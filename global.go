@@ -1,0 +1,3 @@
+package accipfs
+
+var DefaultPath = "."

@@ -4,5 +4,7 @@ type IPFSConfig struct {
 }
 
 type Config struct {
-	IPFS IPFSConfig
+	IPFS               IPFSConfig
+	AwsAccessKeyID     string
+	AwsSecretAccessKey string
 }

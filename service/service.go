@@ -3,11 +3,10 @@ package service
 import "sync"
 
 type Service struct {
-	once *sync.Once
+	once  *sync.Once
+	nodes []Node
 }
 
-var _service *Service
-
 func (s *Service) Register(node Node) {
-
+	s.nodes = append(s.nodes, node)
 }

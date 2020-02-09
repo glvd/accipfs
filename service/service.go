@@ -8,6 +8,6 @@ type Service struct {
 
 var _service *Service
 
-func (s *Service) Register(service Service) {
+func (s *Service) Register(node Node) {
 
 }

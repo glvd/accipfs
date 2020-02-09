@@ -1,4 +1,13 @@
 package service
 
-type Service interface {
+import "sync"
+
+type Service struct {
+	once *sync.Once
+}
+
+var _service *Service
+
+func (s *Service) Register(service Service) {
+
 }

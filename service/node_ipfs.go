@@ -16,7 +16,7 @@ func (n nodeIPFS) Start() {
 	panic("implement me")
 }
 
-// New ...
+// NodeIPFS ...
 func NodeIPFS(config config.Config) (Node, error) {
 	ma, err := multiaddr.NewMultiaddr("path")
 	if err != nil {

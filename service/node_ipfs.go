@@ -4,6 +4,7 @@ import (
 	"context"
 	"github.com/glvd/accipfs/config"
 	"github.com/ipfs/go-ipfs-http-client"
+	iface "github.com/ipfs/interface-go-ipfs-core"
 	"github.com/libp2p/go-libp2p-core/peer"
 	"github.com/multiformats/go-multiaddr"
 )
@@ -33,4 +34,8 @@ func (i *nodeIPFS) SwarmConnect(ctx context.Context, addr string) (e error) {
 		return e
 	}
 	return nil
+}
+
+func (i *nodeIPFS) SwarmPeers(ctx context.Context) ([]iface.ConnectionInfo, error) {
+	return i.api.Swarm().Peers(ctx)
 }

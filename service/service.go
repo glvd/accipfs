@@ -1,24 +1,30 @@
 package service
 
-import "sync"
+import (
+	"github.com/glvd/accipfs/config"
+	"sync"
+)
 
 // Service ...
 type Service struct {
-	once  *sync.Once
-	nodes []Node
+	once *sync.Once
+	cfg  *config.Config
+	i    *nodeIPFS
 }
 
-// Register ...
-func (s *Service) Register(node Node) {
-	s.nodes = append(s.nodes, node)
+func New(config config.Config) (s *Service, e error) {
+	s = &Service{
+		cfg:  &config,
+		once: &sync.Once{},
+	}
+	s.i, e = newNodeIPFS(config)
+	return s, e
 }
 
 // Run ...
 func (s *Service) Run() {
 	s.once.Do(
 		func() {
-			for _, node := range s.nodes {
-				node.Start()
-			}
+
 		})
 }

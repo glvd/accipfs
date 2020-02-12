@@ -10,13 +10,7 @@ type nodeIPFS struct {
 	api *httpapi.HttpApi
 }
 
-// Start ...
-func (n nodeIPFS) Start() {
-	panic("implement me")
-}
-
-// NodeIPFS ...
-func NodeIPFS(config config.Config) (Node, error) {
+func newNodeIPFS(config config.Config) (*nodeIPFS, error) {
 	return &nodeIPFS{
 		cfg: config,
 	}, nil

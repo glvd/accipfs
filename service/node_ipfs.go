@@ -5,6 +5,8 @@ import (
 	"github.com/glvd/accipfs/config"
 	"github.com/ipfs/go-ipfs-http-client"
 	iface "github.com/ipfs/interface-go-ipfs-core"
+	"github.com/ipfs/interface-go-ipfs-core/options"
+	"github.com/ipfs/interface-go-ipfs-core/path"
 	"github.com/libp2p/go-libp2p-core/peer"
 	"github.com/multiformats/go-multiaddr"
 )
@@ -66,4 +68,15 @@ func (i *nodeIPFS) ID(ctx context.Context) (pid *PeerID, e error) {
 		return nil, e
 	}
 	return pid, nil
+}
+
+func (i *nodeIPFS) PinAdd(ctx context.Context, hash string) (e error) {
+	p := path.New(hash)
+	e = i.api.Pin().Add(ctx, p, func(settings *options.PinAddSettings) error {
+		settings.Recursive = true
+		return nil
+	})
+	if e != nil {
+		return e
+	}
 }

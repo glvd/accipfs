@@ -12,6 +12,7 @@ type Service struct {
 	i    *nodeIPFS
 }
 
+// New ...
 func New(config config.Config) (s *Service, e error) {
 	s = &Service{
 		cfg:  &config,

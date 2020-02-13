@@ -31,6 +31,7 @@ func newNodeIPFS(config config.Config) (*nodeIPFS, error) {
 	}, nil
 }
 
+// SwarmConnect ...
 func (i *nodeIPFS) SwarmConnect(ctx context.Context, addr string) (e error) {
 	ma, e := multiaddr.NewMultiaddr(addr)
 	if e != nil {
@@ -56,6 +57,7 @@ func (i *nodeIPFS) connect() (e error) {
 	return
 }
 
+// SwarmPeers ...
 func (i *nodeIPFS) SwarmPeers(ctx context.Context) ([]iface.ConnectionInfo, error) {
 	return i.api.Swarm().Peers(ctx)
 }
@@ -70,13 +72,11 @@ func (i *nodeIPFS) ID(ctx context.Context) (pid *PeerID, e error) {
 	return pid, nil
 }
 
+// PinAdd ...
 func (i *nodeIPFS) PinAdd(ctx context.Context, hash string) (e error) {
 	p := path.New(hash)
-	e = i.api.Pin().Add(ctx, p, func(settings *options.PinAddSettings) error {
+	return i.api.Pin().Add(ctx, p, func(settings *options.PinAddSettings) error {
 		settings.Recursive = true
 		return nil
 	})
-	if e != nil {
-		return e
-	}
 }

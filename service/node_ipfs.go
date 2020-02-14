@@ -85,3 +85,13 @@ func (i *nodeIPFS) PinAdd(ctx context.Context, hash string) (e error) {
 func (i *nodeIPFS) PinLS(ctx context.Context) (pins []iface.Pin, e error) {
 	return i.api.Pin().Ls(ctx)
 }
+
+// PinRm ...
+func (i *nodeIPFS) PinRm(ctx context.Context, hash string) (e error) {
+	p := path.New(hash)
+
+	return i.api.Pin().Rm(ctx, p, func(settings *options.PinRmSettings) error {
+		settings.Recursive = true
+		return nil
+	})
+}

@@ -80,3 +80,8 @@ func (i *nodeIPFS) PinAdd(ctx context.Context, hash string) (e error) {
 		return nil
 	})
 }
+
+// PinLS ...
+func (i *nodeIPFS) PinLS(ctx context.Context) (pins []iface.Pin, e error) {
+	return i.api.Pin().Ls(ctx)
+}

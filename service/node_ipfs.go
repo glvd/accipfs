@@ -11,7 +11,7 @@ import (
 )
 
 const ipfsPath = ".ipfs"
-const ipfsApi = "api"
+const ipfsAPI = "api"
 
 type nodeIPFS struct {
 	cfg config.Config

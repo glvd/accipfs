@@ -10,6 +10,9 @@ import (
 	"github.com/multiformats/go-multiaddr"
 )
 
+const ipfsPath = ".ipfs"
+const ipfsApi = "api"
+
 type nodeIPFS struct {
 	cfg config.Config
 	api *httpapi.HttpApi

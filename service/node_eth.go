@@ -4,6 +4,9 @@ import (
 	"github.com/glvd/accipfs/config"
 )
 
+const ethPath = ".ethereum"
+const endPoint = "geth.ipc"
+
 type nodeETH struct {
 	cfg config.Config
 }

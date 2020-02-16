@@ -10,3 +10,7 @@ const endPoint = "geth.ipc"
 type nodeETH struct {
 	cfg config.Config
 }
+
+func newETH(cfg config.Config) *nodeETH {
+	return &nodeETH{cfg: cfg}
+}

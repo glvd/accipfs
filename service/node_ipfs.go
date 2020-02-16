@@ -8,6 +8,7 @@ import (
 	"github.com/ipfs/interface-go-ipfs-core/path"
 	"github.com/libp2p/go-libp2p-core/peer"
 	"github.com/multiformats/go-multiaddr"
+	"path/filepath"
 )
 
 const ipfsPath = ".ipfs"
@@ -28,8 +29,13 @@ type PeerID struct {
 }
 
 func newNodeIPFS(config config.Config) (*nodeIPFS, error) {
+	api, e := httpapi.NewPathApi(filepath.Join(config.Path, ipfsPath, ipfsAPI))
+	if e != nil {
+		return nil, e
+	}
 	return &nodeIPFS{
 		cfg: config,
+		api: api,
 	}, nil
 }
 

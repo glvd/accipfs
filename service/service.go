@@ -24,6 +24,9 @@ func New(config config.Config) (s *Service, e error) {
 		return nil, e
 	}
 	s.e, e = newETH(config)
+	if e != nil {
+		return nil, e
+	}
 	return s, e
 }
 

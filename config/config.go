@@ -3,6 +3,7 @@ package config
 // IPFSConfig ...
 type IPFSConfig struct {
 	Addr string
+	Name string
 }
 
 // Config ...

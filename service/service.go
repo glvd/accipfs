@@ -33,5 +33,6 @@ func New(config config.Config) (s *Service, e error) {
 // Run ...
 func (s *Service) Run() {
 	s.once.Do(func() {
+
 	})
 }

@@ -2,7 +2,9 @@ package main
 
 import (
 	"fmt"
+	"github.com/mitchellh/go-homedir"
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 )
 
 var rootCmd = &cobra.Command{
@@ -14,10 +16,6 @@ var rootCmd = &cobra.Command{
 	},
 }
 
-// Execute ...
-func Execute() {
-
-}
 func main() {
 	fmt.Println("accipfs starting...")
 
@@ -27,6 +25,30 @@ func main() {
 
 }
 
-func initCmc() *cobra.Command {
+func initCmd() *cobra.Command {
 
+}
+
+func initConfig() (cfgFile string) {
+	if cfgFile != "" {
+		// Use config file from the flag.
+		viper.SetConfigFile(cfgFile)
+	} else {
+		// Find home directory.
+		home, err := homedir.Dir()
+		if err != nil {
+			panic(err)
+		}
+
+		// Search config in home directory with name ".cobra" (without extension).
+		viper.AddConfigPath(home)
+		viper.SetConfigName(".cobra")
+	}
+
+	viper.AutomaticEnv()
+
+	if err := viper.ReadInConfig(); err == nil {
+		fmt.Println("Using config file:", viper.ConfigFileUsed())
+	}
+	return
 }

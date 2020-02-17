@@ -18,7 +18,6 @@ type HandleCallback func(src interface{})
 // Node ...
 type Node interface {
 	Start()
-	Handle(HandleInfo)
 }
 
 type node struct {
@@ -27,12 +26,7 @@ type node struct {
 
 // Start ...
 func (n *node) Start() {
-	panic("implement me")
-}
 
-// Handle ...
-func (n *node) Handle(HandleInfo) {
-	panic("implement me")
 }
 
 // NodeI ...

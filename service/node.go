@@ -1,6 +1,7 @@
 package service
 
 import (
+	"fmt"
 	"github.com/glvd/accipfs/config"
 	"os/exec"
 )
@@ -21,12 +22,13 @@ type Node interface {
 }
 
 type node struct {
-	cmd *exec.Cmd
+	name string
+	cmd  *exec.Cmd
 }
 
 // Start ...
 func (n *node) Start() {
-
+	fmt.Println("starting", n.name)
 }
 
 // NodeI ...

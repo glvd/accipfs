@@ -10,6 +10,7 @@ type Service struct {
 	once *sync.Once
 	cfg  *config.Config
 	i    *nodeIPFS
+	e    *nodeETH
 }
 
 // New ...
@@ -19,13 +20,15 @@ func New(config config.Config) (s *Service, e error) {
 		once: &sync.Once{},
 	}
 	s.i, e = newNodeIPFS(config)
+	if e != nil {
+		return nil, e
+	}
+	s.e, e = newETH(config)
 	return s, e
 }
 
 // Run ...
 func (s *Service) Run() {
-	s.once.Do(
-		func() {
-
-		})
+	s.once.Do(func() {
+	})
 }

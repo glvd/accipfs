@@ -3,6 +3,7 @@ package service
 import (
 	"fmt"
 	"github.com/glvd/accipfs/config"
+	"os"
 	"os/exec"
 )
 
@@ -34,7 +35,7 @@ func (n *node) Start() {
 // NodeI ...
 func NodeI(cfg config.Config) Node {
 	cmd := exec.Command(cfg.IPFS.Name, "")
-
+	cmd.Env = os.Environ()
 	return &node{cmd: cmd}
 }
 

@@ -40,6 +40,8 @@ func NodeI(cfg config.Config) Node {
 }
 
 // NodeE ...
-func NodeE() {
-
+func NodeE(cfg config.Config) Node {
+	cmd := exec.Command(cfg.ETH.Name, "")
+	cmd.Env = accipfs.Environ()
+	return &node{cmd: cmd}
 }

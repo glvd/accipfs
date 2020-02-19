@@ -22,7 +22,12 @@ type Node interface {
 	Start()
 }
 
-type node struct {
+type nodeI struct {
+	name string
+	cmd  *exec.Cmd
+}
+
+type nodeE struct {
 	name string
 	cmd  *exec.Cmd
 }
@@ -36,12 +41,12 @@ func (n *node) Start() {
 func NodeI(cfg config.Config) Node {
 	cmd := exec.Command(cfg.IPFS.Name, "")
 	cmd.Env = accipfs.Environ()
-	return &node{cmd: cmd}
+	return &nodeI{cmd: cmd}
 }
 
 // NodeE ...
 func NodeE(cfg config.Config) Node {
 	cmd := exec.Command(cfg.ETH.Name, "")
 	cmd.Env = accipfs.Environ()
-	return &node{cmd: cmd}
+	return &nodeE{cmd: cmd}
 }

@@ -33,8 +33,13 @@ type nodeE struct {
 }
 
 // Start ...
-func (n *node) Start() {
+func (n *nodeI) Start() {
 	fmt.Println("starting", n.name)
+}
+
+// Start ...
+func (n nodeE) Start() {
+	panic("implement me")
 }
 
 // NodeI ...

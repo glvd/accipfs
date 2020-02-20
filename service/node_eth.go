@@ -27,13 +27,13 @@ func newETH(cfg config.Config) (*nodeClientETH, error) {
 	}, nil
 }
 
-type nodeE struct {
+type nodeServerETH struct {
 	name string
 	cmd  *exec.Cmd
 }
 
 // Start ...
-func (n *nodeE) Start() {
+func (n *nodeServerETH) Start() {
 
 }
 
@@ -41,5 +41,5 @@ func (n *nodeE) Start() {
 func NodeServerETH(cfg config.Config) Node {
 	cmd := exec.Command(cfg.ETH.Name, "")
 	cmd.Env = accipfs.Environ()
-	return &nodeE{cmd: cmd}
+	return &nodeServerETH{cmd: cmd}
 }

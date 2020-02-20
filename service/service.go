@@ -7,17 +7,17 @@ import (
 
 // Service ...
 type Service struct {
-	once *sync.Once
-	cfg  *config.Config
-	i    *nodeIPFS
-	e    *nodeETH
+	cfg        *config.Config
+	serveMutex sync.RWMutex
+	serve      []Node
+	i          *nodeClientIPFS
+	e          *nodeClientETH
 }
 
 // New ...
 func New(config config.Config) (s *Service, e error) {
 	s = &Service{
-		cfg:  &config,
-		once: &sync.Once{},
+		cfg: &config,
 	}
 	s.i, e = newNodeIPFS(config)
 	if e != nil {
@@ -30,9 +30,18 @@ func New(config config.Config) (s *Service, e error) {
 	return s, e
 }
 
+// RegisterServer ...
+func (s *Service) RegisterServer(node Node) {
+	s.serveMutex.Lock()
+	defer s.serveMutex.Unlock()
+	s.serve = append(s.serve, node)
+}
+
 // Run ...
 func (s *Service) Run() {
-	s.once.Do(func() {
-
-	})
+	s.serveMutex.RLock()
+	defer s.serveMutex.RUnlock()
+	for _, s := range s.serve {
+		s.Start()
+	}
 }

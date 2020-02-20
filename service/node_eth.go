@@ -34,7 +34,7 @@ type nodeServerETH struct {
 
 // Start ...
 func (n *nodeServerETH) Start() {
-
+	panic("TODO")
 }
 
 // NodeServerETH ...

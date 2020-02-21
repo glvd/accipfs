@@ -2,8 +2,8 @@ package config
 
 // IPFSConfig ...
 type IPFSConfig struct {
-	Addr string
 	Name string
+	Addr string
 }
 
 // ETHConfig ...
@@ -23,9 +23,14 @@ type Config struct {
 // LoadConfig ...
 func LoadConfig() *Config {
 	return &Config{
-		Path:               "",
-		ETH:                ETHConfig{},
-		IPFS:               IPFSConfig{},
+		Path: "",
+		ETH: ETHConfig{
+			Name: "",
+		},
+		IPFS: IPFSConfig{
+			Name: "",
+			Addr: "",
+		},
 		AwsAccessKeyID:     "",
 		AwsSecretAccessKey: "",
 	}

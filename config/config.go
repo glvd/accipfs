@@ -40,7 +40,7 @@ func LoadConfig(path string) (*Config, error) {
 
 		// Search config in home directory with name ".cobra" (without extension).
 		viper.AddConfigPath(home)
-		viper.SetConfigName(".cobra")
+		viper.SetConfigName(".json")
 	}
 
 	viper.AutomaticEnv()

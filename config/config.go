@@ -19,3 +19,14 @@ type Config struct {
 	AwsAccessKeyID     string
 	AwsSecretAccessKey string
 }
+
+// LoadConfig ...
+func LoadConfig() *Config {
+	return &Config{
+		Path:               "",
+		ETH:                ETHConfig{},
+		IPFS:               IPFSConfig{},
+		AwsAccessKeyID:     "",
+		AwsSecretAccessKey: "",
+	}
+}

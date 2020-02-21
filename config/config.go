@@ -49,16 +49,9 @@ func LoadConfig(path string) (*Config, error) {
 		fmt.Println("Using config file:", viper.ConfigFileUsed())
 	}
 
-	return &Config{
-		Path: "",
-		ETH: ETHConfig{
-			Name: "",
-		},
-		IPFS: IPFSConfig{
-			Name: "",
-			Addr: "",
-		},
-		AwsAccessKeyID:     "",
-		AwsSecretAccessKey: "",
-	}, nil
+	cfg := Config{}
+
+	err := viper.Unmarshal(&cfg)
+
+	return &cfg, err
 }

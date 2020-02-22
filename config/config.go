@@ -1,9 +1,12 @@
 package config
 
 import (
-	"github.com/goextension/extmap"
+	"encoding/json"
 	"github.com/mitchellh/go-homedir"
 	"github.com/spf13/viper"
+	"io/ioutil"
+	"os"
+	"path/filepath"
 )
 
 // IPFSConfig ...
@@ -26,14 +29,16 @@ type Config struct {
 	AwsSecretAccessKey string
 }
 
-var path = "config"
-var ext = "json"
+// DefaultPath ...
+var DefaultPath = "config"
+var name = "config"
+var ext = ".json"
 
 // LoadConfig ...
 func LoadConfig() (*Config, error) {
-	if path != "" {
+	if DefaultPath != "" {
 		// Use config file from the flag.
-		viper.SetConfigFile(path)
+		viper.SetConfigFile(DefaultPath)
 	} else {
 		// Find home directory.
 		home, err := homedir.Dir()
@@ -61,14 +66,12 @@ func LoadConfig() (*Config, error) {
 
 // SaveConfig ...
 func SaveConfig(config *Config) error {
-	viper.AddConfigPath(path)
-	viper.SetConfigName("config")
-	viper.SetConfigType("JSON")
-	e := viper.MergeConfigMap(extmap.StructToMap(config))
+	by, e := json.Marshal(config)
 	if e != nil {
 		return e
 	}
-	viper.SetConfigFile(path)
-
-	return viper.WriteConfig()
+	if err := os.MkdirAll(DefaultPath, 0755); err != nil {
+		return err
+	}
+	return ioutil.WriteFile(filepath.Join(DefaultPath, name+ext), by, 0755)
 }

@@ -35,6 +35,7 @@ var ext = ".json"
 
 // LoadConfig ...
 func LoadConfig() (interface{}, error) {
+	//TODO
 	// Use config file from the flag.
 	viper.SetConfigFile(filepath.Join(DefaultPath, name+ext))
 	//viper.AddConfigPath(DefaultConfigPath)

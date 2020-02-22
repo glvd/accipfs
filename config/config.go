@@ -1,9 +1,7 @@
 package config
 
 import (
-	"bytes"
-	"encoding/json"
-	"fmt"
+	"github.com/goextension/extmap"
 	"github.com/mitchellh/go-homedir"
 	"github.com/spf13/viper"
 )
@@ -28,7 +26,8 @@ type Config struct {
 	AwsSecretAccessKey string
 }
 
-var path string
+var path = "config"
+var ext = "json"
 
 // LoadConfig ...
 func LoadConfig() (*Config, error) {
@@ -49,9 +48,9 @@ func LoadConfig() (*Config, error) {
 
 	viper.AutomaticEnv()
 
-	if err := viper.ReadInConfig(); err == nil {
-		fmt.Println("Using config file:", viper.ConfigFileUsed())
-	}
+	//if err := viper.ReadInConfig(); err == nil {
+	//	fmt.Println("Using config file:", viper.ConfigFileUsed())
+	//}
 
 	cfg := Config{}
 
@@ -62,23 +61,14 @@ func LoadConfig() (*Config, error) {
 
 // SaveConfig ...
 func SaveConfig(config *Config) error {
-	if path != "" {
-		// Use config file from the flag.
-		viper.SetConfigFile(path)
-	} else {
-		// Find home directory.
-		home, err := homedir.Dir()
-		if err != nil {
-			return err
-		}
-
-		// Search config in home directory with name ".cobra" (without extension).
-		viper.AddConfigPath(home)
-		viper.SetConfigName(".json")
-	}
-	bys, e := json.Marshal(config)
+	viper.AddConfigPath(path)
+	viper.SetConfigName("config")
+	viper.SetConfigType("JSON")
+	e := viper.MergeConfigMap(extmap.StructToMap(config))
 	if e != nil {
 		return e
 	}
-	return viper.MergeConfig(bytes.NewReader(bys))
+	viper.SetConfigFile(path)
+
+	return viper.WriteConfig()
 }

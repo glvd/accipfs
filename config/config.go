@@ -1,6 +1,8 @@
 package config
 
 import (
+	"bytes"
+	"encoding/json"
 	"fmt"
 	"github.com/mitchellh/go-homedir"
 	"github.com/spf13/viper"
@@ -26,8 +28,10 @@ type Config struct {
 	AwsSecretAccessKey string
 }
 
+var path string
+
 // LoadConfig ...
-func LoadConfig(path string) (*Config, error) {
+func LoadConfig() (*Config, error) {
 	if path != "" {
 		// Use config file from the flag.
 		viper.SetConfigFile(path)
@@ -54,4 +58,27 @@ func LoadConfig(path string) (*Config, error) {
 	err := viper.Unmarshal(&cfg)
 
 	return &cfg, err
+}
+
+// SaveConfig ...
+func SaveConfig(config *Config) error {
+	if path != "" {
+		// Use config file from the flag.
+		viper.SetConfigFile(path)
+	} else {
+		// Find home directory.
+		home, err := homedir.Dir()
+		if err != nil {
+			return err
+		}
+
+		// Search config in home directory with name ".cobra" (without extension).
+		viper.AddConfigPath(home)
+		viper.SetConfigName(".json")
+	}
+	bys, e := json.Marshal(config)
+	if e != nil {
+		return e
+	}
+	return viper.MergeConfig(bytes.NewReader(bys))
 }

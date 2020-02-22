@@ -2,7 +2,6 @@ package config
 
 import (
 	"encoding/json"
-	"github.com/mitchellh/go-homedir"
 	"github.com/spf13/viper"
 	"io/ioutil"
 	"os"
@@ -35,38 +34,30 @@ var name = "config"
 var ext = ".json"
 
 // LoadConfig ...
-func LoadConfig() (*Config, error) {
-	if DefaultPath != "" {
-		// Use config file from the flag.
-		viper.SetConfigFile(DefaultPath)
-	} else {
-		// Find home directory.
-		home, err := homedir.Dir()
-		if err != nil {
-			return nil, err
-		}
+func LoadConfig() (interface{}, error) {
+	// Use config file from the flag.
+	viper.SetConfigFile(filepath.Join(DefaultPath, name+ext))
+	//viper.AddConfigPath(DefaultConfigPath)
+	//viper.SetConfigName(DefaultConfigName)
 
-		// Search config in home directory with name ".cobra" (without extension).
-		viper.AddConfigPath(home)
-		viper.SetConfigName(".json")
+	err := viper.MergeInConfig()
+	if err != nil {
+		return nil, err
 	}
-
+	//m := extmap.ToMap(viper.AllSettings())
+	//return m.Struct(&_config)
 	viper.AutomaticEnv()
 
-	//if err := viper.ReadInConfig(); err == nil {
-	//	fmt.Println("Using config file:", viper.ConfigFileUsed())
-	//}
+	var cfg interface{}
 
-	cfg := Config{}
-
-	err := viper.Unmarshal(&cfg)
+	err = viper.Unmarshal(&cfg)
 
 	return &cfg, err
 }
 
 // SaveConfig ...
 func SaveConfig(config *Config) error {
-	by, e := json.Marshal(config)
+	by, e := json.MarshalIndent(config, "", " ")
 	if e != nil {
 		return e
 	}

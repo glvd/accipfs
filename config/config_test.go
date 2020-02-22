@@ -10,5 +10,11 @@ func TestLoadConfig(t *testing.T) {
 		AwsAccessKeyID:     "",
 		AwsSecretAccessKey: "",
 	}))
-	t.Log(LoadConfig())
+
+	v, err := LoadConfig()
+	if err != nil {
+		panic(err)
+	}
+
+	t.Logf("%+v", v)
 }

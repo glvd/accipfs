@@ -29,14 +29,14 @@ type Config struct {
 	AwsSecretAccessKey string
 }
 
-// DefaultPath ...
-var DefaultPath = "config"
+// DefaultConfigPath ...
+var DefaultConfigPath = "config"
 var name = "config"
 var ext = ".json"
 
 // LoadConfig ...
 func LoadConfig() (*Config, error) {
-	viper.AddConfigPath(filepath.Join(DefaultPath))
+	viper.AddConfigPath(filepath.Join(DefaultConfigPath))
 	viper.SetConfigName(name)
 
 	err := viper.MergeInConfig()
@@ -60,8 +60,8 @@ func SaveConfig(config *Config) error {
 		return e
 	}
 
-	if err := os.MkdirAll(DefaultPath, 0755); err != nil {
+	if err := os.MkdirAll(DefaultConfigPath, 0755); err != nil {
 		return err
 	}
-	return ioutil.WriteFile(filepath.Join(DefaultPath, name+ext), by, 0755)
+	return ioutil.WriteFile(filepath.Join(DefaultConfigPath, name+ext), by, 0755)
 }

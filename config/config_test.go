@@ -4,7 +4,7 @@ import "testing"
 
 func TestLoadConfig(t *testing.T) {
 	t.Log(SaveConfig(&Config{
-		Path:               "here",
+		Path:               "here2",
 		ETH:                ETHConfig{},
 		IPFS:               IPFSConfig{},
 		AwsAccessKeyID:     "",

@@ -2,6 +2,7 @@ package config
 
 import (
 	"encoding/json"
+	"github.com/goextension/extmap"
 	"github.com/spf13/viper"
 	"io/ioutil"
 	"os"
@@ -34,26 +35,22 @@ var name = "config"
 var ext = ".json"
 
 // LoadConfig ...
-func LoadConfig() (interface{}, error) {
-	//TODO
-	// Use config file from the flag.
-	viper.SetConfigFile(filepath.Join(DefaultPath, name+ext))
-	//viper.AddConfigPath(DefaultConfigPath)
-	//viper.SetConfigName(DefaultConfigName)
+func LoadConfig() (*Config, error) {
+	viper.AddConfigPath(filepath.Join(DefaultPath))
+	viper.SetConfigName(name)
 
 	err := viper.MergeInConfig()
 	if err != nil {
 		return nil, err
 	}
-	//m := extmap.ToMap(viper.AllSettings())
-	//return m.Struct(&_config)
-	viper.AutomaticEnv()
+	m := extmap.ToMap(viper.AllSettings())
 
-	var cfg interface{}
-
-	err = viper.Unmarshal(&cfg)
-
-	return &cfg, err
+	var cfg Config
+	err = m.Struct(&cfg)
+	if err != nil {
+		return nil, err
+	}
+	return &cfg, nil
 }
 
 // SaveConfig ...
@@ -62,6 +59,7 @@ func SaveConfig(config *Config) error {
 	if e != nil {
 		return e
 	}
+
 	if err := os.MkdirAll(DefaultPath, 0755); err != nil {
 		return err
 	}

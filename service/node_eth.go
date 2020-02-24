@@ -43,3 +43,9 @@ func NodeServerETH(cfg config.Config) Node {
 	cmd.Env = accipfs.Environ()
 	return &nodeServerETH{cmd: cmd}
 }
+
+// CheckClientReady ...
+func (e *nodeClientETH) CheckClientReady() bool {
+	//TODO
+	return false
+}

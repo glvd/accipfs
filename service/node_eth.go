@@ -44,8 +44,8 @@ func NodeServerETH(cfg config.Config) Node {
 	return &nodeServerETH{cmd: cmd}
 }
 
-// CheckClientReady ...
-func (e *nodeClientETH) CheckClientReady() bool {
+// IsReady ...
+func (e *nodeClientETH) IsReady() bool {
 	//TODO
 	return false
 }

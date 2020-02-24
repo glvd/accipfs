@@ -18,6 +18,8 @@ type IPFSConfig struct {
 // ETHConfig ...
 type ETHConfig struct {
 	Name string
+	Key  string
+	Pass string
 }
 
 // Config ...

@@ -49,3 +49,13 @@ func (e *nodeClientETH) IsReady() bool {
 	//TODO
 	return false
 }
+
+// Node ...
+func (e *nodeClientETH) Node() {
+
+}
+
+// Token ...
+func (e *nodeClientETH) Token() {
+
+}

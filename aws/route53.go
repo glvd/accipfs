@@ -19,8 +19,8 @@ const (
 	RecordName = "gate.dhash.app"
 )
 
-// Route ...
-type Route struct {
+// awsRoute ...
+type awsRoute struct {
 }
 
 // Router ...
@@ -33,11 +33,11 @@ type Router interface {
 
 // NewRoute53 ...
 func NewRoute53() Router {
-	return &Route{}
+	return &awsRoute{}
 }
 
 // GetRecordSets ...
-func (r Route) GetRecordSets() ([]*route53.ResourceRecordSet, error) {
+func (r awsRoute) GetRecordSets() ([]*route53.ResourceRecordSet, error) {
 	client := route53.New(session.New())
 	recordSetsInput := &route53.ListResourceRecordSetsInput{
 		HostedZoneId:    aws.String(HostedZoneID),
@@ -52,7 +52,7 @@ func (r Route) GetRecordSets() ([]*route53.ResourceRecordSet, error) {
 }
 
 // ChangeSets options: 'CREATE', 'DELETE', 'UPSERT'
-func (r Route) ChangeSets(sets []*route53.ResourceRecordSet, option string) (*route53.ChangeResourceRecordSetsOutput, error) {
+func (r awsRoute) ChangeSets(sets []*route53.ResourceRecordSet, option string) (*route53.ChangeResourceRecordSetsOutput, error) {
 	var changes []*route53.Change
 	client := route53.New(session.New())
 
@@ -76,7 +76,7 @@ func (r Route) ChangeSets(sets []*route53.ResourceRecordSet, option string) (*ro
 }
 
 // BuildMultiValueRecordSets ...
-func (r Route) BuildMultiValueRecordSets(ips []string) []*route53.ResourceRecordSet {
+func (r awsRoute) BuildMultiValueRecordSets(ips []string) []*route53.ResourceRecordSet {
 	var sets []*route53.ResourceRecordSet
 	for _, ip := range ips {
 		awsRecordSet := &route53.ResourceRecordSet{
@@ -95,7 +95,7 @@ func (r Route) BuildMultiValueRecordSets(ips []string) []*route53.ResourceRecord
 }
 
 // FilterFailedRecords ...
-func (r Route) FilterFailedRecords(sets []*route53.ResourceRecordSet) []*route53.ResourceRecordSet {
+func (r awsRoute) FilterFailedRecords(sets []*route53.ResourceRecordSet) []*route53.ResourceRecordSet {
 	var failedSets []*route53.ResourceRecordSet
 	for _, set := range sets {
 		ip := set.ResourceRecords[0].Value

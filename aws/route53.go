@@ -3,6 +3,7 @@ package aws
 import (
 	"context"
 	"fmt"
+	"github.com/glvd/accipfs/config"
 	"os/exec"
 	"time"
 
@@ -12,15 +13,10 @@ import (
 	"github.com/goextension/tool"
 )
 
-const (
-	// HostedZoneID ...
-	HostedZoneID = "ZULHCRKQ5YDLC"
-	// RecordName ...
-	RecordName = "gate.dhash.app"
-)
-
 // awsRoute ...
 type awsRoute struct {
+	cfg    *config.Config
+	client *route53.Route53
 }
 
 // Router ...
@@ -32,16 +28,23 @@ type Router interface {
 }
 
 // NewRoute53 ...
-func NewRoute53() Router {
-	return &awsRoute{}
+func NewRoute53(cfg *config.Config) Router {
+	s, e := session.NewSession()
+	if e != nil {
+		panic(e)
+	}
+	return &awsRoute{
+		cfg:    cfg,
+		client: route53.New(s),
+	}
 }
 
 // GetRecordSets ...
 func (r awsRoute) GetRecordSets() ([]*route53.ResourceRecordSet, error) {
 	client := route53.New(session.New())
 	recordSetsInput := &route53.ListResourceRecordSetsInput{
-		HostedZoneId:    aws.String(HostedZoneID),
-		StartRecordName: aws.String(RecordName),
+		HostedZoneId:    aws.String(r.cfg.AWS.HostedZoneID),
+		StartRecordName: aws.String(r.cfg.AWS.RecordName),
 	}
 	sets, err := client.ListResourceRecordSets(recordSetsInput)
 	if err != nil {
@@ -69,7 +72,7 @@ func (r awsRoute) ChangeSets(sets []*route53.ResourceRecordSet, option string) (
 			Changes: changes,
 			Comment: aws.String("gateway"),
 		},
-		HostedZoneId: aws.String(HostedZoneID),
+		HostedZoneId: aws.String(r.cfg.AWS.HostedZoneID),
 	}
 	res, err := client.ChangeResourceRecordSets(changeInput)
 	return res, err
@@ -80,12 +83,12 @@ func (r awsRoute) BuildMultiValueRecordSets(ips []string) []*route53.ResourceRec
 	var sets []*route53.ResourceRecordSet
 	for _, ip := range ips {
 		awsRecordSet := &route53.ResourceRecordSet{
-			Name:             aws.String(RecordName),
+			Name:             aws.String(r.cfg.AWS.RecordName),
 			Type:             aws.String("A"),
 			SetIdentifier:    aws.String(tool.GenerateRandomString(5)),
 			MultiValueAnswer: aws.Bool(true),
 			ResourceRecords: []*route53.ResourceRecord{
-				&route53.ResourceRecord{Value: aws.String(ip)},
+				{Value: aws.String(ip)},
 			},
 			TTL: aws.Int64(60),
 		}

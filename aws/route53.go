@@ -104,7 +104,10 @@ func (r awsRoute) FilterFailedRecords(sets []*route53.ResourceRecordSet) []*rout
 		ip := set.ResourceRecords[0].Value
 		ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 		cmd := exec.CommandContext(ctx, "nc", "-vz", *ip, "8545")
-		cmd.Start()
+		e := cmd.Start()
+		if e != nil {
+			return nil
+		}
 		if err := cmd.Wait(); err != nil {
 			failedSets = append(failedSets, set)
 		}

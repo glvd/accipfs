@@ -40,13 +40,12 @@ func NewRoute53(cfg *config.Config) Router {
 }
 
 // GetRecordSets ...
-func (r awsRoute) GetRecordSets() ([]*route53.ResourceRecordSet, error) {
-	client := route53.New(session.New())
+func (r *awsRoute) GetRecordSets() ([]*route53.ResourceRecordSet, error) {
 	recordSetsInput := &route53.ListResourceRecordSetsInput{
 		HostedZoneId:    aws.String(r.cfg.AWS.HostedZoneID),
 		StartRecordName: aws.String(r.cfg.AWS.RecordName),
 	}
-	sets, err := client.ListResourceRecordSets(recordSetsInput)
+	sets, err := r.client.ListResourceRecordSets(recordSetsInput)
 	if err != nil {
 		fmt.Println("[get record sets failed]", err.Error())
 		return []*route53.ResourceRecordSet{}, err
@@ -55,9 +54,8 @@ func (r awsRoute) GetRecordSets() ([]*route53.ResourceRecordSet, error) {
 }
 
 // ChangeSets options: 'CREATE', 'DELETE', 'UPSERT'
-func (r awsRoute) ChangeSets(sets []*route53.ResourceRecordSet, option string) (*route53.ChangeResourceRecordSetsOutput, error) {
+func (r *awsRoute) ChangeSets(sets []*route53.ResourceRecordSet, option string) (*route53.ChangeResourceRecordSetsOutput, error) {
 	var changes []*route53.Change
-	client := route53.New(session.New())
 
 	for _, set := range sets {
 		change := &route53.Change{
@@ -74,7 +72,7 @@ func (r awsRoute) ChangeSets(sets []*route53.ResourceRecordSet, option string) (
 		},
 		HostedZoneId: aws.String(r.cfg.AWS.HostedZoneID),
 	}
-	res, err := client.ChangeResourceRecordSets(changeInput)
+	res, err := r.client.ChangeResourceRecordSets(changeInput)
 	return res, err
 }
 

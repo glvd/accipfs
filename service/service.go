@@ -8,6 +8,8 @@ import (
 	"sync"
 )
 
+const outputHead = "<Service>"
+
 // Service ...
 type Service struct {
 	cfg        *config.Config

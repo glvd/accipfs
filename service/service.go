@@ -70,7 +70,7 @@ func (s *Service) syncDNS() {
 	if len(records) == 0 {
 		return
 	}
-	fmt.Println("<正在更新网关数据...>", records)
+	fmt.Println(outputHead, "<正在更新网关数据...>", records)
 
 	dnsService := aws.NewRoute53(s.cfg)
 
@@ -78,7 +78,7 @@ func (s *Service) syncDNS() {
 	var remoteIPs []string
 	remoteRecordSets, err := dnsService.GetRecordSets()
 	if err != nil {
-		fmt.Println("<访问远端网关失败> ", err.Error())
+		fmt.Println(outputHead, "<访问远端网关失败> ", err.Error())
 		return
 	}
 	if len(remoteRecordSets) != 0 {

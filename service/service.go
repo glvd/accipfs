@@ -2,6 +2,7 @@ package service
 
 import (
 	"fmt"
+	"github.com/glvd/accipfs/aws"
 	"github.com/glvd/accipfs/config"
 	"strings"
 	"sync"
@@ -69,21 +70,20 @@ func (s *Service) syncDNS() {
 	}
 	fmt.Println("<正在更新网关数据...>", records)
 
-	//TODO
-	//dnsService := aws.NewRoute53()
-	//
-	//// get remote dns record
-	//var remoteIPs []string
-	//remoteRecordSets, err := dnsService.GetRecordSets()
-	//if err != nil {
-	//	fmt.Println("<访问远端网关失败> ", err.Error())
-	//	return
-	//}
-	//if len(remoteRecordSets) != 0 {
-	//	for _, recordSet := range remoteRecordSets {
-	//		remoteIPs = append(remoteIPs, *recordSet.ResourceRecords[0].Value)
-	//	}
-	//}
+	dnsService := aws.NewRoute53(s.cfg)
+
+	// get remote dns record
+	var remoteIPs []string
+	remoteRecordSets, err := dnsService.GetRecordSets()
+	if err != nil {
+		fmt.Println("<访问远端网关失败> ", err.Error())
+		return
+	}
+	if len(remoteRecordSets) != 0 {
+		for _, recordSet := range remoteRecordSets {
+			remoteIPs = append(remoteIPs, *recordSet.ResourceRecords[0].Value)
+		}
+	}
 	//// add new record
 	//ipAdd := removeDuplicateElement(general.DiffStrArray(records, remoteIPs))
 	//fmt.Println("[resource to be added]", ipAdd)

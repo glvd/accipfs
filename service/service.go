@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/glvd/accipfs/aws"
 	"github.com/glvd/accipfs/config"
+	"github.com/goextension/log"
 	"strings"
 	"sync"
 )
@@ -89,26 +90,26 @@ func (s *Service) syncDNS() {
 	//// add new record
 
 	ipAdd := DiffStrArray(records, remoteIPs)
-	fmt.Println(outputHead, "<资源添加中...>", ipAdd)
 	setsAdd := dnsService.BuildMultiValueRecordSets(ipAdd)
+	log.Infow(outputHead, "tag", "resource adding", "list", ipAdd, "count", len(setsAdd))
 	if len(setsAdd) > 0 {
 		res, err := dnsService.ChangeSets(setsAdd, "UPSERT")
 		if err != nil {
-			fmt.Println("[add resource record fail]", err.Error())
+			log.Infow(outputHead, "tag", "add resource record fail", "error", err)
 		} else {
-			fmt.Println("[add resource record success]", res.String())
+			log.Infow(outputHead, "tag", "add resource record success", "error", "result", res.String())
 		}
 	}
 
 	// delete record out of date
 	failedSets := dnsService.FilterFailedRecords(remoteRecordSets)
-	fmt.Println("[resource to be deleted]", len(failedSets))
+	log.Infow(outputHead, "tag", "resource deleting", "list", remoteRecordSets, "count", len(failedSets))
 	if len(failedSets) > 0 {
 		res, err := dnsService.ChangeSets(failedSets, "DELETE")
 		if err != nil {
-			fmt.Println("[delete resource record fail]", err.Error())
+			log.Infow(outputHead, "tag", "delete resource record fail", "error", err)
 		} else {
-			fmt.Println("[delete resource record success]", res.String())
+			log.Infow(outputHead, "tag", "delete resource record success", "error", "result", res.String())
 		}
 	}
 

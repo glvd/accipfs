@@ -17,14 +17,14 @@ type Service struct {
 	serve      []Node
 	i          *nodeClientIPFS
 	e          *nodeClientETH
-	nodes      map[string][]byte
+	nodes      map[string]bool
 }
 
 // New ...
 func New(config config.Config) (s *Service, e error) {
 	s = &Service{
 		cfg:   &config,
-		nodes: make(map[string][]byte),
+		nodes: make(map[string]bool),
 	}
 	s.i, e = newNodeIPFS(config)
 	if e != nil {
@@ -78,7 +78,7 @@ func (s *Service) syncDNS() {
 	remoteIPs := make(map[string]bool)
 	remoteRecordSets, err := dnsService.GetRecordSets()
 	if err != nil {
-		fmt.Println(outputHead, "<访问远端网关失败> ", err.Error())
+		fmt.Println(outputHead, "<访问远端网关失败...> ", err.Error())
 		return
 	}
 	if len(remoteRecordSets) != 0 {
@@ -88,8 +88,8 @@ func (s *Service) syncDNS() {
 	}
 	//// add new record
 
-	//ipAdd := removeDuplicateElement(general.DiffStrArray(records, remoteIPs))
-	//fmt.Println("[resource to be added]", ipAdd)
+	ipAdd := DiffStrArray(records, remoteIPs)
+	fmt.Println(outputHead, "<资源添加中...>", ipAdd)
 	//setsAdd := dnsService.BuildMultiValueRecordSets(ipAdd)
 	//if len(setsAdd) > 0 {
 	//	res, err := dnsService.ChangeSets(setsAdd, "UPSERT")
@@ -115,27 +115,11 @@ func (s *Service) syncDNS() {
 	return
 }
 
-func removeDuplicateElement(addrs []string) []string {
-	result := make([]string, 0, len(addrs))
-	temp := map[string]struct{}{}
-	for _, item := range addrs {
-		if _, ok := temp[item]; !ok {
-			temp[item] = struct{}{}
-			result = append(result, item)
-		}
-	}
-	return result
-}
-
 // DiffStrArray return the elements in `a` that aren't in `b`.
-func DiffStrArray(a, b []string) []string {
-	mb := make(map[string]struct{}, len(b))
-	for _, x := range b {
-		mb[x] = struct{}{}
-	}
+func DiffStrArray(a []string, b map[string]bool) []string {
 	var diff []string
 	for _, x := range a {
-		if _, found := mb[x]; !found {
+		if _, found := b[x]; !found {
 			diff = append(diff, x)
 		}
 	}

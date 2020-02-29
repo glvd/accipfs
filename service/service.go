@@ -90,27 +90,27 @@ func (s *Service) syncDNS() {
 
 	ipAdd := DiffStrArray(records, remoteIPs)
 	fmt.Println(outputHead, "<资源添加中...>", ipAdd)
-	//setsAdd := dnsService.BuildMultiValueRecordSets(ipAdd)
-	//if len(setsAdd) > 0 {
-	//	res, err := dnsService.ChangeSets(setsAdd, "UPSERT")
-	//	if err != nil {
-	//		fmt.Println("[add resource record fail]", err.Error())
-	//	} else {
-	//		fmt.Println("[add resource record success]", res.String())
-	//	}
-	//}
-	//
-	//// delete record out of date
-	//failedSets := dnsService.FilterFailedRecords(remoteRecordSets)
-	//fmt.Println("[resource to be deleted]", len(failedSets))
-	//if len(failedSets) > 0 {
-	//	res, err := dnsService.ChangeSets(failedSets, "DELETE")
-	//	if err != nil {
-	//		fmt.Println("[delete resource record fail]", err.Error())
-	//	} else {
-	//		fmt.Println("[delete resource record success]", res.String())
-	//	}
-	//}
+	setsAdd := dnsService.BuildMultiValueRecordSets(ipAdd)
+	if len(setsAdd) > 0 {
+		res, err := dnsService.ChangeSets(setsAdd, "UPSERT")
+		if err != nil {
+			fmt.Println("[add resource record fail]", err.Error())
+		} else {
+			fmt.Println("[add resource record success]", res.String())
+		}
+	}
+
+	// delete record out of date
+	failedSets := dnsService.FilterFailedRecords(remoteRecordSets)
+	fmt.Println("[resource to be deleted]", len(failedSets))
+	if len(failedSets) > 0 {
+		res, err := dnsService.ChangeSets(failedSets, "DELETE")
+		if err != nil {
+			fmt.Println("[delete resource record fail]", err.Error())
+		} else {
+			fmt.Println("[delete resource record success]", res.String())
+		}
+	}
 
 	return
 }

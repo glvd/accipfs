@@ -75,7 +75,7 @@ func (s *Service) syncDNS() {
 	dnsService := aws.NewRoute53(s.cfg)
 
 	// get remote dns record
-	var remoteIPs []string
+	remoteIPs := make(map[string]bool)
 	remoteRecordSets, err := dnsService.GetRecordSets()
 	if err != nil {
 		fmt.Println(outputHead, "<访问远端网关失败> ", err.Error())
@@ -83,10 +83,11 @@ func (s *Service) syncDNS() {
 	}
 	if len(remoteRecordSets) != 0 {
 		for _, recordSet := range remoteRecordSets {
-			remoteIPs = append(remoteIPs, *recordSet.ResourceRecords[0].Value)
+			remoteIPs[*recordSet.ResourceRecords[0].Value] = true
 		}
 	}
 	//// add new record
+
 	//ipAdd := removeDuplicateElement(general.DiffStrArray(records, remoteIPs))
 	//fmt.Println("[resource to be added]", ipAdd)
 	//setsAdd := dnsService.BuildMultiValueRecordSets(ipAdd)
@@ -112,4 +113,31 @@ func (s *Service) syncDNS() {
 	//}
 
 	return
+}
+
+func removeDuplicateElement(addrs []string) []string {
+	result := make([]string, 0, len(addrs))
+	temp := map[string]struct{}{}
+	for _, item := range addrs {
+		if _, ok := temp[item]; !ok {
+			temp[item] = struct{}{}
+			result = append(result, item)
+		}
+	}
+	return result
+}
+
+// DiffStrArray return the elements in `a` that aren't in `b`.
+func DiffStrArray(a, b []string) []string {
+	mb := make(map[string]struct{}, len(b))
+	for _, x := range b {
+		mb[x] = struct{}{}
+	}
+	var diff []string
+	for _, x := range a {
+		if _, found := mb[x]; !found {
+			diff = append(diff, x)
+		}
+	}
+	return diff
 }

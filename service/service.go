@@ -87,8 +87,7 @@ func (s *Service) syncDNS() {
 			remoteIPs[*recordSet.ResourceRecords[0].Value] = true
 		}
 	}
-	//// add new record
-
+	// add new record
 	ipAdd := DiffStrArray(records, remoteIPs)
 	setsAdd := dnsService.BuildMultiValueRecordSets(ipAdd)
 	log.Infow(outputHead, "tag", "resource adding", "list", ipAdd, "count", len(setsAdd))

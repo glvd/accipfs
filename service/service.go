@@ -79,7 +79,7 @@ func (s *Service) syncDNS() {
 	remoteIPs := make(map[string]bool)
 	remoteRecordSets, err := dnsService.GetRecordSets()
 	if err != nil {
-		fmt.Println(outputHead, "<访问远端网关失败...> ", err.Error())
+		log.Infow(outputHead, "tag", "visit remote record failed", "error", err.Error())
 		return
 	}
 	if len(remoteRecordSets) != 0 {

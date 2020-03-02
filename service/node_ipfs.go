@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"fmt"
+	"github.com/fatih/color"
 	"github.com/glvd/accipfs"
 	"github.com/glvd/accipfs/config"
 	"github.com/ipfs/go-ipfs-http-client"
@@ -12,6 +13,7 @@ import (
 	"github.com/multiformats/go-multiaddr"
 	"os/exec"
 	"path/filepath"
+	"time"
 )
 
 const ipfsPath = ".ipfs"
@@ -111,11 +113,18 @@ func (i *nodeClientIPFS) IsReady() bool {
 	return false
 }
 
+func (i *nodeClientIPFS) output(v ...interface{}) {
+	fmt.Print(outputHead, " ")
+	fmt.Print("[IPFS]", " ")
+	color.New(color.FgBlue).Println(v...)
+}
+
 // Run ...
 func (i *nodeClientIPFS) Run() {
-	fmt.Println(outputHead, "[IPFS]", "syncing node")
+	i.output("syncing node")
+	time.Sleep(30 * time.Second)
 	if !i.IsReady() {
-		fmt.Println(outputHead, "[IPFS]", "waiting for ready")
+		i.output("waiting for ready")
 		return
 	}
 	//// get self node info
@@ -205,7 +214,7 @@ func (i *nodeClientIPFS) Run() {
 	//} else {
 	//	fmt.Println("[添加节点成功] ")
 	//}
-	fmt.Println("<IPFS同步完成>")
+	i.output("<IPFS同步完成>")
 	return
 }
 

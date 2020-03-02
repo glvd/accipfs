@@ -16,9 +16,13 @@ type nodeClientETH struct {
 	client *ethclient.Client
 }
 
+func (e *nodeClientETH) output(v ...interface{}) {
+	fmt.Println(append([]interface{}{outputHead, "[ETH]"}, v...)...)
+}
+
 // Run ...
 func (e *nodeClientETH) Run() {
-	fmt.Println(outputHead, "[ETH]", "eth running")
+	e.output("eth running")
 }
 
 func newETH(cfg config.Config) (*nodeClientETH, error) {

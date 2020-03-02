@@ -52,7 +52,7 @@ func (s *Service) Run() {
 		s.Start()
 	}
 
-	job, err := s.cron.AddJob("0 * * * * * ", s.i)
+	job, err := s.cron.AddJob("0 * * * * *", s.i)
 	if err != nil {
 		panic(err)
 	}

@@ -5,6 +5,7 @@ go 1.13
 require (
 	github.com/aws/aws-sdk-go v1.25.48
 	github.com/ethereum/go-ethereum v1.9.10
+	github.com/fatih/color v1.3.0
 	github.com/goextension/extmap v0.0.1
 	github.com/goextension/log v0.0.2
 	github.com/goextension/tool v0.0.2

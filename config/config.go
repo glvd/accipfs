@@ -86,6 +86,6 @@ func SaveConfig(config *Config) error {
 }
 
 // Global ...
-func Global() *Config {
-	return _config
+func Global() Config {
+	return *_config
 }

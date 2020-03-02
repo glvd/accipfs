@@ -5,6 +5,7 @@ import (
 	"github.com/glvd/accipfs/aws"
 	"github.com/glvd/accipfs/config"
 	"github.com/goextension/log"
+	"github.com/robfig/cron/v3"
 	"strings"
 	"sync"
 )
@@ -14,6 +15,7 @@ const outputHead = "<Service>"
 // Service ...
 type Service struct {
 	cfg        *config.Config
+	cron       *cron.Cron
 	serveMutex sync.RWMutex
 	serve      []Node
 	i          *nodeClientIPFS
@@ -35,23 +37,23 @@ func New(config config.Config) (s *Service, e error) {
 	if e != nil {
 		return nil, e
 	}
+	s.cron = cron.New(cron.WithSeconds())
 	return s, e
 }
 
 // RegisterServer ...
 func (s *Service) RegisterServer(node Node) {
-	s.serveMutex.Lock()
-	defer s.serveMutex.Unlock()
 	s.serve = append(s.serve, node)
 }
 
 // Run ...
 func (s *Service) Run() {
-	s.serveMutex.RLock()
-	defer s.serveMutex.RUnlock()
 	for _, s := range s.serve {
 		s.Start()
 	}
+
+	s.cron.AddJob("60 * * * * * *", s.i)
+
 }
 
 func (s *Service) syncDNS() {

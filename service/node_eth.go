@@ -5,7 +5,6 @@ import (
 	"github.com/glvd/accipfs"
 	"github.com/glvd/accipfs/config"
 	"os/exec"
-	"path/filepath"
 )
 
 const ethPath = ".ethereum"
@@ -17,13 +16,13 @@ type nodeClientETH struct {
 }
 
 func newETH(cfg config.Config) (*nodeClientETH, error) {
-	client, e := ethclient.Dial(filepath.Join(cfg.Path, ethPath, endPoint))
-	if e != nil {
-		return nil, e
-	}
+	//client, e := ethclient.Dial(filepath.Join(cfg.Path, ethPath, endPoint))
+	//if e != nil {
+	//	return nil, e
+	//}
 	return &nodeClientETH{
-		cfg:    cfg,
-		client: client,
+		cfg: cfg,
+		//client: client,
 	}, nil
 }
 

@@ -37,7 +37,7 @@ type PeerID struct {
 }
 
 func newNodeIPFS(config config.Config) (*nodeClientIPFS, error) {
-	api, e := httpapi.NewPathApi(filepath.Join(config.Path, ipfsPath, ipfsAPI))
+	api, e := httpapi.NewPathApi(filepath.Join(config.Path, ipfsPath))
 	if e != nil {
 		return nil, e
 	}

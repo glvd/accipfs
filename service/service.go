@@ -52,8 +52,13 @@ func (s *Service) Run() {
 		s.Start()
 	}
 
-	s.cron.AddJob("60 * * * * * *", s.i)
+	job, err := s.cron.AddJob("0 * * * * * ", s.i)
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println(outputHead, "<Id>", job)
 
+	s.cron.Run()
 }
 
 func (s *Service) syncDNS() {

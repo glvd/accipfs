@@ -42,6 +42,16 @@ type Config struct {
 var DefaultConfigPath = "config"
 var name = "config"
 var ext = ".json"
+var _config *Config
+
+// Initialize ...
+func Initialize() {
+	cfg, err := LoadConfig()
+	if err != nil {
+		panic(err)
+	}
+	_config = cfg
+}
 
 // LoadConfig ...
 func LoadConfig() (*Config, error) {
@@ -73,4 +83,9 @@ func SaveConfig(config *Config) error {
 		return err
 	}
 	return ioutil.WriteFile(filepath.Join(DefaultConfigPath, name+ext), by, 0755)
+}
+
+// Global ...
+func Global() *Config {
+	return _config
 }

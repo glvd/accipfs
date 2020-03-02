@@ -21,7 +21,6 @@ var rootCmd = &cobra.Command{
 }
 
 func main() {
-	fmt.Println("accipfs starting...")
 	rootCmd.AddCommand(daemonRun(), versionCmd())
 	if err := rootCmd.Execute(); err != nil {
 		panic(err)
@@ -35,7 +34,7 @@ func versionCmd() *cobra.Command {
 		Short: "Print the version number of " + APP,
 		Long:  `All software has versions. This is ` + APP + `'s`,
 		Run: func(cmd *cobra.Command, args []string) {
-			fmt.Println(APP, "Version:", Version)
+			fmt.Println(APP, "version:", Version)
 		},
 	}
 	return cmd

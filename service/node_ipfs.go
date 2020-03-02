@@ -105,6 +105,12 @@ func (i *nodeClientIPFS) PinRm(ctx context.Context, hash string) (e error) {
 	return i.api.Pin().Rm(ctx, p)
 }
 
+// IsReady ...
+func (i *nodeClientIPFS) IsReady() bool {
+	//TODO
+	return false
+}
+
 // Run ...
 func (i *nodeClientIPFS) Run() {
 	fmt.Println("<同步IPFS节点中>")

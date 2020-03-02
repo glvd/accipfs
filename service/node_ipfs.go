@@ -113,9 +113,9 @@ func (i *nodeClientIPFS) IsReady() bool {
 
 // Run ...
 func (i *nodeClientIPFS) Run() {
-	fmt.Println(outputHead, "syncing IPFS node")
+	fmt.Println(outputHead, "[IPFS]", "syncing IPFS node")
 	if !i.IsReady() {
-		fmt.Println(outputHead, "waiting for ipfs ready")
+		fmt.Println(outputHead, "[IPFS]", "waiting for ipfs ready")
 		return
 	}
 	//// get self node info

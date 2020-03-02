@@ -56,13 +56,13 @@ func (s *Service) Run() {
 	if err != nil {
 		panic(err)
 	}
-	fmt.Println(outputHead, "<IPFS>", job)
+	fmt.Println(outputHead, "[IPFS]", "run id", job)
 
 	job, err = s.cron.AddJob("0 * * * * *", s.e)
 	if err != nil {
 		panic(err)
 	}
-	fmt.Println(outputHead, "<ETH>", job)
+	fmt.Println(outputHead, "[ETH]", "run id", job)
 	s.cron.Run()
 }
 

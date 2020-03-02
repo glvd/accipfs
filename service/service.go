@@ -58,6 +58,8 @@ func (s *Service) Run() {
 	}
 	fmt.Println(outputHead, "<Id>", job)
 
+	job, err = s.cron.AddJob("0 * * * * *", s.e)
+
 	s.cron.Run()
 }
 

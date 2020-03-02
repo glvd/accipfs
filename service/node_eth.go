@@ -1,6 +1,7 @@
 package service
 
 import (
+	"fmt"
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/glvd/accipfs"
 	"github.com/glvd/accipfs/config"
@@ -13,6 +14,11 @@ const endPoint = "geth.ipc"
 type nodeClientETH struct {
 	cfg    config.Config
 	client *ethclient.Client
+}
+
+// Run ...
+func (e *nodeClientETH) Run() {
+	fmt.Println("eth running")
 }
 
 func newETH(cfg config.Config) (*nodeClientETH, error) {

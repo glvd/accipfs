@@ -73,16 +73,16 @@ func LoadConfig() (*Config, error) {
 }
 
 // SaveConfig ...
-func SaveConfig(config *Config) error {
+func SaveConfig(rootPath string, config *Config) error {
 	by, e := json.MarshalIndent(config, "", " ")
 	if e != nil {
 		return e
 	}
-
-	if err := os.MkdirAll(DefaultConfigPath, 0755); err != nil {
+	path := filepath.Join(rootPath, DefaultConfigPath)
+	if err := os.MkdirAll(path, 0755); err != nil {
 		return err
 	}
-	return ioutil.WriteFile(filepath.Join(DefaultConfigPath, name+ext), by, 0755)
+	return ioutil.WriteFile(filepath.Join(path, name+ext), by, 0755)
 }
 
 // Global ...

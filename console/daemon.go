@@ -6,7 +6,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func daemonRun() *cobra.Command {
+func daemonCmd() *cobra.Command {
 	return &cobra.Command{
 		Use:   "daemon",
 		Short: "Run the service as daemon",

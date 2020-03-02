@@ -21,7 +21,7 @@ var rootCmd = &cobra.Command{
 }
 
 func main() {
-	rootCmd.AddCommand(daemonRun(), versionCmd())
+	rootCmd.AddCommand(daemonCmd(), versionCmd())
 	if err := rootCmd.Execute(); err != nil {
 		panic(err)
 	}

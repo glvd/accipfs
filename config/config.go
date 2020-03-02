@@ -89,3 +89,20 @@ func SaveConfig(config *Config) error {
 func Global() Config {
 	return *_config
 }
+
+// Default ...
+func Default() *Config {
+	return &Config{
+		Path: "config",
+		ETH: ETHConfig{
+			Name: "eth",
+			Key:  "",
+			Pass: "",
+		},
+		IPFS: IPFSConfig{
+			Name: "ipfs",
+			Addr: "",
+		},
+		AWS: AWSConfig{},
+	}
+}

@@ -22,7 +22,7 @@ var rootCmd = &cobra.Command{
 
 func main() {
 	fmt.Println("accipfs starting...")
-	rootCmd.AddCommand(daemonRun())
+	rootCmd.AddCommand(daemonRun(), versionCmd())
 	if err := rootCmd.Execute(); err != nil {
 		panic(err)
 	}

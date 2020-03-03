@@ -6,7 +6,6 @@ import (
 	"github.com/spf13/viper"
 	"io/ioutil"
 	"os"
-	"path/filepath"
 )
 
 // IPFSConfig ...
@@ -38,8 +37,6 @@ type Config struct {
 	AWS  AWSConfig
 }
 
-// DefaultConfigPath ...
-var DefaultConfigPath = "config"
 var name = "config"
 var ext = ".json"
 var _config *Config
@@ -55,7 +52,7 @@ func Initialize() {
 
 // LoadConfig ...
 func LoadConfig() (*Config, error) {
-	viper.AddConfigPath(filepath.Join(DefaultConfigPath))
+	viper.AddConfigPath(currentPath())
 	viper.SetConfigName(name)
 
 	err := viper.MergeInConfig()
@@ -73,16 +70,12 @@ func LoadConfig() (*Config, error) {
 }
 
 // SaveConfig ...
-func SaveConfig(rootPath string, config *Config) error {
+func SaveConfig(config *Config) error {
 	by, e := json.MarshalIndent(config, "", " ")
 	if e != nil {
 		return e
 	}
-	path := filepath.Join(rootPath, DefaultConfigPath)
-	if err := os.MkdirAll(path, 0755); err != nil {
-		return err
-	}
-	return ioutil.WriteFile(filepath.Join(path, name+ext), by, 0755)
+	return ioutil.WriteFile(name+ext, by, 0755)
 }
 
 // Global ...
@@ -105,4 +98,12 @@ func Default() *Config {
 		},
 		AWS: AWSConfig{},
 	}
+}
+
+func currentPath() string {
+	dir, e := os.Getwd()
+	if e != nil {
+		return "."
+	}
+	return dir
 }

@@ -12,6 +12,7 @@ import (
 	"github.com/libp2p/go-libp2p-core/peer"
 	"github.com/multiformats/go-multiaddr"
 	"os/exec"
+	"path/filepath"
 	"time"
 )
 
@@ -38,7 +39,7 @@ type PeerID struct {
 }
 
 func newNodeIPFS(config config.Config) (*nodeClientIPFS, error) {
-	api, e := httpapi.NewPathApi(ipfsPath)
+	api, e := httpapi.NewPathApi(filepath.Join(config.Path, ipfsPath))
 	if e != nil {
 		return nil, fmt.Errorf("new node: %w", e)
 	}

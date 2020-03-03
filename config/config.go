@@ -32,7 +32,6 @@ type AWSConfig struct {
 
 // Config ...
 type Config struct {
-	Path string
 	ETH  ETHConfig
 	IPFS IPFSConfig
 	AWS  AWSConfig
@@ -93,7 +92,6 @@ func Global() Config {
 // Default ...
 func Default() *Config {
 	return &Config{
-		Path: "config",
 		ETH: ETHConfig{
 			Name: "eth",
 			Key:  "",

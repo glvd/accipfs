@@ -9,7 +9,7 @@ import (
 
 func TestRun(t *testing.T) {
 	config.Initialize()
-	accipfs.DefaultPath = "/mnt/d/ipfstest/ipfsdata"
+	accipfs.DefaultPath = "data"
 	s, e := service.New(config.Global())
 	if e != nil {
 		panic(e)

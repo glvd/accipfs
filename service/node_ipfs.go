@@ -40,7 +40,7 @@ type PeerID struct {
 func newNodeIPFS(config config.Config) (*nodeClientIPFS, error) {
 	api, e := httpapi.NewPathApi(ipfsPath)
 	if e != nil {
-		return nil, e
+		return nil, fmt.Errorf("new node: %w", e)
 	}
 	return &nodeClientIPFS{
 		cfg: config,

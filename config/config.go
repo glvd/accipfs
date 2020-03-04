@@ -10,8 +10,9 @@ import (
 
 // IPFSConfig ...
 type IPFSConfig struct {
-	Name string
-	Addr string
+	Name    string
+	Addr    string
+	Timeout int
 }
 
 // ETHConfig ...

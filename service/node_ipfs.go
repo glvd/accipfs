@@ -6,6 +6,7 @@ import (
 	"github.com/fatih/color"
 	"github.com/glvd/accipfs"
 	"github.com/glvd/accipfs/config"
+	"github.com/goextension/log"
 	"github.com/ipfs/go-ipfs-http-client"
 	iface "github.com/ipfs/interface-go-ipfs-core"
 	"github.com/ipfs/interface-go-ipfs-core/path"
@@ -42,13 +43,10 @@ type PeerID struct {
 }
 
 func newNodeIPFS(config config.Config) (*nodeClientIPFS, error) {
-	api, e := httpapi.NewPathApi(filepath.Join(config.Path, ipfsPath))
-	if e != nil {
-		return nil, fmt.Errorf("new node: %w", e)
-	}
+
 	return &nodeClientIPFS{
-		cfg:  config,
-		api:  api,
+		cfg: config,
+		//api:  api,
 		lock: atomic.NewBool(false),
 		out:  color.New(color.FgBlue),
 	}, nil
@@ -114,14 +112,19 @@ func (i *nodeClientIPFS) PinRm(ctx context.Context, hash string) (e error) {
 
 // IsReady ...
 func (i *nodeClientIPFS) IsReady() bool {
-	//TODO
-	return false
+	api, e := httpapi.NewPathApi(filepath.Join(i.cfg.Path, ipfsPath))
+	if e != nil {
+		log.Errorf("new node: %w ", e)
+		return false
+	}
+	i.api = api
+	return true
 }
 
 func (i *nodeClientIPFS) output(v ...interface{}) {
 	fmt.Print(outputHead, " ")
 	fmt.Print("[IPFS]", " ")
-	i.out.Println(v...)
+	_, _ = i.out.Println(v...)
 }
 
 // Run ...
@@ -134,23 +137,34 @@ func (i *nodeClientIPFS) Run() {
 	i.lock.Store(true)
 	defer i.lock.Store(false)
 	i.output("ipfs sync running")
-	time.Sleep(30 * time.Second)
 	if !i.IsReady() {
 		i.output("waiting for ready")
 		return
 	}
 	//// get self node info
-	//selfInfo, err := ipfs.ID()
-	//if err != nil {
-	//	fmt.Println("[获取本节点信息失败]", err.Error())
-	//	return
-	//}
-	//nodeID := selfInfo.ID
+	timeout, cancelFunc := context.WithTimeout(context.Background(), time.Duration(i.cfg.IPFS.Timeout)*time.Second)
+	defer cancelFunc()
+	pid, e := i.ID(timeout)
+	if e != nil {
+		log.Errorw(outputHead, "tag", "run get id", "error", e)
+		return
+	}
+
+	nid := pid.ID
+	i.output("id", nid)
 	//// get ipfs swarm nodes
 	//var peers []string
 	//var publicNodes []string
-	//resp := ipfs.SwarmPeers()
-	//for _, peer := range resp.Peers {
+	timeout2, cancelFunc2 := context.WithTimeout(context.Background(), time.Duration(i.cfg.IPFS.Timeout)*time.Second)
+	defer cancelFunc2()
+	infos, e := i.SwarmPeers(timeout2)
+	if e != nil {
+		log.Errorw(outputHead, "tag", "run get peers", "error", e)
+		return
+	}
+	for _, info := range infos {
+		i.output("peers", info.ID().String())
+	}
 	//	// check if ipfs node in public net
 	//	ip, port := getAddressInfo(peer.Addr)
 	//	conn, err := net.Dial("tcp", ip+":"+port)

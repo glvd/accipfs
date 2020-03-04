@@ -94,8 +94,9 @@ func Default() *Config {
 			Pass: "",
 		},
 		IPFS: IPFSConfig{
-			Name: "ipfs",
-			Addr: "",
+			Name:    "ipfs",
+			Addr:    "",
+			Timeout: 30,
 		},
 		AWS: AWSConfig{},
 	}

@@ -91,7 +91,7 @@ func (s *Service) syncDNS() {
 	remoteIPs := make(map[string]bool)
 	remoteRecordSets, err := dnsService.GetRecordSets()
 	if err != nil {
-		log.Infow(outputHead, "tag", "visit remote record failed", "error", err.Error())
+		log.Infow("visit remote record failed", "tag", outputHead, "error", err.Error())
 		return
 	}
 	if len(remoteRecordSets) != 0 {
@@ -102,25 +102,25 @@ func (s *Service) syncDNS() {
 	// add new record
 	ipAdd := DiffStrArray(records, remoteIPs)
 	setsAdd := dnsService.BuildMultiValueRecordSets(ipAdd)
-	log.Infow(outputHead, "tag", "resource adding", "list", ipAdd, "count", len(setsAdd))
+	log.Infow("resource adding", "tag", outputHead, "list", ipAdd, "count", len(setsAdd))
 	if len(setsAdd) > 0 {
 		res, err := dnsService.ChangeSets(setsAdd, "UPSERT")
 		if err != nil {
-			log.Infow(outputHead, "tag", "add resource record fail", "error", err)
+			log.Infow("add resource record fail", "tag", outputHead, "error", err)
 		} else {
-			log.Infow(outputHead, "tag", "add resource record success", "error", "result", res.String())
+			log.Infow("add resource record success", "tag", outputHead, "error", "result", res.String())
 		}
 	}
 
 	// delete record out of date
 	failedSets := dnsService.FilterFailedRecords(remoteRecordSets)
-	log.Infow(outputHead, "tag", "resource deleting", "list", remoteRecordSets, "count", len(failedSets))
+	log.Infow("resource deleting", "tag", outputHead, "list", remoteRecordSets, "count", len(failedSets))
 	if len(failedSets) > 0 {
 		res, err := dnsService.ChangeSets(failedSets, "DELETE")
 		if err != nil {
-			log.Infow(outputHead, "tag", "delete resource record fail", "error", err)
+			log.Infow("delete resource record fail", "tag", outputHead, "error", err)
 		} else {
-			log.Infow(outputHead, "tag", "delete resource record success", "error", "result", res.String())
+			log.Infow("delete resource record success", "tag", outputHead, "error", "result", res.String())
 		}
 	}
 

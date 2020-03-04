@@ -146,7 +146,7 @@ func (i *nodeClientIPFS) Run() {
 	defer cancelFunc()
 	pid, e := i.ID(timeout)
 	if e != nil {
-		log.Errorw(outputHead, "tag", "run get id", "error", e)
+		log.Errorw("run get id", "tag", outputHead, "error", e)
 		return
 	}
 

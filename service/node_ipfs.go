@@ -11,6 +11,7 @@ import (
 	"github.com/ipfs/interface-go-ipfs-core/path"
 	"github.com/libp2p/go-libp2p-core/peer"
 	"github.com/multiformats/go-multiaddr"
+	"go.uber.org/atomic"
 	"os/exec"
 	"path/filepath"
 	"time"
@@ -20,8 +21,10 @@ const ipfsPath = ".ipfs"
 const ipfsAPI = "api"
 
 type nodeClientIPFS struct {
-	cfg config.Config
-	api *httpapi.HttpApi
+	lock *atomic.Bool
+	cfg  config.Config
+	api  *httpapi.HttpApi
+	out  *color.Color
 }
 
 type nodeServerIPFS struct {
@@ -44,8 +47,10 @@ func newNodeIPFS(config config.Config) (*nodeClientIPFS, error) {
 		return nil, fmt.Errorf("new node: %w", e)
 	}
 	return &nodeClientIPFS{
-		cfg: config,
-		api: api,
+		cfg:  config,
+		api:  api,
+		lock: atomic.NewBool(false),
+		out:  color.New(color.FgBlue),
 	}, nil
 }
 
@@ -116,12 +121,19 @@ func (i *nodeClientIPFS) IsReady() bool {
 func (i *nodeClientIPFS) output(v ...interface{}) {
 	fmt.Print(outputHead, " ")
 	fmt.Print("[IPFS]", " ")
-	color.New(color.FgBlue).Println(v...)
+	i.out.Println(v...)
 }
 
 // Run ...
 func (i *nodeClientIPFS) Run() {
 	i.output("syncing node")
+	if i.lock.Load() {
+		i.output("ipfs node is already running")
+		return
+	}
+	i.lock.Store(true)
+	defer i.lock.Store(false)
+	i.output("ipfs sync running")
 	time.Sleep(30 * time.Second)
 	if !i.IsReady() {
 		i.output("waiting for ready")

@@ -1,6 +1,7 @@
 package service
 
 import (
+	"bytes"
 	"context"
 	"fmt"
 	"github.com/fatih/color"
@@ -15,6 +16,7 @@ import (
 	"go.uber.org/atomic"
 	"os/exec"
 	"path/filepath"
+	"strings"
 	"time"
 )
 
@@ -163,7 +165,9 @@ func (i *nodeClientIPFS) Run() {
 		return
 	}
 	for _, info := range infos {
-		i.output("peers", info.ID().String())
+		i.output("peers", info.ID().String(), "ip", info.Address())
+		info.Address()
+		StringToAddr(info.Address().String())
 	}
 	//	// check if ipfs node in public net
 	//	ip, port := getAddressInfo(peer.Addr)
@@ -254,4 +258,62 @@ func NodeServerIPFS(cfg config.Config) Node {
 	cmd := exec.Command(cfg.IPFS.Name, "")
 	cmd.Env = accipfs.Environ()
 	return &nodeServerIPFS{cmd: cmd}
+}
+
+// StringToAddr ...
+func StringToAddr(s string) ([]byte, error) {
+	// consume trailing slashes
+	s = strings.TrimRight(s, "/")
+
+	var b bytes.Buffer
+	sp := strings.Split(s, "/")
+
+	if sp[0] != "" {
+		return nil, fmt.Errorf("failed to parse multiaddr %q: must begin with /", s)
+	}
+
+	// consume first empty elem
+	sp = sp[1:]
+
+	if len(sp) == 0 {
+		return nil, fmt.Errorf("failed to parse multiaddr %q: empty multiaddr", s)
+	}
+
+	for len(sp) > 0 {
+		log.Infow("sp info", "tag", outputHead, "info", sp)
+		name := sp[0]
+		p := multiaddr.ProtocolWithName(name)
+		if p.Code == 0 {
+			return nil, fmt.Errorf("failed to parse multiaddr %q: unknown protocol %s", s, sp[0])
+		}
+		_, _ = b.Write(multiaddr.CodeToVarint(p.Code))
+		log.Info(sp)
+		sp = sp[1:]
+		if p.Size == 0 { // no length.
+			continue
+		}
+
+		if len(sp) < 1 {
+			return nil, fmt.Errorf("failed to parse multiaddr %q: unexpected end of multiaddr", s)
+		}
+
+		if p.Path {
+			// it's a path protocol (terminal).
+			// consume the rest of the address as the next component.
+			sp = []string{"/" + strings.Join(sp, "/")}
+		}
+
+		a, err := p.Transcoder.StringToBytes(sp[0])
+		if err != nil {
+			return nil, fmt.Errorf("failed to parse multiaddr %q: invalid value %q for protocol %s: %s", s, sp[0], p.Name, err)
+		}
+		if p.Size < 0 { // varint size.
+			_, _ = b.Write(multiaddr.CodeToVarint(len(a)))
+		}
+		b.Write(a)
+		log.Info(sp)
+		sp = sp[1:]
+	}
+
+	return b.Bytes(), nil
 }

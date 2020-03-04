@@ -4,7 +4,8 @@ go 1.13
 
 require (
 	github.com/aws/aws-sdk-go v1.25.48
-	github.com/ethereum/go-ethereum v1.9.10
+	github.com/elastic/gosigar v0.10.5 // indirect
+	github.com/ethereum/go-ethereum v1.9.11
 	github.com/fatih/color v1.3.0
 	github.com/goextension/extmap v0.0.1
 	github.com/goextension/log v0.0.2
@@ -17,4 +18,5 @@ require (
 	github.com/spf13/cobra v0.0.5
 	github.com/spf13/viper v1.3.2
 	go.uber.org/atomic v1.5.0
+	golang.org/x/sys v0.0.0-20200302150141-5c8b2ff67527 // indirect
 )

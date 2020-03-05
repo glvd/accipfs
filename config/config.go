@@ -32,10 +32,12 @@ type AWSConfig struct {
 
 // Config ...
 type Config struct {
-	Path string
-	ETH  ETHConfig
-	IPFS IPFSConfig
-	AWS  AWSConfig
+	Path       string
+	PrivateKey string
+	PublicKey  string
+	ETH        ETHConfig
+	IPFS       IPFSConfig
+	AWS        AWSConfig
 }
 
 var name = "config"

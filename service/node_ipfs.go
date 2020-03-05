@@ -1,22 +1,22 @@
 package service
 
 import (
-	"bytes"
 	"context"
 	"fmt"
 	"github.com/fatih/color"
 	"github.com/glvd/accipfs"
 	"github.com/glvd/accipfs/config"
+	"github.com/glvd/accipfs/contract"
 	"github.com/goextension/log"
 	"github.com/ipfs/go-ipfs-http-client"
 	iface "github.com/ipfs/interface-go-ipfs-core"
 	"github.com/ipfs/interface-go-ipfs-core/path"
 	"github.com/libp2p/go-libp2p-core/peer"
 	"github.com/multiformats/go-multiaddr"
+	manet "github.com/multiformats/go-multiaddr-net"
 	"go.uber.org/atomic"
 	"os/exec"
 	"path/filepath"
-	"strings"
 	"time"
 )
 
@@ -154,9 +154,9 @@ func (i *nodeClientIPFS) Run() {
 
 	nid := pid.ID
 	i.output("id", nid)
-	//// get ipfs swarm nodes
-	//var peers []string
-	//var publicNodes []string
+	// get ipfs swarm nodes
+	var peers []string
+	var publicNodes []string
 	timeout2, cancelFunc2 := context.WithTimeout(context.Background(), time.Duration(i.cfg.IPFS.Timeout)*time.Second)
 	defer cancelFunc2()
 	infos, e := i.SwarmPeers(timeout2)
@@ -167,49 +167,46 @@ func (i *nodeClientIPFS) Run() {
 	for _, info := range infos {
 		i.output("peers", info.ID().String(), "ip", info.Address())
 		info.Address()
-		StringToAddr(info.Address().String())
+		conn, err := manet.Dial(info.Address())
+		// p2p proxy node
+		if err != nil {
+			//TODO:
+			//ipfsAddr := "/ipfs/" + nodeID + "/p2p-circuit/ipfs/" + .Peer
+			//peers = append(peers, ipfsAddr)
+			// public node
+		} else {
+			ipfsAddr := info.Address().String()
+			publicNodes = append(publicNodes, ipfsAddr)
+			conn.Close()
+		}
 	}
-	//	// check if ipfs node in public net
-	//	ip, port := getAddressInfo(peer.Addr)
-	//	conn, err := net.Dial("tcp", ip+":"+port)
-	//	// p2p proxy node
-	//	if err != nil {
-	//		ipfsAddr := "/ipfs/" + nodeID + "/p2p-circuit/ipfs/" + peer.Peer
-	//		peers = append(peers, ipfsAddr)
-	//		// public node
-	//	} else {
-	//		ipfsAddr := peer.Addr + "/ipfs/" + peer.Peer
-	//		publicNodes = append(publicNodes, ipfsAddr)
-	//		conn.Close()
-	//	}
-	//}
-	//fmt.Println("[当前IPFS总节点数]", len(peers)+len(publicNodes))
-	//fmt.Println("[当前IPFS公网节点数]", len(publicNodes))
-	//// get nodes info
+	//i.output("[当前IPFS总节点数]", len(peers)+len(publicNodes))
+	i.output("exists IPFS nodes:", len(publicNodes))
+	// get nodes info
 	//if len(peers) == 0 {
 	//	fmt.Println("<IPFS节点状态已是最新>")
 	//	return
 	//}
-	//cl := eth.ContractLoader()
-	//ac, auth, client := cl.AccelerateNode()
-	//defer client.Close()
-	//
-	//cPeers, err := ac.GetIpfsNodes(nil)
-	//cNodes, err := ac.GetPublicIpfsNodes(nil)
-	//cPeers = decodeNodes(cPeers)
-	//cNodes = decodeNodes(cNodes)
-	//
-	//fmt.Println("[adding ipfs nodes]", difference(peers, cPeers))
-	//fmt.Println("[adding public ipfs nodes]", difference(publicNodes, cNodes))
+	cl := contract.ContractLoader()
+	ac, auth, client := cl.AccelerateNode()
+	defer client.Close()
+
+	cPeers, err := ac.GetIpfsNodes(nil)
+	cNodes, err := ac.GetPublicIpfsNodes(nil)
+	cPeers = decodeNodes(cPeers)
+	cNodes = decodeNodes(cNodes)
+
+	fmt.Println("[adding ipfs nodes]", difference(peers, cPeers))
+	fmt.Println("[adding public ipfs nodes]", difference(publicNodes, cNodes))
 	//// delete nodes
 	//var deleteIdx []int
-	//for _, dNode := range difference(cNodes, getAccessibleIpfsNodes(cNodes, "4001")) {
-	//	for idx, cNode := range cNodes {
-	//		if cNode == dNode {
-	//			deleteIdx = append(deleteIdx, idx)
-	//		}
-	//	}
-	//}
+	for _, dNode := range difference(cNodes, getAccessibleIpfsNodes(cNodes, "4001")) {
+		for idx, cNode := range cNodes {
+			if cNode == dNode {
+				deleteIdx = append(deleteIdx, idx)
+			}
+		}
+	}
 	//
 	//if len(deleteIdx) > 0 {
 	//	var err error
@@ -260,60 +257,98 @@ func NodeServerIPFS(cfg config.Config) Node {
 	return &nodeServerIPFS{cmd: cmd}
 }
 
+// Address ...
+type Address struct {
+	Addr string
+	Port string
+}
+
 // StringToAddr ...
-func StringToAddr(s string) ([]byte, error) {
-	// consume trailing slashes
-	s = strings.TrimRight(s, "/")
+func StringToAddr(s string) (a *Address, e error) {
+	return
+	//// consume trailing slashes
+	//s = strings.TrimRight(s, "/")
+	//
+	//var b bytes.Buffer
+	//sp := strings.Split(s, "/")
+	//
+	//if sp[0] != "" {
+	//	return nil, fmt.Errorf("failed to parse multiaddr %q: must begin with /", s)
+	//}
+	//
+	//// consume first empty elem
+	//sp = sp[1:]
+	//
+	//if len(sp) == 0 {
+	//	return nil, fmt.Errorf("failed to parse multiaddr %q: empty multiaddr", s)
+	//}
+	//
+	//for len(sp) > 0 {
+	//	log.Infow("sp info", "tag", outputHead, "info", sp)
+	//	name := sp[0]
+	//	p := multiaddr.ProtocolWithName(name)
+	//	if p.Code == 0 {
+	//		return nil, fmt.Errorf("failed to parse multiaddr %q: unknown protocol %s", s, sp[0])
+	//	}
+	//
+	//	_, _ = b.Write(multiaddr.CodeToVarint(p.Code))
+	//	log.Info(sp)
+	//	sp = sp[1:]
+	//	if p.Size == 0 { // no length.
+	//		continue
+	//	}
+	//
+	//	if len(sp) < 1 {
+	//		return nil, fmt.Errorf("failed to parse multiaddr %q: unexpected end of multiaddr", s)
+	//	}
+	//
+	//	if p.Path {
+	//		// it's a path protocol (terminal).
+	//		// consume the rest of the address as the next component.
+	//		sp = []string{"/" + strings.Join(sp, "/")}
+	//	}
+	//
+	//	a, err := p.Transcoder.StringToBytes(sp[0])
+	//	if err != nil {
+	//		return nil, fmt.Errorf("failed to parse multiaddr %q: invalid value %q for protocol %s: %s", s, sp[0], p.Name, err)
+	//	}
+	//	if p.Size < 0 { // varint size.
+	//		_, _ = b.Write(multiaddr.CodeToVarint(len(a)))
+	//	}
+	//	b.Write(a)
+	//	log.Info(sp)
+	//	sp = sp[1:]
+	//}
+	//
+	//return b.Bytes(), nil
+}
 
-	var b bytes.Buffer
-	sp := strings.Split(s, "/")
-
-	if sp[0] != "" {
-		return nil, fmt.Errorf("failed to parse multiaddr %q: must begin with /", s)
+func (i *nodeClientIPFS) decodeNodes(nodes []string) []string {
+	// init contract
+	var decodeNodes []string
+	decoder := dhcrypto.NewCipherDecode([]byte(i.cfg.PrivateKey), dateKey)
+	if len(nodes) == 0 {
+		return decodeNodes
 	}
-
-	// consume first empty elem
-	sp = sp[1:]
-
-	if len(sp) == 0 {
-		return nil, fmt.Errorf("failed to parse multiaddr %q: empty multiaddr", s)
-	}
-
-	for len(sp) > 0 {
-		log.Infow("sp info", "tag", outputHead, "info", sp)
-		name := sp[0]
-		p := multiaddr.ProtocolWithName(name)
-		if p.Code == 0 {
-			return nil, fmt.Errorf("failed to parse multiaddr %q: unknown protocol %s", s, sp[0])
-		}
-		_, _ = b.Write(multiaddr.CodeToVarint(p.Code))
-		log.Info(sp)
-		sp = sp[1:]
-		if p.Size == 0 { // no length.
+	for _, node := range nodes {
+		decoded, err := decoder.Decode(node)
+		if err != nil {
 			continue
 		}
-
-		if len(sp) < 1 {
-			return nil, fmt.Errorf("failed to parse multiaddr %q: unexpected end of multiaddr", s)
-		}
-
-		if p.Path {
-			// it's a path protocol (terminal).
-			// consume the rest of the address as the next component.
-			sp = []string{"/" + strings.Join(sp, "/")}
-		}
-
-		a, err := p.Transcoder.StringToBytes(sp[0])
-		if err != nil {
-			return nil, fmt.Errorf("failed to parse multiaddr %q: invalid value %q for protocol %s: %s", s, sp[0], p.Name, err)
-		}
-		if p.Size < 0 { // varint size.
-			_, _ = b.Write(multiaddr.CodeToVarint(len(a)))
-		}
-		b.Write(a)
-		log.Info(sp)
-		sp = sp[1:]
+		decodeNodes = append(decodeNodes, string(decoded))
 	}
+	return decodeNodes
+}
 
-	return b.Bytes(), nil
+func (i *nodeClientIPFS) encodeNodes(nodes []string) []string {
+	var encodedNodes []string
+	encoder := dhcrypto.NewCipherEncoder([]byte(pubKey), 10, dateKey)
+	for _, node := range nodes {
+		encoded, err := encoder.Encode(node)
+		if err != nil {
+			continue
+		}
+		encodedNodes = append(encodedNodes, string(encoded))
+	}
+	return encodedNodes
 }

@@ -13,7 +13,7 @@ func initCmd() *cobra.Command {
 		Short: "init run",
 		Long:  "init will create the config file with a default settings",
 		Run: func(cmd *cobra.Command, args []string) {
-			config.SaveConfig(accipfs.DefaultPath, config.Default())
+			config.SaveConfig(config.Default())
 		},
 	}
 	cmd.Flags().StringVar(&accipfs.DefaultPath, "path", ".", "set work path")

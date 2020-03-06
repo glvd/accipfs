@@ -1,7 +1,6 @@
 package service
 
 import (
-	"fmt"
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/fatih/color"
 	"github.com/glvd/accipfs"
@@ -21,8 +20,7 @@ type nodeClientETH struct {
 }
 
 func (n *nodeClientETH) output(v ...interface{}) {
-	fmt.Print(outputHead, " ")
-	fmt.Print("[ETH]", " ")
+	v = append([]interface{}{outputHead, "[ETH]"}, v...)
 	_, _ = n.out.Println(v...)
 }
 

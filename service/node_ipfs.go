@@ -130,8 +130,7 @@ func (n *nodeClientIPFS) IsReady() bool {
 }
 
 func (n *nodeClientIPFS) output(v ...interface{}) {
-	fmt.Print(outputHead, " ")
-	fmt.Print("[IPFS]", " ")
+	v = append([]interface{}{outputHead, "[IPFS]"}, v...)
 	_, _ = n.out.Println(v...)
 }
 

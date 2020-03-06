@@ -30,12 +30,12 @@ func (e *nodeClientETH) output(v ...interface{}) {
 func (e *nodeClientETH) Run() {
 	e.output("syncing node")
 	if e.lock.Load() {
-		e.output("ipfs node is already running")
+		e.output("eth node is already running")
 		return
 	}
 	e.lock.Store(true)
 	defer e.lock.Store(false)
-	e.output("ipfs sync running")
+	e.output("eth sync running")
 	if !e.IsReady() {
 		e.output("waiting for eth ready")
 		return

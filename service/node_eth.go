@@ -5,6 +5,7 @@ import (
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/glvd/accipfs"
 	"github.com/glvd/accipfs/config"
+	"github.com/goextension/log"
 	"os/exec"
 )
 
@@ -26,10 +27,7 @@ func (e *nodeClientETH) Run() {
 }
 
 func newETH(cfg config.Config) (*nodeClientETH, error) {
-	//client, e := ethclient.Dial(filepath.Join(cfg.Path, ethPath, endPoint))
-	//if e != nil {
-	//	return nil, e
-	//}
+
 	return &nodeClientETH{
 		cfg: cfg,
 		//client: client,
@@ -55,8 +53,13 @@ func NodeServerETH(cfg config.Config) Node {
 
 // IsReady ...
 func (e *nodeClientETH) IsReady() bool {
-	//TODO
-	return false
+	client, err := ethclient.Dial(e.cfg.ETH.Addr)
+	if err != nil {
+		log.Errorw("new node eth", "error", err)
+		return false
+	}
+	e.client = client
+	return true
 }
 
 // Node ...

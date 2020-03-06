@@ -121,7 +121,7 @@ func (i *nodeClientIPFS) PinRm(ctx context.Context, hash string) (e error) {
 func (i *nodeClientIPFS) IsReady() bool {
 	api, e := httpapi.NewPathApi(filepath.Join(i.cfg.Path, ipfsPath))
 	if e != nil {
-		log.Errorf("new node: %w ", e)
+		log.Errorw("new node ipfs", "error", e)
 		return false
 	}
 	i.api = api

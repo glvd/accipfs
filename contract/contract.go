@@ -25,6 +25,9 @@ type Contracter interface {
 	DHToken() (*dhToken.DhToken, *bind.TransactOpts, *ethclient.Client)
 }
 
+// DefaultGateway ...
+var DefaultGateway = "http://127.0.0.1:8545"
+
 // ContractLoader ...
 func ContractLoader() Contracter {
 	return &contract{keyStore}
@@ -39,7 +42,7 @@ func (c contract) AccelerateNode() (*node.AccelerateNode, *bind.TransactOpts, *e
 	}
 	// gateway redirect to private chain
 	// client, err := ethclient.Dial("http://gate.betabb.space:8545")
-	client, err := ethclient.Dial("/root/.ethereum/geth.ipc")
+	client, err := ethclient.Dial(DefaultGateway)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -60,7 +63,7 @@ func (c contract) DHToken() (*dhToken.DhToken, *bind.TransactOpts, *ethclient.Cl
 		log.Fatal(err)
 	}
 	// gateway redirect to private chain
-	client, err := ethclient.Dial("/root/.ethereum/geth.ipc")
+	client, err := ethclient.Dial(DefaultGateway)
 	if err != nil {
 		log.Fatal(err)
 	}

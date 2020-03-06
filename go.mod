@@ -14,6 +14,7 @@ require (
 	github.com/ipfs/interface-go-ipfs-core v0.2.3
 	github.com/libp2p/go-libp2p-core v0.2.3
 	github.com/multiformats/go-multiaddr v0.1.1
+	github.com/multiformats/go-multiaddr-net v0.1.0
 	github.com/robfig/cron/v3 v3.0.1
 	github.com/spf13/cobra v0.0.5
 	github.com/spf13/viper v1.3.2

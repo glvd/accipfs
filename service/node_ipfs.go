@@ -22,17 +22,16 @@ import (
 	"github.com/libp2p/go-libp2p-core/peer"
 	"github.com/multiformats/go-multiaddr"
 	manet "github.com/multiformats/go-multiaddr-net"
-	"go.uber.org/atomic"
 )
 
 const ipfsPath = ".ipfs"
 const ipfsAPI = "api"
 
 type nodeClientIPFS struct {
-	lock *atomic.Bool
-	cfg  config.Config
-	api  *httpapi.HttpApi
-	out  *color.Color
+	*node
+	cfg config.Config
+	api *httpapi.HttpApi
+	out *color.Color
 }
 
 type nodeServerIPFS struct {
@@ -54,7 +53,7 @@ func newNodeIPFS(config config.Config) (*nodeClientIPFS, error) {
 	return &nodeClientIPFS{
 		cfg: config,
 		//api:  api,
-		lock: atomic.NewBool(false),
+		node: nodeInstance(),
 		out:  color.New(color.FgBlue),
 	}, nil
 }
@@ -145,7 +144,7 @@ func (i *nodeClientIPFS) Run() {
 	defer i.lock.Store(false)
 	i.output("ipfs sync running")
 	if !i.IsReady() {
-		i.output("waiting for ready")
+		i.output("waiting for ipfs ready")
 		return
 	}
 	//// get self node info

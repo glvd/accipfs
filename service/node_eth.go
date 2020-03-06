@@ -13,6 +13,7 @@ const ethPath = ".ethereum"
 const endPoint = "geth.ipc"
 
 type nodeClientETH struct {
+	*node
 	cfg    config.Config
 	client *ethclient.Client
 }
@@ -23,7 +24,18 @@ func (e *nodeClientETH) output(v ...interface{}) {
 
 // Run ...
 func (e *nodeClientETH) Run() {
-	e.output("eth running")
+	e.output("syncing node")
+	if e.lock.Load() {
+		e.output("ipfs node is already running")
+		return
+	}
+	e.lock.Store(true)
+	defer e.lock.Store(false)
+	e.output("ipfs sync running")
+	if !e.IsReady() {
+		e.output("waiting for eth ready")
+		return
+	}
 }
 
 func newETH(cfg config.Config) (*nodeClientETH, error) {

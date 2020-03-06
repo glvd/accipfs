@@ -3,8 +3,12 @@ package service
 import (
 	"context"
 	"fmt"
+	"github.com/glvd/accipfs/dhcrypto"
+	"net"
 	"os/exec"
 	"path/filepath"
+	"sort"
+	"strings"
 	"time"
 
 	"github.com/fatih/color"
@@ -203,10 +207,11 @@ func (i *nodeClientIPFS) Run() {
 	cPeers = i.decodeNodes(cPeers)
 	cNodes = i.decodeNodes(cNodes)
 
+	//TODO:fix sta
 	fmt.Println("[adding ipfs nodes]", difference(peers, cPeers))
 	fmt.Println("[adding public ipfs nodes]", difference(publicNodes, cNodes))
 	//// delete nodes
-	//var deleteIdx []int
+	var deleteIdx []int
 	for _, dNode := range difference(cNodes, getAccessibleIpfsNodes(cNodes, "4001")) {
 		for idx, cNode := range cNodes {
 			if cNode == dNode {
@@ -214,40 +219,40 @@ func (i *nodeClientIPFS) Run() {
 			}
 		}
 	}
-	//
-	//if len(deleteIdx) > 0 {
-	//	var err error
-	//	sort.Sort(sort.Reverse(sort.IntSlice(deleteIdx)))
-	//	for _, idx := range deleteIdx {
-	//		_, err = ac.DeletePublicIpfsNodes(auth, uint32(idx))
-	//	}
-	//
-	//	if err != nil {
-	//		fmt.Println("<删除失效节点失败>", err.Error())
-	//	} else {
-	//		fmt.Println("[删除失效节点成功]")
-	//	}
-	//}
-	//
-	//// add new nodes
-	//for _, n := range encodeNodes(difference(peers, cPeers)) {
-	//	if n == "" {
-	//		continue
-	//	}
-	//	_, err = ac.AddIpfsNodes(auth, []string{n})
-	//}
-	//for _, n := range encodeNodes(difference(publicNodes, cNodes)) {
-	//	if n == "" {
-	//		continue
-	//	}
-	//	_, err = ac.AddPublicIpfsNodes(auth, []string{n})
-	//}
-	//
-	//if err != nil {
-	//	fmt.Println("[添加节点失败]", err.Error())
-	//} else {
-	//	fmt.Println("[添加节点成功] ")
-	//}
+	//TODO:fix end
+	if len(deleteIdx) > 0 {
+		var err error
+		sort.Sort(sort.Reverse(sort.IntSlice(deleteIdx)))
+		for _, idx := range deleteIdx {
+			_, err = ac.DeletePublicIpfsNodes(auth, uint32(idx))
+		}
+
+		if err != nil {
+			fmt.Println("<删除失效节点失败>", err.Error())
+		} else {
+			fmt.Println("[删除失效节点成功]")
+		}
+	}
+
+	// add new nodes
+	for _, n := range i.encodeNodes(difference(peers, cPeers)) {
+		if n == "" {
+			continue
+		}
+		_, err = ac.AddIpfsNodes(auth, []string{n})
+	}
+	for _, n := range i.encodeNodes(difference(publicNodes, cNodes)) {
+		if n == "" {
+			continue
+		}
+		_, err = ac.AddPublicIpfsNodes(auth, []string{n})
+	}
+
+	if err != nil {
+		fmt.Println("[添加节点失败]", err.Error())
+	} else {
+		fmt.Println("[添加节点成功] ")
+	}
 	i.output("<IPFS同步完成>")
 	return
 }
@@ -349,7 +354,7 @@ func (i *nodeClientIPFS) decodeNodes(nodes []string) []string {
 
 func (i *nodeClientIPFS) encodeNodes(nodes []string) []string {
 	var encodedNodes []string
-	encoder := dhcrypto.NewCipherEncoder([]byte(pubKey), 10, dateKey)
+	encoder := dhcrypto.NewCipherEncoder([]byte(i.cfg.PublicKey), 10, dateKey)
 	for _, node := range nodes {
 		encoded, err := encoder.Encode(node)
 		if err != nil {
@@ -373,4 +378,28 @@ func difference(a, b []string) []string {
 		}
 	}
 	return diff
+}
+
+func getAccessibleIpfsNodes(addresses []string, port string) []string {
+	var accessible []string
+	for _, address := range addresses {
+		strs := strings.Split(address, "/ip4/")
+		if len(strs) < 2 {
+			continue
+		}
+		ip := strings.Split(strs[1], "/")[0]
+		if len(ip) < 8 {
+			continue
+		}
+		conn, err := net.DialTimeout("tcp", ip+":"+port, 3*time.Second)
+		if err == nil {
+			addr := strs[0] + "@" + ip + ":" + port
+			accessible = append(accessible, addr)
+			conn.Close()
+		} else {
+			fmt.Println("[dial err]", err)
+		}
+
+	}
+	return accessible
 }

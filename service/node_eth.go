@@ -3,6 +3,7 @@ package service
 import (
 	"fmt"
 	"github.com/ethereum/go-ethereum/ethclient"
+	"github.com/fatih/color"
 	"github.com/glvd/accipfs"
 	"github.com/glvd/accipfs/config"
 	"github.com/goextension/log"
@@ -16,10 +17,13 @@ type nodeClientETH struct {
 	*node
 	cfg    config.Config
 	client *ethclient.Client
+	out    *color.Color
 }
 
 func (e *nodeClientETH) output(v ...interface{}) {
-	fmt.Println(append([]interface{}{outputHead, "[ETH]"}, v...)...)
+	fmt.Print(outputHead, " ")
+	fmt.Print("[ETH]", " ")
+	_, _ = e.out.Println(v...)
 }
 
 // Run ...
@@ -43,6 +47,7 @@ func newETH(cfg config.Config) (*nodeClientETH, error) {
 	return &nodeClientETH{
 		cfg:  cfg,
 		node: nodeInstance(),
+		out:  color.New(color.FgRed),
 	}, nil
 }
 

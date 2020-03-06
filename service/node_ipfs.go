@@ -51,8 +51,7 @@ type PeerID struct {
 func newNodeIPFS(config config.Config) (*nodeClientIPFS, error) {
 
 	return &nodeClientIPFS{
-		cfg: config,
-		//api:  api,
+		cfg:  config,
 		node: nodeInstance(),
 		out:  color.New(color.FgBlue),
 	}, nil

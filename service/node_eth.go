@@ -41,8 +41,8 @@ func (e *nodeClientETH) Run() {
 func newETH(cfg config.Config) (*nodeClientETH, error) {
 
 	return &nodeClientETH{
-		cfg: cfg,
-		//client: client,
+		cfg:  cfg,
+		node: nodeInstance(),
 	}, nil
 }
 

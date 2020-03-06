@@ -16,6 +16,7 @@ const nodeContractAddr = "0xbaEEB7a3AF34a365ACAa1f8464A3374B58ac9889"
 const tokenContractAddr = "0x9064322CfeE623A447ba5aF0dA6AD3341c073535"
 
 type contract struct {
+	opts     *bind.TransactOpts
 	keystore string
 }
 
@@ -28,9 +29,9 @@ type Contracter interface {
 // DefaultGateway ...
 var DefaultGateway = "http://127.0.0.1:8545"
 
-// ContractLoader ...
-func ContractLoader() Contracter {
-	return &contract{keyStore}
+// Loader ...
+func Loader() Contracter {
+	return &contract{keystore: keyStore}
 }
 
 // contract: AccelerateNode init acceleratenode contract

@@ -3,6 +3,10 @@ package service
 import (
 	"context"
 	"fmt"
+	"os/exec"
+	"path/filepath"
+	"time"
+
 	"github.com/fatih/color"
 	"github.com/glvd/accipfs"
 	"github.com/glvd/accipfs/config"
@@ -15,9 +19,6 @@ import (
 	"github.com/multiformats/go-multiaddr"
 	manet "github.com/multiformats/go-multiaddr-net"
 	"go.uber.org/atomic"
-	"os/exec"
-	"path/filepath"
-	"time"
 )
 
 const ipfsPath = ".ipfs"
@@ -187,14 +188,14 @@ func (i *nodeClientIPFS) Run() {
 	//	fmt.Println("<IPFS节点状态已是最新>")
 	//	return
 	//}
-	cl := contract.ContractLoader()
+	cl := contract.Loader()
 	ac, auth, client := cl.AccelerateNode()
 	defer client.Close()
 
 	cPeers, err := ac.GetIpfsNodes(nil)
 	cNodes, err := ac.GetPublicIpfsNodes(nil)
-	cPeers = decodeNodes(cPeers)
-	cNodes = decodeNodes(cNodes)
+	cPeers = i.decodeNodes(cPeers)
+	cNodes = i.decodeNodes(cNodes)
 
 	fmt.Println("[adding ipfs nodes]", difference(peers, cPeers))
 	fmt.Println("[adding public ipfs nodes]", difference(publicNodes, cNodes))

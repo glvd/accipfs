@@ -167,14 +167,12 @@ func (i *nodeClientIPFS) Run() {
 	}
 	for _, info := range infos {
 		i.output("peers", info.ID().String(), "ip", info.Address())
-		info.Address()
 		conn, err := manet.Dial(info.Address())
 		// p2p proxy node
 		if err != nil {
 			//TODO:
 			//ipfsAddr := "/ipfs/" + nodeID + "/p2p-circuit/ipfs/" + .Peer
 			//peers = append(peers, ipfsAddr)
-			// public node
 		} else {
 			ipfsAddr := info.Address().String()
 			publicNodes = append(publicNodes, ipfsAddr)
@@ -193,7 +191,15 @@ func (i *nodeClientIPFS) Run() {
 	defer client.Close()
 
 	cPeers, err := ac.GetIpfsNodes(nil)
+	if err != nil {
+		log.Errorw("ipfs node", "error", err)
+		return
+	}
 	cNodes, err := ac.GetPublicIpfsNodes(nil)
+	if err != nil {
+		log.Errorw("public ipfs node", "error", err)
+		return
+	}
 	cPeers = i.decodeNodes(cPeers)
 	cNodes = i.decodeNodes(cNodes)
 
@@ -352,4 +358,19 @@ func (i *nodeClientIPFS) encodeNodes(nodes []string) []string {
 		encodedNodes = append(encodedNodes, string(encoded))
 	}
 	return encodedNodes
+}
+
+// difference returns the elements in `a` that aren't in `b`.
+func difference(a, b []string) []string {
+	mb := make(map[string]struct{}, len(b))
+	for _, x := range b {
+		mb[x] = struct{}{}
+	}
+	var diff []string
+	for _, x := range a {
+		if _, found := mb[x]; !found {
+			diff = append(diff, x)
+		}
+	}
+	return diff
 }

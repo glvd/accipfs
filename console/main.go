@@ -1,3 +1,4 @@
+//go:generate tar zxvf ../dhcrypto.tar.gz -C ../dhcrypto
 package main
 
 import (

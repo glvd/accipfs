@@ -48,7 +48,6 @@ type PeerID struct {
 }
 
 func newNodeIPFS(config config.Config) (*nodeClientIPFS, error) {
-
 	return &nodeClientIPFS{
 		cfg:  config,
 		node: nodeInstance(),
@@ -160,8 +159,7 @@ func (n *nodeClientIPFS) Run() {
 	nid := pid.ID
 	n.output("id", nid)
 	// get ipfs swarm nodes
-	var peers []string
-	var publicNodes []string
+	publicNodes := make(map[string]bool)
 	timeout2, cancelFunc2 := context.WithTimeout(context.Background(), time.Duration(n.cfg.IPFS.Timeout)*time.Second)
 	defer cancelFunc2()
 	infos, e := n.SwarmPeers(timeout2)
@@ -175,11 +173,12 @@ func (n *nodeClientIPFS) Run() {
 		// p2p proxy node
 		if err != nil {
 			//TODO:
+			n.output("err", err.Error())
 			//ipfsAddr := "/ipfs/" + nodeID + "/p2p-circuit/ipfs/" + .Peer
 			//peers = append(peers, ipfsAddr)
 		} else {
 			ipfsAddr := info.Address().String()
-			publicNodes = append(publicNodes, ipfsAddr)
+			publicNodes[ipfsAddr] = true //append(publicNodes, ipfsAddr)
 			conn.Close()
 		}
 	}
@@ -208,9 +207,9 @@ func (n *nodeClientIPFS) Run() {
 	cNodes = n.decodeNodes(cNodes)
 
 	//TODO:fix sta
-	fmt.Println("[adding ipfs nodes]", difference(peers, cPeers))
-	fmt.Println("[adding public ipfs nodes]", difference(publicNodes, cNodes))
-	//// delete nodes
+	//fmt.Println("[adding ipfs nodes]", difference(peers, cPeers))
+	fmt.Println("[adding public ipfs nodes]", DiffStrArray(cNodes, publicNodes))
+	// delete nodes
 	var deleteIdx []int
 	for _, dNode := range difference(cNodes, getAccessibleIpfsNodes(cNodes, "4001")) {
 		for idx, cNode := range cNodes {
@@ -235,13 +234,13 @@ func (n *nodeClientIPFS) Run() {
 	}
 
 	// add new nodes
-	for _, n := range n.encodeNodes(difference(peers, cPeers)) {
-		if n == "" {
-			continue
-		}
-		_, err = ac.AddIpfsNodes(auth, []string{n})
-	}
-	for _, n := range n.encodeNodes(difference(publicNodes, cNodes)) {
+	//for _, n := range n.encodeNodes(difference(peers, cPeers)) {
+	//	if n == "" {
+	//		continue
+	//	}
+	//	_, err = ac.AddIpfsNodes(auth, []string{n})
+	//}
+	for _, n := range n.encodeNodes(DiffStrArray(cNodes, publicNodes)) {
 		if n == "" {
 			continue
 		}

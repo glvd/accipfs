@@ -98,7 +98,7 @@ func Default() *Config {
 		},
 		IPFS: IPFSConfig{
 			Name:    "ipfs",
-			Addr:    "",
+			Addr:    "/ip4/127.0.0.1/tcp/5001",
 			Timeout: 30,
 		},
 		AWS: AWSConfig{},

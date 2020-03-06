@@ -6,7 +6,6 @@ import (
 	"github.com/glvd/accipfs/dhcrypto"
 	"net"
 	"os/exec"
-	"path/filepath"
 	"sort"
 	"strings"
 	"time"
@@ -117,7 +116,11 @@ func (n *nodeClientIPFS) PinRm(ctx context.Context, hash string) (e error) {
 
 // IsReady ...
 func (n *nodeClientIPFS) IsReady() bool {
-	api, e := httpapi.NewPathApi(filepath.Join(n.cfg.Path, ipfsPath))
+	ma, err := multiaddr.NewMultiaddr(n.cfg.IPFS.Addr)
+	if err != nil {
+		return false
+	}
+	api, e := httpapi.NewApi(ma)
 	if e != nil {
 		log.Errorw("new node ipfs", "error", e)
 		return false
@@ -146,7 +149,7 @@ func (n *nodeClientIPFS) Run() {
 		n.output("waiting for ready")
 		return
 	}
-	//// get self node info
+	// get self node info
 	timeout, cancelFunc := context.WithTimeout(context.Background(), time.Duration(n.cfg.IPFS.Timeout)*time.Second)
 	defer cancelFunc()
 	pid, e := n.ID(timeout)

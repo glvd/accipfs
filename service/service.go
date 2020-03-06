@@ -58,7 +58,7 @@ func (s *Service) Run() {
 	}
 	fmt.Println(outputHead, "[IPFS]", "run id", job)
 
-	job, err = s.cron.AddJob("0* * * * *", s.e)
+	job, err = s.cron.AddJob("0 * * * * *", s.e)
 	if err != nil {
 		panic(err)
 	}

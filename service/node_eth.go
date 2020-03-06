@@ -20,24 +20,24 @@ type nodeClientETH struct {
 	out    *color.Color
 }
 
-func (e *nodeClientETH) output(v ...interface{}) {
+func (n *nodeClientETH) output(v ...interface{}) {
 	fmt.Print(outputHead, " ")
 	fmt.Print("[ETH]", " ")
-	_, _ = e.out.Println(v...)
+	_, _ = n.out.Println(v...)
 }
 
 // Run ...
-func (e *nodeClientETH) Run() {
-	e.output("syncing node")
-	if e.lock.Load() {
-		e.output("eth node is already running")
+func (n *nodeClientETH) Run() {
+	n.output("syncing node")
+	if n.lock.Load() {
+		n.output("node is already running")
 		return
 	}
-	e.lock.Store(true)
-	defer e.lock.Store(false)
-	e.output("eth sync running")
-	if !e.IsReady() {
-		e.output("waiting for eth ready")
+	n.lock.Store(true)
+	defer n.lock.Store(false)
+	n.output("sync running")
+	if !n.IsReady() {
+		n.output("waiting for ready")
 		return
 	}
 }
@@ -69,22 +69,22 @@ func NodeServerETH(cfg config.Config) Node {
 }
 
 // IsReady ...
-func (e *nodeClientETH) IsReady() bool {
-	client, err := ethclient.Dial(e.cfg.ETH.Addr)
+func (n *nodeClientETH) IsReady() bool {
+	client, err := ethclient.Dial(n.cfg.ETH.Addr)
 	if err != nil {
 		log.Errorw("new node eth", "error", err)
 		return false
 	}
-	e.client = client
+	n.client = client
 	return true
 }
 
 // Node ...
-func (e *nodeClientETH) Node() {
+func (n *nodeClientETH) Node() {
 
 }
 
 // Token ...
-func (e *nodeClientETH) Token() {
+func (n *nodeClientETH) Token() {
 
 }

@@ -58,7 +58,7 @@ func newNodeIPFS(config config.Config) (*nodeClientIPFS, error) {
 }
 
 // SwarmConnect ...
-func (i *nodeClientIPFS) SwarmConnect(ctx context.Context, addr string) (e error) {
+func (n *nodeClientIPFS) SwarmConnect(ctx context.Context, addr string) (e error) {
 	ma, e := multiaddr.NewMultiaddr(addr)
 	if e != nil {
 		return e
@@ -67,31 +67,31 @@ func (i *nodeClientIPFS) SwarmConnect(ctx context.Context, addr string) (e error
 	if e != nil {
 		return e
 	}
-	e = i.api.Swarm().Connect(ctx, *info)
+	e = n.api.Swarm().Connect(ctx, *info)
 	if e != nil {
 		return e
 	}
 	return nil
 }
 
-func (i *nodeClientIPFS) connect() (e error) {
-	ma, err := multiaddr.NewMultiaddr(i.cfg.IPFS.Addr)
+func (n *nodeClientIPFS) connect() (e error) {
+	ma, err := multiaddr.NewMultiaddr(n.cfg.IPFS.Addr)
 	if err != nil {
 		return err
 	}
-	i.api, e = httpapi.NewApi(ma)
+	n.api, e = httpapi.NewApi(ma)
 	return
 }
 
 // SwarmPeers ...
-func (i *nodeClientIPFS) SwarmPeers(ctx context.Context) ([]iface.ConnectionInfo, error) {
-	return i.api.Swarm().Peers(ctx)
+func (n *nodeClientIPFS) SwarmPeers(ctx context.Context) ([]iface.ConnectionInfo, error) {
+	return n.api.Swarm().Peers(ctx)
 }
 
 // ID get self node info
-func (i *nodeClientIPFS) ID(ctx context.Context) (pid *PeerID, e error) {
+func (n *nodeClientIPFS) ID(ctx context.Context) (pid *PeerID, e error) {
 	pid = &PeerID{}
-	e = i.api.Request("id").Exec(ctx, pid)
+	e = n.api.Request("id").Exec(ctx, pid)
 	if e != nil {
 		return nil, e
 	}
@@ -99,76 +99,76 @@ func (i *nodeClientIPFS) ID(ctx context.Context) (pid *PeerID, e error) {
 }
 
 // PinAdd ...
-func (i *nodeClientIPFS) PinAdd(ctx context.Context, hash string) (e error) {
+func (n *nodeClientIPFS) PinAdd(ctx context.Context, hash string) (e error) {
 	p := path.New(hash)
-	return i.api.Pin().Add(ctx, p)
+	return n.api.Pin().Add(ctx, p)
 }
 
 // PinLS ...
-func (i *nodeClientIPFS) PinLS(ctx context.Context) (pins []iface.Pin, e error) {
-	return i.api.Pin().Ls(ctx)
+func (n *nodeClientIPFS) PinLS(ctx context.Context) (pins []iface.Pin, e error) {
+	return n.api.Pin().Ls(ctx)
 }
 
 // PinRm ...
-func (i *nodeClientIPFS) PinRm(ctx context.Context, hash string) (e error) {
+func (n *nodeClientIPFS) PinRm(ctx context.Context, hash string) (e error) {
 	p := path.New(hash)
-	return i.api.Pin().Rm(ctx, p)
+	return n.api.Pin().Rm(ctx, p)
 }
 
 // IsReady ...
-func (i *nodeClientIPFS) IsReady() bool {
-	api, e := httpapi.NewPathApi(filepath.Join(i.cfg.Path, ipfsPath))
+func (n *nodeClientIPFS) IsReady() bool {
+	api, e := httpapi.NewPathApi(filepath.Join(n.cfg.Path, ipfsPath))
 	if e != nil {
 		log.Errorw("new node ipfs", "error", e)
 		return false
 	}
-	i.api = api
+	n.api = api
 	return true
 }
 
-func (i *nodeClientIPFS) output(v ...interface{}) {
+func (n *nodeClientIPFS) output(v ...interface{}) {
 	fmt.Print(outputHead, " ")
 	fmt.Print("[IPFS]", " ")
-	_, _ = i.out.Println(v...)
+	_, _ = n.out.Println(v...)
 }
 
 // Run ...
-func (i *nodeClientIPFS) Run() {
-	i.output("syncing node")
-	if i.lock.Load() {
-		i.output("ipfs node is already running")
+func (n *nodeClientIPFS) Run() {
+	n.output("syncing node")
+	if n.lock.Load() {
+		n.output("node is already running")
 		return
 	}
-	i.lock.Store(true)
-	defer i.lock.Store(false)
-	i.output("ipfs sync running")
-	if !i.IsReady() {
-		i.output("waiting for ipfs ready")
+	n.lock.Store(true)
+	defer n.lock.Store(false)
+	n.output("sync running")
+	if !n.IsReady() {
+		n.output("waiting for ready")
 		return
 	}
 	//// get self node info
-	timeout, cancelFunc := context.WithTimeout(context.Background(), time.Duration(i.cfg.IPFS.Timeout)*time.Second)
+	timeout, cancelFunc := context.WithTimeout(context.Background(), time.Duration(n.cfg.IPFS.Timeout)*time.Second)
 	defer cancelFunc()
-	pid, e := i.ID(timeout)
+	pid, e := n.ID(timeout)
 	if e != nil {
 		log.Errorw("run get id", "tag", outputHead, "error", e)
 		return
 	}
 
 	nid := pid.ID
-	i.output("id", nid)
+	n.output("id", nid)
 	// get ipfs swarm nodes
 	var peers []string
 	var publicNodes []string
-	timeout2, cancelFunc2 := context.WithTimeout(context.Background(), time.Duration(i.cfg.IPFS.Timeout)*time.Second)
+	timeout2, cancelFunc2 := context.WithTimeout(context.Background(), time.Duration(n.cfg.IPFS.Timeout)*time.Second)
 	defer cancelFunc2()
-	infos, e := i.SwarmPeers(timeout2)
+	infos, e := n.SwarmPeers(timeout2)
 	if e != nil {
 		log.Errorw(outputHead, "tag", "run get peers", "error", e)
 		return
 	}
 	for _, info := range infos {
-		i.output("peers", info.ID().String(), "ip", info.Address())
+		n.output("peers", info.ID().String(), "ip", info.Address())
 		conn, err := manet.Dial(info.Address())
 		// p2p proxy node
 		if err != nil {
@@ -181,8 +181,8 @@ func (i *nodeClientIPFS) Run() {
 			conn.Close()
 		}
 	}
-	//i.output("[当前IPFS总节点数]", len(peers)+len(publicNodes))
-	i.output("exists IPFS nodes:", len(publicNodes))
+	//n.output("[当前IPFS总节点数]", len(peers)+len(publicNodes))
+	n.output("exists IPFS nodes:", len(publicNodes))
 	// get nodes info
 	//if len(peers) == 0 {
 	//	fmt.Println("<IPFS节点状态已是最新>")
@@ -202,8 +202,8 @@ func (i *nodeClientIPFS) Run() {
 		log.Errorw("public ipfs node", "error", err)
 		return
 	}
-	cPeers = i.decodeNodes(cPeers)
-	cNodes = i.decodeNodes(cNodes)
+	cPeers = n.decodeNodes(cPeers)
+	cNodes = n.decodeNodes(cNodes)
 
 	//TODO:fix sta
 	fmt.Println("[adding ipfs nodes]", difference(peers, cPeers))
@@ -233,13 +233,13 @@ func (i *nodeClientIPFS) Run() {
 	}
 
 	// add new nodes
-	for _, n := range i.encodeNodes(difference(peers, cPeers)) {
+	for _, n := range n.encodeNodes(difference(peers, cPeers)) {
 		if n == "" {
 			continue
 		}
 		_, err = ac.AddIpfsNodes(auth, []string{n})
 	}
-	for _, n := range i.encodeNodes(difference(publicNodes, cNodes)) {
+	for _, n := range n.encodeNodes(difference(publicNodes, cNodes)) {
 		if n == "" {
 			continue
 		}
@@ -251,7 +251,7 @@ func (i *nodeClientIPFS) Run() {
 	} else {
 		fmt.Println("[添加节点成功] ")
 	}
-	i.output("<IPFS同步完成>")
+	n.output("<IPFS同步完成>")
 	return
 }
 
@@ -333,10 +333,10 @@ func StringToAddr(s string) (a *Address, e error) {
 	//return b.Bytes(), nil
 }
 
-func (i *nodeClientIPFS) decodeNodes(nodes []string) []string {
+func (n *nodeClientIPFS) decodeNodes(nodes []string) []string {
 	// init contract
 	var decodeNodes []string
-	decoder := dhcrypto.NewCipherDecode([]byte(i.cfg.PrivateKey), dateKey)
+	decoder := dhcrypto.NewCipherDecode([]byte(n.cfg.PrivateKey), dateKey)
 	if len(nodes) == 0 {
 		return decodeNodes
 	}
@@ -350,9 +350,9 @@ func (i *nodeClientIPFS) decodeNodes(nodes []string) []string {
 	return decodeNodes
 }
 
-func (i *nodeClientIPFS) encodeNodes(nodes []string) []string {
+func (n *nodeClientIPFS) encodeNodes(nodes []string) []string {
 	var encodedNodes []string
-	encoder := dhcrypto.NewCipherEncoder([]byte(i.cfg.PublicKey), 10, dateKey)
+	encoder := dhcrypto.NewCipherEncoder([]byte(n.cfg.PublicKey), 10, dateKey)
 	for _, node := range nodes {
 		encoded, err := encoder.Encode(node)
 		if err != nil {

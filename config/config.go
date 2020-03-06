@@ -17,10 +17,12 @@ type IPFSConfig struct {
 
 // ETHConfig ...
 type ETHConfig struct {
-	Name string
-	Addr string
-	Key  string
-	Pass string
+	Name      string //bin name
+	Addr      string //eth rpc address
+	Key       string //eth key
+	Pass      string //eth key pass
+	NodeAddr  string //node contract address
+	TokenAddr string //token contract address
 }
 
 // AWSConfig ...

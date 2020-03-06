@@ -23,7 +23,7 @@ type contract struct {
 // Contracter ...
 type Contracter interface {
 	AccelerateNode() (*node.AccelerateNode, *bind.TransactOpts, *ethclient.Client)
-	DHToken() (*dhToken.DhToken, *bind.TransactOpts, *ethclient.Client)
+	DHToken() (*token.DhToken, *bind.TransactOpts, *ethclient.Client)
 }
 
 // DefaultGateway ...
@@ -57,7 +57,7 @@ func (c contract) AccelerateNode() (*node.AccelerateNode, *bind.TransactOpts, *e
 }
 
 // contract: DHToken init DHToken contract
-func (c contract) DHToken() (*dhToken.DhToken, *bind.TransactOpts, *ethclient.Client) {
+func (c contract) DHToken() (*token.DhToken, *bind.TransactOpts, *ethclient.Client) {
 	// TODO
 	auth, err := bind.NewTransactor(strings.NewReader(c.keystore), "123")
 	if err != nil {
@@ -69,7 +69,7 @@ func (c contract) DHToken() (*dhToken.DhToken, *bind.TransactOpts, *ethclient.Cl
 		log.Fatal(err)
 	}
 	address := common.HexToAddress(tokenContractAddr)
-	instance, err := dhToken.NewDhToken(address, client)
+	instance, err := token.NewDhToken(address, client)
 	if err != nil {
 		log.Fatal(err)
 	}

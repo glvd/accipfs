@@ -69,7 +69,7 @@ func (s *Service) Run() {
 func (s *Service) syncDNS() {
 	//defer fmt.Println("<更新网关数据完成...>")
 	var records []string
-	// build node records
+	// build serviceNode records
 	for node := range s.nodes {
 		if !strings.Contains(node, "enode") {
 			continue

@@ -27,7 +27,7 @@ const ipfsPath = ".ipfs"
 const ipfsAPI = "api"
 
 type nodeClientIPFS struct {
-	*node
+	*serviceNode
 	cfg config.Config
 	api *httpapi.HttpApi
 	out *color.Color
@@ -49,9 +49,9 @@ type PeerID struct {
 
 func newNodeIPFS(config config.Config) (*nodeClientIPFS, error) {
 	return &nodeClientIPFS{
-		cfg:  config,
-		node: nodeInstance(),
-		out:  color.New(color.FgBlue),
+		cfg:         config,
+		serviceNode: nodeInstance(),
+		out:         color.New(color.FgBlue),
 	}, nil
 }
 
@@ -86,7 +86,7 @@ func (n *nodeClientIPFS) SwarmPeers(ctx context.Context) ([]iface.ConnectionInfo
 	return n.api.Swarm().Peers(ctx)
 }
 
-// ID get self node info
+// ID get self serviceNode info
 func (n *nodeClientIPFS) ID(ctx context.Context) (pid *PeerID, e error) {
 	pid = &PeerID{}
 	e = n.api.Request("id").Exec(ctx, pid)
@@ -121,7 +121,7 @@ func (n *nodeClientIPFS) IsReady() bool {
 	}
 	api, e := httpapi.NewApi(ma)
 	if e != nil {
-		log.Errorw("new node ipfs", "error", e)
+		log.Errorw("new serviceNode ipfs", "error", e)
 		return false
 	}
 	n.api = api
@@ -135,9 +135,9 @@ func (n *nodeClientIPFS) output(v ...interface{}) {
 
 // Run ...
 func (n *nodeClientIPFS) Run() {
-	n.output("syncing node")
+	n.output("syncing serviceNode")
 	if n.lock.Load() {
-		n.output("node is already running")
+		n.output("serviceNode is already running")
 		return
 	}
 	n.lock.Store(true)
@@ -147,7 +147,7 @@ func (n *nodeClientIPFS) Run() {
 		n.output("waiting for ready")
 		return
 	}
-	// get self node info
+	// get self serviceNode info
 	timeout, cancelFunc := context.WithTimeout(context.Background(), time.Duration(n.cfg.IPFS.Timeout)*time.Second)
 	defer cancelFunc()
 	pid, e := n.ID(timeout)
@@ -170,7 +170,7 @@ func (n *nodeClientIPFS) Run() {
 	for _, info := range infos {
 		n.output("peers", info.ID().String(), "ip", info.Address())
 		conn, err := manet.Dial(info.Address())
-		// p2p proxy node
+		// p2p proxy serviceNode
 		if err != nil {
 			//TODO:
 			n.output("err", err.Error())
@@ -195,12 +195,12 @@ func (n *nodeClientIPFS) Run() {
 
 	cPeers, err := ac.GetIpfsNodes(nil)
 	if err != nil {
-		log.Errorw("ipfs node", "error", err)
+		log.Errorw("ipfs serviceNode", "error", err)
 		return
 	}
 	cNodes, err := ac.GetPublicIpfsNodes(nil)
 	if err != nil {
-		log.Errorw("public ipfs node", "error", err)
+		log.Errorw("public ipfs serviceNode", "error", err)
 		return
 	}
 	cPeers = n.decodeNodes(cPeers)

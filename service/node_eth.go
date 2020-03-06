@@ -2,10 +2,13 @@ package service
 
 import (
 	"fmt"
+	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/fatih/color"
 	"github.com/glvd/accipfs"
 	"github.com/glvd/accipfs/config"
+	"github.com/glvd/accipfs/contract/node"
+	"github.com/glvd/accipfs/contract/token"
 	"github.com/goextension/log"
 	"os/exec"
 )
@@ -14,7 +17,7 @@ const ethPath = ".ethereum"
 const endPoint = "geth.ipc"
 
 type nodeClientETH struct {
-	*node
+	*serviceNode
 	cfg    config.Config
 	client *ethclient.Client
 	out    *color.Color
@@ -27,9 +30,9 @@ func (n *nodeClientETH) output(v ...interface{}) {
 
 // Run ...
 func (n *nodeClientETH) Run() {
-	n.output("syncing node")
+	n.output("syncing serviceNode")
 	if n.lock.Load() {
-		n.output("node is already running")
+		n.output("serviceNode is already running")
 		return
 	}
 	n.lock.Store(true)
@@ -44,9 +47,9 @@ func (n *nodeClientETH) Run() {
 func newETH(cfg config.Config) (*nodeClientETH, error) {
 
 	return &nodeClientETH{
-		cfg:  cfg,
-		node: nodeInstance(),
-		out:  color.New(color.FgRed),
+		cfg:         cfg,
+		serviceNode: nodeInstance(),
+		out:         color.New(color.FgRed),
 	}, nil
 }
 
@@ -71,7 +74,7 @@ func NodeServerETH(cfg config.Config) Node {
 func (n *nodeClientETH) IsReady() bool {
 	client, err := ethclient.Dial(n.cfg.ETH.Addr)
 	if err != nil {
-		log.Errorw("new node eth", "error", err)
+		log.Errorw("new serviceNode eth", "error", err)
 		return false
 	}
 	n.client = client
@@ -79,11 +82,13 @@ func (n *nodeClientETH) IsReady() bool {
 }
 
 // Node ...
-func (n *nodeClientETH) Node() {
-
+func (n *nodeClientETH) Node() (*node.AccelerateNode, error) {
+	address := common.HexToAddress(n.cfg.ETH.NodeAddr)
+	return node.NewAccelerateNode(address, n.client)
 }
 
 // Token ...
-func (n *nodeClientETH) Token() {
-
+func (n *nodeClientETH) Token() (*token.DhToken, error) {
+	address := common.HexToAddress(n.cfg.ETH.TokenAddr)
+	return token.NewDhToken(address, n.client)
 }

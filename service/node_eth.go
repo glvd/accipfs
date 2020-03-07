@@ -3,6 +3,7 @@ package service
 import (
 	"fmt"
 	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/eth"
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/fatih/color"
 	"github.com/glvd/accipfs"
@@ -11,6 +12,8 @@ import (
 	"github.com/glvd/accipfs/contract/token"
 	"github.com/goextension/log"
 	"os/exec"
+	"sort"
+	"strings"
 )
 
 const ethPath = ".ethereum"
@@ -42,6 +45,130 @@ func (n *nodeClientETH) Run() {
 		n.output("waiting for ready")
 		return
 	}
+	//fmt.Println("<同步ETH节点中...>")
+	//if !ethWorker.CheckClientReady() {
+	//	fmt.Println("<waiting for eth ready>")
+	//	return
+	//}
+	//
+	//// get self node info
+	//nodeInfo, err := eth.NodeInfo()
+	//if err != nil {
+	//	fmt.Println("[获取本节点信息失败] ", err.Error())
+	//}
+	//node := nodeInfo.Enode
+	//jsonString, _ := json.Marshal(nodeInfo.Protocols)
+	//var nodeProtocal EthProtocal
+	//json.Unmarshal([]byte(jsonString), &nodeProtocal)
+	//ip := os.Getenv("IP")
+	//node = strings.Split(node, "@")[0] + "@" + ip + ":30303"
+	//
+	//// get active nodes
+	//var activePeers []string
+	//peers, err := eth.Peers()
+	//if err != nil {
+	//	fmt.Println("[获取活跃ETH节点失败] ", err.Error())
+	//} else {
+	//	fmt.Println("[当前活跃ETH节点数] ", len(activePeers))
+	//}
+	//for _, peer := range peers {
+	//	jsStr, _ := json.Marshal(peer.Protocols)
+	//	var peerProtocal EthProtocal
+	//	json.Unmarshal([]byte(jsStr), &peerProtocal)
+	//	fmt.Println("peer diffculty", peerProtocal.Eth.Difficulty)
+	//	// check if peers had enough blocks
+	//	if float64(peerProtocal.Eth.Difficulty)/float64(nodeProtocal.Eth.Difficulty) > 0.9 {
+	//		activePeers = append(activePeers, peer.Enode)
+	//	}
+	//}
+	//
+	//// init contract
+	//cl := eth.ContractLoader()
+	//ac, auth, client := cl.AccelerateNode()
+	//defer client.Close()
+	//
+	//// get decoded contract nodes
+	//cPeers, err := ac.GetEthNodes(nil)
+	//if err != nil {
+	//	fmt.Println("[获取合约节点失败]", err.Error())
+	//} else {
+	//	fmt.Println("[合约已有节点数]", len(cPeers))
+	//}
+	//cPeers = decodeNodes(cPeers)
+	//fmt.Println("[cPeers]", cPeers)
+	//// get decoded contract signer nodes
+	//cNodes, err := ac.GetSignerNodes(nil)
+	//if err != nil {
+	//	fmt.Println("[获取合约主节点失败] ", err.Error())
+	//} else {
+	//	fmt.Println("[合约已有主节点数]", len(cNodes))
+	//}
+	//cNodes = decodeNodes(cNodes)
+	//fmt.Println("[cNodes]", cNodes)
+	//// filter public network accessible nodes
+	//accessibleNodes := getAccessibleEthNodes(activePeers, "30303")
+	//// cDifference := difference(cPeers, accessibleNodes)
+	//// sync nodes
+	//newSignerNodes := difference([]string{node}, cNodes)
+	//newAccNodes := difference(accessibleNodes, cPeers)
+	//// node to be deleted
+	//deleteNodes := difference(cPeers, getAccessibleEthNodes(cPeers, "30303"))
+	//var deleteIdx []int
+	//for _, dNode := range deleteNodes {
+	//	for idx, cNode := range cPeers {
+	//		if cNode == dNode {
+	//			deleteIdx = append(deleteIdx, idx)
+	//		}
+	//	}
+	//}
+	//
+	//// delete rest node
+	//if len(deleteIdx) > 0 {
+	//	var err error
+	//	sort.Sort(sort.Reverse(sort.IntSlice(deleteIdx)))
+	//	for _, idx := range deleteIdx {
+	//		_, err = ac.DeleteEthNodes(auth, uint32(idx))
+	//	}
+	//
+	//	if err != nil {
+	//		fmt.Println("<删除失效节点失败>", err.Error())
+	//	} else {
+	//		fmt.Println("[删除失效节点成功]")
+	//	}
+	//}
+	//
+	//// crypto node info && add to contract
+	//if len(newAccNodes) > 0 {
+	//	var err error
+	//	fmt.Println("[adding node]", newAccNodes)
+	//	for _, n := range encodeNodes(newAccNodes) {
+	//		_, err = ac.AddEthNodes(auth, []string{n})
+	//	}
+	//	if err != nil {
+	//		fmt.Println("[add node failed]", err.Error())
+	//	} else {
+	//		fmt.Println("[add node success]")
+	//	}
+	//	// update gateway info
+	//} else {
+	//	fmt.Println("[已经是最新节点数据]")
+	//}
+	//
+	//// add signer nodes
+	//if len(newSignerNodes) > 0 {
+	//	fmt.Println("[adding signer node]", newSignerNodes)
+	//	_, err := ac.AddSignerNodes(auth, encodeNodes(newSignerNodes))
+	//	if err != nil {
+	//		fmt.Println("<添加主节点失败>", err.Error())
+	//	} else {
+	//		fmt.Println("[添加主节点成功]")
+	//	}
+	//}
+	//
+	//DNSSync(difference(accessibleNodes, cNodes))
+	//
+	//fmt.Println("<同步ETH节点完成>")
+	return
 }
 
 func newETH(cfg config.Config) (*nodeClientETH, error) {

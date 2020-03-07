@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/eth"
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/ethereum/go-ethereum/rpc"
 	"github.com/fatih/color"
@@ -91,14 +90,18 @@ func (n *nodeClientETH) Run() {
 	}
 
 	// get self node info
-	nodeInfo, err := eth.NodeInfo()
+	nodeInfo, err := n.ETHNodeInfo(context.Background())
 	if err != nil {
-		fmt.Println("[获取本节点信息失败] ", err.Error())
+		log.Errorw("get eth node", "error", err.Error(), "node", nodeInfo)
+		return
 	}
 	//node := nodeInfo.Enode
 	//jsonString, _ := json.Marshal(nodeInfo.Protocols)
 	//var nodeProtocal EthProtocal
-	//json.Unmarshal([]byte(jsonString), &nodeProtocal)
+	//err = json.Unmarshal(jsonString, &nodeProtocal)
+	//if err != nil {
+	//	return
+	//}
 	//ip := os.Getenv("IP")
 	//node = strings.Split(node, "@")[0] + "@" + ip + ":30303"
 	//

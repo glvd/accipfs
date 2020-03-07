@@ -94,16 +94,18 @@ func Default() *Config {
 	return &Config{
 		Path: "data",
 		ETH: ETHConfig{
-			Name: "eth",
-			Key:  "",
-			Pass: "",
+			Name:      "eth",
+			Addr:      "http://127.0.0.1:8545",
+			Key:       "",
+			Pass:      "",
+			NodeAddr:  "",
+			TokenAddr: "",
 		},
 		IPFS: IPFSConfig{
 			Name:    "ipfs",
 			Addr:    "/ip4/127.0.0.1/tcp/5001",
 			Timeout: 30,
 		},
-		AWS: AWSConfig{},
 	}
 }
 

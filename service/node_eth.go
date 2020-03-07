@@ -1,9 +1,12 @@
 package service
 
 import (
+	"context"
 	"fmt"
 	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/eth"
 	"github.com/ethereum/go-ethereum/ethclient"
+	"github.com/ethereum/go-ethereum/rpc"
 	"github.com/fatih/color"
 	"github.com/glvd/accipfs"
 	"github.com/glvd/accipfs/config"
@@ -21,6 +24,50 @@ type nodeClientETH struct {
 	cfg    config.Config
 	client *ethclient.Client
 	out    *color.Color
+}
+
+// Network ...
+type Network struct {
+	Inbound       bool
+	LocalAddress  string
+	RemoteAddress string
+	Static        bool
+	Trusted       bool
+}
+
+// Peer ...
+type Peer struct {
+	Caps      []string
+	ID        string
+	Name      string
+	Enode     string
+	Network   Network
+	Protocols interface{}
+}
+
+// Result ...
+type Result struct {
+	ID      string
+	Jsonrpc string
+	Result  []Peer
+}
+
+// Node self node info
+type ETHNode struct {
+	ID         string
+	Enode      string
+	IP         string
+	Name       string
+	ListenAddr string
+	Ports      interface{}
+	Protocols  interface{}
+}
+
+// NodeResult return node info
+type ETHNodeResult struct {
+	ID      string
+	Jsonrpc string
+	Result  Node
 }
 
 func (n *nodeClientETH) output(v ...interface{}) {
@@ -42,17 +89,12 @@ func (n *nodeClientETH) Run() {
 		n.output("waiting for ready")
 		return
 	}
-	//fmt.Println("<同步ETH节点中...>")
-	//if !ethWorker.CheckClientReady() {
-	//	fmt.Println("<waiting for eth ready>")
-	//	return
-	//}
-	//
-	//// get self node info
-	//nodeInfo, err := eth.NodeInfo()
-	//if err != nil {
-	//	fmt.Println("[获取本节点信息失败] ", err.Error())
-	//}
+
+	// get self node info
+	nodeInfo, err := eth.NodeInfo()
+	if err != nil {
+		fmt.Println("[获取本节点信息失败] ", err.Error())
+	}
 	//node := nodeInfo.Enode
 	//jsonString, _ := json.Marshal(nodeInfo.Protocols)
 	//var nodeProtocal EthProtocal
@@ -215,4 +257,21 @@ func (n *nodeClientETH) Node() (*node.AccelerateNode, error) {
 func (n *nodeClientETH) Token() (*token.DhToken, error) {
 	address := common.HexToAddress(n.cfg.ETH.TokenAddr)
 	return token.NewDhToken(address, n.client)
+}
+
+// NodeInfo ...
+func (n *nodeClientETH) ETHNodeInfo(ctx context.Context) (enode *ETHNode, e error) {
+	var result ETHNode
+	ctx, cancel := context.WithCancel(ctx)
+	defer cancel()
+	cli, e := rpc.Dial(n.cfg.ETH.Addr)
+	if e != nil {
+		return nil, e
+	}
+	defer cli.Close()
+	e = cli.Call(&result, "admin_nodeInfo")
+	if e != nil {
+		return nil, e
+	}
+	return &result, nil
 }

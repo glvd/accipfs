@@ -51,7 +51,7 @@ type Result struct {
 	Result  []Peer
 }
 
-// Node self node info
+// ETHNode ...
 type ETHNode struct {
 	ID         string
 	Enode      string
@@ -62,7 +62,7 @@ type ETHNode struct {
 	Protocols  interface{}
 }
 
-// NodeResult return node info
+// ETHNodeResult ...
 type ETHNodeResult struct {
 	ID      string
 	Jsonrpc string

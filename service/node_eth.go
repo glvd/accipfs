@@ -3,7 +3,6 @@ package service
 import (
 	"fmt"
 	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/eth"
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/fatih/color"
 	"github.com/glvd/accipfs"
@@ -12,8 +11,6 @@ import (
 	"github.com/glvd/accipfs/contract/token"
 	"github.com/goextension/log"
 	"os/exec"
-	"sort"
-	"strings"
 )
 
 const ethPath = ".ethereum"

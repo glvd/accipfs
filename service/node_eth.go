@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/ethclient"
@@ -69,6 +70,18 @@ type ETHNodeResult struct {
 	Result  Node
 }
 
+// ETHProtocolInfo ...
+type ETHProtocolInfo struct {
+	Difficulty int    `json:"difficulty"`
+	Head       string `json:"head"`
+	Version    int    `json:"version"`
+}
+
+// ETHProtocol ...
+type ETHProtocol struct {
+	Eth ETHProtocolInfo `json:"eth"`
+}
+
 func (n *nodeClientETH) output(v ...interface{}) {
 	v = append([]interface{}{outputHead, "[ETH]"}, v...)
 	fmt.Println(v...)
@@ -95,9 +108,9 @@ func (n *nodeClientETH) Run() {
 		log.Errorw("get eth node", "error", err.Error(), "node", nodeInfo)
 		return
 	}
-	//node := nodeInfo.Enode
-	//jsonString, _ := json.Marshal(nodeInfo.Protocols)
-	//var nodeProtocal EthProtocal
+	node := nodeInfo.Enode
+	jsonString, _ := json.Marshal(nodeInfo.Protocols)
+	var nodeProtocal ETHProtocol
 	//err = json.Unmarshal(jsonString, &nodeProtocal)
 	//if err != nil {
 	//	return
@@ -115,7 +128,7 @@ func (n *nodeClientETH) Run() {
 	//}
 	//for _, peer := range peers {
 	//	jsStr, _ := json.Marshal(peer.Protocols)
-	//	var peerProtocal EthProtocal
+	//	var peerProtocal ETHProtocol
 	//	json.Unmarshal([]byte(jsStr), &peerProtocal)
 	//	fmt.Println("peer diffculty", peerProtocal.Eth.Difficulty)
 	//	// check if peers had enough blocks

@@ -108,13 +108,13 @@ func (n *nodeClientETH) Run() {
 		log.Errorw("get eth node", "error", err.Error(), "node", nodeInfo)
 		return
 	}
-	node := nodeInfo.Enode
+	//node := nodeInfo.Enode
 	jsonString, _ := json.Marshal(nodeInfo.Protocols)
 	var nodeProtocal ETHProtocol
-	//err = json.Unmarshal(jsonString, &nodeProtocal)
-	//if err != nil {
-	//	return
-	//}
+	err = json.Unmarshal(jsonString, &nodeProtocal)
+	if err != nil {
+		return
+	}
 	//ip := os.Getenv("IP")
 	//node = strings.Split(node, "@")[0] + "@" + ip + ":30303"
 	//

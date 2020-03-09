@@ -101,9 +101,10 @@ func (n *nodeClientETH) Run() {
 		n.output("waiting for ready")
 		return
 	}
+	ctx := context.TODO()
 
 	// get self node info
-	nodeInfo, err := n.ETHNodeInfo(context.Background())
+	nodeInfo, err := n.ETHNodeInfo(ctx)
 	if err != nil {
 		log.Errorw("get eth node", "error", err.Error(), "node", nodeInfo)
 		return
@@ -120,12 +121,12 @@ func (n *nodeClientETH) Run() {
 	//
 	//// get active nodes
 	//var activePeers []string
-	peers, err := n.Peers()
-	//if err != nil {
-	//	fmt.Println("[获取活跃ETH节点失败] ", err.Error())
-	//} else {
-	//	fmt.Println("[当前活跃ETH节点数] ", len(activePeers))
-	//}
+	peers, err := n.Peers(ctx)
+	if err != nil {
+		n.output("get active eth node failed: ", err.Error())
+	} else {
+		n.output("get active eth nodes:  ", len(peers))
+	}
 	//for _, peer := range peers {
 	//	jsStr, _ := json.Marshal(peer.Protocols)
 	//	var peerProtocal ETHProtocol

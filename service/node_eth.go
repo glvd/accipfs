@@ -123,18 +123,21 @@ func (n *nodeClientETH) Run() {
 	//var activePeers []string
 	peers, err := n.AllPeers(ctx)
 	if err != nil {
-		n.output("get active eth node failed: ", err.Error())
+		n.output("get active eth node failed", err.Error())
 	} else {
-		n.output("get active eth nodes:  ", len(peers))
+		n.output("get active eth nodes", len(peers))
 	}
 	for _, peer := range peers {
 		jsStr, _ := json.Marshal(peer.Protocols)
-		var peerProtocal ETHProtocol
-		json.Unmarshal([]byte(jsStr), &peerProtocal)
-		fmt.Println("peer diffculty", peerProtocal.Eth.Difficulty)
+		var peerProtocol ETHProtocol
+		err := json.Unmarshal(jsStr, &peerProtocol)
+		if err != nil {
+			return
+		}
+		fmt.Println("peer difficulty", peerProtocol.Eth.Difficulty)
 		// check if peers had enough blocks
-		if float64(peerProtocal.Eth.Difficulty)/float64(nodeProtocal.Eth.Difficulty) > 0.9 {
-			activePeers = append(activePeers, peer.Enode)
+		if float64(peerProtocol.Eth.Difficulty)/float64(nodeProtocal.Eth.Difficulty) > 0.9 {
+			//activePeers = append(activePeers, peer.Enode)
 		}
 	}
 	//

@@ -50,6 +50,12 @@ var _config *Config
 // DefaultGateway ...
 var DefaultGateway = "http://127.0.0.1:8545"
 
+// DefaultNodeContractAddr ...
+var DefaultNodeContractAddr = "0xbaEEB7a3AF34a365ACAa1f8464A3374B58ac9889"
+
+// DefaultTokenContractAddr ...
+var DefaultTokenContractAddr = "0x9064322CfeE623A447ba5aF0dA6AD3341c073535"
+
 // Initialize ...
 func Initialize() {
 	cfg, err := LoadConfig()
@@ -101,8 +107,8 @@ func Default() *Config {
 			Addr:      DefaultGateway,
 			Key:       "",
 			Pass:      "",
-			NodeAddr:  "",
-			TokenAddr: "",
+			NodeAddr:  DefaultNodeContractAddr,
+			TokenAddr: DefaultTokenContractAddr,
 		},
 		IPFS: IPFSConfig{
 			Name:    "ipfs",

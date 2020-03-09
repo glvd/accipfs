@@ -153,9 +153,9 @@ func (n *nodeClientETH) Run() {
 		if e != nil {
 			n.output("get contract node failed", err.Error())
 			return e
-		} else {
-			n.output("get contract nodes", len(nodes))
 		}
+		n.output("get contract nodes", len(nodes))
+
 		nodes = decodeNodes(n.cfg, nodes)
 		//fmt.Println("[cPeers]", cPeers)
 		// get decoded contract signer nodes
@@ -163,11 +163,11 @@ func (n *nodeClientETH) Run() {
 		if e != nil {
 			n.output("get contract node failed", err.Error())
 			return e
-		} else {
-			n.output("get contract nodes", len(masterNodes))
 		}
+		n.output("get contract nodes", len(masterNodes))
+
 		masterNodes = decodeNodes(n.cfg, masterNodes)
-		//// filter public network accessible nodes
+		// filter public network accessible nodes
 		//accessibleNodes := getAccessibleEthNodes(activePeers, "30303")
 		//// cDifference := difference(cPeers, accessibleNodes)
 		//// sync nodes

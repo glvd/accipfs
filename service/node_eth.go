@@ -121,22 +121,22 @@ func (n *nodeClientETH) Run() {
 	//
 	//// get active nodes
 	//var activePeers []string
-	peers, err := n.Peers(ctx)
+	peers, err := n.AllPeers(ctx)
 	if err != nil {
 		n.output("get active eth node failed: ", err.Error())
 	} else {
 		n.output("get active eth nodes:  ", len(peers))
 	}
-	//for _, peer := range peers {
-	//	jsStr, _ := json.Marshal(peer.Protocols)
-	//	var peerProtocal ETHProtocol
-	//	json.Unmarshal([]byte(jsStr), &peerProtocal)
-	//	fmt.Println("peer diffculty", peerProtocal.Eth.Difficulty)
-	//	// check if peers had enough blocks
-	//	if float64(peerProtocal.Eth.Difficulty)/float64(nodeProtocal.Eth.Difficulty) > 0.9 {
-	//		activePeers = append(activePeers, peer.Enode)
-	//	}
-	//}
+	for _, peer := range peers {
+		jsStr, _ := json.Marshal(peer.Protocols)
+		var peerProtocal ETHProtocol
+		json.Unmarshal([]byte(jsStr), &peerProtocal)
+		fmt.Println("peer diffculty", peerProtocal.Eth.Difficulty)
+		// check if peers had enough blocks
+		if float64(peerProtocal.Eth.Difficulty)/float64(nodeProtocal.Eth.Difficulty) > 0.9 {
+			activePeers = append(activePeers, peer.Enode)
+		}
+	}
 	//
 	//// init contract
 	//cl := eth.ContractLoader()
@@ -294,27 +294,20 @@ func (n *nodeClientETH) ETHNodeInfo(ctx context.Context) (enode *ETHNode, e erro
 }
 
 // Peers ...
-func (n *nodeClientETH) Peers(ctx context.Context) ([]Peer, error) {
+func (n *nodeClientETH) AllPeers(ctx context.Context) ([]Peer, error) {
 	var peers []Peer
-	var res []Peer
 	ctx, cancel := context.WithCancel(ctx)
 	defer cancel()
 	client, err := rpc.Dial(n.cfg.ETH.Addr)
 	if err != nil {
-		return res, err
+		return nil, err
 	}
 	defer client.Close()
 
 	err = client.Call(&peers, "admin_peers")
 	if err != nil {
-		return nil, nil
+		return nil, err
 	}
-	for _, peer := range peers {
-		v, _ := peer.Protocols.(map[string]interface{})
-		_, ok := v["eth"].(string)
-		if ok == false {
-			res = append(res, peer)
-		}
-	}
-	return res, nil
+
+	return peers, nil
 }

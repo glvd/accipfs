@@ -120,7 +120,7 @@ func (n *nodeClientETH) Run() {
 	//
 	//// get active nodes
 	//var activePeers []string
-	//peers, err := eth.Peers()
+	peers, err := n.Peers()
 	//if err != nil {
 	//	fmt.Println("[获取活跃ETH节点失败] ", err.Error())
 	//} else {
@@ -290,4 +290,30 @@ func (n *nodeClientETH) ETHNodeInfo(ctx context.Context) (enode *ETHNode, e erro
 		return nil, e
 	}
 	return &result, nil
+}
+
+// Peers ...
+func (n *nodeClientETH) Peers(ctx context.Context) ([]Peer, error) {
+	var peers []Peer
+	var res []Peer
+	ctx, cancel := context.WithCancel(ctx)
+	defer cancel()
+	client, err := rpc.Dial(n.cfg.ETH.Addr)
+	if err != nil {
+		return res, err
+	}
+	defer client.Close()
+
+	err = client.Call(&peers, "admin_peers")
+	if err != nil {
+		return nil, nil
+	}
+	for _, peer := range peers {
+		v, _ := peer.Protocols.(map[string]interface{})
+		_, ok := v["eth"].(string)
+		if ok == false {
+			res = append(res, peer)
+		}
+	}
+	return res, nil
 }

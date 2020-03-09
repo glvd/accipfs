@@ -25,9 +25,15 @@ type instance struct {
 
 // Contractor ...
 type Contractor interface {
-	AccelerateNode() (*node.AccelerateNode, *bind.TransactOpts, *ethclient.Client)
-	DHToken() (*token.DhToken, *bind.TransactOpts, *ethclient.Client)
+	Node() (*node.AccelerateNode, *bind.TransactOpts, *ethclient.Client)
+	Token() (*token.DhToken, *bind.TransactOpts, *ethclient.Client)
 }
+
+// NodeCall ...
+type NodeCall func(node *node.AccelerateNode, opts *bind.TransactOpts)
+
+// TokenCall ...
+type TokenCall func(token *token.DhToken, opts *bind.TransactOpts)
 
 // Loader ...
 func Loader(cfg config.Config) Contractor {
@@ -37,8 +43,8 @@ func Loader(cfg config.Config) Contractor {
 	}
 }
 
-// contract: AccelerateNode init acceleratenode contract
-func (c *instance) AccelerateNode() (*node.AccelerateNode, *bind.TransactOpts, *ethclient.Client) {
+//Node contract: Node init acceleratenode contract
+func (c *instance) Node() (*node.AccelerateNode, *bind.TransactOpts, *ethclient.Client) {
 	// TODO
 	auth, err := bind.NewTransactor(strings.NewReader(c.keystore), "123")
 	if err != nil {
@@ -59,8 +65,8 @@ func (c *instance) AccelerateNode() (*node.AccelerateNode, *bind.TransactOpts, *
 	return instance, auth, client
 }
 
-// contract: DHToken init DHToken contract
-func (c *instance) DHToken() (*token.DhToken, *bind.TransactOpts, *ethclient.Client) {
+//Token contract: Token init DHToken contract
+func (c *instance) Token() (*token.DhToken, *bind.TransactOpts, *ethclient.Client) {
 	// TODO
 	auth, err := bind.NewTransactor(strings.NewReader(c.keystore), "123")
 	if err != nil {

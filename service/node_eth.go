@@ -144,7 +144,7 @@ func (n *nodeClientETH) Run() {
 
 	// init contract
 	cl := contract.Loader(n.cfg)
-	ac, auth, client := cl.AccelerateNode()
+	ac, auth, client := cl.Node()
 	defer client.Close()
 
 	//// get decoded contract nodes

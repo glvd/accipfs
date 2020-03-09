@@ -1,11 +1,10 @@
 package service
 
 import (
-	"context"
 	"github.com/glvd/accipfs/config"
 	"github.com/glvd/accipfs/dhcrypto"
 	"go.uber.org/atomic"
-	"os/exec"
+	"net"
 	"strings"
 	"time"
 )
@@ -64,7 +63,7 @@ func encodeNodes(cfg config.Config, nodes []string) []string {
 	return encodedNodes
 }
 
-func getAccessibleEthNodes(addresses []string, port string) []string {
+func getAccessibleEthNodes(addresses []string, port string, to time.Duration) []string {
 	var accessible []string
 	for _, address := range addresses {
 		strs := strings.Split(address, "@")
@@ -74,18 +73,12 @@ func getAccessibleEthNodes(addresses []string, port string) []string {
 		url := strs[1]
 		ip := strings.Split(url, ":")[0]
 
-		ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
-		cmd := exec.CommandContext(ctx, "nc", "-vz", ip, port)
-		err := cmd.Start()
-		if err != nil {
-			return accessible
-		}
-
-		if err := cmd.Wait(); err == nil {
+		conn, e := net.DialTimeout("tcp", ip+":"+port, to)
+		if e == nil {
 			addr := strs[0] + "@" + ip + ":" + port
 			accessible = append(accessible, addr)
+			_ = conn.Close()
 		}
-		cancel()
 	}
 	return accessible
 }

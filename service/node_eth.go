@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/ethereum/go-ethereum/rpc"
@@ -144,27 +145,95 @@ func (n *nodeClientETH) Run() {
 
 	// init contract
 	cl := contract.Loader(n.cfg)
-	ac, auth, client := cl.Node()
-	defer client.Close()
 
-	//// get decoded contract nodes
-	//cPeers, err := ac.GetEthNodes(nil)
-	//if err != nil {
-	//	fmt.Println("[获取合约节点失败]", err.Error())
-	//} else {
-	//	fmt.Println("[合约已有节点数]", len(cPeers))
-	//}
-	//cPeers = decodeNodes(cPeers)
-	//fmt.Println("[cPeers]", cPeers)
-	//// get decoded contract signer nodes
-	//cNodes, err := ac.GetSignerNodes(nil)
-	//if err != nil {
-	//	fmt.Println("[获取合约主节点失败] ", err.Error())
-	//} else {
-	//	fmt.Println("[合约已有主节点数]", len(cNodes))
-	//}
-	//cNodes = decodeNodes(cNodes)
-	//fmt.Println("[cNodes]", cNodes)
+	// get decoded contract nodes
+	err = cl.Node(func(node *node.AccelerateNode, opts *bind.TransactOpts) error {
+		o := &bind.CallOpts{Pending: true}
+		nodes, e := node.GetEthNodes(o)
+		if e != nil {
+			n.output("get contract node failed", err.Error())
+			return e
+		} else {
+			n.output("get contract nodes", len(nodes))
+		}
+		nodes = decodeNodes(n.cfg, nodes)
+		//fmt.Println("[cPeers]", cPeers)
+		// get decoded contract signer nodes
+		masterNodes, e := node.GetSignerNodes(o)
+		if e != nil {
+			n.output("get contract node failed", err.Error())
+			return e
+		} else {
+			n.output("get contract nodes", len(masterNodes))
+		}
+		masterNodes = decodeNodes(n.cfg, masterNodes)
+		//// filter public network accessible nodes
+		//accessibleNodes := getAccessibleEthNodes(activePeers, "30303")
+		//// cDifference := difference(cPeers, accessibleNodes)
+		//// sync nodes
+		//newSignerNodes := difference([]string{node}, cNodes)
+		//newAccNodes := difference(accessibleNodes, cPeers)
+		//// node to be deleted
+		//deleteNodes := difference(cPeers, getAccessibleEthNodes(cPeers, "30303"))
+		//var deleteIdx []int
+		//for _, dNode := range deleteNodes {
+		//	for idx, cNode := range cPeers {
+		//		if cNode == dNode {
+		//			deleteIdx = append(deleteIdx, idx)
+		//		}
+		//	}
+		//}
+		//
+		//// delete rest node
+		//if len(deleteIdx) > 0 {
+		//	var err error
+		//	sort.Sort(sort.Reverse(sort.IntSlice(deleteIdx)))
+		//	for _, idx := range deleteIdx {
+		//		_, err = ac.DeleteEthNodes(auth, uint32(idx))
+		//	}
+		//
+		//	if err != nil {
+		//		fmt.Println("<删除失效节点失败>", err.Error())
+		//	} else {
+		//		fmt.Println("[删除失效节点成功]")
+		//	}
+		//}
+		//
+		//// crypto node info && add to contract
+		//if len(newAccNodes) > 0 {
+		//	var err error
+		//	fmt.Println("[adding node]", newAccNodes)
+		//	for _, n := range encodeNodes(newAccNodes) {
+		//		_, err = ac.AddEthNodes(auth, []string{n})
+		//	}
+		//	if err != nil {
+		//		fmt.Println("[add node failed]", err.Error())
+		//	} else {
+		//		fmt.Println("[add node success]")
+		//	}
+		//	// update gateway info
+		//} else {
+		//	fmt.Println("[已经是最新节点数据]")
+		//}
+		//
+		//// add signer nodes
+		//if len(newSignerNodes) > 0 {
+		//	fmt.Println("[adding signer node]", newSignerNodes)
+		//	_, err := ac.AddSignerNodes(auth, encodeNodes(newSignerNodes))
+		//	if err != nil {
+		//		fmt.Println("<添加主节点失败>", err.Error())
+		//	} else {
+		//		fmt.Println("[添加主节点成功]")
+		//	}
+		//}
+		return nil
+	})
+
+	if err != nil {
+		log.Errorw("node process error", "error", err)
+		return
+	}
+
 	//// filter public network accessible nodes
 	//accessibleNodes := getAccessibleEthNodes(activePeers, "30303")
 	//// cDifference := difference(cPeers, accessibleNodes)

@@ -334,36 +334,6 @@ func StringToAddr(s string) (a *Address, e error) {
 	//return b.Bytes(), nil
 }
 
-func (n *nodeClientIPFS) decodeNodes(nodes []string) []string {
-	// init contract
-	var decodeNodes []string
-	decoder := dhcrypto.NewCipherDecode([]byte(n.cfg.PrivateKey), dateKey)
-	if len(nodes) == 0 {
-		return decodeNodes
-	}
-	for _, node := range nodes {
-		decoded, err := decoder.Decode(node)
-		if err != nil {
-			continue
-		}
-		decodeNodes = append(decodeNodes, string(decoded))
-	}
-	return decodeNodes
-}
-
-func (n *nodeClientIPFS) encodeNodes(nodes []string) []string {
-	var encodedNodes []string
-	encoder := dhcrypto.NewCipherEncoder([]byte(n.cfg.PublicKey), 10, dateKey)
-	for _, node := range nodes {
-		encoded, err := encoder.Encode(node)
-		if err != nil {
-			continue
-		}
-		encodedNodes = append(encodedNodes, string(encoded))
-	}
-	return encodedNodes
-}
-
 // difference returns the elements in `a` that aren't in `b`.
 func difference(a, b []string) []string {
 	mb := make(map[string]struct{}, len(b))

@@ -1,6 +1,7 @@
 package contract
 
 import (
+	"github.com/glvd/accipfs/config"
 	"log"
 	"strings"
 
@@ -16,12 +17,13 @@ const nodeContractAddr = "0xbaEEB7a3AF34a365ACAa1f8464A3374B58ac9889"
 const tokenContractAddr = "0x9064322CfeE623A447ba5aF0dA6AD3341c073535"
 
 type contract struct {
+	cfg      config.Config
 	opts     *bind.TransactOpts
 	keystore string
 }
 
-// Contracter ...
-type Contracter interface {
+// Contractor ...
+type Contractor interface {
 	AccelerateNode() (*node.AccelerateNode, *bind.TransactOpts, *ethclient.Client)
 	DHToken() (*token.DhToken, *bind.TransactOpts, *ethclient.Client)
 }
@@ -30,12 +32,15 @@ type Contracter interface {
 var DefaultGateway = "http://127.0.0.1:8545"
 
 // Loader ...
-func Loader() Contracter {
-	return &contract{keystore: keyStore}
+func Loader(cfg config.Config) Contractor {
+	return &contract{
+		cfg:      cfg,
+		keystore: keyStore,
+	}
 }
 
 // contract: AccelerateNode init acceleratenode contract
-func (c contract) AccelerateNode() (*node.AccelerateNode, *bind.TransactOpts, *ethclient.Client) {
+func (c *contract) AccelerateNode() (*node.AccelerateNode, *bind.TransactOpts, *ethclient.Client) {
 	// TODO
 	auth, err := bind.NewTransactor(strings.NewReader(c.keystore), "123")
 	if err != nil {
@@ -54,6 +59,11 @@ func (c contract) AccelerateNode() (*node.AccelerateNode, *bind.TransactOpts, *e
 	}
 
 	return instance, auth, client
+}
+
+// NodeInstance ...
+func (c *contract) NodeInstance() {
+
 }
 
 // contract: DHToken init DHToken contract

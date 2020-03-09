@@ -10,6 +10,7 @@ import (
 	"github.com/fatih/color"
 	"github.com/glvd/accipfs"
 	"github.com/glvd/accipfs/config"
+	"github.com/glvd/accipfs/contract"
 	"github.com/glvd/accipfs/contract/node"
 	"github.com/glvd/accipfs/contract/token"
 	"github.com/goextension/log"
@@ -140,12 +141,12 @@ func (n *nodeClientETH) Run() {
 			//activePeers = append(activePeers, peer.Enode)
 		}
 	}
-	//
-	//// init contract
-	//cl := eth.ContractLoader()
-	//ac, auth, client := cl.AccelerateNode()
-	//defer client.Close()
-	//
+
+	// init contract
+	cl := contract.Loader(n.cfg)
+	ac, auth, client := cl.AccelerateNode()
+	defer client.Close()
+
 	//// get decoded contract nodes
 	//cPeers, err := ac.GetEthNodes(nil)
 	//if err != nil {

@@ -47,6 +47,9 @@ var name = "config"
 var ext = ".json"
 var _config *Config
 
+// DefaultGateway ...
+var DefaultGateway = "http://127.0.0.1:8545"
+
 // Initialize ...
 func Initialize() {
 	cfg, err := LoadConfig()
@@ -95,7 +98,7 @@ func Default() *Config {
 		Path: "data",
 		ETH: ETHConfig{
 			Name:      "eth",
-			Addr:      "http://127.0.0.1:8545",
+			Addr:      DefaultGateway,
 			Key:       "",
 			Pass:      "",
 			NodeAddr:  "",

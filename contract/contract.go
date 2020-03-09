@@ -2,13 +2,13 @@ package contract
 
 import (
 	"github.com/glvd/accipfs/config"
+	"github.com/glvd/accipfs/contract/node"
 	"log"
 	"strings"
 
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/ethclient"
-	"github.com/glvd/accipfs/contract/node"
 	"github.com/glvd/accipfs/contract/token"
 )
 
@@ -16,9 +16,10 @@ const keyStore = `{"address":"945d35cd4a6549213e8d37feb5d708ec98906902","crypto"
 const nodeContractAddr = "0xbaEEB7a3AF34a365ACAa1f8464A3374B58ac9889"
 const tokenContractAddr = "0x9064322CfeE623A447ba5aF0dA6AD3341c073535"
 
-type contract struct {
+// instance ...
+type instance struct {
 	cfg      config.Config
-	opts     *bind.TransactOpts
+	cli      *ethclient.Client
 	keystore string
 }
 
@@ -28,19 +29,16 @@ type Contractor interface {
 	DHToken() (*token.DhToken, *bind.TransactOpts, *ethclient.Client)
 }
 
-// DefaultGateway ...
-var DefaultGateway = "http://127.0.0.1:8545"
-
 // Loader ...
 func Loader(cfg config.Config) Contractor {
-	return &contract{
+	return &instance{
 		cfg:      cfg,
 		keystore: keyStore,
 	}
 }
 
 // contract: AccelerateNode init acceleratenode contract
-func (c *contract) AccelerateNode() (*node.AccelerateNode, *bind.TransactOpts, *ethclient.Client) {
+func (c *instance) AccelerateNode() (*node.AccelerateNode, *bind.TransactOpts, *ethclient.Client) {
 	// TODO
 	auth, err := bind.NewTransactor(strings.NewReader(c.keystore), "123")
 	if err != nil {
@@ -48,7 +46,7 @@ func (c *contract) AccelerateNode() (*node.AccelerateNode, *bind.TransactOpts, *
 	}
 	// gateway redirect to private chain
 	// client, err := ethclient.Dial("http://gate.betabb.space:8545")
-	client, err := ethclient.Dial(DefaultGateway)
+	client, err := ethclient.Dial(c.cfg.ETH.Addr)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -61,20 +59,15 @@ func (c *contract) AccelerateNode() (*node.AccelerateNode, *bind.TransactOpts, *
 	return instance, auth, client
 }
 
-// NodeInstance ...
-func (c *contract) NodeInstance() {
-
-}
-
 // contract: DHToken init DHToken contract
-func (c contract) DHToken() (*token.DhToken, *bind.TransactOpts, *ethclient.Client) {
+func (c *instance) DHToken() (*token.DhToken, *bind.TransactOpts, *ethclient.Client) {
 	// TODO
 	auth, err := bind.NewTransactor(strings.NewReader(c.keystore), "123")
 	if err != nil {
 		log.Fatal(err)
 	}
 	// gateway redirect to private chain
-	client, err := ethclient.Dial(DefaultGateway)
+	client, err := ethclient.Dial(c.cfg.ETH.Addr)
 	if err != nil {
 		log.Fatal(err)
 	}

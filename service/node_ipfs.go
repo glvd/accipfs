@@ -3,7 +3,8 @@ package service
 import (
 	"context"
 	"fmt"
-	"github.com/glvd/accipfs/dhcrypto"
+	"github.com/ethereum/go-ethereum/accounts/abi/bind"
+	"github.com/glvd/accipfs/contract/node"
 	"net"
 	"os/exec"
 	"sort"
@@ -189,69 +190,70 @@ func (n *nodeClientIPFS) Run() {
 	//	fmt.Println("<IPFS节点状态已是最新>")
 	//	return
 	//}
-	cl := contract.Loader()
-	ac, auth, client := cl.AccelerateNode()
-	defer client.Close()
+	cl := contract.Loader(n.cfg)
+	err := cl.Node(func(node *node.AccelerateNode, opts *bind.TransactOpts) error {
+		op := &bind.CallOpts{Pending: true}
+		cPeers, err := ac.GetIpfsNodes(nil)
+		if err != nil {
+			log.Errorw("ipfs serviceNode", "error", err)
+			return err
+		}
+		cNodes, err := node.GetPublicIpfsNodes(op)
+		if err != nil {
+			log.Errorw("public ipfs serviceNode", "error", err)
+			return err
+		}
+		cPeers = decodeNodes(n.cfg, cPeers)
+		cNodes = decodeNodes(n.cfg, cNodes)
 
-	cPeers, err := ac.GetIpfsNodes(nil)
-	if err != nil {
-		log.Errorw("ipfs serviceNode", "error", err)
-		return
-	}
-	cNodes, err := ac.GetPublicIpfsNodes(nil)
-	if err != nil {
-		log.Errorw("public ipfs serviceNode", "error", err)
-		return
-	}
-	cPeers = n.decodeNodes(cPeers)
-	cNodes = n.decodeNodes(cNodes)
-
-	//TODO:fix sta
-	//fmt.Println("[adding ipfs nodes]", difference(peers, cPeers))
-	fmt.Println("[adding public ipfs nodes]", DiffStrArray(cNodes, publicNodes))
-	// delete nodes
-	var deleteIdx []int
-	for _, dNode := range difference(cNodes, getAccessibleIpfsNodes(cNodes, "4001")) {
-		for idx, cNode := range cNodes {
-			if cNode == dNode {
-				deleteIdx = append(deleteIdx, idx)
+		//TODO:fix sta
+		//fmt.Println("[adding ipfs nodes]", difference(peers, cPeers))
+		fmt.Println("[adding public ipfs nodes]", DiffStrArray(cNodes, publicNodes))
+		// delete nodes
+		var deleteIdx []int
+		for _, dNode := range difference(cNodes, getAccessibleIPFSNodes(cNodes, "4001")) {
+			for idx, cNode := range cNodes {
+				if cNode == dNode {
+					deleteIdx = append(deleteIdx, idx)
+				}
 			}
 		}
-	}
-	//TODO:fix end
-	if len(deleteIdx) > 0 {
-		var err error
-		sort.Sort(sort.Reverse(sort.IntSlice(deleteIdx)))
-		for _, idx := range deleteIdx {
-			_, err = ac.DeletePublicIpfsNodes(auth, uint32(idx))
+		//TODO:fix end
+		if len(deleteIdx) > 0 {
+			var err error
+			sort.Sort(sort.Reverse(sort.IntSlice(deleteIdx)))
+			for _, idx := range deleteIdx {
+				_, err = ac.DeletePublicIpfsNodes(auth, uint32(idx))
+			}
+
+			if err != nil {
+				fmt.Println("<删除失效节点失败>", err.Error())
+			} else {
+				fmt.Println("[删除失效节点成功]")
+			}
+		}
+
+		// add new nodes
+		//for _, n := range n.encodeNodes(difference(peers, cPeers)) {
+		//	if n == "" {
+		//		continue
+		//	}
+		//	_, err = ac.AddIpfsNodes(auth, []string{n})
+		//}
+		for _, n := range n.encodeNodes(DiffStrArray(cNodes, publicNodes)) {
+			if n == "" {
+				continue
+			}
+			_, err = ac.AddPublicIpfsNodes(auth, []string{n})
 		}
 
 		if err != nil {
-			fmt.Println("<删除失效节点失败>", err.Error())
+			fmt.Println("[添加节点失败]", err.Error())
 		} else {
-			fmt.Println("[删除失效节点成功]")
+			fmt.Println("[添加节点成功] ")
 		}
-	}
+	})
 
-	// add new nodes
-	//for _, n := range n.encodeNodes(difference(peers, cPeers)) {
-	//	if n == "" {
-	//		continue
-	//	}
-	//	_, err = ac.AddIpfsNodes(auth, []string{n})
-	//}
-	for _, n := range n.encodeNodes(DiffStrArray(cNodes, publicNodes)) {
-		if n == "" {
-			continue
-		}
-		_, err = ac.AddPublicIpfsNodes(auth, []string{n})
-	}
-
-	if err != nil {
-		fmt.Println("[添加节点失败]", err.Error())
-	} else {
-		fmt.Println("[添加节点成功] ")
-	}
 	n.output("<IPFS同步完成>")
 	return
 }
@@ -349,7 +351,7 @@ func difference(a, b []string) []string {
 	return diff
 }
 
-func getAccessibleIpfsNodes(addresses []string, port string) []string {
+func getAccessibleIPFSNodes(addresses []string, port string) []string {
 	var accessible []string
 	for _, address := range addresses {
 		strs := strings.Split(address, "/ip4/")
@@ -364,7 +366,7 @@ func getAccessibleIpfsNodes(addresses []string, port string) []string {
 		if err == nil {
 			addr := strs[0] + "@" + ip + ":" + port
 			accessible = append(accessible, addr)
-			conn.Close()
+			_ = conn.Close()
 		} else {
 			fmt.Println("[dial err]", err)
 		}

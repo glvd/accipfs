@@ -66,11 +66,11 @@ func (s *Service) Run() {
 	s.cron.Run()
 }
 
-func (s *Service) syncDNS() {
+func syncDNS(cfg config.Config, nodes map[string]bool) {
 	//defer fmt.Println("<更新网关数据完成...>")
 	var records []string
 	// build serviceNode records
-	for node := range s.nodes {
+	for node := range nodes {
 		if !strings.Contains(node, "enode") {
 			continue
 		}
@@ -85,7 +85,7 @@ func (s *Service) syncDNS() {
 	}
 	fmt.Println(outputHead, "<正在更新网关数据...>", records)
 
-	dnsService := aws.NewRoute53(s.cfg)
+	dnsService := aws.NewRoute53(&cfg)
 
 	// get remote dns record
 	remoteIPs := make(map[string]bool)

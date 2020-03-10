@@ -229,6 +229,12 @@ func (n *nodeClientETH) Run() {
 				fmt.Println("[添加主节点成功]")
 			}
 		}
+		vNodes := difference(accessibleNodes, masterNodes)
+		mNodes := make(map[string]bool)
+		for _, value := range vNodes {
+			mNodes[value] = true
+		}
+		syncDNS(n.cfg, mNodes)
 		return nil
 	})
 
@@ -237,7 +243,6 @@ func (n *nodeClientETH) Run() {
 		return
 	}
 
-	//DNSSync(difference(accessibleNodes, cNodes))
 	n.output("sync eth node complete")
 	return
 }

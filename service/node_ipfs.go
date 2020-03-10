@@ -255,6 +255,11 @@ func (n *nodeClientIPFS) Run() {
 		return nil
 	})
 
+	if err != nil {
+		log.Errorw(outputHead, "tag", "ipfs node process error", "err", err)
+		return
+	}
+
 	n.output("<IPFS同步完成>")
 	return
 }

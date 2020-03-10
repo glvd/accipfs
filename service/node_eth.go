@@ -233,7 +233,7 @@ func (n *nodeClientETH) Run() {
 	})
 
 	if err != nil {
-		log.Errorw(outputHead, "tag", "node process error", "error", err)
+		log.Errorw(outputHead, "tag", "eth node process error", "error", err)
 		return
 	}
 

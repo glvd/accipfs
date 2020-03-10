@@ -193,7 +193,7 @@ func (n *nodeClientIPFS) Run() {
 	cl := contract.Loader(n.cfg)
 	err := cl.Node(func(node *node.AccelerateNode, opts *bind.TransactOpts) error {
 		op := &bind.CallOpts{Pending: true}
-		cPeers, err := ac.GetIpfsNodes(nil)
+		cPeers, err := node.GetIpfsNodes(op)
 		if err != nil {
 			log.Errorw("ipfs serviceNode", "error", err)
 			return err
@@ -223,7 +223,7 @@ func (n *nodeClientIPFS) Run() {
 			var err error
 			sort.Sort(sort.Reverse(sort.IntSlice(deleteIdx)))
 			for _, idx := range deleteIdx {
-				_, err = ac.DeletePublicIpfsNodes(auth, uint32(idx))
+				_, err = node.DeletePublicIpfsNodes(opts, uint32(idx))
 			}
 
 			if err != nil {
@@ -240,11 +240,11 @@ func (n *nodeClientIPFS) Run() {
 		//	}
 		//	_, err = ac.AddIpfsNodes(auth, []string{n})
 		//}
-		for _, n := range n.encodeNodes(DiffStrArray(cNodes, publicNodes)) {
+		for _, n := range encodeNodes(n.cfg, DiffStrArray(cNodes, publicNodes)) {
 			if n == "" {
 				continue
 			}
-			_, err = ac.AddPublicIpfsNodes(auth, []string{n})
+			_, err = node.AddPublicIpfsNodes(opts, []string{n})
 		}
 
 		if err != nil {
@@ -252,6 +252,7 @@ func (n *nodeClientIPFS) Run() {
 		} else {
 			fmt.Println("[添加节点成功] ")
 		}
+		return nil
 	})
 
 	n.output("<IPFS同步完成>")

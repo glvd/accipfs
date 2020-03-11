@@ -95,14 +95,12 @@ func (n *nodeClientETH) output(v ...interface{}) {
 
 // Run ...
 func (n *nodeClientETH) Run() {
-	n.output("syncing serviceNode")
 	if n.lock.Load() {
-		n.output("serviceNode is already running")
+		n.output("service Node is already running")
 		return
 	}
 	n.lock.Store(true)
 	defer n.lock.Store(false)
-	n.output("sync running")
 	if !n.IsReady() {
 		n.output("waiting for ready")
 		return

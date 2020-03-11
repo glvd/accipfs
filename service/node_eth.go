@@ -9,14 +9,12 @@ import (
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/ethereum/go-ethereum/rpc"
 	"github.com/fatih/color"
-	"github.com/glvd/accipfs"
 	"github.com/glvd/accipfs/config"
 	"github.com/glvd/accipfs/contract"
 	"github.com/glvd/accipfs/contract/node"
 	"github.com/glvd/accipfs/contract/token"
 	"github.com/goextension/log"
 	"os"
-	"os/exec"
 	"sort"
 	"strings"
 	"time"
@@ -251,28 +249,6 @@ func newETH(cfg config.Config) (*nodeClientETH, error) {
 		serviceNode: nodeInstance(),
 		out:         color.New(color.FgRed),
 	}, nil
-}
-
-type nodeServerETH struct {
-	name string
-	cmd  *exec.Cmd
-}
-
-// Start ...
-func (n *nodeServerETH) Start() {
-	panic("TODO")
-}
-
-// Init ...
-func (n *nodeServerETH) Init() {
-
-}
-
-// NodeServerETH ...
-func NodeServerETH(cfg config.Config) NodeClient {
-	cmd := exec.Command(cfg.ETH.Name, "")
-	cmd.Env = accipfs.Environ()
-	return &nodeServerETH{cmd: cmd}
 }
 
 // IsReady ...

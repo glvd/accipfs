@@ -38,8 +38,8 @@ func (n *nodeServerETH) Init() {
 
 }
 
-// NodeServerETH ...
-func NodeServerETH(cfg config.Config) NodeClient {
+// NewNodeServerETH ...
+func NewNodeServerETH(cfg config.Config) NodeClient {
 	path := filepath.Join(general.CurrentDir(), "bin", cfg.ETH.Name)
 	return &nodeServerETH{
 		name: path,

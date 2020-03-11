@@ -10,7 +10,7 @@ import (
 func TestRun(t *testing.T) {
 	config.Initialize()
 	accipfs.DefaultPath = "data"
-	s, e := service.New(config.Global())
+	s, e := service.NewClient(config.Global())
 	if e != nil {
 		panic(e)
 	}

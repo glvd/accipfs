@@ -137,7 +137,7 @@ func (n *nodeClientIPFS) output(v ...interface{}) {
 // Run ...
 func (n *nodeClientIPFS) Run() {
 	if n.lock.Load() {
-		n.output("service Node is already running")
+		n.output("service NodeClient is already running")
 		return
 	}
 	n.lock.Store(true)
@@ -268,7 +268,7 @@ func (n *nodeServerIPFS) Start() {
 }
 
 // NodeServerIPFS ...
-func NodeServerIPFS(cfg config.Config) Node {
+func NodeServerIPFS(cfg config.Config) NodeClient {
 	cmd := exec.Command(cfg.IPFS.Name, "")
 	cmd.Env = accipfs.Environ()
 	return &nodeServerIPFS{cmd: cmd}

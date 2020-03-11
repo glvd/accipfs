@@ -19,8 +19,8 @@ type HandleInfo struct {
 // HandleCallback ...
 type HandleCallback func(src interface{})
 
-// Node ...
-type Node interface {
+// NodeClient ...
+type NodeClient interface {
 	Start()
 }
 

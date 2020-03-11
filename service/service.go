@@ -10,22 +10,22 @@ import (
 	"sync"
 )
 
-const outputHead = "<Service>"
+const outputHead = "<Client>"
 
-// Service ...
-type Service struct {
+// Client ...
+type Client struct {
 	cfg        *config.Config
 	cron       *cron.Cron
 	serveMutex sync.RWMutex
-	serve      []Node
+	serve      []NodeClient
 	i          *nodeClientIPFS
 	e          *nodeClientETH
 	nodes      map[string]bool
 }
 
-// New ...
-func New(config config.Config) (s *Service, e error) {
-	s = &Service{
+// NewClient ...
+func NewClient(config config.Config) (s *Client, e error) {
+	s = &Client{
 		cfg:   &config,
 		nodes: make(map[string]bool),
 	}
@@ -42,12 +42,12 @@ func New(config config.Config) (s *Service, e error) {
 }
 
 // RegisterServer ...
-func (s *Service) RegisterServer(node Node) {
+func (s *Client) RegisterServer(node NodeClient) {
 	s.serve = append(s.serve, node)
 }
 
 // Run ...
-func (s *Service) Run() {
+func (s *Client) Run() {
 	for _, s := range s.serve {
 		s.Start()
 	}

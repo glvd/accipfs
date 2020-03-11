@@ -73,7 +73,7 @@ type ETHNode struct {
 type ETHNodeResult struct {
 	ID      string
 	Jsonrpc string
-	Result  Node
+	Result  NodeClient
 }
 
 // ETHProtocolInfo ...
@@ -96,7 +96,7 @@ func (n *nodeClientETH) output(v ...interface{}) {
 // Run ...
 func (n *nodeClientETH) Run() {
 	if n.lock.Load() {
-		n.output("service Node is already running")
+		n.output("service NodeClient is already running")
 		return
 	}
 	n.lock.Store(true)
@@ -263,8 +263,13 @@ func (n *nodeServerETH) Start() {
 	panic("TODO")
 }
 
+// Init ...
+func (n *nodeServerETH) Init() {
+
+}
+
 // NodeServerETH ...
-func NodeServerETH(cfg config.Config) Node {
+func NodeServerETH(cfg config.Config) NodeClient {
 	cmd := exec.Command(cfg.ETH.Name, "")
 	cmd.Env = accipfs.Environ()
 	return &nodeServerETH{cmd: cmd}
@@ -281,7 +286,7 @@ func (n *nodeClientETH) IsReady() bool {
 	return true
 }
 
-// Node ...
+// NodeClient ...
 func (n *nodeClientETH) Node() (*node.AccelerateNode, error) {
 	address := common.HexToAddress(n.cfg.ETH.NodeAddr)
 	return node.NewAccelerateNode(address, n.client)

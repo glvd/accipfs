@@ -1,7 +1,12 @@
 package service
 
-import "testing"
+import (
+	"github.com/glvd/accipfs/config"
+	"testing"
+)
 
 func TestNodeServerETH(t *testing.T) {
-	NewSer
+	cfg := config.Default()
+	node := NewNodeServerETH(*cfg)
+	t.Logf("%+v", node)
 }

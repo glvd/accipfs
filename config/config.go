@@ -6,6 +6,7 @@ import (
 	"github.com/spf13/viper"
 	"io/ioutil"
 	"os"
+	"path/filepath"
 )
 
 // IPFSConfig ...
@@ -56,6 +57,17 @@ var DefaultNodeContractAddr = "0xbaEEB7a3AF34a365ACAa1f8464A3374B58ac9889"
 // DefaultTokenContractAddr ...
 var DefaultTokenContractAddr = "0x9064322CfeE623A447ba5aF0dA6AD3341c073535"
 
+// WorkDir ...
+var WorkDir = ""
+
+var dataDirETH = ".eth"
+
+var dataDirIPFS = ".ipfs"
+
+func init() {
+	WorkDir = currentPath()
+}
+
 // Initialize ...
 func Initialize() {
 	cfg, err := LoadConfig()
@@ -101,7 +113,7 @@ func Global() Config {
 // Default ...
 func Default() *Config {
 	return &Config{
-		Path: "data",
+		Path: WorkDir,
 		ETH: ETHConfig{
 			Name:      "eth",
 			Addr:      DefaultGateway,
@@ -124,4 +136,14 @@ func currentPath() string {
 		return "."
 	}
 	return dir
+}
+
+// DataDirETH ...
+func DataDirETH() string {
+	return filepath.Join(Global().Path, dataDirETH)
+}
+
+// DataDirIPFS ...
+func DataDirIPFS() string {
+	return filepath.Join(Global().Path, dataDirIPFS)
 }

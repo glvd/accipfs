@@ -2,10 +2,14 @@ package service
 
 import (
 	"github.com/glvd/accipfs/config"
+	"github.com/goextension/log/zap"
 	"testing"
 	"time"
 )
 
+func init() {
+	zap.InitZapFileSugar()
+}
 func TestNodeServerETH(t *testing.T) {
 	config.WorkDir = "D:\\workspace\\pvt"
 	err := config.SaveConfig(config.Default())

@@ -1,8 +1,10 @@
 package service
 
 import (
+	"fmt"
 	"github.com/glvd/accipfs/config"
 	"github.com/goextension/log"
+	"os"
 	"os/exec"
 	"path/filepath"
 )
@@ -30,24 +32,29 @@ func (n *nodeServerIPFS) Stop() error {
 
 // Init ...
 func (n *nodeServerIPFS) Init() error {
+	_, err := os.Stat(config.DataDirIPFS())
+	if err != nil && os.IsNotExist(err) {
+		_ = os.MkdirAll(config.DataDirIPFS(), 0755)
+	}
+	//os.Setenv("IPFS_PATH", filepath.Join(n.cfg.Path, config.DataDirIPFS()))
 	cmd := exec.Command(n.name, "init", "--profile", "badgerds")
 	out, err := cmd.CombinedOutput()
 	if err != nil {
-		return err
+		return fmt.Errorf("init:%w", err)
 	}
 	log.Infow("ipfs init", "tag", outputHead, "log", string(out))
 
 	cmd = exec.Command(n.name, "config", "Swarm.EnableAutoNATService", "--bool", "true")
 	out, err = cmd.CombinedOutput()
 	if err != nil {
-		return err
+		return fmt.Errorf("config(nat):%w", err)
 	}
 	log.Infow("ipfs config set", "tag", outputHead, "log", string(out))
 
 	cmd = exec.Command(n.name, "config", "Swarm.EnableRelayHop", "--bool", "true")
 	out, err = cmd.CombinedOutput()
 	if err != nil {
-		return err
+		return fmt.Errorf("config(relay):%w", err)
 	}
 	log.Infow("ipfs init config set", "tag", outputHead, "log", string(out))
 	log.Infow("ipfs init end", "tag", outputHead)
@@ -56,7 +63,7 @@ func (n *nodeServerIPFS) Init() error {
 
 // NewNodeServerIPFS ...
 func NewNodeServerIPFS(cfg config.Config) NodeServer {
-	path := filepath.Join(cfg.Path, "bin", binName(cfg.ETH.Name))
+	path := filepath.Join(cfg.Path, "bin", binName(cfg.IPFS.Name))
 	return &nodeServerIPFS{
 		cfg:  &cfg,
 		name: path,

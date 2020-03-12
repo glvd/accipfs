@@ -1,6 +1,7 @@
 package service
 
 import (
+	"context"
 	"github.com/glvd/accipfs/config"
 	"os"
 	"os/exec"
@@ -9,6 +10,8 @@ import (
 )
 
 type nodeServerETH struct {
+	ctx     context.Context
+	cancel  context.CancelFunc
 	cfg     *config.Config
 	genesis *config.Genesis
 	name    string
@@ -17,12 +20,16 @@ type nodeServerETH struct {
 
 // Stop ...
 func (n *nodeServerETH) Stop() error {
-	return n.cmd.Process.Kill()
+	if n.cmd != nil {
+		n.cancel()
+		n.cmd = nil
+	}
+	return nil
 }
 
 // Start ...
 func (n *nodeServerETH) Start() error {
-	n.cmd = exec.Command(n.name, "--datadir", config.DataDirETH(), "--networkid", strconv.FormatInt(n.genesis.Config.ChainID, 10), "--rpc", "--rpcaddr", "127.0.0.1", "--rpcapi", "db,eth,net,web3,personal")
+	n.cmd = exec.CommandContext(n.ctx, n.name, "--datadir", config.DataDirETH(), "--networkid", strconv.FormatInt(n.genesis.Config.ChainID, 10), "--rpc", "--rpcaddr", "127.0.0.1", "--rpcapi", "db,eth,net,web3,personal")
 	err := n.cmd.Start()
 	if err != nil {
 		return err
@@ -53,7 +60,10 @@ func NewNodeServerETH(cfg config.Config) NodeServer {
 	if err != nil {
 		panic(err)
 	}
+	ctx, cancelFunc := context.WithCancel(context.Background())
 	return &nodeServerETH{
+		ctx:     ctx,
+		cancel:  cancelFunc,
 		cfg:     &cfg,
 		genesis: genesis,
 		name:    path,

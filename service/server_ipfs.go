@@ -1,6 +1,7 @@
 package service
 
 import (
+	"context"
 	"fmt"
 	"github.com/glvd/accipfs/config"
 	"github.com/goextension/log"
@@ -10,14 +11,16 @@ import (
 )
 
 type nodeServerIPFS struct {
-	cfg  *config.Config
-	name string
-	cmd  *exec.Cmd
+	ctx    context.Context
+	cancel context.CancelFunc
+	cfg    *config.Config
+	name   string
+	cmd    *exec.Cmd
 }
 
 // Start ...
 func (n *nodeServerIPFS) Start() error {
-	n.cmd = exec.Command(n.name, "daemon", "--routing", "none")
+	n.cmd = exec.CommandContext(n.ctx, n.name, "daemon", "--routing", "none")
 	err := n.cmd.Start()
 	if err != nil {
 		return err
@@ -27,7 +30,11 @@ func (n *nodeServerIPFS) Start() error {
 
 // Stop ...
 func (n *nodeServerIPFS) Stop() error {
-	return n.cmd.Process.Kill()
+	if n.cmd != nil {
+		n.cancel()
+		n.cmd = nil
+	}
+	return nil
 }
 
 // Init ...
@@ -64,8 +71,11 @@ func (n *nodeServerIPFS) Init() error {
 // NewNodeServerIPFS ...
 func NewNodeServerIPFS(cfg config.Config) NodeServer {
 	path := filepath.Join(cfg.Path, "bin", binName(cfg.IPFS.Name))
+	ctx, cancelFunc := context.WithCancel(context.Background())
 	return &nodeServerIPFS{
-		cfg:  &cfg,
-		name: path,
+		ctx:    ctx,
+		cancel: cancelFunc,
+		cfg:    &cfg,
+		name:   path,
 	}
 }

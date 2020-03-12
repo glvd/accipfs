@@ -31,18 +31,25 @@ func TestNodeServerETH(t *testing.T) {
 
 	ipfs := NewNodeServerIPFS(config.Global())
 	t.Logf("%+v", ipfs)
-	if err := ipfs.Init(); err != nil {
-		t.Error(err)
-		return
-	}
+	//if err := ipfs.Init(); err != nil {
+	//	t.Error(err)
+	//	return
+	//}
 	if err := ipfs.Start(); err != nil {
 		t.Error(err)
 		return
 	}
 
-	time.Sleep(3 * time.Minute)
+	time.Sleep(1 * time.Minute)
 
-	eth.Stop()
-	ipfs.Stop()
+	if err := eth.Stop(); err != nil {
+		t.Error(err)
+		return
+	}
 
+	if err := ipfs.Stop(); err != nil {
+		t.Error(err)
+		return
+	}
+	t.Log("done")
 }

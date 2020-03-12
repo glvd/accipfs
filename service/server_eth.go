@@ -34,7 +34,7 @@ func (n *nodeServerETH) Init() error {
 
 // NewNodeServerETH ...
 func NewNodeServerETH(cfg config.Config) NodeServer {
-	path := filepath.Join(cfg.Path, "bin", cfg.ETH.Name)
+	path := filepath.Join(cfg.Path, "bin", binName(cfg.ETH.Name))
 	return &nodeServerETH{
 		cfg:  &cfg,
 		name: path,

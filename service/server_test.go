@@ -7,9 +7,14 @@ import (
 
 func TestNodeServerETH(t *testing.T) {
 	config.WorkDir = "D:\\workspace\\pvt"
-	c := config.Default()
-	eth := NewNodeServerETH(*c)
-	t.Logf("%+v,cfg:%+v", eth, *c)
+	err := config.SaveConfig(config.Default())
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	config.Initialize()
+	eth := NewNodeServerETH(config.Global())
+	t.Logf("%+v", eth)
 	if err := eth.Init(); err != nil {
 		t.Error(err)
 		return

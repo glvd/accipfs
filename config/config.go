@@ -101,7 +101,7 @@ func SaveConfig(config *Config) error {
 	if e != nil {
 		return e
 	}
-	return ioutil.WriteFile(name+ext, by, 0755)
+	return ioutil.WriteFile(filepath.Join(WorkDir, name+ext), by, 0755)
 }
 
 // Global ...
@@ -114,7 +114,7 @@ func Default() *Config {
 	return &Config{
 		Path: WorkDir,
 		ETH: ETHConfig{
-			Name:      "eth",
+			Name:      "geth",
 			Addr:      DefaultGateway,
 			Key:       "",
 			Pass:      "",

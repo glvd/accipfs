@@ -3,7 +3,6 @@ package service
 import (
 	"github.com/glvd/accipfs/config"
 	"github.com/goextension/log"
-	"os"
 	"os/exec"
 	"path/filepath"
 )
@@ -49,7 +48,6 @@ func (n *nodeServerIPFS) Init() error {
 
 // NewNodeServerIPFS ...
 func NewNodeServerIPFS(cfg config.Config) NodeServer {
-	os.Setenv("IPFS_PATH", filepath.Join(config.WorkDir, config.DataDirIPFS()))
 	path := filepath.Join(cfg.Path, "bin", binName(cfg.ETH.Name))
 	return &nodeServerIPFS{
 		cfg:  &cfg,

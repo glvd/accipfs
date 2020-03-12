@@ -75,6 +75,10 @@ func Initialize() {
 		panic(err)
 	}
 	_config = cfg
+	err = os.Setenv("IPFS_PATH", filepath.Join(cfg.Path, DataDirIPFS()))
+	if err != nil {
+		panic(err)
+	}
 }
 
 // LoadConfig ...

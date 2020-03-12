@@ -65,7 +65,7 @@ func Loader(cfg config.Config) Contractor {
 		cfg:       cfg,
 		nodeAddr:  common.HexToAddress(cfg.ETH.NodeAddr),
 		tokenAddr: common.HexToAddress(cfg.ETH.TokenAddr),
-		key:       FileKey(cfg.ETH.Key, cfg.ETH.Pass),
+		//key:       FileKey(cfg.ETH.Key, cfg.ETH.Pass),
 	}
 }
 

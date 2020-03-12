@@ -243,7 +243,7 @@ func (n *nodeClientETH) Run() {
 	return
 }
 
-func newETH(cfg config.Config) (*nodeClientETH, error) {
+func newNodeETH(cfg config.Config) (*nodeClientETH, error) {
 	return &nodeClientETH{
 		cfg:         cfg,
 		serviceNode: nodeInstance(),

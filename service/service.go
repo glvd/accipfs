@@ -17,23 +17,25 @@ type Service struct {
 	cfg        *config.Config
 	cron       *cron.Cron
 	serveMutex sync.RWMutex
-	serve      []NodeClient
+	serve      []NodeServer
 	i          *nodeClientIPFS
 	e          *nodeClientETH
 	nodes      map[string]bool
 }
 
-// NewClient ...
-func NewClient(config config.Config) (s *Service, e error) {
+// New ...
+func New(config config.Config) (s *Service, e error) {
 	s = &Service{
 		cfg:   &config,
 		nodes: make(map[string]bool),
 	}
+	s.serve = append(s.serve, NewNodeServerIPFS(config), NewNodeServerETH(config))
+
 	s.i, e = newNodeIPFS(config)
 	if e != nil {
 		return nil, e
 	}
-	s.e, e = newETH(config)
+	s.e, e = newNodeETH(config)
 	if e != nil {
 		return nil, e
 	}
@@ -42,14 +44,16 @@ func NewClient(config config.Config) (s *Service, e error) {
 }
 
 // RegisterServer ...
-func (s *Service) RegisterServer(node NodeClient) {
+func (s *Service) RegisterServer(node NodeServer) {
 	s.serve = append(s.serve, node)
 }
 
 // Run ...
 func (s *Service) Run() {
 	for _, s := range s.serve {
-		s.Start()
+		if err := s.Start(); err != nil {
+			panic(err)
+		}
 	}
 
 	job, err := s.cron.AddJob("0/5 * * * * *", s.i)

@@ -15,7 +15,6 @@ type nodeServerETH struct {
 
 // Start ...
 func (n *nodeServerETH) Start() error {
-	panic("TODO")
 }
 
 // Init ...
@@ -29,6 +28,7 @@ func (n *nodeServerETH) Init() error {
 	if err != nil {
 		return err
 	}
+
 	return nil
 }
 

@@ -13,5 +13,6 @@ func TestRun(t *testing.T) {
 	if e != nil {
 		panic(e)
 	}
+	defer s.Stop()
 	s.Run()
 }

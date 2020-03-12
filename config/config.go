@@ -3,6 +3,7 @@ package config
 import (
 	"encoding/json"
 	"github.com/goextension/extmap"
+	"github.com/goextension/log"
 	"github.com/spf13/viper"
 	"io/ioutil"
 	"os"
@@ -99,6 +100,7 @@ func LoadConfig() (*Config, error) {
 	m := extmap.ToMap(viper.AllSettings())
 
 	var cfg Config
+	log.Infof("cfg map:%+v", m)
 	err = m.Struct(&cfg)
 	if err != nil {
 		return nil, err

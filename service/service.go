@@ -50,8 +50,8 @@ func (s *Service) RegisterServer(node NodeServer) {
 
 // Run ...
 func (s *Service) Run() {
-	for _, s := range s.serve {
-		if err := s.Start(); err != nil {
+	for _, serv := range s.serve {
+		if err := serv.Start(); err != nil {
 			panic(err)
 		}
 	}
@@ -68,6 +68,16 @@ func (s *Service) Run() {
 	}
 	fmt.Println(outputHead, "[ETH]", "run id", job)
 	s.cron.Run()
+}
+
+// Stop ...
+func (s *Service) Stop() {
+	for _, serv := range s.serve {
+		if err := serv.Stop(); err != nil {
+			log.Errorw("stop error", "tag", outputHead, "error", err)
+		}
+
+	}
 }
 
 func syncDNS(cfg config.Config, nodes map[string]bool) {

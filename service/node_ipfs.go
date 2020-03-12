@@ -247,7 +247,7 @@ func (n *nodeClientIPFS) Run() {
 	})
 
 	if err != nil {
-		log.Errorw(outputHead, "tag", "ipfs node process error", "err", err)
+		log.Errorw("ipfs node process error", "tag", outputHead, "err", err)
 		return
 	}
 

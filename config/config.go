@@ -18,12 +18,13 @@ type IPFSConfig struct {
 
 // ETHConfig ...
 type ETHConfig struct {
-	Name      string //bin name
-	Addr      string //eth rpc address
-	Key       string //eth key
-	Pass      string //eth key pass
-	NodeAddr  string //node contract address
-	TokenAddr string //token contract address
+	Name        string            //bin name
+	Addr        string            //eth rpc address
+	KeyHash     string            //binary key hash
+	ETHKeyFile  `json:"key_file"` //default key file
+	KeyFileList []ETHKeyFile      //key file list
+	NodeAddr    string            //node contract address
+	TokenAddr   string            //token contract address
 }
 
 // AWSConfig ...
@@ -32,6 +33,12 @@ type AWSConfig struct {
 	RecordName         string
 	AwsAccessKeyID     string
 	AwsSecretAccessKey string
+}
+
+// ETHKeyFile ...
+type ETHKeyFile struct {
+	Name string
+	Pass string
 }
 
 // Config ...
@@ -118,10 +125,13 @@ func Default() *Config {
 	return &Config{
 		Path: WorkDir,
 		ETH: ETHConfig{
-			Name:      "geth",
-			Addr:      DefaultGateway,
-			Key:       "",
-			Pass:      "",
+			Name:    "geth",
+			Addr:    DefaultGateway,
+			KeyHash: "",
+			ETHKeyFile: ETHKeyFile{
+				Name: "",
+				Pass: "",
+			},
 			NodeAddr:  DefaultNodeContractAddr,
 			TokenAddr: DefaultTokenContractAddr,
 		},

@@ -56,13 +56,13 @@ func (s *Service) Run() {
 		}
 	}
 
-	job, err := s.cron.AddJob("0/5 * * * * *", s.i)
+	job, err := s.cron.AddJob("0 * * * * *", s.i)
 	if err != nil {
 		panic(err)
 	}
 	fmt.Println(outputHead, "[IPFS]", "run id", job)
 
-	job, err = s.cron.AddJob("0/5 * * * * *", s.e)
+	job, err = s.cron.AddJob("0 * * * * *", s.e)
 	if err != nil {
 		panic(err)
 	}
@@ -76,7 +76,6 @@ func (s *Service) Stop() {
 		if err := serv.Stop(); err != nil {
 			log.Errorw("stop error", "tag", outputHead, "error", err)
 		}
-
 	}
 }
 

@@ -186,12 +186,12 @@ func (n *nodeClientIPFS) Run() {
 		op := &bind.CallOpts{Pending: true}
 		cPeers, err := node.GetIpfsNodes(op)
 		if err != nil {
-			log.Errorw("ipfs serviceNode", "error", err)
+			log.Errorw("get ipfs node error", "tag", outputHead, "error", err)
 			return err
 		}
 		cNodes, err := node.GetPublicIpfsNodes(op)
 		if err != nil {
-			log.Errorw("public ipfs serviceNode", "error", err)
+			log.Errorw("get public ipfs node error", "tag", outputHead, "error", err)
 			return err
 		}
 		cPeers = decodeNodes(n.cfg, cPeers)

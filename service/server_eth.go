@@ -15,6 +15,11 @@ type nodeServerETH struct {
 	cmd     *exec.Cmd
 }
 
+// Stop ...
+func (n *nodeServerETH) Stop() error {
+	return n.cmd.Process.Kill()
+}
+
 // Start ...
 func (n *nodeServerETH) Start() error {
 	n.cmd = exec.Command(n.name, "--datadir", config.DataDirETH(), "--networkid", strconv.FormatInt(n.genesis.Config.ChainID, 10), "--rpc", "--rpcaddr", "127.0.0.1", "--rpcapi", "db,eth,net,web3,personal")

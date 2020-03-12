@@ -19,5 +19,9 @@ func TestNodeServerETH(t *testing.T) {
 		t.Error(err)
 		return
 	}
-
+	ipfs := NewNodeServerIPFS(config.Global())
+	t.Logf("%+v", ipfs)
+	if err := ipfs.Init(); err != nil {
+		return
+	}
 }

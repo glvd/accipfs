@@ -17,23 +17,25 @@ type Service struct {
 	cfg        *config.Config
 	cron       *cron.Cron
 	serveMutex sync.RWMutex
-	serve      []NodeClient
+	serve      []NodeServer
 	i          *nodeClientIPFS
 	e          *nodeClientETH
 	nodes      map[string]bool
 }
 
-// NewClient ...
-func NewClient(config config.Config) (s *Service, e error) {
+// New ...
+func New(config config.Config) (s *Service, e error) {
 	s = &Service{
 		cfg:   &config,
 		nodes: make(map[string]bool),
 	}
+	s.serve = append(s.serve, NewNodeServerIPFS(config), NewNodeServerETH(config))
+
 	s.i, e = newNodeIPFS(config)
 	if e != nil {
 		return nil, e
 	}
-	s.e, e = newETH(config)
+	s.e, e = newNodeETH(config)
 	if e != nil {
 		return nil, e
 	}
@@ -42,28 +44,39 @@ func NewClient(config config.Config) (s *Service, e error) {
 }
 
 // RegisterServer ...
-func (s *Service) RegisterServer(node NodeClient) {
+func (s *Service) RegisterServer(node NodeServer) {
 	s.serve = append(s.serve, node)
 }
 
 // Run ...
 func (s *Service) Run() {
-	for _, s := range s.serve {
-		s.Start()
+	for _, serv := range s.serve {
+		if err := serv.Start(); err != nil {
+			panic(err)
+		}
 	}
-
-	job, err := s.cron.AddJob("0/5 * * * * *", s.i)
+	jobETH, err := s.cron.AddJob("0 * * * * *", s.e)
 	if err != nil {
 		panic(err)
 	}
-	fmt.Println(outputHead, "[IPFS]", "run id", job)
+	fmt.Println(outputHead, "[ETH]", "run id", jobETH)
 
-	job, err = s.cron.AddJob("0/5 * * * * *", s.e)
+	jobIPFS, err := s.cron.AddJob("0 * * * * *", s.i)
 	if err != nil {
 		panic(err)
 	}
-	fmt.Println(outputHead, "[ETH]", "run id", job)
+	fmt.Println(outputHead, "[IPFS]", "run id", jobIPFS)
+
 	s.cron.Run()
+}
+
+// Stop ...
+func (s *Service) Stop() {
+	for _, serv := range s.serve {
+		if err := serv.Stop(); err != nil {
+			log.Errorw("stop error", "tag", outputHead, "error", err)
+		}
+	}
 }
 
 func syncDNS(cfg config.Config, nodes map[string]bool) {

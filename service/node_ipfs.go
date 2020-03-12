@@ -6,13 +6,11 @@ import (
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/glvd/accipfs/contract/node"
 	"net"
-	"os/exec"
 	"sort"
 	"strings"
 	"time"
 
 	"github.com/fatih/color"
-	"github.com/glvd/accipfs"
 	"github.com/glvd/accipfs/config"
 	"github.com/glvd/accipfs/contract"
 	"github.com/goextension/log"
@@ -32,11 +30,6 @@ type nodeClientIPFS struct {
 	cfg config.Config
 	api *httpapi.HttpApi
 	out *color.Color
-}
-
-type nodeServerIPFS struct {
-	name string
-	cmd  *exec.Cmd
 }
 
 // PeerID ...
@@ -193,12 +186,12 @@ func (n *nodeClientIPFS) Run() {
 		op := &bind.CallOpts{Pending: true}
 		cPeers, err := node.GetIpfsNodes(op)
 		if err != nil {
-			log.Errorw("ipfs serviceNode", "error", err)
+			log.Errorw("get ipfs node error", "tag", outputHead, "error", err)
 			return err
 		}
 		cNodes, err := node.GetPublicIpfsNodes(op)
 		if err != nil {
-			log.Errorw("public ipfs serviceNode", "error", err)
+			log.Errorw("get public ipfs node error", "tag", outputHead, "error", err)
 			return err
 		}
 		cPeers = decodeNodes(n.cfg, cPeers)
@@ -254,24 +247,12 @@ func (n *nodeClientIPFS) Run() {
 	})
 
 	if err != nil {
-		log.Errorw(outputHead, "tag", "ipfs node process error", "err", err)
+		log.Errorw("ipfs node process error", "tag", outputHead, "err", err)
 		return
 	}
 
 	n.output("<IPFS同步完成>")
 	return
-}
-
-// Start ...
-func (n *nodeServerIPFS) Start() {
-	fmt.Println("starting", n.name)
-}
-
-// NodeServerIPFS ...
-func NodeServerIPFS(cfg config.Config) NodeClient {
-	cmd := exec.Command(cfg.IPFS.Name, "")
-	cmd.Env = accipfs.Environ()
-	return &nodeServerIPFS{cmd: cmd}
 }
 
 // Address ...

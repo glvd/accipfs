@@ -11,44 +11,44 @@ import (
 
 // IPFSConfig ...
 type IPFSConfig struct {
-	Name    string
-	Addr    string
-	Timeout int
+	Name    string `json:"name" mapstructure:"name"`
+	Addr    string `json:"addr" mapstructure:"addr"`
+	Timeout int    `json:"timeout" mapstructure:"timeout"`
 }
 
 // ETHConfig ...
 type ETHConfig struct {
-	Name        string            //bin name
-	Addr        string            //eth rpc address
-	KeyHash     string            //binary key hash
-	ETHKeyFile  `json:"key_file"` //default key file
-	KeyFileList []ETHKeyFile      //key file list
-	NodeAddr    string            //node contract address
-	TokenAddr   string            //token contract address
+	ETHKeyFile  `json:"key_file" mapstructure:"key_file"` //default key file
+	KeyFileList []ETHKeyFile                              `json:"key_file_list" mapstructure:"key_file_list"` //key file list
+	Name        string                                    `json:"name" mapstructure:"name"`                   //bin name
+	Addr        string                                    `json:"addr" mapstructure:"addr"`                   //eth rpc address
+	KeyHash     string                                    `json:"key_hash" mapstructure:"key_hash"`           //binary key hash
+	NodeAddr    string                                    `json:"node_addr" mapstructure:"node_addr"`         //node contract address
+	TokenAddr   string                                    `json:"token_addr" mapstructure:"token_addr"`       //token contract address
 }
 
 // AWSConfig ...
 type AWSConfig struct {
-	HostedZoneID       string
-	RecordName         string
-	AwsAccessKeyID     string
-	AwsSecretAccessKey string
+	HostedZoneID       string `json:"hosted_zone_id" mapstructure:"hosted_zone_id"`
+	RecordName         string `json:"record_name" mapstructure:"record_name"`
+	AwsAccessKeyID     string `json:"aws_access_key_id" mapstructure:"aws_access_key_id"`
+	AwsSecretAccessKey string `json:"aws_secret_access_key" mapstructure:"aws_secret_access_key"`
 }
 
 // ETHKeyFile ...
 type ETHKeyFile struct {
-	Name string
-	Pass string
+	Name string `json:"name" mapstructure:"name"`
+	Pass string `json:"pass" mapstructure:"pass"`
 }
 
 // Config ...
 type Config struct {
-	Path       string
-	PrivateKey string
-	PublicKey  string
-	ETH        ETHConfig
-	IPFS       IPFSConfig
-	AWS        AWSConfig
+	Path       string     `json:"path" mapstructure:"path" `
+	PrivateKey string     `json:"private_key" mapstructure:"private_key"`
+	PublicKey  string     `json:"public_key" mapstructure:"public_key"`
+	ETH        ETHConfig  `json:"eth" mapstructure:"eth"`
+	IPFS       IPFSConfig `json:"ipfs" mapstructure:"ipfs"`
+	AWS        AWSConfig  `json:"aws" mapstructure:"aws"`
 }
 
 var name = "config"

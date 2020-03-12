@@ -10,4 +10,9 @@ func TestNodeServerETH(t *testing.T) {
 	c := config.Default()
 	eth := NewNodeServerETH(*c)
 	t.Logf("%+v,cfg:%+v", eth, *c)
+	if err := eth.Init(); err != nil {
+		t.Error(err)
+		return
+	}
+
 }

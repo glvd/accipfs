@@ -2,8 +2,6 @@ package service
 
 import (
 	"github.com/glvd/accipfs/config"
-	"os/exec"
-	"path/filepath"
 )
 
 // NodeServer ...
@@ -20,29 +18,4 @@ type Server struct {
 // NewServer ...
 func NewServer(cfg config.Config) *Server {
 	return &Server{cfg: &cfg}
-}
-
-type nodeServerETH struct {
-	cfg  *config.Config
-	name string
-	cmd  *exec.Cmd
-}
-
-// Start ...
-func (n *nodeServerETH) Start() {
-	panic("TODO")
-}
-
-// Init ...
-func (n *nodeServerETH) Init() {
-	exec.Command(n.name, "--datadir", "../.geth", "init", "../contract")
-}
-
-// NewNodeServerETH ...
-func NewNodeServerETH(cfg config.Config) NodeClient {
-	path := filepath.Join(cfg.Path, "bin", cfg.ETH.Name)
-	return &nodeServerETH{
-		cfg:  &cfg,
-		name: path,
-	}
 }

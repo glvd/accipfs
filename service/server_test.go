@@ -6,8 +6,8 @@ import (
 )
 
 func TestNodeServerETH(t *testing.T) {
+	config.WorkDir = "D:\\workspace\\pvt"
 	c := config.Default()
-	c.Path = "D:\\workspace\\pvt"
 	eth := NewNodeServerETH(*c)
 	t.Logf("%+v", eth)
 }

@@ -2,7 +2,6 @@ package service
 
 import (
 	"github.com/glvd/accipfs/config"
-	"github.com/glvd/accipfs/general"
 	"os/exec"
 	"path/filepath"
 )
@@ -41,8 +40,9 @@ func (n *nodeServerETH) Init() {
 
 // NewNodeServerETH ...
 func NewNodeServerETH(cfg config.Config) NodeClient {
-	path := filepath.Join(general.CurrentDir(), "bin", cfg.ETH.Name)
+	path := filepath.Join(cfg.Path, "bin", cfg.ETH.Name)
 	return &nodeServerETH{
+		cfg:  &cfg,
 		name: path,
 	}
 }

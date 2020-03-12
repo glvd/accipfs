@@ -8,6 +8,7 @@ import (
 type NodeServer interface {
 	Start() error
 	Init() error
+	Stop() error
 }
 
 // Server ...

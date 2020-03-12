@@ -5,16 +5,25 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strconv"
 )
 
 type nodeServerETH struct {
-	cfg  *config.Config
-	name string
-	cmd  *exec.Cmd
+	cfg     *config.Config
+	genesis *config.Genesis
+	name    string
+	cmd     *exec.Cmd
 }
 
 // Start ...
 func (n *nodeServerETH) Start() error {
+	n.cmd = exec.Command(n.name, "--datadir", config.DataDirETH(), "--networkid", strconv.FormatInt(n.genesis.Config.ChainID, 10), "--rpc", "--rpcaddr", "127.0.0.1", "--rpcapi", "db,eth,net,web3,personal")
+	err := n.cmd.Start()
+	if err != nil {
+		return err
+	}
+	//geth --datadir /root/.ethereum --miner.gasprice 1000 --targetgaslimit 50000000  --networkid 20190723 --allow-insecure-unlock --rpc --rpcaddr 0.0.0.0 --rpccorsdomain '*' --rpcapi db,eth,net,web3,personal --unlock 54C0fa4a3d982656c51fe7dFBdCc21923a7678cB --password /root/.ethereum/password --nodiscover --mine
+	return nil
 }
 
 // Init ...
@@ -35,8 +44,13 @@ func (n *nodeServerETH) Init() error {
 // NewNodeServerETH ...
 func NewNodeServerETH(cfg config.Config) NodeServer {
 	path := filepath.Join(cfg.Path, "bin", binName(cfg.ETH.Name))
+	genesis, err := config.LoadGenesis(cfg)
+	if err != nil {
+		panic(err)
+	}
 	return &nodeServerETH{
-		cfg:  &cfg,
-		name: path,
+		cfg:     &cfg,
+		genesis: genesis,
+		name:    path,
 	}
 }

@@ -31,18 +31,26 @@ func (n *nodeServerIPFS) Stop() error {
 // Init ...
 func (n *nodeServerIPFS) Init() error {
 	cmd := exec.Command(n.name, "init", "--profile", "badgerds")
-	if err := cmd.Run(); err != nil {
+	out, err := cmd.CombinedOutput()
+	if err != nil {
 		return err
 	}
+	log.Infow("ipfs init", "tag", outputHead, "log", string(out))
+
 	cmd = exec.Command(n.name, "config", "Swarm.EnableAutoNATService", "--bool", "true")
-	if err := cmd.Run(); err != nil {
+	out, err = cmd.CombinedOutput()
+	if err != nil {
 		return err
 	}
+	log.Infow("ipfs config set", "tag", outputHead, "log", string(out))
+
 	cmd = exec.Command(n.name, "config", "Swarm.EnableRelayHop", "--bool", "true")
-	if err := cmd.Run(); err != nil {
+	out, err = cmd.CombinedOutput()
+	if err != nil {
 		return err
 	}
-	log.Infow("ipfs init", "tag", outputHead)
+	log.Infow("ipfs init config set", "tag", outputHead, "log", string(out))
+	log.Infow("ipfs init end", "tag", outputHead)
 	return nil
 }
 

@@ -3,6 +3,7 @@ package service
 import (
 	"github.com/glvd/accipfs/config"
 	"testing"
+	"time"
 )
 
 func TestNodeServerETH(t *testing.T) {
@@ -15,13 +16,29 @@ func TestNodeServerETH(t *testing.T) {
 	config.Initialize()
 	eth := NewNodeServerETH(config.Global())
 	t.Logf("%+v", eth)
-	if err := eth.Init(); err != nil {
+	//if err := eth.Init(); err != nil {
+	//	t.Error(err)
+	//	return
+	//}
+	if err := eth.Start(); err != nil {
 		t.Error(err)
 		return
 	}
+
 	ipfs := NewNodeServerIPFS(config.Global())
 	t.Logf("%+v", ipfs)
 	if err := ipfs.Init(); err != nil {
+		t.Error(err)
 		return
 	}
+	if err := ipfs.Start(); err != nil {
+		t.Error(err)
+		return
+	}
+
+	time.Sleep(3 * time.Minute)
+
+	eth.Stop()
+	ipfs.Stop()
+
 }

@@ -29,7 +29,7 @@ func (n *nodeServerETH) Stop() error {
 
 // Start ...
 func (n *nodeServerETH) Start() error {
-	n.cmd = exec.CommandContext(n.ctx, n.name, "--datadir", config.DataDirETH(), "--networkid", strconv.FormatInt(n.genesis.Config.ChainID, 10), "--rpc", "--rpcaddr", "127.0.0.1", "--rpcapi", "db,eth,net,web3,personal")
+	n.cmd = exec.CommandContext(n.ctx, n.name, "--datadir", config.DataDirETH(), "--networkid", strconv.FormatInt(n.genesis.Config.ChainID, 10), "--rpc", "--rpcaddr", "127.0.0.1", "--rpcapi", "db,eth,net,web3,personal", "--unlock", "945d35cd4a6549213e8d37feb5d708ec98906902")
 	err := n.cmd.Start()
 	if err != nil {
 		return err

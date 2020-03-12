@@ -55,18 +55,18 @@ func (s *Service) Run() {
 			panic(err)
 		}
 	}
-
-	job, err := s.cron.AddJob("0 * * * * *", s.i)
+	jobETH, err := s.cron.AddJob("0 * * * * *", s.e)
 	if err != nil {
 		panic(err)
 	}
-	fmt.Println(outputHead, "[IPFS]", "run id", job)
+	fmt.Println(outputHead, "[ETH]", "run id", jobETH)
 
-	job, err = s.cron.AddJob("0 * * * * *", s.e)
+	jobIPFS, err := s.cron.AddJob("0 * * * * *", s.i)
 	if err != nil {
 		panic(err)
 	}
-	fmt.Println(outputHead, "[ETH]", "run id", job)
+	fmt.Println(outputHead, "[IPFS]", "run id", jobIPFS)
+
 	s.cron.Run()
 }
 

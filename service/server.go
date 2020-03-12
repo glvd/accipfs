@@ -24,6 +24,7 @@ func NewServer(cfg config.Config) *Server {
 }
 
 type nodeServerETH struct {
+	cfg  *config.Config
 	name string
 	cmd  *exec.Cmd
 }
@@ -35,7 +36,7 @@ func (n *nodeServerETH) Start() {
 
 // Init ...
 func (n *nodeServerETH) Init() {
-
+	exec.Command(n.name, "--datadir", "../.geth", "init", "../contract")
 }
 
 // NewNodeServerETH ...

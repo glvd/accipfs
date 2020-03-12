@@ -79,9 +79,8 @@ func Initialize() {
 
 // LoadConfig ...
 func LoadConfig() (*Config, error) {
-	viper.AddConfigPath(currentPath())
+	viper.AddConfigPath(WorkDir)
 	viper.SetConfigName(name)
-
 	err := viper.MergeInConfig()
 	if err != nil {
 		return nil, err

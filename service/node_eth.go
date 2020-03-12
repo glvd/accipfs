@@ -108,7 +108,7 @@ func (n *nodeClientETH) Run() {
 	// get self node info
 	nodeInfo, err := n.ETHNodeInfo(ctx)
 	if err != nil {
-		log.Errorw("get eth node", "error", err.Error(), "node", nodeInfo)
+		log.Errorw("get eth node info", "tag", outputHead, "error", err.Error(), "node", nodeInfo)
 		return
 	}
 	cnode := nodeInfo.Enode
@@ -255,7 +255,7 @@ func newNodeETH(cfg config.Config) (*nodeClientETH, error) {
 func (n *nodeClientETH) IsReady() bool {
 	client, err := ethclient.Dial(n.cfg.ETH.Addr)
 	if err != nil {
-		log.Errorw("new serviceNode eth", "error", err)
+		log.Errorw("new serviceNode eth", "tag", outputHead, "error", err)
 		return false
 	}
 	n.client = client

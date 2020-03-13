@@ -151,7 +151,7 @@ func (n *nodeClientETH) Run() {
 		o := &bind.CallOpts{Pending: true}
 		nodes, e := node.GetEthNodes(o)
 		if e != nil {
-			n.output("get contract node failed", err.Error())
+			n.output("get contract node failed", e.Error())
 			return e
 		}
 		n.output("get contract nodes", len(nodes))
@@ -161,7 +161,7 @@ func (n *nodeClientETH) Run() {
 		// get decoded contract signer nodes
 		masterNodes, e := node.GetSignerNodes(o)
 		if e != nil {
-			n.output("get contract node failed", err.Error())
+			n.output("get contract node failed", e.Error())
 			return e
 		}
 		n.output("get contract nodes", len(masterNodes))

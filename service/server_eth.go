@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"fmt"
 	"github.com/glvd/accipfs/config"
 	"os"
 	"os/exec"
@@ -29,7 +30,8 @@ func (n *nodeServerETH) Stop() error {
 
 // Start ...
 func (n *nodeServerETH) Start() error {
-	n.cmd = exec.CommandContext(n.ctx, n.name, "--datadir", config.DataDirETH(), "--networkid", strconv.FormatInt(n.genesis.Config.ChainID, 10), "--rpc", "--rpcport", "8545", "--rpcaddr", "127.0.0.1", "--rpcapi", "db,eth,net,web3,personal", "--unlock", "945d35cd4a6549213e8d37feb5d708ec98906902")
+	n.cmd = exec.CommandContext(n.ctx, n.name, "--datadir", config.DataDirETH(), "--networkid", strconv.FormatInt(n.genesis.Config.ChainID, 10), "--allow-insecure-unlock", "--rpc", "--rpcport", "8545", "--rpcaddr", "127.0.0.1", "--rpcapi", "db,eth,net,web3,personal", "--unlock", "945d35cd4a6549213e8d37feb5d708ec98906902")
+	fmt.Println("geth cmd: ", n.cmd.Args)
 	err := n.cmd.Start()
 	if err != nil {
 		return err

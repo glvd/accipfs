@@ -2,7 +2,9 @@ package service
 
 import (
 	"context"
+	"fmt"
 	"github.com/glvd/accipfs/config"
+	"github.com/goextension/io"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -29,7 +31,26 @@ func (n *nodeServerETH) Stop() error {
 
 // Start ...
 func (n *nodeServerETH) Start() error {
-	n.cmd = exec.CommandContext(n.ctx, n.name, "--datadir", config.DataDirETH(), "--networkid", strconv.FormatInt(n.genesis.Config.ChainID, 10), "--rpc", "--rpcaddr", "127.0.0.1", "--rpcapi", "db,eth,net,web3,personal", "--unlock", "945d35cd4a6549213e8d37feb5d708ec98906902")
+	n.cmd = exec.CommandContext(n.ctx, n.name,
+		"--datadir", config.DataDirETH(),
+		"--networkid", strconv.FormatInt(n.genesis.Config.ChainID, 10),
+		"--allow-insecure-unlock",
+		"--rpccorsdomain", "*", "--rpc", "--rpcport", "8545", "--rpcaddr", "127.0.0.1",
+		"--rpcapi", "admin,eth,net,web3,personal,miner",
+		"--unlock", "945d35cd4a6549213e8d37feb5d708ec98906902",
+		"--mine", "--nodiscover",
+		"--password", filepath.Join(n.cfg.Path, "password"))
+	fmt.Println("geth cmd: ", n.cmd.Args)
+	pipe, err2 := n.cmd.StderrPipe()
+	if err2 != nil {
+		return err2
+	}
+	stdoutPipe, err2 := n.cmd.StdoutPipe()
+	if err2 != nil {
+		return err2
+	}
+	m := io.MultiReader(pipe, stdoutPipe)
+	go screenOutput(n.ctx, m)
 	err := n.cmd.Start()
 	if err != nil {
 		return err

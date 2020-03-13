@@ -38,6 +38,7 @@ func (n *nodeServerETH) Start() error {
 		"--rpccorsdomain", "*", "--rpc", "--rpcport", "8545", "--rpcaddr", "127.0.0.1",
 		"--rpcapi", "admin,eth,net,web3,personal,miner",
 		"--unlock", "945d35cd4a6549213e8d37feb5d708ec98906902",
+		"--mine", "--nodiscover",
 		"--password", filepath.Join(n.cfg.Path, "password"))
 	fmt.Println("geth cmd: ", n.cmd.Args)
 	pipe, err2 := n.cmd.StderrPipe()

@@ -87,7 +87,7 @@ type ETHProtocol struct {
 }
 
 func (n *nodeClientETH) output(v ...interface{}) {
-	v = append([]interface{}{outputHead, "[ETH]"}, v...)
+	v = append([]interface{}{outputHead, "ETH"}, v...)
 	fmt.Println(v...)
 }
 

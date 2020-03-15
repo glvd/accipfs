@@ -14,53 +14,53 @@ type memoryCache struct {
 }
 
 // Get ...
-func (m memoryCache) Get(key string) ([]byte, error) {
-	panic("implement me")
+func (m *memoryCache) Get(key string) ([]byte, error) {
+	return m.cache.Get(key)
 }
 
 // GetD ...
-func (m memoryCache) GetD(key string, v []byte) []byte {
-	panic("implement me")
+func (m *memoryCache) GetD(key string, v []byte) []byte {
+	return m.cache.GetD(key, v)
 }
 
 // Set ...
-func (m memoryCache) Set(key string, val []byte) error {
-	panic("implement me")
+func (m *memoryCache) Set(key string, val []byte) error {
+	return m.cache.Set(key, val)
 }
 
 // SetWithTTL ...
-func (m memoryCache) SetWithTTL(key string, val []byte, ttl int64) error {
-	panic("implement me")
+func (m *memoryCache) SetWithTTL(key string, val []byte, ttl int64) error {
+	return m.cache.SetWithTTL(key, val, ttl)
 }
 
 // Has ...
-func (m memoryCache) Has(key string) (bool, error) {
-	panic("implement me")
+func (m *memoryCache) Has(key string) (bool, error) {
+	return m.cache.Has(key)
 }
 
 // Delete ...
-func (m memoryCache) Delete(key string) error {
-	panic("implement me")
+func (m *memoryCache) Delete(key string) error {
+	return m.cache.Delete(key)
 }
 
 // Clear ...
-func (m memoryCache) Clear() error {
-	panic("implement me")
+func (m *memoryCache) Clear() error {
+	return m.cache.Clear()
 }
 
 // GetMultiple ...
-func (m memoryCache) GetMultiple(keys ...string) (map[string][]byte, error) {
-	panic("implement me")
+func (m *memoryCache) GetMultiple(keys ...string) (map[string][]byte, error) {
+	return m.cache.GetMultiple(keys...)
 }
 
 // SetMultiple ...
-func (m memoryCache) SetMultiple(values map[string][]byte) error {
-	panic("implement me")
+func (m *memoryCache) SetMultiple(values map[string][]byte) error {
+	return m.cache.SetMultiple(values)
 }
 
 // DeleteMultiple ...
-func (m memoryCache) DeleteMultiple(keys ...string) error {
-	panic("implement me")
+func (m *memoryCache) DeleteMultiple(keys ...string) error {
+	return m.cache.DeleteMultiple(keys...)
 }
 
 // New ...
@@ -71,5 +71,4 @@ func New(cfg config.Config) cacher.Cacher {
 		memory: make(map[string][]byte),
 		cache:  cache.New(),
 	}
-
 }

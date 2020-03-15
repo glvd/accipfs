@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/glvd/accipfs/aws"
 	"github.com/glvd/accipfs/config"
+	"github.com/gocacher/badger-cache"
 	"github.com/gocacher/cacher"
 	"github.com/goextension/log"
 	"github.com/robfig/cron/v3"
@@ -26,21 +27,25 @@ type Service struct {
 }
 
 // New ...
-func New(config config.Config) (s *Service, e error) {
+func New(cfg config.Config) (s *Service, e error) {
 	s = &Service{
-		cfg:   &config,
+		cfg:   &cfg,
 		nodes: make(map[string]bool),
 	}
-	s.serve = append(s.serve, NewNodeServerIPFS(config), NewNodeServerETH(config))
+	s.serve = append(s.serve, NewNodeServerIPFS(cfg), NewNodeServerETH(cfg))
 
-	s.i, e = newNodeIPFS(config)
+	s.i, e = newNodeIPFS(cfg)
 	if e != nil {
 		return nil, e
 	}
-	s.e, e = newNodeETH(config)
+	s.e, e = newNodeETH(cfg)
 	if e != nil {
 		return nil, e
 	}
+
+	cache.DefaultCachePath = config.DataDirCache()
+	s.cache = cache.New()
+
 	s.cron = cron.New(cron.WithSeconds())
 	return s, e
 }

@@ -1,6 +1,7 @@
 package cache
 
 type cache struct {
+	data map[string]string
 }
 
 // Cache ...

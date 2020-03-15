@@ -121,6 +121,8 @@ github.com/go-ole/go-ole v1.2.1/go.mod h1:7FAglXiTm7HKlQRDeOQ6ZNUHidzCWXuZWq/1dT
 github.com/go-sourcemap/sourcemap v2.1.2+incompatible/go.mod h1:F8jJfvm2KbVjc5NqelyYJmf/v5J0dwNLS2mL4sNA1Jg=
 github.com/go-stack/stack v1.8.0 h1:5SgMzNM5HxrEjV0ww2lTmX6E2Izsfxas4+YHWRs3Lsk=
 github.com/go-stack/stack v1.8.0/go.mod h1:v0f6uXyyMGvRgIKkXu+yp6POWl0qKG85gN/melR3HDY=
+github.com/gocacher/cacher v1.0.5 h1:Nk7TfMg/rhKvYvuP4xe/qGq3KGndQ769BvsbTUpRqQU=
+github.com/gocacher/cacher v1.0.5/go.mod h1:59qIKgE1PQiWqo+pl9cXtvNpG0JJl+CpMz+pOeqRQ64=
 github.com/goextension/extmap v0.0.1 h1:HBNoFczVSs6Twdmi4AN1qFJ6vtmzR80bZ5zt9rrNdi0=
 github.com/goextension/extmap v0.0.1/go.mod h1:Nfdawv1DbZzOgesdNLSiRdUy7oTkN6P4ugpGinSGuRQ=
 github.com/goextension/io v0.0.0-20191016080154-50dbafac3df3 h1:HMUnXbss3UpPgb33MfmuK1U070QIA/FjFEiRjMY/Cmk=

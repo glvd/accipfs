@@ -72,6 +72,8 @@ var dataDirETH = ".eth"
 
 var dataDirIPFS = ".ipfs"
 
+var dataDirCache = ".cache"
+
 func init() {
 	WorkDir = currentPath()
 }
@@ -161,4 +163,9 @@ func DataDirETH() string {
 // DataDirIPFS ...
 func DataDirIPFS() string {
 	return filepath.Join(Global().Path, dataDirIPFS)
+}
+
+// DataDirCache ...
+func DataDirCache() string {
+	return filepath.Join(Global().Path, dataDirCache)
 }

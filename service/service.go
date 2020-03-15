@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/glvd/accipfs/aws"
 	"github.com/glvd/accipfs/config"
+	"github.com/gocacher/cacher"
 	"github.com/goextension/log"
 	"github.com/robfig/cron/v3"
 	"strings"
@@ -15,6 +16,7 @@ const outputHead = "<Service>"
 // Service ...
 type Service struct {
 	cfg        *config.Config
+	cache      cacher.Cacher
 	cron       *cron.Cron
 	serveMutex sync.RWMutex
 	serve      []NodeServer

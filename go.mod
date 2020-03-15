@@ -8,6 +8,7 @@ require (
 	github.com/ethereum/go-ethereum v1.9.11
 	github.com/fatih/color v1.3.0
 	github.com/gocacher/badger-cache v0.0.4
+	github.com/gocacher/badger-cache/v2 v2.0.0
 	github.com/gocacher/cacher v1.0.5
 	github.com/goextension/extmap v0.0.1
 	github.com/goextension/io v0.0.0-20191016080154-50dbafac3df3

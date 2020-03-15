@@ -43,9 +43,6 @@ func New(cfg config.Config) (s *Service, e error) {
 		return nil, e
 	}
 
-	cache.DefaultCachePath = config.DataDirCache()
-	s.cache = cache.New()
-
 	s.cron = cron.New(cron.WithSeconds())
 	return s, e
 }

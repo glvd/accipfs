@@ -3,8 +3,8 @@ package service
 import (
 	"fmt"
 	"github.com/glvd/accipfs/aws"
+	"github.com/glvd/accipfs/cache"
 	"github.com/glvd/accipfs/config"
-	"github.com/gocacher/badger-cache"
 	"github.com/gocacher/cacher"
 	"github.com/goextension/log"
 	"github.com/robfig/cron/v3"
@@ -42,6 +42,8 @@ func New(cfg config.Config) (s *Service, e error) {
 	if e != nil {
 		return nil, e
 	}
+
+	s.cache = cache.New(cfg)
 
 	s.cron = cron.New(cron.WithSeconds())
 	return s, e

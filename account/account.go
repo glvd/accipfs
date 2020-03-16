@@ -1,13 +1,16 @@
 package account
 
 import (
+	"encoding/base64"
 	"encoding/json"
+	"errors"
 	"github.com/ethereum/go-ethereum/accounts"
 	"github.com/ethereum/go-ethereum/accounts/keystore"
 	"github.com/glvd/accipfs/config"
 	"github.com/goextension/tool"
 	"io/ioutil"
 	"path/filepath"
+	"strings"
 )
 
 // Account ...
@@ -36,6 +39,37 @@ func NewAccount(cfg config.Config) (*Account, error) {
 		return nil, e
 	}
 	return &acc, nil
+}
+
+// LoadAccount ...
+func LoadAccount(cfg config.Config) (*Account, error) {
+	var target []byte
+	r := strings.NewReader(cfg.Account)
+	dec := base64.NewDecoder(base64.StdEncoding, r)
+	read, err := dec.Read(target)
+	if err != nil {
+		return nil, err
+	}
+	if read == 0 {
+		return nil, errors.New("read account with size:0")
+	}
+	var acc Account
+	err = json.Unmarshal(target, &acc)
+	if err != nil {
+		return nil, err
+	}
+	return &acc, nil
+}
+
+// SaveToConfig ...
+func SaveToConfig(cfg config.Config, account *Account) error {
+	bytes, err := json.MarshalIndent(account, "", " ")
+	if err != nil {
+		return err
+	}
+	toString := base64.StdEncoding.EncodeToString(bytes)
+	cfg.Account = toString
+	return config.SaveConfig(&cfg)
 }
 
 func (acc *Account) getName(act *accounts.Account) {

@@ -19,13 +19,13 @@ type IPFSConfig struct {
 
 // ETHConfig ...
 type ETHConfig struct {
+	Name        string                                    `json:"name" mapstructure:"name"`             //bin name
+	Addr        string                                    `json:"addr" mapstructure:"addr"`             //eth rpc address
+	KeyHash     string                                    `json:"key_hash" mapstructure:"key_hash"`     //binary key hash
+	NodeAddr    string                                    `json:"node_addr" mapstructure:"node_addr"`   //node contract address
+	TokenAddr   string                                    `json:"token_addr" mapstructure:"token_addr"` //token contract address
 	ETHKeyFile  `json:"key_file" mapstructure:"key_file"` //default key file
 	KeyFileList []ETHKeyFile                              `json:"key_file_list" mapstructure:"key_file_list"` //key file list
-	Name        string                                    `json:"_name" mapstructure:"_name"`                 //bin _name
-	Addr        string                                    `json:"addr" mapstructure:"addr"`                   //eth rpc address
-	KeyHash     string                                    `json:"key_hash" mapstructure:"key_hash"`           //binary key hash
-	NodeAddr    string                                    `json:"node_addr" mapstructure:"node_addr"`         //node contract address
-	TokenAddr   string                                    `json:"token_addr" mapstructure:"token_addr"`       //token contract address
 }
 
 // AWSConfig ...
@@ -82,6 +82,9 @@ func Initialize() {
 		panic(err)
 	}
 	_config = cfg
+
+	log.Infof("config:%+v", _config)
+
 	err = os.Setenv("IPFS_PATH", DataDirIPFS())
 	if err != nil {
 		panic(err)

@@ -166,7 +166,7 @@ func (n *nodeClientIPFS) Run() {
 		if err != nil {
 			//TODO:
 			n.output("err", err.Error())
-			//ipfsAddr := "/ipfs/" + nodeID + "/p2p-circuit/ipfs/" + .Peer
+			//ipfsAddr := "/ipfs/" + nodeID + "/p2p-circuit/ipfs/" + .ETHPeer
 			//peers = append(peers, ipfsAddr)
 		} else {
 			ipfsAddr := info.Address().String()

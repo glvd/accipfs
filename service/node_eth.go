@@ -39,8 +39,8 @@ type Network struct {
 	Trusted       bool
 }
 
-// Peer ...
-type Peer struct {
+// ETHPeer ...
+type ETHPeer struct {
 	Caps      []string
 	ID        string
 	Name      string
@@ -53,11 +53,11 @@ type Peer struct {
 type Result struct {
 	ID      string
 	Jsonrpc string
-	Result  []Peer
+	Result  []ETHPeer
 }
 
-// ETHNode ...
-type ETHNode struct {
+// ETHNodeInfo ...
+type ETHNodeInfo struct {
 	ID         string
 	Enode      string
 	IP         string
@@ -275,11 +275,11 @@ func (n *nodeClientETH) Token() (*token.DhToken, error) {
 }
 
 // NodeInfo ...
-func (n *nodeClientETH) ETHNodeInfo(ctx context.Context) (enode *ETHNode, e error) {
-	var result ETHNode
-	ctx, cancel := context.WithCancel(ctx)
+func (n *nodeClientETH) ETHNodeInfo(ctx context.Context) (enode *ETHNodeInfo, e error) {
+	var result ETHNodeInfo
+	cancelCtx, cancel := context.WithCancel(ctx)
 	defer cancel()
-	cli, e := rpc.Dial(n.cfg.ETH.Addr)
+	cli, e := rpc.DialContext(cancelCtx, n.cfg.ETH.Addr)
 	if e != nil {
 		return nil, e
 	}
@@ -292,16 +292,15 @@ func (n *nodeClientETH) ETHNodeInfo(ctx context.Context) (enode *ETHNode, e erro
 }
 
 // Peers ...
-func (n *nodeClientETH) AllPeers(ctx context.Context) ([]Peer, error) {
-	var peers []Peer
-	ctx, cancel := context.WithCancel(ctx)
+func (n *nodeClientETH) AllPeers(ctx context.Context) ([]ETHPeer, error) {
+	var peers []ETHPeer
+	cancelCtx, cancel := context.WithCancel(ctx)
 	defer cancel()
-	client, err := rpc.Dial(n.cfg.ETH.Addr)
+	client, err := rpc.DialContext(cancelCtx, n.cfg.ETH.Addr)
 	if err != nil {
 		return nil, err
 	}
 	defer client.Close()
-
 	err = client.Call(&peers, "admin_peers")
 	if err != nil {
 		return nil, err

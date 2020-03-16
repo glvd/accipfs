@@ -1,7 +1,7 @@
 package cache
 
 import (
-	"container/list"
+	"container/ring"
 	"github.com/glvd/accipfs/config"
 	"github.com/gocacher/badger-cache/v2"
 	"github.com/gocacher/cacher"
@@ -9,10 +9,10 @@ import (
 )
 
 type memoryCache struct {
-	path    string
-	stdList list.List
-	memory  map[string][]byte
-	cache   cacher.Cacher
+	path   string
+	loop   ring.Ring
+	memory map[string][]byte
+	cache  cacher.Cacher
 }
 
 // Get ...

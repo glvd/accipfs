@@ -12,7 +12,7 @@ import (
 
 // IPFSConfig ...
 type IPFSConfig struct {
-	Name    string `json:"_name" mapstructure:"_name"`
+	Name    string `json:"name" mapstructure:"name"`
 	Addr    string `json:"addr" mapstructure:"addr"`
 	Timeout int    `json:"timeout" mapstructure:"timeout"`
 }
@@ -38,7 +38,7 @@ type AWSConfig struct {
 
 // ETHKeyFile ...
 type ETHKeyFile struct {
-	Name string `json:"_name" mapstructure:"_name"`
+	Name string `json:"name" mapstructure:"name"`
 	Pass string `json:"pass" mapstructure:"pass"`
 }
 

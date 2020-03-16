@@ -308,3 +308,21 @@ func (n *nodeClientETH) AllPeers(ctx context.Context) ([]ETHPeer, error) {
 
 	return peers, nil
 }
+
+// NewAccount ...
+func (n *nodeClientETH) NewAccount(ctx context.Context) error {
+	var inf interface{}
+	cancelCtx, cancel := context.WithCancel(ctx)
+	defer cancel()
+	client, err := rpc.DialContext(cancelCtx, n.cfg.ETH.Addr)
+	if err != nil {
+		return err
+	}
+	defer client.Close()
+	err = client.Call(&inf, "personal_newAccount")
+	if err != nil {
+		return err
+	}
+
+	return nil
+}

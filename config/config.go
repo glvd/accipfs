@@ -162,6 +162,11 @@ func DataDirETH() string {
 	return filepath.Join(Global().Path, _dataDirETH)
 }
 
+// KeyStoreDirETH ...
+func KeyStoreDirETH() string {
+	return filepath.Join(Global().Path, _dataDirETH, "keystore")
+}
+
 // DataDirIPFS ...
 func DataDirIPFS() string {
 	return filepath.Join(Global().Path, _dataDirIPFS)

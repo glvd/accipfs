@@ -1,4 +1,4 @@
-package contract
+package account
 
 // KeyStore ...
 type KeyStore struct {

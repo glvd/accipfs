@@ -10,6 +10,21 @@ import (
 	"path/filepath"
 )
 
+const _keyDir = "key"
+const _configName = "config"
+const _configExt = ".json"
+const _dataDirETH = ".eth"
+const _dataDirIPFS = ".ipfs"
+const _dataDirCache = ".cache"
+const _ethGateway = "http://127.0.0.1:%d"
+const _ipfsGateway = "/ip4/127.0.0.1/tcp/%d"
+
+// DefaultNodeContractAddr ...
+var DefaultNodeContractAddr = "0xbaEEB7a3AF34a365ACAa1f8464A3374B58ac9889"
+
+// DefaultTokenContractAddr ...
+var DefaultTokenContractAddr = "0x9064322CfeE623A447ba5aF0dA6AD3341c073535"
+
 // IPFSConfig ...
 type IPFSConfig struct {
 	Name string `json:"name" mapstructure:"name"`
@@ -54,27 +69,10 @@ type Config struct {
 	AWS        AWSConfig  `json:"aws" mapstructure:"aws"`
 }
 
-var _config *Config
-var _ext = ".json"
-var _name = "config"
-var _dataDirETH = ".eth"
-var _dataDirIPFS = ".ipfs"
-var _dataDirCache = ".cache"
-
 // WorkDir ...
 var WorkDir = ""
 
-// DefaultETHGateway ...
-const DefaultETHGateway = "http://127.0.0.1:%d"
-
-// DefaultIPFSGateway ...
-const DefaultIPFSGateway = "/ip4/127.0.0.1/tcp/%d"
-
-// DefaultNodeContractAddr ...
-var DefaultNodeContractAddr = "0xbaEEB7a3AF34a365ACAa1f8464A3374B58ac9889"
-
-// DefaultTokenContractAddr ...
-var DefaultTokenContractAddr = "0x9064322CfeE623A447ba5aF0dA6AD3341c073535"
+var _config *Config
 
 func init() {
 	WorkDir = currentPath()
@@ -95,7 +93,7 @@ func Initialize() {
 // LoadConfig ...
 func LoadConfig() error {
 	viper.AddConfigPath(WorkDir)
-	viper.SetConfigName(_name)
+	viper.SetConfigName(_configName)
 	err := viper.MergeInConfig()
 	if err != nil {
 		return err
@@ -117,7 +115,7 @@ func SaveConfig(config *Config) error {
 		return e
 	}
 	_config = config
-	return ioutil.WriteFile(filepath.Join(WorkDir, _name+_ext), by, 0755)
+	return ioutil.WriteFile(filepath.Join(WorkDir, _configName+_configExt), by, 0755)
 }
 
 // Global ...
@@ -174,12 +172,17 @@ func DataDirCache() string {
 	return filepath.Join(Global().Path, _dataDirCache)
 }
 
+// KeyDir ...
+func KeyDir() string {
+	return filepath.Join(Global().Path, _keyDir)
+}
+
 // ETHAddr ...
 func ETHAddr() string {
-	return fmt.Sprintf(DefaultETHGateway, Global().ETH.Port)
+	return fmt.Sprintf(_ethGateway, Global().ETH.Port)
 }
 
 // IPFSAddr ...
 func IPFSAddr() string {
-	return fmt.Sprintf(DefaultIPFSGateway, Global().IPFS.Port)
+	return fmt.Sprintf(_ipfsGateway, Global().IPFS.Port)
 }

@@ -75,8 +75,7 @@ func (c *instance) Node(call NodeCall) error {
 	o := bind.NewKeyedTransactor(c.key)
 
 	// gateway redirect to private chain
-	// client, err := ethclient.Dial("http://gate.betabb.space:8545")
-	client, err := ethclient.Dial(c.cfg.ETH.Addr)
+	client, err := ethclient.Dial(config.ETHAddr())
 	if err != nil {
 		return err
 	}
@@ -94,7 +93,7 @@ func (c *instance) Token(call TokenCall) error {
 	o := bind.NewKeyedTransactor(c.key)
 
 	// gateway redirect to private chain
-	client, err := ethclient.Dial(c.cfg.ETH.Addr)
+	client, err := ethclient.Dial(config.ETHAddr())
 	if err != nil {
 		return err
 	}

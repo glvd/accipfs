@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/goextension/extmap"
-	"github.com/goextension/log"
 	"github.com/spf13/viper"
 	"io/ioutil"
 	"os"
@@ -83,11 +82,10 @@ func init() {
 
 // Initialize ...
 func Initialize() {
-	cfg, err := LoadConfig()
+	err := LoadConfig()
 	if err != nil {
 		panic(err)
 	}
-	_config = cfg
 	err = os.Setenv("IPFS_PATH", DataDirIPFS())
 	if err != nil {
 		panic(err)
@@ -95,22 +93,21 @@ func Initialize() {
 }
 
 // LoadConfig ...
-func LoadConfig() (*Config, error) {
+func LoadConfig() error {
 	viper.AddConfigPath(WorkDir)
 	viper.SetConfigName(_name)
 	err := viper.MergeInConfig()
 	if err != nil {
-		return nil, err
+		return err
 	}
 	m := extmap.ToMap(viper.AllSettings())
-
 	var cfg Config
-	log.Infof("cfg map:%+v", m)
 	err = m.Struct(&cfg)
 	if err != nil {
-		return nil, err
+		return err
 	}
-	return &cfg, nil
+	_config = &cfg
+	return nil
 }
 
 // SaveConfig ...
@@ -119,11 +116,15 @@ func SaveConfig(config *Config) error {
 	if e != nil {
 		return e
 	}
+	_config = config
 	return ioutil.WriteFile(filepath.Join(WorkDir, _name+_ext), by, 0755)
 }
 
 // Global ...
 func Global() Config {
+	if _config == nil {
+		panic("config must load first")
+	}
 	return *_config
 }
 
@@ -174,11 +175,11 @@ func DataDirCache() string {
 }
 
 // ETHAddr ...
-func ETHAddr(cfg Config) string {
-	return fmt.Sprintf(DefaultETHGateway, cfg.ETH.Port)
+func ETHAddr() string {
+	return fmt.Sprintf(DefaultETHGateway, Global().ETH.Port)
 }
 
 // IPFSAddr ...
-func IPFSAddr(cfg Config) string {
-	return fmt.Sprintf(DefaultIPFSGateway, cfg.IPFS.Port)
+func IPFSAddr() string {
+	return fmt.Sprintf(DefaultIPFSGateway, Global().IPFS.Port)
 }

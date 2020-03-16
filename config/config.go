@@ -2,6 +2,7 @@ package config
 
 import (
 	"encoding/json"
+	"fmt"
 	"github.com/goextension/extmap"
 	"github.com/goextension/log"
 	"github.com/spf13/viper"
@@ -12,15 +13,17 @@ import (
 
 // IPFSConfig ...
 type IPFSConfig struct {
-	Name    string `json:"name" mapstructure:"name"`
-	Addr    string `json:"addr" mapstructure:"addr"`
-	Timeout int    `json:"timeout" mapstructure:"timeout"`
+	Name string `json:"name" mapstructure:"name"`
+	//Addr    string `json:"addr" mapstructure:"addr"`
+	Port    int `json:"port" mapstructure:"port"`
+	Timeout int `json:"timeout" mapstructure:"timeout"`
 }
 
 // ETHConfig ...
 type ETHConfig struct {
-	Name        string                                    `json:"name" mapstructure:"name"`             //bin name
-	Addr        string                                    `json:"addr" mapstructure:"addr"`             //eth rpc address
+	Name string `json:"name" mapstructure:"name"` //bin name
+	//Addr        string       `json:"addr" mapstructure:"addr"`                   //eth rpc address
+	Port        int                                       `json:"port" mapstructure:"port"`
 	KeyHash     string                                    `json:"key_hash" mapstructure:"key_hash"`     //binary key hash
 	NodeAddr    string                                    `json:"node_addr" mapstructure:"node_addr"`   //node contract address
 	TokenAddr   string                                    `json:"token_addr" mapstructure:"token_addr"` //token contract address
@@ -62,8 +65,11 @@ var _dataDirCache = ".cache"
 // WorkDir ...
 var WorkDir = ""
 
-// DefaultGateway ...
-var DefaultGateway = "http://127.0.0.1:8545"
+// DefaultETHGateway ...
+const DefaultETHGateway = "http://127.0.0.1:%d"
+
+// DefaultIPFSGateway ...
+const DefaultIPFSGateway = "/ip4/127.0.0.1/tcp/%d"
 
 // DefaultNodeContractAddr ...
 var DefaultNodeContractAddr = "0xbaEEB7a3AF34a365ACAa1f8464A3374B58ac9889"
@@ -82,9 +88,6 @@ func Initialize() {
 		panic(err)
 	}
 	_config = cfg
-
-	log.Infof("config:%+v", _config)
-
 	err = os.Setenv("IPFS_PATH", DataDirIPFS())
 	if err != nil {
 		panic(err)
@@ -130,7 +133,7 @@ func Default() *Config {
 		Path: WorkDir,
 		ETH: ETHConfig{
 			Name:    "geth",
-			Addr:    DefaultGateway,
+			Port:    8545,
 			KeyHash: "",
 			ETHKeyFile: ETHKeyFile{
 				Name: "",
@@ -141,7 +144,7 @@ func Default() *Config {
 		},
 		IPFS: IPFSConfig{
 			Name:    "ipfs",
-			Addr:    "/ip4/127.0.0.1/tcp/5001",
+			Port:    5001,
 			Timeout: 30,
 		},
 	}
@@ -168,4 +171,14 @@ func DataDirIPFS() string {
 // DataDirCache ...
 func DataDirCache() string {
 	return filepath.Join(Global().Path, _dataDirCache)
+}
+
+// ETHAddr ...
+func ETHAddr(cfg Config) string {
+	return fmt.Sprintf(DefaultETHGateway, cfg.ETH.Port)
+}
+
+// IPFSAddr ...
+func IPFSAddr(cfg Config) string {
+	return fmt.Sprintf(DefaultIPFSGateway, cfg.IPFS.Port)
 }

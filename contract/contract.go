@@ -2,7 +2,6 @@ package contract
 
 import (
 	"crypto/ecdsa"
-	"fmt"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/accounts/keystore"
 	"github.com/ethereum/go-ethereum/common"
@@ -51,7 +50,7 @@ func HexKey(cfg config.Config) *ecdsa.PrivateKey {
 func FileKey(cfg config.Config) *ecdsa.PrivateKey {
 	bys, e := ioutil.ReadFile(filepath.Join(cfg.Path, cfg.ETH.ETHKeyFile.Name))
 	if e != nil {
-		panic(fmt.Errorf("failed (%w) with path: %s", e, filepath.Join(cfg.Path, cfg.ETH.ETHKeyFile.Name)))
+		panic(e)
 	}
 
 	keys, err := keystore.DecryptKey(bys, cfg.ETH.Pass)

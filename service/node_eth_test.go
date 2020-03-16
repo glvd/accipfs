@@ -15,7 +15,7 @@ func TestNodeClientETH_NewAccount(t *testing.T) {
 		t.Fatal(err)
 	}
 	defer client.Close()
-	err = client.Call(&inf, "personal_newAccount")
+	err = client.Call(&inf, "personal_newAccount", "123")
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -12,7 +12,7 @@ import (
 
 // IPFSConfig ...
 type IPFSConfig struct {
-	Name    string `json:"name" mapstructure:"name"`
+	Name    string `json:"_name" mapstructure:"_name"`
 	Addr    string `json:"addr" mapstructure:"addr"`
 	Timeout int    `json:"timeout" mapstructure:"timeout"`
 }
@@ -21,7 +21,7 @@ type IPFSConfig struct {
 type ETHConfig struct {
 	ETHKeyFile  `json:"key_file" mapstructure:"key_file"` //default key file
 	KeyFileList []ETHKeyFile                              `json:"key_file_list" mapstructure:"key_file_list"` //key file list
-	Name        string                                    `json:"name" mapstructure:"name"`                   //bin name
+	Name        string                                    `json:"_name" mapstructure:"_name"`                 //bin _name
 	Addr        string                                    `json:"addr" mapstructure:"addr"`                   //eth rpc address
 	KeyHash     string                                    `json:"key_hash" mapstructure:"key_hash"`           //binary key hash
 	NodeAddr    string                                    `json:"node_addr" mapstructure:"node_addr"`         //node contract address
@@ -38,7 +38,7 @@ type AWSConfig struct {
 
 // ETHKeyFile ...
 type ETHKeyFile struct {
-	Name string `json:"name" mapstructure:"name"`
+	Name string `json:"_name" mapstructure:"_name"`
 	Pass string `json:"pass" mapstructure:"pass"`
 }
 
@@ -52,9 +52,15 @@ type Config struct {
 	AWS        AWSConfig  `json:"aws" mapstructure:"aws"`
 }
 
-var name = "config"
-var ext = ".json"
 var _config *Config
+var _ext = ".json"
+var _name = "config"
+var _dataDirETH = ".eth"
+var _dataDirIPFS = ".ipfs"
+var _dataDirCache = ".cache"
+
+// WorkDir ...
+var WorkDir = ""
 
 // DefaultGateway ...
 var DefaultGateway = "http://127.0.0.1:8545"
@@ -64,15 +70,6 @@ var DefaultNodeContractAddr = "0xbaEEB7a3AF34a365ACAa1f8464A3374B58ac9889"
 
 // DefaultTokenContractAddr ...
 var DefaultTokenContractAddr = "0x9064322CfeE623A447ba5aF0dA6AD3341c073535"
-
-// WorkDir ...
-var WorkDir = ""
-
-var dataDirETH = ".eth"
-
-var dataDirIPFS = ".ipfs"
-
-var dataDirCache = ".cache"
 
 func init() {
 	WorkDir = currentPath()
@@ -94,7 +91,7 @@ func Initialize() {
 // LoadConfig ...
 func LoadConfig() (*Config, error) {
 	viper.AddConfigPath(WorkDir)
-	viper.SetConfigName(name)
+	viper.SetConfigName(_name)
 	err := viper.MergeInConfig()
 	if err != nil {
 		return nil, err
@@ -116,7 +113,7 @@ func SaveConfig(config *Config) error {
 	if e != nil {
 		return e
 	}
-	return ioutil.WriteFile(filepath.Join(WorkDir, name+ext), by, 0755)
+	return ioutil.WriteFile(filepath.Join(WorkDir, _name+_ext), by, 0755)
 }
 
 // Global ...
@@ -157,15 +154,15 @@ func currentPath() string {
 
 // DataDirETH ...
 func DataDirETH() string {
-	return filepath.Join(Global().Path, dataDirETH)
+	return filepath.Join(Global().Path, _dataDirETH)
 }
 
 // DataDirIPFS ...
 func DataDirIPFS() string {
-	return filepath.Join(Global().Path, dataDirIPFS)
+	return filepath.Join(Global().Path, _dataDirIPFS)
 }
 
 // DataDirCache ...
 func DataDirCache() string {
-	return filepath.Join(Global().Path, dataDirCache)
+	return filepath.Join(Global().Path, _dataDirCache)
 }

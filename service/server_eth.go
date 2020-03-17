@@ -3,7 +3,6 @@ package service
 import (
 	"context"
 	"fmt"
-	"github.com/glvd/accipfs/accelerate"
 	"github.com/glvd/accipfs/config"
 	"github.com/goextension/io"
 	"os"
@@ -15,7 +14,7 @@ import (
 type nodeServerETH struct {
 	ctx     context.Context
 	cancel  context.CancelFunc
-	cfg     config.Config
+	cfg     *config.Config
 	genesis *config.Genesis
 	name    string
 	cmd     *exec.Cmd
@@ -56,7 +55,7 @@ func (n *nodeServerETH) Start() error {
 		return err2
 	}
 	m := io.MultiReader(pipe, stdoutPipe)
-	go accelerate.screenOutput(n.ctx, m)
+	go screenOutput(n.ctx, m)
 	err := n.cmd.Start()
 	if err != nil {
 		return err
@@ -81,7 +80,7 @@ func (n *nodeServerETH) Init() error {
 }
 
 // NewNodeServerETH ...
-func NewNodeServerETH(cfg config.Config) NodeServer {
+func NewNodeServerETH(cfg *config.Config) NodeServer {
 	path := filepath.Join(cfg.Path, "bin", binName(cfg.ETH.Name))
 	genesis, err := config.LoadGenesis(cfg)
 	if err != nil {

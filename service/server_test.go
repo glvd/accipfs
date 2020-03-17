@@ -5,7 +5,8 @@ import (
 	"github.com/glvd/accipfs/account"
 	"github.com/glvd/accipfs/config"
 	"github.com/goextension/log/zap"
-	"github.com/gorilla/rpc/v2/json"
+	"github.com/gorilla/rpc/v2/json2"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"testing"
@@ -77,7 +78,7 @@ func TestNewServer(t *testing.T) {
 	go server.Start()
 	url := "http://localhost:1234/rpc"
 
-	message, err := json.EncodeClientRequest("Accelerate.ID", &Empty{})
+	message, err := json2.EncodeClientRequest("Accelerate.ID", &Empty{})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -86,9 +87,13 @@ func TestNewServer(t *testing.T) {
 		t.Fatal(err)
 	}
 	defer resp.Body.Close()
-
+	all, e := ioutil.ReadAll(resp.Body)
+	if e != nil {
+		t.Fatal(e)
+	}
+	t.Log(string(all))
 	reply := new(Account)
-	err = json.DecodeClientResponse(resp.Body, reply)
+	err = json2.DecodeClientResponse(bytes.NewReader(all), reply)
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"github.com/glvd/accipfs/config"
 	"github.com/gorilla/mux"
-	"github.com/gorilla/rpc"
-	"github.com/gorilla/rpc/json"
+	"github.com/gorilla/rpc/v2"
+	"github.com/gorilla/rpc/v2/json2"
 	"io"
 	"log"
 	"net/http"
@@ -24,18 +24,18 @@ type NodeServer interface {
 
 // Server ...
 type Server struct {
-	cfg       config.Config
+	cfg       *config.Config
 	rpcServer *rpc.Server
 	route     *mux.Router
 }
 
 // NewRPCServer ...
-func NewRPCServer(cfg config.Config) (*Server, error) {
+func NewRPCServer(cfg *config.Config) (*Server, error) {
 	rpcServer := rpc.NewServer()
-	rpcServer.RegisterCodec(json.NewCodec(), "application/json")
-	rpcServer.RegisterCodec(json.NewCodec(), "application/json;charset=UTF-8")
+	rpcServer.RegisterCodec(json2.NewCodec(), "application/json")
+	rpcServer.RegisterCodec(json2.NewCodec(), "application/json;charset=UTF-8")
 
-	acc, err := NewServerAccelerate(cfg)
+	acc, err := NewServerAccelerate(*cfg)
 	if err != nil {
 		return nil, err
 	}

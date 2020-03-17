@@ -28,9 +28,9 @@ type Service struct {
 }
 
 // New ...
-func New(cfg config.Config) (s *Service, e error) {
+func New(cfg *config.Config) (s *Service, e error) {
 	s = &Service{
-		cfg:   &cfg,
+		cfg:   cfg,
 		nodes: make(map[string]bool),
 	}
 
@@ -83,7 +83,7 @@ func (s *Service) Stop() {
 	}
 }
 
-func syncDNS(cfg config.Config, nodes map[string]bool) {
+func syncDNS(cfg *config.Config, nodes map[string]bool) {
 	//defer fmt.Println("<更新网关数据完成...>")
 	var records []string
 	// build serviceNode records

@@ -27,7 +27,7 @@ const ipfsAPI = "api"
 
 type nodeClientIPFS struct {
 	*serviceNode
-	cfg config.Config
+	cfg *config.Config
 	api *httpapi.HttpApi
 	out *color.Color
 }
@@ -41,7 +41,7 @@ type PeerID struct {
 	PublicKey       string   `json:"PublicKey"`
 }
 
-func newNodeIPFS(config config.Config) (Node, error) {
+func newNodeIPFS(config *config.Config) (Node, error) {
 	return &nodeClientIPFS{
 		cfg:         config,
 		serviceNode: nodeInstance(),

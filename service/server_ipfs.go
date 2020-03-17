@@ -13,7 +13,7 @@ import (
 type nodeServerIPFS struct {
 	ctx    context.Context
 	cancel context.CancelFunc
-	cfg    config.Config
+	cfg    *config.Config
 	name   string
 	cmd    *exec.Cmd
 }
@@ -74,7 +74,7 @@ func (n *nodeServerIPFS) Init() error {
 }
 
 // NewNodeServerIPFS ...
-func NewNodeServerIPFS(cfg config.Config) NodeServer {
+func NewNodeServerIPFS(cfg *config.Config) NodeServer {
 	path := filepath.Join(cfg.Path, "bin", binName(cfg.IPFS.Name))
 	ctx, cancelFunc := context.WithCancel(context.Background())
 	return &nodeServerIPFS{

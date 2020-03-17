@@ -23,7 +23,7 @@ type serviceNode struct {
 func nodeInstance() *serviceNode {
 	return &serviceNode{lock: atomic.NewBool(false)}
 }
-func decodeNodes(cfg config.Config, nodes []string) []string {
+func decodeNodes(cfg *config.Config, nodes []string) []string {
 	// init contract
 	var decodeNodes []string
 	decoder := dhcrypto.NewCipherDecode([]byte(cfg.PrivateKey), dateKey)
@@ -40,7 +40,7 @@ func decodeNodes(cfg config.Config, nodes []string) []string {
 	return decodeNodes
 }
 
-func encodeNodes(cfg config.Config, nodes []string) []string {
+func encodeNodes(cfg *config.Config, nodes []string) []string {
 	var encodedNodes []string
 	encoder := dhcrypto.NewCipherEncoder([]byte(cfg.PublicKey), 10, dateKey)
 	for _, node := range nodes {

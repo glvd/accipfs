@@ -21,8 +21,8 @@ type Service struct {
 	cron       *cron.Cron
 	serveMutex sync.RWMutex
 	serve      []NodeServer
-	i          *nodeClientIPFS
-	e          *nodeClientETH
+	ipfsNode   Node
+	ethNode    Node
 	nodes      map[string]bool
 }
 
@@ -34,11 +34,11 @@ func New(cfg config.Config) (s *Service, e error) {
 	}
 	s.serve = append(s.serve, NewNodeServerIPFS(cfg), NewNodeServerETH(cfg))
 
-	s.i, e = newNodeIPFS(cfg)
+	s.ipfsNode, e = newNodeIPFS(cfg)
 	if e != nil {
 		return nil, e
 	}
-	s.e, e = newNodeETH(cfg)
+	s.ethNode, e = newNodeETH(cfg)
 	if e != nil {
 		return nil, e
 	}
@@ -61,13 +61,13 @@ func (s *Service) Run() {
 			panic(err)
 		}
 	}
-	jobETH, err := s.cron.AddJob("0 * * * * *", s.e)
+	jobETH, err := s.cron.AddJob("0 * * * * *", s.ethNode)
 	if err != nil {
 		panic(err)
 	}
 	fmt.Println(outputHead, "ETH", "run id", jobETH)
 
-	jobIPFS, err := s.cron.AddJob("0 * * * * *", s.i)
+	jobIPFS, err := s.cron.AddJob("0 * * * * *", s.ipfsNode)
 	if err != nil {
 		panic(err)
 	}

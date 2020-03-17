@@ -67,13 +67,6 @@ type ETHNodeInfo struct {
 	Protocols  interface{}
 }
 
-// ETHNodeResult ...
-type ETHNodeResult struct {
-	ID      string
-	Jsonrpc string
-	Result  NodeClient
-}
-
 // ETHProtocolInfo ...
 type ETHProtocolInfo struct {
 	Difficulty int    `json:"difficulty"`
@@ -243,7 +236,7 @@ func (n *nodeClientETH) Run() {
 	return
 }
 
-func newNodeETH(cfg config.Config) (*nodeClientETH, error) {
+func newNodeETH(cfg config.Config) (Node, error) {
 	return &nodeClientETH{
 		cfg:         cfg,
 		serviceNode: nodeInstance(),

@@ -26,6 +26,7 @@ type NodeServer interface {
 type Server struct {
 	cfg       config.Config
 	rpcServer *rpc.Server
+	route     *mux.Router
 }
 
 // NewServer ...
@@ -33,22 +34,28 @@ func NewServer(cfg config.Config) (*Server, error) {
 	rpcServer := rpc.NewServer()
 	rpcServer.RegisterCodec(json.NewCodec(), "application/json")
 	rpcServer.RegisterCodec(json.NewCodec(), "application/json;charset=UTF-8")
-	acc := &nodeServerAccelerate{}
-	err := rpcServer.RegisterService(acc, "accelerate")
+	acc := &NodeServerAccelerate{}
+	err := rpcServer.RegisterService(acc, "")
 	if err != nil {
 		return nil, err
 	}
-	r := mux.NewRouter()
-	r.Handle("/rpc", rpcServer)
-	log.Println("JSON RPC service listen and serving on port 1234")
-	if err := http.ListenAndServe(":1234", r); err != nil {
-		log.Fatalf("Error serving: %s", err)
-	}
-
 	return &Server{
 		cfg:       cfg,
 		rpcServer: rpcServer,
+		route:     mux.NewRouter(),
 	}, nil
+}
+
+// Start ...
+func (s *Server) Start() error {
+	s.route.Handle("rpc", s.rpcServer)
+
+	log.Println("JSON RPC service listen and serving on port 1234")
+	if err := http.ListenAndServe(":1234", s.route); err != nil {
+		log.Fatalf("Error serving: %s", err)
+		return err
+	}
+	return nil
 }
 
 func screenOutput(ctx context.Context, reader io.Reader) (e error) {

@@ -67,7 +67,7 @@ func (n *nodeClientIPFS) SwarmConnect(ctx context.Context, addr string) (e error
 }
 
 func (n *nodeClientIPFS) connect() (e error) {
-	ma, err := multiaddr.NewMultiaddr(n.cfg.IPFS.Addr)
+	ma, err := multiaddr.NewMultiaddr(config.IPFSAddr())
 	if err != nil {
 		return err
 	}
@@ -109,7 +109,7 @@ func (n *nodeClientIPFS) PinRm(ctx context.Context, hash string) (e error) {
 
 // IsReady ...
 func (n *nodeClientIPFS) IsReady() bool {
-	ma, err := multiaddr.NewMultiaddr(n.cfg.IPFS.Addr)
+	ma, err := multiaddr.NewMultiaddr(config.IPFSAddr())
 	if err != nil {
 		return false
 	}

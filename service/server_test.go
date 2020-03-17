@@ -1,8 +1,12 @@
 package service
 
 import (
+	"bytes"
 	"github.com/glvd/accipfs/config"
 	"github.com/goextension/log/zap"
+	"github.com/gorilla/rpc/v2/json"
+	"log"
+	"net/http"
 	"testing"
 )
 
@@ -51,4 +55,32 @@ func TestNodeServerETH(t *testing.T) {
 	//	return
 	//}
 	t.Log("done")
+}
+
+func TestNewServer(t *testing.T) {
+	config.WorkDir = "d:\\workspace\\pvt"
+	config.Initialize()
+	server, e := NewServer(config.Global())
+	if e != nil {
+		t.Fatal(e)
+	}
+	go server.Start()
+	url := "http://localhost:1234/rpc"
+
+	message, err := json.EncodeClientRequest("Accelerate.Ping", nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	resp, err := http.Post(url, "application/json", bytes.NewReader(message))
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer resp.Body.Close()
+
+	reply := new(string)
+	err = json.DecodeClientResponse(resp.Body, reply)
+	if err != nil {
+		t.Fatal(err)
+	}
+	log.Printf(" %s\n", *reply)
 }

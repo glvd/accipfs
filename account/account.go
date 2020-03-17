@@ -3,7 +3,6 @@ package account
 import (
 	"encoding/base64"
 	"encoding/json"
-	"errors"
 	"github.com/ethereum/go-ethereum/accounts"
 	"github.com/ethereum/go-ethereum/accounts/keystore"
 	"github.com/glvd/accipfs/config"
@@ -44,15 +43,11 @@ func NewAccount(cfg config.Config) (*Account, error) {
 
 // LoadAccount ...
 func LoadAccount(cfg config.Config) (*Account, error) {
-	var target []byte
 	r := strings.NewReader(cfg.Account)
 	dec := base64.NewDecoder(base64.StdEncoding, r)
-	read, err := dec.Read(target)
+	target, err := ioutil.ReadAll(dec)
 	if err != nil {
 		return nil, err
-	}
-	if read == 0 {
-		return nil, errors.New("read account with size:0")
 	}
 	var acc Account
 	err = json.Unmarshal(target, &acc)

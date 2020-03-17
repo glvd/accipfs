@@ -2,6 +2,7 @@ package service
 
 import (
 	"bytes"
+	"github.com/glvd/accipfs/account"
 	"github.com/glvd/accipfs/config"
 	"github.com/goextension/log/zap"
 	"github.com/gorilla/rpc/v2/json"
@@ -60,6 +61,15 @@ func TestNodeServerETH(t *testing.T) {
 func TestNewServer(t *testing.T) {
 	config.WorkDir = "d:\\workspace\\pvt"
 	config.Initialize()
+	cfg := config.Global()
+	acc, e := account.NewAccount(cfg)
+	if e != nil {
+		t.Fatal(e)
+	}
+	if err := acc.Save(cfg); err != nil {
+		t.Fatal(err)
+	}
+	t.Logf("%+v", cfg)
 	server, e := NewServer(config.Global())
 	if e != nil {
 		t.Fatal(e)
@@ -67,7 +77,7 @@ func TestNewServer(t *testing.T) {
 	go server.Start()
 	url := "http://localhost:1234/rpc"
 
-	message, err := json.EncodeClientRequest("Accelerate.Ping", &Empty{})
+	message, err := json.EncodeClientRequest("Accelerate.ID", &Empty{})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -77,7 +87,7 @@ func TestNewServer(t *testing.T) {
 	}
 	defer resp.Body.Close()
 
-	reply := new(string)
+	reply := new(Account)
 	err = json.DecodeClientResponse(resp.Body, reply)
 	if err != nil {
 		t.Fatal(err)

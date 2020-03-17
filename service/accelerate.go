@@ -55,7 +55,7 @@ func (n *Accelerate) ID(r *http.Request, s *Empty, result *Account) error {
 	return nil
 }
 
-// ExchangeNode ...
-func (n *Accelerate) ExchangeNode(r *http.Request, list NodeList, result NodeList) error {
+// Connect ...
+func (n *Accelerate) Connect(r *http.Request, addr *string, result *bool) error {
 	return nil
 }

@@ -14,6 +14,7 @@ type NodeServer interface {
 	Start() error
 	Init() error
 	Stop() error
+	Node() Node
 }
 
 // Server ...

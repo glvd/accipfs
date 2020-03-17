@@ -19,9 +19,9 @@ type HandleInfo struct {
 // HandleCallback ...
 type HandleCallback func(src interface{})
 
-// NodeClient ...
-type NodeClient interface {
-	Start()
+// Node ...
+type Node interface {
+	Run()
 }
 
 var dateKey = time.Date(2019, time.November, 11, 10, 20, 10, 300, time.Local)

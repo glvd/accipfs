@@ -9,6 +9,7 @@ import (
 	"github.com/glvd/accipfs/config"
 	"github.com/goextension/tool"
 	"io/ioutil"
+	"os"
 	"path/filepath"
 	"strings"
 )
@@ -72,8 +73,29 @@ func saveAccountToConfig(account *Account, cfg config.Config) error {
 	return config.SaveConfig(&cfg)
 }
 
+// Check ...
+func (acc *Account) Check() error {
+	path := filepath.Join(config.KeyStoreDirETH(), acc.Name)
+	_, e := os.Stat(path)
+	if e != nil && os.IsNotExist(e) {
+		bytes, e := json.Marshal(acc.KeyStore)
+		if e != nil {
+			return e
+		}
+		e = ioutil.WriteFile(path, bytes, 0755)
+		if e != nil {
+			return e
+		}
+		return nil
+	}
+	return nil
+}
+
 // Save ...
 func (acc *Account) Save(cfg config.Config) error {
+	if err := acc.Check(); err != nil {
+		return err
+	}
 	return saveAccountToConfig(acc, cfg)
 }
 

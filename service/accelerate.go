@@ -59,3 +59,8 @@ func (n *Accelerate) ID(r *http.Request, s *Empty, result *Account) error {
 func (n *Accelerate) Connect(r *http.Request, addr *string, result *bool) error {
 	return nil
 }
+
+// Exchange ...
+func (n *Accelerate) Exchange(r *http.Request, from, to interface{}) error {
+	return nil
+}

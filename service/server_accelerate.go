@@ -1,10 +1,19 @@
 package service
 
-// NodeServerAccelerate ...
-type NodeServerAccelerate struct {
+import (
+	"net/http"
+)
+
+// Empty ...
+type Empty struct {
+}
+
+// Accelerate ...
+type Accelerate struct {
 }
 
 // Ping ...
-func (n *NodeServerAccelerate) Ping() string {
-	return "pong pong pong"
+func (n *Accelerate) Ping(r *http.Request, s *Empty, result *string) error {
+	*result = "pong pong pong"
+	return nil
 }

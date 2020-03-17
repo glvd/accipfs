@@ -61,6 +61,7 @@ type ETHKeyFile struct {
 
 // Config ...
 type Config struct {
+	Port       int        `json:"port" mapstructure:"port"`
 	Path       string     `json:"path" mapstructure:"path" `
 	Account    string     `json:"account" mapstructure:"account"`
 	PrivateKey string     `json:"private_key" mapstructure:"private_key"`

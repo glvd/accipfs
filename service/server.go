@@ -34,7 +34,7 @@ func NewServer(cfg config.Config) (*Server, error) {
 	rpcServer := rpc.NewServer()
 	rpcServer.RegisterCodec(json.NewCodec(), "application/json")
 	rpcServer.RegisterCodec(json.NewCodec(), "application/json;charset=UTF-8")
-	acc := &NodeServerAccelerate{}
+	acc := &Accelerate{}
 	err := rpcServer.RegisterService(acc, "")
 	if err != nil {
 		return nil, err
@@ -48,7 +48,7 @@ func NewServer(cfg config.Config) (*Server, error) {
 
 // Start ...
 func (s *Server) Start() error {
-	s.route.Handle("rpc", s.rpcServer)
+	s.route.Handle("/rpc", s.rpcServer)
 
 	log.Println("JSON RPC service listen and serving on port 1234")
 	if err := http.ListenAndServe(":1234", s.route); err != nil {

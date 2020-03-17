@@ -67,7 +67,7 @@ func TestNewServer(t *testing.T) {
 	go server.Start()
 	url := "http://localhost:1234/rpc"
 
-	message, err := json.EncodeClientRequest("Accelerate.Ping", nil)
+	message, err := json.EncodeClientRequest("Accelerate.Ping", &Empty{})
 	if err != nil {
 		t.Fatal(err)
 	}

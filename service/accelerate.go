@@ -12,15 +12,24 @@ type Empty struct {
 
 // Account ...
 type Account struct {
-	Name         string
-	ContractAddr string
-	DataAddr     string
+	Name string
 }
 
 // Accelerate ...
 type Accelerate struct {
 	self *account.Account
 }
+
+// NodeInfo ...
+type NodeInfo struct {
+	Name         string
+	ContractAddr string
+	DataAddr     string
+	Version      string
+}
+
+// NodeList ...
+type NodeList map[string]NodeInfo
 
 // NewServerAccelerate ...
 func NewServerAccelerate(cfg *config.Config) (*Accelerate, error) {
@@ -46,11 +55,7 @@ func (n *Accelerate) ID(r *http.Request, s *Empty, result *Account) error {
 	return nil
 }
 
-// NodeList ...
-type NodeList struct {
-}
-
 // ExchangeNode ...
-func (n *Accelerate) ExchangeNode(r *http.Request, list *NodeList, result *NodeList) error {
+func (n *Accelerate) ExchangeNode(r *http.Request, list NodeList, result NodeList) error {
 	return nil
 }

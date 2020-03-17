@@ -70,7 +70,7 @@ func TestNewServer(t *testing.T) {
 		t.Fatal(err)
 	}
 	t.Logf("%+v", cfg)
-	server, e := NewServer(config.Global())
+	server, e := NewRPCServer(config.Global())
 	if e != nil {
 		t.Fatal(e)
 	}

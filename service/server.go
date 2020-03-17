@@ -4,7 +4,6 @@ import (
 	"bufio"
 	"context"
 	"fmt"
-	"github.com/glvd/accipfs/account"
 	"github.com/glvd/accipfs/config"
 	"github.com/gorilla/mux"
 	"github.com/gorilla/rpc"
@@ -30,18 +29,17 @@ type Server struct {
 	route     *mux.Router
 }
 
-// NewServer ...
-func NewServer(cfg config.Config) (*Server, error) {
+// NewRPCServer ...
+func NewRPCServer(cfg config.Config) (*Server, error) {
 	rpcServer := rpc.NewServer()
 	rpcServer.RegisterCodec(json.NewCodec(), "application/json")
 	rpcServer.RegisterCodec(json.NewCodec(), "application/json;charset=UTF-8")
-	account, err := account.LoadAccount(cfg)
+
+	acc, err := NewServerAccelerate(cfg)
 	if err != nil {
 		return nil, err
 	}
-	acc := &Accelerate{
-		self: account,
-	}
+
 	err = rpcServer.RegisterService(acc, "")
 	if err != nil {
 		return nil, err

@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"fmt"
+	"github.com/glvd/accipfs/accelerate"
 	"github.com/glvd/accipfs/config"
 	"github.com/goextension/io"
 	"os"
@@ -55,7 +56,7 @@ func (n *nodeServerETH) Start() error {
 		return err2
 	}
 	m := io.MultiReader(pipe, stdoutPipe)
-	go screenOutput(n.ctx, m)
+	go accelerate.screenOutput(n.ctx, m)
 	err := n.cmd.Start()
 	if err != nil {
 		return err

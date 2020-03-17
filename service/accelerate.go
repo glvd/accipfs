@@ -22,8 +22,8 @@ type Accelerate struct {
 	self *account.Account
 }
 
-// NewAccelerate ...
-func NewAccelerate(cfg config.Config) (*Accelerate, error) {
+// NewServerAccelerate ...
+func NewServerAccelerate(cfg config.Config) (*Accelerate, error) {
 	account, err := account.LoadAccount(cfg)
 	if err != nil {
 		return nil, err
@@ -42,5 +42,6 @@ func (n *Accelerate) Ping(r *http.Request, s *Empty, result *string) error {
 // ID ...
 func (n *Accelerate) ID(r *http.Request, s *Empty, result *Account) error {
 	result.Name = n.self.Name
+
 	return nil
 }

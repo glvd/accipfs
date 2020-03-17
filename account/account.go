@@ -42,7 +42,7 @@ func NewAccount(cfg config.Config) (*Account, error) {
 }
 
 // LoadAccount ...
-func LoadAccount(cfg config.Config) (*Account, error) {
+func LoadAccount(cfg *config.Config) (*Account, error) {
 	r := strings.NewReader(cfg.Account)
 	dec := base64.NewDecoder(base64.StdEncoding, r)
 	target, err := ioutil.ReadAll(dec)
@@ -58,14 +58,14 @@ func LoadAccount(cfg config.Config) (*Account, error) {
 }
 
 // SaveAccountToConfig ...
-func saveAccountToConfig(account *Account, cfg config.Config) error {
+func saveAccountToConfig(account *Account, cfg *config.Config) error {
 	bytes, err := json.Marshal(account)
 	if err != nil {
 		return err
 	}
 	acc := base64.StdEncoding.EncodeToString(bytes)
 	cfg.Account = acc
-	return config.SaveConfig(&cfg)
+	return config.SaveConfig(cfg)
 }
 
 // Check ...
@@ -87,7 +87,7 @@ func (acc *Account) Check() error {
 }
 
 // Save ...
-func (acc *Account) Save(cfg config.Config) error {
+func (acc *Account) Save(cfg *config.Config) error {
 	if err := acc.Check(); err != nil {
 		return err
 	}

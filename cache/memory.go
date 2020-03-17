@@ -66,7 +66,7 @@ func (m *memoryCache) DeleteMultiple(keys ...string) error {
 }
 
 // New ...
-func New(cfg config.Config) cacher.Cacher {
+func New(cfg *config.Config) cacher.Cacher {
 	cache.DefaultCachePath = filepath.Join(cfg.Path, ".cache")
 	return &memoryCache{
 		path:   cache.DefaultCachePath,

@@ -18,7 +18,7 @@ const keyStore = `{"address":"945d35cd4a6549213e8d37feb5d708ec98906902","crypto"
 
 // instance ...
 type instance struct {
-	cfg       config.Config
+	cfg       *config.Config
 	cli       *ethclient.Client
 	nodeAddr  common.Address
 	tokenAddr common.Address
@@ -47,7 +47,7 @@ func HexKey(cfg config.Config) *ecdsa.PrivateKey {
 }
 
 // FileKey ...
-func FileKey(cfg config.Config) *ecdsa.PrivateKey {
+func FileKey(cfg *config.Config) *ecdsa.PrivateKey {
 	bys, e := ioutil.ReadFile(filepath.Join(cfg.Path, cfg.ETH.ETHKeyFile.Name))
 	if e != nil {
 		panic(e)
@@ -61,7 +61,7 @@ func FileKey(cfg config.Config) *ecdsa.PrivateKey {
 }
 
 // Loader ...
-func Loader(cfg config.Config) Contractor {
+func Loader(cfg *config.Config) Contractor {
 	return &instance{
 		cfg:       cfg,
 		nodeAddr:  common.HexToAddress(cfg.ETH.NodeAddr),

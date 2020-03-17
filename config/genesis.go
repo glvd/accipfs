@@ -47,7 +47,7 @@ type Clique struct {
 }
 
 // LoadGenesis ...
-func LoadGenesis(cfg Config) (*Genesis, error) {
+func LoadGenesis(cfg *Config) (*Genesis, error) {
 	var g Genesis
 	path := filepath.Join(cfg.Path, "genesis.json")
 	open, err := os.Open(path)

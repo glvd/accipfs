@@ -102,7 +102,7 @@ func syncDNS(cfg *config.Config, nodes map[string]bool) {
 	}
 	fmt.Println(outputHead, "<正在更新网关数据...>", records)
 
-	dnsService := aws.NewRoute53(&cfg)
+	dnsService := aws.NewRoute53(cfg)
 
 	// get remote dns record
 	remoteIPs := make(map[string]bool)

@@ -116,7 +116,7 @@ func SaveConfig(config *Config) error {
 	if e != nil {
 		return e
 	}
-	_config = config
+	*_config = *config
 	return ioutil.WriteFile(filepath.Join(WorkDir, _configName+_configExt), by, 0755)
 }
 

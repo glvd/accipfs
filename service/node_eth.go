@@ -253,7 +253,7 @@ func newNodeETH(cfg config.Config) (*nodeClientETH, error) {
 
 // IsReady ...
 func (n *nodeClientETH) IsReady() bool {
-	client, err := ethclient.Dial(config.ETHAddr(n.cfg))
+	client, err := ethclient.Dial(config.ETHAddr())
 	if err != nil {
 		log.Errorw("new serviceNode eth", "tag", outputHead, "error", err)
 		return false
@@ -279,7 +279,7 @@ func (n *nodeClientETH) ETHNodeInfo(ctx context.Context) (enode *ETHNodeInfo, e 
 	var result ETHNodeInfo
 	cancelCtx, cancel := context.WithCancel(ctx)
 	defer cancel()
-	cli, e := rpc.DialContext(cancelCtx, config.ETHAddr(n.cfg))
+	cli, e := rpc.DialContext(cancelCtx, config.ETHAddr())
 	if e != nil {
 		return nil, e
 	}
@@ -296,7 +296,7 @@ func (n *nodeClientETH) AllPeers(ctx context.Context) ([]ETHPeer, error) {
 	var peers []ETHPeer
 	cancelCtx, cancel := context.WithCancel(ctx)
 	defer cancel()
-	client, err := rpc.DialContext(cancelCtx, config.ETHAddr(n.cfg))
+	client, err := rpc.DialContext(cancelCtx, config.ETHAddr())
 	if err != nil {
 		return nil, err
 	}
@@ -314,7 +314,7 @@ func (n *nodeClientETH) NewAccount(ctx context.Context) error {
 	var inf interface{}
 	cancelCtx, cancel := context.WithCancel(ctx)
 	defer cancel()
-	client, err := rpc.DialContext(cancelCtx, config.ETHAddr(n.cfg))
+	client, err := rpc.DialContext(cancelCtx, config.ETHAddr())
 	if err != nil {
 		return err
 	}

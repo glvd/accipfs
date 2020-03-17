@@ -32,12 +32,12 @@ func NewAccount(cfg config.Config) (*Account, error) {
 		return nil, err
 	}
 
-	acc.getName(&account)
-
 	e := acc.loadKey(&account)
 	if e != nil {
 		return nil, e
 	}
+	acc.getName(&account)
+
 	return &acc, nil
 }
 
@@ -95,7 +95,7 @@ func (acc *Account) Save(cfg config.Config) error {
 }
 
 func (acc *Account) getName(act *accounts.Account) {
-	_, acc.Name = filepath.Split(act.URL.Path)
+	acc.Name = "0x" + acc.KeyStore.Address
 }
 
 func (acc *Account) loadKey(act *accounts.Account) error {

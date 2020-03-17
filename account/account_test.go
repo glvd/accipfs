@@ -17,7 +17,7 @@ func TestNewAccount(t *testing.T) {
 		return
 	}
 
-	if err := SaveToConfig(config.Global(), acc); err != nil {
+	if err := SaveAccountToConfig(config.Global(), acc); err != nil {
 		t.Fatal(err)
 		return
 	}

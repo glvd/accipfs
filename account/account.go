@@ -61,14 +61,14 @@ func LoadAccount(cfg config.Config) (*Account, error) {
 	return &acc, nil
 }
 
-// SaveToConfig ...
-func SaveToConfig(cfg config.Config, account *Account) error {
-	bytes, err := json.MarshalIndent(account, "", " ")
+// SaveAccountToConfig ...
+func SaveAccountToConfig(cfg config.Config, account *Account) error {
+	bytes, err := json.Marshal(account)
 	if err != nil {
 		return err
 	}
-	toString := base64.StdEncoding.EncodeToString(bytes)
-	cfg.Account = toString
+	acc := base64.StdEncoding.EncodeToString(bytes)
+	cfg.Account = acc
 	return config.SaveConfig(&cfg)
 }
 

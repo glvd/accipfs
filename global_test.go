@@ -9,7 +9,8 @@ import (
 func TestRun(t *testing.T) {
 	config.WorkDir = "D:\\workspace\\pvt"
 	config.Initialize()
-	s, e := service.New(config.Global())
+	cfg := config.Global()
+	s, e := service.New(&cfg)
 	if e != nil {
 		panic(e)
 	}

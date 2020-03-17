@@ -49,9 +49,9 @@ func NewServer(cfg config.Config) (*Server, error) {
 // Start ...
 func (s *Server) Start() error {
 	s.route.Handle("/rpc", s.rpcServer)
-
-	log.Println("JSON RPC service listen and serving on port 1234")
-	if err := http.ListenAndServe(":1234", s.route); err != nil {
+	port := fmt.Sprintf(":%d", s.cfg.Port)
+	log.Println("JSON RPC service listen and serving on port", port)
+	if err := http.ListenAndServe(port, s.route); err != nil {
 		log.Fatalf("Error serving: %s", err)
 		return err
 	}

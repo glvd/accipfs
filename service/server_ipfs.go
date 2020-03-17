@@ -13,9 +13,14 @@ import (
 type nodeServerIPFS struct {
 	ctx    context.Context
 	cancel context.CancelFunc
-	cfg    *config.Config
+	cfg    config.Config
 	name   string
 	cmd    *exec.Cmd
+}
+
+// Node ...
+func (n *nodeServerIPFS) Node() (Node, error) {
+	return newNodeIPFS(n.cfg)
 }
 
 // Start ...
@@ -75,7 +80,7 @@ func NewNodeServerIPFS(cfg config.Config) NodeServer {
 	return &nodeServerIPFS{
 		ctx:    ctx,
 		cancel: cancelFunc,
-		cfg:    &cfg,
+		cfg:    cfg,
 		name:   path,
 	}
 }

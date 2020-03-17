@@ -14,10 +14,15 @@ import (
 type nodeServerETH struct {
 	ctx     context.Context
 	cancel  context.CancelFunc
-	cfg     *config.Config
+	cfg     config.Config
 	genesis *config.Genesis
 	name    string
 	cmd     *exec.Cmd
+}
+
+// Node ...
+func (n *nodeServerETH) Node() (Node, error) {
+	return newNodeETH(n.cfg)
 }
 
 // Stop ...
@@ -85,7 +90,7 @@ func NewNodeServerETH(cfg config.Config) NodeServer {
 	return &nodeServerETH{
 		ctx:     ctx,
 		cancel:  cancelFunc,
-		cfg:     &cfg,
+		cfg:     cfg,
 		genesis: genesis,
 		name:    path,
 	}

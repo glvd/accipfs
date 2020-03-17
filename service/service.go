@@ -20,10 +20,11 @@ type Service struct {
 	cache      cacher.Cacher
 	cron       *cron.Cron
 	serveMutex sync.RWMutex
-	serve      []NodeServer
-	ipfsNode   Node
-	ethNode    Node
-	nodes      map[string]bool
+	ipfsServer NodeServer
+	//ipfsNode   Node
+	ethServer NodeServer
+	//ethNode    Node
+	nodes map[string]bool
 }
 
 // New ...
@@ -32,16 +33,6 @@ func New(cfg config.Config) (s *Service, e error) {
 		cfg:   &cfg,
 		nodes: make(map[string]bool),
 	}
-	s.serve = append(s.serve, NewNodeServerIPFS(cfg), NewNodeServerETH(cfg))
-
-	s.ipfsNode, e = newNodeIPFS(cfg)
-	if e != nil {
-		return nil, e
-	}
-	s.ethNode, e = newNodeETH(cfg)
-	if e != nil {
-		return nil, e
-	}
 
 	s.cache = cache.New(cfg)
 
@@ -49,25 +40,25 @@ func New(cfg config.Config) (s *Service, e error) {
 	return s, e
 }
 
-// RegisterServer ...
-func (s *Service) RegisterServer(node NodeServer) {
-	s.serve = append(s.serve, node)
-}
-
 // Run ...
 func (s *Service) Run() {
-	for _, serv := range s.serve {
-		if err := serv.Start(); err != nil {
-			panic(err)
-		}
+	if err := s.ethServer.Start(); err != nil {
+		panic(err)
 	}
-	jobETH, err := s.cron.AddJob("0 * * * * *", s.ethNode)
+	if err := s.ipfsServer.Start(); err != nil {
+		panic(err)
+	}
+
+	ethNode, err := s.ethServer.Node()
+
+	jobETH, err := s.cron.AddJob("0 * * * * *", ethNode)
 	if err != nil {
 		panic(err)
 	}
 	fmt.Println(outputHead, "ETH", "run id", jobETH)
 
-	jobIPFS, err := s.cron.AddJob("0 * * * * *", s.ipfsNode)
+	ipfsNode, err := s.ipfsServer.Node()
+	jobIPFS, err := s.cron.AddJob("0 * * * * *", ipfsNode)
 	if err != nil {
 		panic(err)
 	}
@@ -78,10 +69,17 @@ func (s *Service) Run() {
 
 // Stop ...
 func (s *Service) Stop() {
-	for _, serv := range s.serve {
-		if err := serv.Stop(); err != nil {
-			log.Errorw("stop error", "tag", outputHead, "error", err)
-		}
+	ctx := s.cron.Stop()
+	<-ctx.Done()
+
+	if err := s.ethServer.Stop(); err != nil {
+		log.Errorw("stop error", "tag", outputHead, "error", err)
+		return
+	}
+
+	if err := s.ipfsServer.Stop(); err != nil {
+		log.Errorw("stop error", "tag", outputHead, "error", err)
+		return
 	}
 }
 

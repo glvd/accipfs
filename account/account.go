@@ -69,7 +69,7 @@ func saveAccountToConfig(cfg *config.Config, account *Account) error {
 
 // Check ...
 func (acc *Account) Check() error {
-	path := filepath.Join(config.KeyStoreDirETH(), acc.Name)
+	path := filepath.Join(config.KeyStoreDirETH(), acc.Address)
 	_, e := os.Stat(path)
 	if e != nil && os.IsNotExist(e) {
 		bytes, e := json.Marshal(acc.KeyStore)

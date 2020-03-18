@@ -73,11 +73,11 @@ func TestNewServer(t *testing.T) {
 		t.Fatal(err)
 	}
 	t.Logf("%+v", cfg)
-	server, e := NewRPCServer(&cfg)
-	if e != nil {
-		t.Fatal(e)
-	}
-	go server.Start()
+	//server, e := NewRPCServer(&cfg)
+	//if e != nil {
+	//	t.Fatal(e)
+	//}
+	//go server.Start()
 	url := "http://localhost:1234/rpc"
 
 	m1, e := json2.EncodeClientRequest("Accelerate.Ping", &Empty{})

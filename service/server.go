@@ -24,9 +24,10 @@ type NodeServer interface {
 
 // Server ...
 type Server struct {
-	cfg       *config.Config
-	rpcServer *rpc.Server
-	route     *mux.Router
+	cfg        *config.Config
+	rpcServer  *rpc.Server
+	httpServer *http.Server
+	route      *mux.Router
 }
 
 // NewRPCServer ...
@@ -56,11 +57,16 @@ func (s *Server) Start() error {
 	s.route.Handle("/rpc", s.rpcServer)
 	port := fmt.Sprintf(":%d", s.cfg.Port)
 	log.Println("JSON RPC service listen and serving on port", port)
-	if err := http.ListenAndServe(port, s.route); err != nil {
-		log.Fatalf("Error serving: %s", err)
-		return err
-	}
+	s.httpServer = &http.Server{Addr: port, Handler: s.route}
+	go func() {
+		s.httpServer.ListenAndServe()
+	}()
 	return nil
+}
+
+// Stop ...
+func (s *Server) Stop() error {
+	return s.httpServer.Shutdown(context.Background())
 }
 
 func screenOutput(ctx context.Context, reader io.Reader) (e error) {

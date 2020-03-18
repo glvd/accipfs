@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"github.com/glvd/accipfs/account"
 	"github.com/glvd/accipfs/config"
+	"github.com/glvd/accipfs/core"
 	"github.com/goextension/log/zap"
 	"github.com/gorilla/rpc/v2/json2"
 	"io/ioutil"
@@ -93,10 +94,10 @@ func TestNewServer(t *testing.T) {
 		t.Fatal(e)
 	}
 	t.Log(string(all))
-	reply := new(Account)
+	reply := new(core.NodeInfo)
 	err = json2.DecodeClientResponse(bytes.NewReader(all), reply)
 	if err != nil {
 		t.Fatal(err)
 	}
-	log.Printf(" %s\n", *reply)
+	log.Printf(" %+v\n", *reply)
 }

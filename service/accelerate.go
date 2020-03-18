@@ -41,9 +41,8 @@ func NewAccelerateServer(cfg *config.Config) (*Accelerate, error) {
 	if err != nil {
 		return nil, err
 	}
-	return &Accelerate{
-		self: selfAcc,
-	}, nil
+	acc.self = selfAcc
+	return acc, nil
 }
 
 // Run ...

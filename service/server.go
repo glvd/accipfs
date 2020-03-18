@@ -35,7 +35,7 @@ func NewRPCServer(cfg *config.Config) (*Server, error) {
 	rpcServer.RegisterCodec(json2.NewCodec(), "application/json")
 	rpcServer.RegisterCodec(json2.NewCodec(), "application/json;charset=UTF-8")
 
-	acc, err := NewServerAccelerate(cfg)
+	acc, err := NewAccelerateServer(cfg)
 	if err != nil {
 		return nil, err
 	}

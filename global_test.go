@@ -10,7 +10,7 @@ func TestRun(t *testing.T) {
 	config.WorkDir = "D:\\workspace\\pvt"
 	config.Initialize()
 	cfg := config.Global()
-	s, e := service.New(&cfg)
+	s, e := service.NewAccelerateServer(&cfg)
 	if e != nil {
 		panic(e)
 	}

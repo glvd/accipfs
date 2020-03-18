@@ -3,7 +3,6 @@ package service
 import (
 	"fmt"
 	"github.com/glvd/accipfs/aws"
-	"github.com/glvd/accipfs/cache"
 	"github.com/glvd/accipfs/config"
 	"github.com/gocacher/cacher"
 	"github.com/goextension/log"
@@ -25,11 +24,6 @@ type Service struct {
 	ethServer NodeServer
 	//ethNode    Node
 	nodes map[string]bool
-}
-
-// New ...
-func New(cfg *config.Config) (s *Service, e error) {
-
 }
 
 func syncDNS(cfg *config.Config, nodes map[string]bool) {

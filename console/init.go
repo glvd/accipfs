@@ -16,6 +16,7 @@ func initCmd() *cobra.Command {
 		Run: func(cmd *cobra.Command, args []string) {
 			config.WorkDir = accipfs.DefaultPath
 			cfg := config.Default()
+			config.Initialize()
 			acc, e := account.NewAccount(cfg)
 			if e != nil {
 				panic(e)

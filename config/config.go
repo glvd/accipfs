@@ -130,7 +130,7 @@ func Global() Config {
 
 // Default ...
 func Default() *Config {
-	return &Config{
+	def := &Config{
 		Port:       20304,
 		Path:       WorkDir,
 		PrivateKey: "",
@@ -148,6 +148,10 @@ func Default() *Config {
 		},
 		AWS: AWSConfig{},
 	}
+	if _config == nil {
+		_config = def
+	}
+	return def
 }
 
 func currentPath() string {

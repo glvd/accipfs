@@ -81,6 +81,10 @@ func (n *nodeServerETH) Init() error {
 
 // NewNodeServerETH ...
 func NewNodeServerETH(cfg *config.Config) NodeServer {
+	return newNodeServerETH(cfg)
+}
+
+func newNodeServerETH(cfg *config.Config) *nodeServerETH {
 	path := filepath.Join(cfg.Path, "bin", binName(cfg.ETH.Name))
 	genesis, err := config.LoadGenesis(cfg)
 	if err != nil {

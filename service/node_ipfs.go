@@ -40,9 +40,14 @@ type PeerID struct {
 	PublicKey       string   `json:"PublicKey"`
 }
 
-func newNodeIPFS(config *config.Config) (Node, error) {
+// NewNodeIPFS ...
+func NewNodeIPFS(cfg *config.Config) (Node, error) {
+	return newNodeIPFS(cfg)
+}
+
+func newNodeIPFS(cfg *config.Config) (*nodeClientIPFS, error) {
 	return &nodeClientIPFS{
-		cfg:         config,
+		cfg:         cfg,
 		serviceNode: nodeInstance(),
 	}, nil
 }

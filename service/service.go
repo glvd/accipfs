@@ -29,60 +29,7 @@ type Service struct {
 
 // New ...
 func New(cfg *config.Config) (s *Service, e error) {
-	s = &Service{
-		cfg:   cfg,
-		nodes: make(map[string]bool),
-	}
-	s.ethServer = NewNodeServerETH(cfg)
-	s.ipfsServer = NewNodeServerIPFS(cfg)
 
-	s.cache = cache.New(cfg)
-
-	s.cron = cron.New(cron.WithSeconds())
-	return s, e
-}
-
-// Run ...
-func (s *Service) Run() {
-	if err := s.ethServer.Start(); err != nil {
-		panic(err)
-	}
-	if err := s.ipfsServer.Start(); err != nil {
-		panic(err)
-	}
-
-	ethNode, err := s.ethServer.Node()
-
-	jobETH, err := s.cron.AddJob("0 * * * * *", ethNode)
-	if err != nil {
-		panic(err)
-	}
-	fmt.Println(outputHead, "ETH", "run id", jobETH)
-
-	ipfsNode, err := s.ipfsServer.Node()
-	jobIPFS, err := s.cron.AddJob("0 * * * * *", ipfsNode)
-	if err != nil {
-		panic(err)
-	}
-	fmt.Println(outputHead, "IPFS", "run id", jobIPFS)
-
-	s.cron.Run()
-}
-
-// Stop ...
-func (s *Service) Stop() {
-	ctx := s.cron.Stop()
-	<-ctx.Done()
-
-	if err := s.ethServer.Stop(); err != nil {
-		log.Errorw("stop error", "tag", outputHead, "error", err)
-		return
-	}
-
-	if err := s.ipfsServer.Stop(); err != nil {
-		log.Errorw("stop error", "tag", outputHead, "error", err)
-		return
-	}
 }
 
 func syncDNS(cfg *config.Config, nodes map[string]bool) {

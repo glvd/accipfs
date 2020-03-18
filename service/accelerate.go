@@ -1,8 +1,13 @@
 package service
 
 import (
+	"context"
+	"fmt"
 	"github.com/glvd/accipfs/account"
 	"github.com/glvd/accipfs/config"
+	"github.com/glvd/accipfs/core"
+	"github.com/goextension/log"
+	"github.com/robfig/cron/v3"
 	"net/http"
 )
 
@@ -10,45 +15,108 @@ import (
 type Empty struct {
 }
 
-// Account ...
-type Account struct {
-	Name string
-}
-
 // Accelerate ...
 type Accelerate struct {
-	self *account.Account
+	nodes      core.NodeStore
+	self       *account.Account
+	cfg        *config.Config
+	ethServer  *nodeServerETH
+	ethClient  *nodeClientETH
+	ipfsServer *nodeServerIPFS
+	ipfsClient *nodeClientIPFS
+	cron       *cron.Cron
 }
 
-// NewServerAccelerate ...
-func NewServerAccelerate(cfg *config.Config) (*Accelerate, error) {
-	account, err := account.LoadAccount(cfg)
+// NewAccelerateServer ...
+func NewAccelerateServer(cfg *config.Config) (*Accelerate, error) {
+	acc := &Accelerate{
+		cfg: cfg,
+	}
+	acc.ethServer = newNodeServerETH(cfg)
+	acc.ipfsServer = newNodeServerIPFS(cfg)
+	acc.ethClient, _ = newNodeETH(cfg)
+	acc.ipfsClient, _ = newNodeIPFS(cfg)
+	acc.cron = cron.New(cron.WithSeconds())
+	selfAcc, err := account.LoadAccount(cfg)
 	if err != nil {
 		return nil, err
 	}
 	return &Accelerate{
-		self: account,
+		self: selfAcc,
 	}, nil
 }
 
+// Run ...
+func (a *Accelerate) Run() {
+	if err := a.ethServer.Start(); err != nil {
+		panic(err)
+	}
+	if err := a.ipfsServer.Start(); err != nil {
+		panic(err)
+	}
+
+	ethNode, err := a.ethServer.Node()
+
+	jobETH, err := a.cron.AddJob("0 * * * * *", ethNode)
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println(outputHead, "ETH", "run id", jobETH)
+
+	ipfsNode, err := a.ipfsServer.Node()
+	jobIPFS, err := a.cron.AddJob("0 * * * * *", ipfsNode)
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println(outputHead, "IPFS", "run id", jobIPFS)
+
+	a.cron.Run()
+}
+
+// Stop ...
+func (a *Accelerate) Stop() {
+	ctx := a.cron.Stop()
+	<-ctx.Done()
+
+	if err := a.ethServer.Stop(); err != nil {
+		log.Errorw("stop error", "tag", outputHead, "error", err)
+		return
+	}
+
+	if err := a.ipfsServer.Stop(); err != nil {
+		log.Errorw("stop error", "tag", outputHead, "error", err)
+		return
+	}
+}
+
 // Ping ...
-func (n *Accelerate) Ping(r *http.Request, s *Empty, result *string) error {
+func (a *Accelerate) Ping(r *http.Request, s *Empty, result *string) error {
 	*result = "pong pong pong"
 	return nil
 }
 
 // ID ...
-func (n *Accelerate) ID(r *http.Request, s *Empty, result *Account) error {
-	result.Name = n.self.Name
+func (a *Accelerate) ID(r *http.Request, s *Empty, result *core.NodeInfo) error {
+	result.Name = a.self.Name
+	ds, e := a.ipfsClient.ID(context.Background())
+	if e != nil {
+		return e
+	}
+	result.DataStore = *ds
+	c, e := a.ethClient.NodeInfo(context.Background())
+	if e != nil {
+		return e
+	}
+	result.Contract = *c
 	return nil
 }
 
 // Connect ...
-func (n *Accelerate) Connect(r *http.Request, addr *string, result *bool) error {
+func (a *Accelerate) Connect(r *http.Request, addr *string, result *bool) error {
 	return nil
 }
 
 // Exchange ...
-func (n *Accelerate) Exchange(r *http.Request, from, to interface{}) error {
+func (a *Accelerate) Exchange(r *http.Request, from, to interface{}) error {
 	return nil
 }

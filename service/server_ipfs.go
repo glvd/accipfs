@@ -75,6 +75,10 @@ func (n *nodeServerIPFS) Init() error {
 
 // NewNodeServerIPFS ...
 func NewNodeServerIPFS(cfg *config.Config) NodeServer {
+	return newNodeServerIPFS(cfg)
+}
+
+func newNodeServerIPFS(cfg *config.Config) *nodeServerIPFS {
 	path := filepath.Join(cfg.Path, "bin", binName(cfg.IPFS.Name))
 	ctx, cancelFunc := context.WithCancel(context.Background())
 	return &nodeServerIPFS{

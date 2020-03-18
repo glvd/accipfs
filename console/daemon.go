@@ -13,11 +13,19 @@ func daemonCmd() *cobra.Command {
 		Long:  "Run all the service with a daemon command",
 		Run: func(cmd *cobra.Command, args []string) {
 			config.Initialize()
-			s, e := service.New(config.Global())
+			cfg := config.Global()
+			s, e := service.NewRPCServer(&cfg)
 			if e != nil {
 				panic(e)
 			}
-			s.Run()
+			defer func() {
+				if err := s.Stop(); err != nil {
+					panic(err)
+				}
+			}()
+			if err := s.Start(); err != nil {
+				panic(err)
+			}
 		},
 	}
 }

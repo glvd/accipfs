@@ -113,6 +113,7 @@ func (a *Accelerate) ID(r *http.Request, e *Empty, result *core.NodeInfo) error 
 
 // Connect ...
 func (a *Accelerate) Connect(r *http.Request, node *core.NodeInfo, result *bool) error {
+	log.Infow("connect", "tag", outputHead, "addr", r.RemoteAddr)
 	*result = true
 	node.RemoteAddr = r.RemoteAddr
 	if a.nodes.Check(node.Name) {

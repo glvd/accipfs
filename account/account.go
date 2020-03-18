@@ -57,8 +57,7 @@ func LoadAccount(cfg *config.Config) (*Account, error) {
 	return &acc, nil
 }
 
-// SaveAccountToConfig ...
-func saveAccountToConfig(account *Account, cfg *config.Config) error {
+func saveAccountToConfig(cfg *config.Config, account *Account) error {
 	bytes, err := json.Marshal(account)
 	if err != nil {
 		return err
@@ -91,7 +90,7 @@ func (acc *Account) Save(cfg *config.Config) error {
 	if err := acc.Check(); err != nil {
 		return err
 	}
-	return saveAccountToConfig(acc, cfg)
+	return saveAccountToConfig(cfg, acc)
 }
 
 func (acc *Account) getName(act *accounts.Account) {

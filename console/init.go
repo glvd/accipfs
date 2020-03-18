@@ -15,11 +15,11 @@ func initCmd() *cobra.Command {
 		Long:  "init will create the config file with a default settings",
 		Run: func(cmd *cobra.Command, args []string) {
 			cfg := config.Default()
-			acc, e := account.NewAccount(*cfg)
+			acc, e := account.NewAccount(cfg)
 			if e != nil {
 				panic(e)
 			}
-			e = acc.Save(*cfg)
+			e = acc.Save(cfg)
 			if e != nil {
 				panic(e)
 			}

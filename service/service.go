@@ -33,6 +33,8 @@ func New(cfg *config.Config) (s *Service, e error) {
 		cfg:   cfg,
 		nodes: make(map[string]bool),
 	}
+	s.ethServer = NewNodeServerETH(cfg)
+	s.ipfsServer = NewNodeServerIPFS(cfg)
 
 	s.cache = cache.New(cfg)
 

@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"encoding/json"
 	"github.com/ethereum/go-ethereum/rpc"
 	"testing"
 )
@@ -15,11 +16,15 @@ func TestNodeClientETH_NewAccount(t *testing.T) {
 		t.Fatal(err)
 	}
 	defer client.Close()
-	err = client.Call(&inf, "personal_newAccount", "123")
+	err = client.Call(&inf, "admin_nodeInfo")
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	t.Logf("info:%+v", inf)
+	marshal, err := json.Marshal(inf)
+	if err != nil {
+		return
+	}
+	t.Logf("info:%+v", string(marshal))
 
 }

@@ -20,17 +20,6 @@ type Accelerate struct {
 	self *account.Account
 }
 
-// NodeInfo ...
-type NodeInfo struct {
-	Name         string
-	ContractAddr string
-	DataAddr     string
-	Version      string
-}
-
-// NodeList ...
-type NodeList map[string]NodeInfo
-
 // NewServerAccelerate ...
 func NewServerAccelerate(cfg *config.Config) (*Accelerate, error) {
 	account, err := account.LoadAccount(cfg)

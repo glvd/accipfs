@@ -23,7 +23,8 @@ func TestNodeServerETH(t *testing.T) {
 		return
 	}
 	config.Initialize()
-	eth := NewNodeServerETH(config.Global())
+	cfg := config.Global()
+	eth := NewNodeServerETH(&cfg)
 	t.Logf("%+v", eth)
 	if err := eth.Init(); err != nil {
 		t.Error(err)
@@ -34,7 +35,7 @@ func TestNodeServerETH(t *testing.T) {
 	//	return
 	//}
 
-	ipfs := NewNodeServerIPFS(config.Global())
+	ipfs := NewNodeServerIPFS(&cfg)
 	t.Logf("%+v", ipfs)
 	if err := ipfs.Init(); err != nil {
 		t.Error(err)
@@ -67,11 +68,11 @@ func TestNewServer(t *testing.T) {
 	if e != nil {
 		t.Fatal(e)
 	}
-	if err := acc.Save(cfg); err != nil {
+	if err := acc.Save(&cfg); err != nil {
 		t.Fatal(err)
 	}
 	t.Logf("%+v", cfg)
-	server, e := NewRPCServer(config.Global())
+	server, e := NewRPCServer(&cfg)
 	if e != nil {
 		t.Fatal(e)
 	}

@@ -89,23 +89,23 @@ func (a *Accelerate) Stop() {
 }
 
 // Ping ...
-func (a *Accelerate) Ping(r *http.Request, s *Empty, result *string) error {
-	*result = "pong pong pong"
+func (a *Accelerate) Ping(r *http.Request, e *Empty, result *string) error {
+	*result = "pong"
 	return nil
 }
 
 // ID ...
-func (a *Accelerate) ID(r *http.Request, s *Empty, result *core.NodeInfo) error {
+func (a *Accelerate) ID(r *http.Request, e *Empty, result *core.NodeInfo) error {
 	result.Name = a.self.Name
 	result.Version = core.Version
-	ds, e := a.ipfsClient.ID(context.Background())
-	if e != nil {
-		return fmt.Errorf("datastore error:%w", e)
+	ds, err := a.ipfsClient.ID(context.Background())
+	if err != nil {
+		return fmt.Errorf("datastore error:%w", err)
 	}
 	result.DataStore = *ds
-	c, e := a.ethClient.NodeInfo(context.Background())
-	if e != nil {
-		return fmt.Errorf("nodeinfo error:%w", e)
+	c, err := a.ethClient.NodeInfo(context.Background())
+	if err != nil {
+		return fmt.Errorf("nodeinfo error:%w", err)
 	}
 	result.Contract = *c
 	return nil
@@ -113,6 +113,15 @@ func (a *Accelerate) ID(r *http.Request, s *Empty, result *core.NodeInfo) error 
 
 // Connect ...
 func (a *Accelerate) Connect(r *http.Request, addr *string, result *bool) error {
+	return nil
+}
+
+// Peers ...
+func (a *Accelerate) Peers(r *http.Request, e *Empty, result []*core.NodeInfo) error {
+	a.nodes.Range(func(info *core.NodeInfo) bool {
+		result = append(result, info)
+		return true
+	})
 	return nil
 }
 

@@ -2,6 +2,9 @@ package core
 
 import "sync"
 
+// Version ...
+const Version = "0.0.1"
+
 // DataStoreNode ...
 type DataStoreNode struct {
 	ID              string   `json:"ID"`

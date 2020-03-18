@@ -97,6 +97,7 @@ func (a *Accelerate) Ping(r *http.Request, s *Empty, result *string) error {
 // ID ...
 func (a *Accelerate) ID(r *http.Request, s *Empty, result *core.NodeInfo) error {
 	result.Name = a.self.Name
+	result.Version = core.Version
 	ds, e := a.ipfsClient.ID(context.Background())
 	if e != nil {
 		return fmt.Errorf("datastore error:%w", e)

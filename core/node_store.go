@@ -70,24 +70,37 @@ type NodeInfo struct {
 	Version   string
 }
 
-// NodeStore ...
-type NodeStore struct {
+// nodeStore ...
+type nodeStore struct {
 	nodes sync.Map
 }
 
+// NodeStore ...
+type NodeStore interface {
+	Add(info *NodeInfo)
+	Check(key string) bool
+	Get(key string) *NodeInfo
+	Range(func(info *NodeInfo) bool)
+}
+
+// NewNodeStore ...
+func NewNodeStore() NodeStore {
+	return &nodeStore{}
+}
+
 // Add ...
-func (c *NodeStore) Add(info *NodeInfo) {
+func (c *nodeStore) Add(info *NodeInfo) {
 	c.nodes.Store(info.Name, info)
 }
 
 // Check ...
-func (c *NodeStore) Check(key string) (b bool) {
+func (c *nodeStore) Check(key string) (b bool) {
 	_, b = c.nodes.Load(key)
 	return
 }
 
 // Get ...
-func (c *NodeStore) Get(key string) *NodeInfo {
+func (c *nodeStore) Get(key string) *NodeInfo {
 	if v, b := c.nodes.Load(key); b {
 		return v.(*NodeInfo)
 	}
@@ -95,7 +108,7 @@ func (c *NodeStore) Get(key string) *NodeInfo {
 }
 
 // Range ...
-func (c *NodeStore) Range(f func(info *NodeInfo) bool) {
+func (c *nodeStore) Range(f func(info *NodeInfo) bool) {
 	c.nodes.Range(func(key, value interface{}) bool {
 		return f(value.(*NodeInfo))
 	})

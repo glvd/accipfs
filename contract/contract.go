@@ -5,7 +5,6 @@ import (
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/accounts/keystore"
 	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/glvd/accipfs/account"
 	"github.com/glvd/accipfs/config"
@@ -37,15 +36,6 @@ type NodeCall func(node *node.AccelerateNode, opts *bind.TransactOpts) error
 
 // TokenCall ...
 type TokenCall func(token *token.DhToken, opts *bind.TransactOpts) error
-
-// HexKey ...
-func HexKey(cfg config.Config) *ecdsa.PrivateKey {
-	privateKey, err := crypto.HexToECDSA(cfg.ETH.KeyHash)
-	if err != nil {
-		panic(err)
-	}
-	return privateKey
-}
 
 // FileKey ...
 func FileKey(cfg *config.Config) *ecdsa.PrivateKey {

@@ -57,17 +57,6 @@ type Result struct {
 	Result  []ETHPeer
 }
 
-// ETHNodeInfo ...
-type ETHNodeInfo struct {
-	ID         string
-	Enode      string
-	IP         string
-	Name       string
-	ListenAddr string
-	Ports      interface{}
-	Protocols  interface{}
-}
-
 // ETHProtocolInfo ...
 type ETHProtocolInfo struct {
 	Difficulty int    `json:"difficulty"`
@@ -100,7 +89,7 @@ func (n *nodeClientETH) Run() {
 	ctx := context.TODO()
 
 	// get self node info
-	nodeInfo, err := n.ETHNodeInfo(ctx)
+	nodeInfo, err := n.NodeInfo(ctx)
 	if err != nil {
 		log.Errorw("get eth node info", "tag", outputHead, "error", err.Error(), "node", nodeInfo)
 		return
@@ -267,23 +256,6 @@ func (n *nodeClientETH) Token() (*token.DhToken, error) {
 	return token.NewDhToken(address, n.client)
 }
 
-// NodeInfo ...
-func (n *nodeClientETH) ETHNodeInfo(ctx context.Context) (enode *ETHNodeInfo, e error) {
-	var result ETHNodeInfo
-	cancelCtx, cancel := context.WithCancel(ctx)
-	defer cancel()
-	cli, e := rpc.DialContext(cancelCtx, config.ETHAddr())
-	if e != nil {
-		return nil, e
-	}
-	defer cli.Close()
-	e = cli.Call(&result, "admin_nodeInfo")
-	if e != nil {
-		return nil, e
-	}
-	return &result, nil
-}
-
 // Peers ...
 func (n *nodeClientETH) AllPeers(ctx context.Context) ([]ETHPeer, error) {
 	var peers []ETHPeer
@@ -312,7 +284,7 @@ func (n *nodeClientETH) NodeInfo(ctx context.Context) (*core.ContractNode, error
 		return nil, err
 	}
 	defer client.Close()
-	err = client.Call(&node, "personal_newAccount")
+	err = client.Call(&node, "admin_nodeInfo")
 	if err != nil {
 		return nil, err
 	}

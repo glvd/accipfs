@@ -80,6 +80,19 @@ func TestNewServer(t *testing.T) {
 	go server.Start()
 	url := "http://localhost:1234/rpc"
 
+	m1, e := json2.EncodeClientRequest("Accelerate.Ping", &Empty{})
+	if e != nil {
+		return
+	}
+	r1, err := http.Post(url, "application/json", bytes.NewReader(m1))
+	if err != nil {
+		t.Fatal(err)
+	}
+	readAll, e := ioutil.ReadAll(r1.Body)
+	if e != nil {
+		return
+	}
+	t.Log(string(readAll))
 	message, err := json2.EncodeClientRequest("Accelerate.ID", &Empty{})
 	if err != nil {
 		t.Fatal(err)

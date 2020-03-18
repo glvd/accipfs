@@ -46,10 +46,14 @@ func NewNodeIPFS(cfg *config.Config) (Node, error) {
 }
 
 func newNodeIPFS(cfg *config.Config) (*nodeClientIPFS, error) {
-	return &nodeClientIPFS{
+	node := &nodeClientIPFS{
 		cfg:         cfg,
 		serviceNode: nodeInstance(),
-	}, nil
+	}
+	if err := node.connect(); err != nil {
+		return nil, err
+	}
+	return node, nil
 }
 
 // SwarmConnect ...

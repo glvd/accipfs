@@ -99,12 +99,12 @@ func (a *Accelerate) ID(r *http.Request, s *Empty, result *core.NodeInfo) error 
 	result.Name = a.self.Name
 	ds, e := a.ipfsClient.ID(context.Background())
 	if e != nil {
-		return e
+		return fmt.Errorf("datastore error:%w", e)
 	}
 	result.DataStore = *ds
 	c, e := a.ethClient.NodeInfo(context.Background())
 	if e != nil {
-		return e
+		return fmt.Errorf("nodeinfo error:%w", e)
 	}
 	result.Contract = *c
 	return nil

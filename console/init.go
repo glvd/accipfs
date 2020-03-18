@@ -14,6 +14,7 @@ func initCmd() *cobra.Command {
 		Short: "init run",
 		Long:  "init will create the config file with a default settings",
 		Run: func(cmd *cobra.Command, args []string) {
+			config.WorkDir = accipfs.DefaultPath
 			cfg := config.Default()
 			acc, e := account.NewAccount(cfg)
 			if e != nil {

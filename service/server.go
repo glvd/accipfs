@@ -69,7 +69,11 @@ func (s *Server) Start() error {
 
 // Stop ...
 func (s *Server) Stop() error {
-	return s.httpServer.Shutdown(context.Background())
+	if err := s.httpServer.Shutdown(context.Background()); err != nil {
+		return err
+	}
+	s.accelerateServer.Stop()
+	return nil
 }
 
 func screenOutput(ctx context.Context, reader io.Reader) (e error) {

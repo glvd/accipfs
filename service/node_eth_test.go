@@ -3,7 +3,10 @@ package service
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"github.com/ethereum/go-ethereum/rpc"
+	"net"
+	"strings"
 	"testing"
 )
 
@@ -27,4 +30,22 @@ func TestNodeClientETH_NewAccount(t *testing.T) {
 	}
 	t.Logf("info:%+v", string(marshal))
 
+}
+
+func TestLocalIP(t *testing.T) {
+	conn, err := net.Dial("udp", "baidu.com:80")
+	if err != nil {
+		fmt.Println(err.Error())
+		return
+	}
+	defer conn.Close()
+	fmt.Println(strings.Split(conn.LocalAddr().String(), ":"))
+	fmt.Println(conn.RemoteAddr().String())
+	addrs, err := net.InterfaceAddrs()
+	if err != nil {
+		panic(err)
+	}
+	for _, addr := range addrs {
+		fmt.Println(addr.String())
+	}
 }

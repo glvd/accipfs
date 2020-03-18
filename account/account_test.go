@@ -11,13 +11,15 @@ func TestNewAccount(t *testing.T) {
 		t.Fatal(err)
 		return
 	}
-	acc, err := NewAccount(config.Global())
+	cfg := config.Global()
+
+	acc, err := NewAccount(&cfg)
 	if err != nil {
 		t.Fatal(err)
 		return
 	}
 
-	if err := acc.Save(config.Global()); err != nil {
+	if err := acc.Save(&cfg); err != nil {
 		t.Fatal(err)
 		return
 	}

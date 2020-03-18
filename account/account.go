@@ -22,7 +22,7 @@ type Account struct {
 }
 
 // NewAccount ...
-func NewAccount(cfg config.Config) (*Account, error) {
+func NewAccount(cfg *config.Config) (*Account, error) {
 	var acc Account
 	acc.Password = tool.GenerateRandomString(8)
 
@@ -99,6 +99,7 @@ func (acc *Account) getName(act *accounts.Account) {
 }
 
 func (acc *Account) loadKey(act *accounts.Account) error {
+	_, acc.Address = filepath.Split(act.URL.Path)
 	fileBytes, e := ioutil.ReadFile(act.URL.Path)
 	if e != nil {
 		return e

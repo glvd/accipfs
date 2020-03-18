@@ -65,7 +65,7 @@ func TestNewServer(t *testing.T) {
 	config.WorkDir = "d:\\workspace\\pvt"
 	config.Initialize()
 	cfg := config.Global()
-	acc, e := account.NewAccount(cfg)
+	acc, e := account.NewAccount(&cfg)
 	if e != nil {
 		t.Fatal(e)
 	}

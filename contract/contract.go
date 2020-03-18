@@ -7,6 +7,7 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/ethclient"
+	"github.com/glvd/accipfs/account"
 	"github.com/glvd/accipfs/config"
 	"github.com/glvd/accipfs/contract/node"
 	"github.com/glvd/accipfs/contract/token"
@@ -48,7 +49,12 @@ func HexKey(cfg config.Config) *ecdsa.PrivateKey {
 
 // FileKey ...
 func FileKey(cfg *config.Config) *ecdsa.PrivateKey {
-	bys, e := ioutil.ReadFile(filepath.Join(cfg.Path, cfg.ETH.ETHKeyFile.Name))
+	newAccount, e := account.NewAccount(cfg)
+	if e != nil {
+		panic(e)
+	}
+
+	bys, e := ioutil.ReadFile(filepath.Join(cfg.Path, newAccount.Address))
 	if e != nil {
 		panic(e)
 	}

@@ -13,6 +13,7 @@ import (
 	"github.com/glvd/accipfs/contract"
 	"github.com/glvd/accipfs/contract/node"
 	"github.com/glvd/accipfs/contract/token"
+	"github.com/glvd/accipfs/core"
 	"github.com/goextension/log"
 	"os"
 	"sort"
@@ -240,7 +241,6 @@ func newNodeETH(cfg *config.Config) (Node, error) {
 	return &nodeClientETH{
 		cfg:         cfg,
 		serviceNode: nodeInstance(),
-		out:         color.New(color.FgRed),
 	}, nil
 }
 
@@ -303,19 +303,19 @@ func (n *nodeClientETH) AllPeers(ctx context.Context) ([]ETHPeer, error) {
 }
 
 // NewAccount ...
-func (n *nodeClientETH) NewAccount(ctx context.Context) error {
-	var inf interface{}
+func (n *nodeClientETH) NodeInfo(ctx context.Context) (*core.ContractNode, error) {
+	var node core.ContractNode
 	cancelCtx, cancel := context.WithCancel(ctx)
 	defer cancel()
 	client, err := rpc.DialContext(cancelCtx, config.ETHAddr())
 	if err != nil {
-		return err
+		return nil, err
 	}
 	defer client.Close()
-	err = client.Call(&inf, "personal_newAccount")
+	err = client.Call(&node, "personal_newAccount")
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	return nil
+	return &node, nil
 }

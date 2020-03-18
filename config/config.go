@@ -37,12 +37,12 @@ type IPFSConfig struct {
 type ETHConfig struct {
 	Name string `json:"name" mapstructure:"name"` //bin name
 	//Addr        string       `json:"addr" mapstructure:"addr"`                   //eth rpc address
-	Port        int                                       `json:"port" mapstructure:"port"`
-	KeyHash     string                                    `json:"key_hash" mapstructure:"key_hash"`     //binary key hash
-	NodeAddr    string                                    `json:"node_addr" mapstructure:"node_addr"`   //node contract address
-	TokenAddr   string                                    `json:"token_addr" mapstructure:"token_addr"` //token contract address
-	ETHKeyFile  `json:"key_file" mapstructure:"key_file"` //default key file
-	KeyFileList []ETHKeyFile                              `json:"key_file_list" mapstructure:"key_file_list"` //key file list
+	Port int `json:"port" mapstructure:"port"`
+	//KeyHash     string                                    `json:"key_hash" mapstructure:"key_hash"`     //binary key hash
+	NodeAddr  string `json:"node_addr" mapstructure:"node_addr"`   //node contract address
+	TokenAddr string `json:"token_addr" mapstructure:"token_addr"` //token contract address
+	//ETHKeyFile  `json:"key_file" mapstructure:"key_file"` //default key file
+	//KeyFileList []ETHKeyFile                              `json:"key_file_list" mapstructure:"key_file_list"` //key file list
 }
 
 // AWSConfig ...
@@ -131,15 +131,13 @@ func Global() Config {
 // Default ...
 func Default() *Config {
 	return &Config{
-		Path: WorkDir,
+		Port:       20304,
+		Path:       WorkDir,
+		PrivateKey: "",
+		PublicKey:  "",
 		ETH: ETHConfig{
-			Name:    "geth",
-			Port:    8545,
-			KeyHash: "",
-			ETHKeyFile: ETHKeyFile{
-				Name: "",
-				Pass: "",
-			},
+			Name:      "geth",
+			Port:      8545,
 			NodeAddr:  DefaultNodeContractAddr,
 			TokenAddr: DefaultTokenContractAddr,
 		},
@@ -148,6 +146,7 @@ func Default() *Config {
 			Port:    5001,
 			Timeout: 30,
 		},
+		AWS: AWSConfig{},
 	}
 }
 

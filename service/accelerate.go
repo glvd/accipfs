@@ -25,7 +25,6 @@ type Accelerate struct {
 	ipfsServer *nodeServerIPFS
 	ipfsClient *nodeClientIPFS
 	cron       *cron.Cron
-	rpcServer  *Server
 }
 
 // NewAccelerateServer ...
@@ -37,10 +36,6 @@ func NewAccelerateServer(cfg *config.Config) (acc *Accelerate, err error) {
 	acc.ipfsServer = newNodeServerIPFS(cfg)
 	acc.ethClient, _ = newNodeETH(cfg)
 	acc.ipfsClient, _ = newNodeIPFS(cfg)
-	acc.rpcServer, err = NewRPCServer(cfg)
-	if err != nil {
-		return nil, err
-	}
 	acc.cron = cron.New(cron.WithSeconds())
 	selfAcc, err := account.LoadAccount(cfg)
 	if err != nil {
@@ -53,14 +48,11 @@ func NewAccelerateServer(cfg *config.Config) (acc *Accelerate, err error) {
 
 // Run ...
 func (a *Accelerate) Run() {
+	fmt.Println("accelerate run")
 	if err := a.ethServer.Start(); err != nil {
 		panic(err)
 	}
 	if err := a.ipfsServer.Start(); err != nil {
-		panic(err)
-	}
-
-	if err := a.rpcServer.Start(); err != nil {
 		panic(err)
 	}
 
@@ -85,10 +77,6 @@ func (a *Accelerate) Run() {
 func (a *Accelerate) Stop() {
 	ctx := a.cron.Stop()
 	<-ctx.Done()
-	if err := a.rpcServer.Stop(); err != nil {
-		log.Errorw("rpc stop error", "tag", outputHead, "error", err)
-		return
-	}
 	if err := a.ethServer.Stop(); err != nil {
 		log.Errorw("eth stop error", "tag", outputHead, "error", err)
 		return

@@ -24,10 +24,11 @@ type NodeServer interface {
 
 // Server ...
 type Server struct {
-	cfg        *config.Config
-	rpcServer  *rpc.Server
-	httpServer *http.Server
-	route      *mux.Router
+	cfg              *config.Config
+	rpcServer        *rpc.Server
+	httpServer       *http.Server
+	accelerateServer *Accelerate
+	route            *mux.Router
 }
 
 // NewRPCServer ...
@@ -46,9 +47,10 @@ func NewRPCServer(cfg *config.Config) (*Server, error) {
 		return nil, err
 	}
 	return &Server{
-		cfg:       cfg,
-		rpcServer: rpcServer,
-		route:     mux.NewRouter(),
+		cfg:              cfg,
+		rpcServer:        rpcServer,
+		accelerateServer: acc,
+		route:            mux.NewRouter(),
 	}, nil
 }
 
@@ -58,9 +60,10 @@ func (s *Server) Start() error {
 	port := fmt.Sprintf(":%d", s.cfg.Port)
 	log.Println("JSON RPC service listen and serving on port", port)
 	s.httpServer = &http.Server{Addr: port, Handler: s.route}
-	go func() {
-		s.httpServer.ListenAndServe()
-	}()
+
+	go s.accelerateServer.Run()
+
+	s.httpServer.ListenAndServe()
 	return nil
 }
 

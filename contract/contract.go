@@ -54,12 +54,12 @@ func FileKey(cfg *config.Config) *ecdsa.PrivateKey {
 		panic(e)
 	}
 
-	bys, e := ioutil.ReadFile(filepath.Join(cfg.Path, newAccount.Address))
+	bys, e := ioutil.ReadFile(filepath.Join(config.KeyStoreDirETH(), newAccount.Address))
 	if e != nil {
 		panic(e)
 	}
 
-	keys, err := keystore.DecryptKey(bys, cfg.ETH.Pass)
+	keys, err := keystore.DecryptKey(bys, newAccount.Password)
 	if err != nil {
 		panic(e)
 	}

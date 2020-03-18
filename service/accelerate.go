@@ -112,7 +112,14 @@ func (a *Accelerate) ID(r *http.Request, e *Empty, result *core.NodeInfo) error 
 }
 
 // Connect ...
-func (a *Accelerate) Connect(r *http.Request, addr *string, result *bool) error {
+func (a *Accelerate) Connect(r *http.Request, node *core.NodeInfo, result *bool) error {
+	*result = true
+	node.RemoteAddr = r.RemoteAddr
+	if a.nodes.Check(node.Name) {
+		*result = false
+		return nil
+	}
+	a.nodes.Add(node)
 	return nil
 }
 

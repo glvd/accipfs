@@ -67,10 +67,11 @@ type Clique struct {
 
 // NodeInfo ...
 type NodeInfo struct {
-	Name      string
-	Contract  ContractNode
-	DataStore DataStoreNode
-	Version   string
+	Name       string
+	RemoteAddr string
+	Contract   ContractNode
+	DataStore  DataStoreNode
+	Version    string
 }
 
 // nodeStore ...

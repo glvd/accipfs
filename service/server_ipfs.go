@@ -51,17 +51,16 @@ func (n *nodeServerIPFS) Init() error {
 	//os.Setenv("IPFS_PATH", filepath.Join(n.cfg.Path, config.DataDirIPFS()))
 	cmd := exec.Command(n.name, "init", "--profile", "badgerds")
 	out, err := cmd.CombinedOutput()
-	log.Infow("ipfs init", "tag", outputHead, "log", string(out))
 	if err != nil {
 		return fmt.Errorf("init:%w", err)
 	}
+	log.Infow("ipfs init", "tag", outputHead, "log", string(out))
 	cmd = exec.Command(n.name, "config", "Swarm.EnableAutoNATService", "--bool", "true")
 	out, err = cmd.CombinedOutput()
-	log.Infow("ipfs config set", "tag", outputHead, "log", string(out))
 	if err != nil {
 		return fmt.Errorf("config(nat):%w", err)
 	}
-
+	log.Infow("ipfs init config set", "tag", outputHead, "log", string(out))
 	cmd = exec.Command(n.name, "config", "Swarm.EnableRelayHop", "--bool", "true")
 	out, err = cmd.CombinedOutput()
 	if err != nil {

@@ -61,7 +61,7 @@ func (s *Server) Start() error {
 	log.Println("JSON RPC service listen and serving on port", port)
 	s.httpServer = &http.Server{Addr: port, Handler: s.route}
 
-	go s.accelerateServer.Run()
+	go s.accelerateServer.Start()
 
 	s.httpServer.ListenAndServe()
 	return nil

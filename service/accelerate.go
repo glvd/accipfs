@@ -57,9 +57,8 @@ func NewAccelerateServer(cfg *config.Config) (acc *Accelerate, err error) {
 	return acc, nil
 }
 
-// Run ...
-func (a *Accelerate) Run() {
-	fmt.Println("accelerate run")
+// Start ...
+func (a *Accelerate) Start() {
 	if err := a.ethServer.Start(); err != nil {
 		panic(err)
 	}
@@ -80,8 +79,17 @@ func (a *Accelerate) Run() {
 		panic(err)
 	}
 	fmt.Println(outputHead, "IPFS", "run id", jobIPFS)
-
+	jobAcc, err := a.cron.AddJob("0/5 * * * * *", a)
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println(outputHead, "Accelerate", "run id", jobAcc)
 	a.cron.Run()
+}
+
+// Run ...
+func (a *Accelerate) Run() {
+	fmt.Println(outputHead, "Accelerate", "accelerate run")
 }
 
 // Stop ...

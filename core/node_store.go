@@ -84,6 +84,7 @@ type NodeStore interface {
 	Add(info *NodeInfo)
 	Check(key string) bool
 	Get(key string) *NodeInfo
+	Remove(key string)
 	Range(func(info *NodeInfo) bool)
 }
 
@@ -92,28 +93,33 @@ func NewNodeStore() NodeStore {
 	return &nodeStore{}
 }
 
+// Remove ...
+func (s *nodeStore) Remove(key string) {
+	s.nodes.Delete(key)
+}
+
 // Add ...
-func (c *nodeStore) Add(info *NodeInfo) {
-	c.nodes.Store(info.Name, info)
+func (s *nodeStore) Add(info *NodeInfo) {
+	s.nodes.Store(info.Name, info)
 }
 
 // Check ...
-func (c *nodeStore) Check(key string) (b bool) {
-	_, b = c.nodes.Load(key)
+func (s *nodeStore) Check(key string) (b bool) {
+	_, b = s.nodes.Load(key)
 	return
 }
 
 // Get ...
-func (c *nodeStore) Get(key string) *NodeInfo {
-	if v, b := c.nodes.Load(key); b {
+func (s *nodeStore) Get(key string) *NodeInfo {
+	if v, b := s.nodes.Load(key); b {
 		return v.(*NodeInfo)
 	}
 	return nil
 }
 
 // Range ...
-func (c *nodeStore) Range(f func(info *NodeInfo) bool) {
-	c.nodes.Range(func(key, value interface{}) bool {
+func (s *nodeStore) Range(f func(info *NodeInfo) bool) {
+	s.nodes.Range(func(key, value interface{}) bool {
 		return f(value.(*NodeInfo))
 	})
 }

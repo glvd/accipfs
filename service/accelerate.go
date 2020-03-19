@@ -91,6 +91,8 @@ func (a *Accelerate) Start() {
 // Run ...
 func (a *Accelerate) Run() {
 	fmt.Println(outputHead, "Accelerate", "accelerate run")
+	a.nodes.Range(func(info *core.NodeInfo) bool {
+	})
 }
 
 // Stop ...

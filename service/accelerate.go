@@ -66,19 +66,20 @@ func (a *Accelerate) Start() {
 		panic(err)
 	}
 
-	ethNode, err := a.ethServer.Node()
-	jobETH, err := a.cron.AddJob("0 * * * * *", ethNode)
-	if err != nil {
-		panic(err)
-	}
-	fmt.Println(outputHead, "ETH", "run id", jobETH)
+	//ethNode, err := a.ethServer.Node()
+	//jobETH, err := a.cron.AddJob("0 * * * * *", ethNode)
+	//if err != nil {
+	//	panic(err)
+	//}
+	//fmt.Println(outputHead, "ETH", "run id", jobETH)
 
-	ipfsNode, err := a.ipfsServer.Node()
-	jobIPFS, err := a.cron.AddJob("0 * * * * *", ipfsNode)
-	if err != nil {
-		panic(err)
-	}
-	fmt.Println(outputHead, "IPFS", "run id", jobIPFS)
+	//ipfsNode, err := a.ipfsServer.Node()
+	//jobIPFS, err := a.cron.AddJob("0 * * * * *", ipfsNode)
+	//if err != nil {
+	//	panic(err)
+	//}
+	//fmt.Println(outputHead, "IPFS", "run id", jobIPFS)
+
 	jobAcc, err := a.cron.AddJob("0/5 * * * * *", a)
 	if err != nil {
 		panic(err)

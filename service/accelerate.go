@@ -32,7 +32,9 @@ type Accelerate struct {
 // NewAccelerateServer ...
 func NewAccelerateServer(cfg *config.Config) (acc *Accelerate, err error) {
 	acc = &Accelerate{
-		cfg: cfg,
+		nodes:      core.NewNodeStore(),
+		dummyNodes: core.NewNodeStore(),
+		cfg:        cfg,
 	}
 	acc.ethServer = newNodeServerETH(cfg)
 	acc.ipfsServer = newNodeServerIPFS(cfg)
@@ -117,6 +119,9 @@ func (a *Accelerate) ID(r *http.Request, e *Empty, result *core.NodeInfo) error 
 // Connect ...
 func (a *Accelerate) Connect(r *http.Request, node *core.NodeInfo, result *bool) error {
 	log.Infow("connect", "tag", outputHead, "addr", r.RemoteAddr)
+	if node == nil {
+		return fmt.Errorf("nil node info")
+	}
 	*result = true
 	node.RemoteAddr, _ = general.SplitIP(r.RemoteAddr)
 	if a.nodes.Check(node.Name) {

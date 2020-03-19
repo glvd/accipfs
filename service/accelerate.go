@@ -1,6 +1,7 @@
 package service
 
 import (
+	"bytes"
 	"context"
 	"fmt"
 	"github.com/glvd/accipfs/account"
@@ -8,6 +9,7 @@ import (
 	"github.com/glvd/accipfs/core"
 	"github.com/glvd/accipfs/general"
 	"github.com/goextension/log"
+	"github.com/gorilla/rpc/v2/json2"
 	"github.com/robfig/cron/v3"
 	"net/http"
 )
@@ -27,6 +29,11 @@ type Accelerate struct {
 	ipfsServer *nodeServerIPFS
 	ipfsClient *nodeClientIPFS
 	cron       *cron.Cron
+}
+
+// BootList ...
+var BootList = []string{
+	"gate.dhash.app",
 }
 
 // NewAccelerateServer ...
@@ -98,6 +105,27 @@ func (a *Accelerate) Ping(r *http.Request, e *Empty, result *string) error {
 	return nil
 }
 
+// Ping ...
+func Ping(url string) error {
+	pingReq, err := json2.EncodeClientRequest("Accelerate.Ping", &Empty{})
+	if err != nil {
+		return err
+	}
+	resp, err := http.Post(url, "application/json", bytes.NewReader(pingReq))
+	if err != nil {
+		return err
+	}
+	result := new(string)
+	err = json2.DecodeClientResponse(resp.Body, result)
+	if err != nil {
+		return err
+	}
+	if *result != "pong" {
+		return fmt.Errorf("get wrong response data:%s", *result)
+	}
+
+}
+
 // ID ...
 func (a *Accelerate) ID(r *http.Request, e *Empty, result *core.NodeInfo) error {
 	result.Name = a.self.Name
@@ -124,6 +152,7 @@ func (a *Accelerate) Connect(r *http.Request, node *core.NodeInfo, result *bool)
 	}
 	*result = true
 	node.RemoteAddr, _ = general.SplitIP(r.RemoteAddr)
+
 	if a.nodes.Check(node.Name) {
 		*result = false
 		return nil

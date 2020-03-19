@@ -124,7 +124,7 @@ func Ping(ip string) error {
 	if *result != "pong" {
 		return fmt.Errorf("get wrong response data:%s", *result)
 	}
-
+	return nil
 }
 
 // ID ...

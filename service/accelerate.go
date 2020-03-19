@@ -11,6 +11,7 @@ import (
 	"github.com/goextension/log"
 	"github.com/gorilla/rpc/v2/json2"
 	"github.com/robfig/cron/v3"
+	"go.uber.org/atomic"
 	"net/http"
 	"time"
 )
@@ -23,6 +24,7 @@ type Empty struct {
 type Accelerate struct {
 	nodes      core.NodeStore
 	dummyNodes core.NodeStore
+	lock       *atomic.Bool
 	self       *account.Account
 	cfg        *config.Config
 	ethServer  *nodeServerETH
@@ -91,7 +93,14 @@ func (a *Accelerate) Start() {
 
 // Run ...
 func (a *Accelerate) Run() {
-	fmt.Println(outputHead, "Accelerate", "sync run")
+	if a.lock.Load() {
+		fmt.Println(outputHead, "Accelerate", "accelerate run is already running")
+		return
+	}
+	a.lock.Store(true)
+	defer a.lock.Store(false)
+	ctx := context.TODO()
+
 	a.nodes.Range(func(info *core.NodeInfo) bool {
 		err := Ping(info.RemoteAddr)
 		if err != nil {
@@ -99,7 +108,7 @@ func (a *Accelerate) Run() {
 			a.dummyNodes.Add(info)
 			return true
 		}
-		ipfsTimeout, cancelFunc := context.WithTimeout(context.Background(), time.Duration(a.cfg.Interval)*time.Second)
+		ipfsTimeout, cancelFunc := context.WithTimeout(ctx, time.Duration(a.cfg.Interval)*time.Second)
 		var ipfsErr error
 		for _, addr := range info.DataStore.Addresses {
 			ipfsErr = a.ipfsClient.SwarmConnect(ipfsTimeout, addr)
@@ -113,7 +122,7 @@ func (a *Accelerate) Run() {
 			a.dummyNodes.Add(info)
 			return true
 		}
-		ethTimeout, cancelFunc := context.WithTimeout(context.Background(), time.Duration(a.cfg.Interval)*time.Second)
+		ethTimeout, cancelFunc := context.WithTimeout(ctx, time.Duration(a.cfg.Interval)*time.Second)
 		err = a.ethClient.AddPeer(ethTimeout, info.Contract.Enode)
 		if err != nil {
 			a.nodes.Remove(info.Name)

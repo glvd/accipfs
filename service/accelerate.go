@@ -106,7 +106,8 @@ func (a *Accelerate) Ping(r *http.Request, e *Empty, result *string) error {
 }
 
 // Ping ...
-func Ping(url string) error {
+func Ping(ip string) error {
+	url := fmt.Sprintf("http://%s:14009/rpc", ip)
 	pingReq, err := json2.EncodeClientRequest("Accelerate.Ping", &Empty{})
 	if err != nil {
 		return err
@@ -152,7 +153,15 @@ func (a *Accelerate) Connect(r *http.Request, node *core.NodeInfo, result *bool)
 	}
 	*result = true
 	node.RemoteAddr, _ = general.SplitIP(r.RemoteAddr)
-
+	err := Ping(node.RemoteAddr)
+	if err != nil {
+		*result = false
+		if a.dummyNodes.Check(node.Name) {
+			return nil
+		}
+		a.dummyNodes.Add(node)
+		return nil
+	}
 	if a.nodes.Check(node.Name) {
 		*result = false
 		return nil

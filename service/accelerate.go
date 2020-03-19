@@ -44,6 +44,7 @@ func NewAccelerateServer(cfg *config.Config) (acc *Accelerate, err error) {
 	acc = &Accelerate{
 		nodes:      core.NewNodeStore(),
 		dummyNodes: core.NewNodeStore(),
+		lock:       atomic.NewBool(false),
 		cfg:        cfg,
 	}
 	acc.ethServer = newNodeServerETH(cfg)
@@ -130,6 +131,7 @@ func (a *Accelerate) Run() {
 			return true
 		}
 		cancelFunc()
+		time.Sleep(3 * time.Second)
 		return true
 	})
 }

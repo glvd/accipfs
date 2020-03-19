@@ -6,6 +6,7 @@ import (
 	"github.com/glvd/accipfs/account"
 	"github.com/glvd/accipfs/config"
 	"github.com/glvd/accipfs/core"
+	"github.com/glvd/accipfs/general"
 	"github.com/goextension/log"
 	"github.com/robfig/cron/v3"
 	"net/http"
@@ -117,7 +118,7 @@ func (a *Accelerate) ID(r *http.Request, e *Empty, result *core.NodeInfo) error 
 func (a *Accelerate) Connect(r *http.Request, node *core.NodeInfo, result *bool) error {
 	log.Infow("connect", "tag", outputHead, "addr", r.RemoteAddr)
 	*result = true
-	node.RemoteAddr = r.RemoteAddr
+	node.RemoteAddr, _ = general.SplitIP(r.RemoteAddr)
 	if a.nodes.Check(node.Name) {
 		*result = false
 		return nil

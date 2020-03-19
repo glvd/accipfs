@@ -2,13 +2,11 @@ package service
 
 import (
 	"bytes"
-	"github.com/glvd/accipfs/account"
 	"github.com/glvd/accipfs/config"
 	"github.com/glvd/accipfs/core"
 	"github.com/goextension/log/zap"
 	"github.com/gorilla/rpc/v2/json2"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"testing"
 )
@@ -64,15 +62,15 @@ func TestNodeServerETH(t *testing.T) {
 func TestNewServer(t *testing.T) {
 	config.WorkDir = "d:\\workspace\\pvt"
 	config.Initialize()
-	cfg := config.Global()
-	acc, e := account.NewAccount(&cfg)
-	if e != nil {
-		t.Fatal(e)
-	}
-	if err := acc.Save(&cfg); err != nil {
-		t.Fatal(err)
-	}
-	t.Logf("%+v", cfg)
+	//cfg := config.Global()
+	//acc, e := account.NewAccount(&cfg)
+	//if e != nil {
+	//	t.Fatal(e)
+	//}
+	//if err := acc.Save(&cfg); err != nil {
+	//	t.Fatal(err)
+	//}
+	//t.Logf("%+v", cfg)
 	//server, e := NewRPCServer(&cfg)
 	//if e != nil {
 	//	t.Fatal(e)
@@ -112,5 +110,25 @@ func TestNewServer(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	log.Printf(" %+v\n", *reply)
+	message2, err := json2.EncodeClientRequest("Accelerate.Connect", reply)
+	if err != nil {
+		t.Fatal(err)
+	}
+	resp2, err := http.Post(url, "application/json", bytes.NewReader(message2))
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer resp2.Body.Close()
+	all2, e := ioutil.ReadAll(resp2.Body)
+	if e != nil {
+		t.Fatal(e)
+	}
+	t.Log(string(all2))
+	//reply2 := new(bool)
+	//err = json2.DecodeClientResponse(bytes.NewReader(all), reply2)
+	//if err != nil {
+	//	t.Fatal(err)
+	//}
+
+	//log.Printf(" %+v\n", *reply2)
 }

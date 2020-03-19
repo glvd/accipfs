@@ -18,6 +18,7 @@ type Empty struct {
 // Accelerate ...
 type Accelerate struct {
 	nodes      core.NodeStore
+	dummyNodes core.NodeStore
 	self       *account.Account
 	cfg        *config.Config
 	ethServer  *nodeServerETH
@@ -98,6 +99,7 @@ func (a *Accelerate) Ping(r *http.Request, e *Empty, result *string) error {
 func (a *Accelerate) ID(r *http.Request, e *Empty, result *core.NodeInfo) error {
 	result.Name = a.self.Name
 	result.Version = core.Version
+	fmt.Println(outputHead, "print remote ip", r.RemoteAddr)
 	ds, err := a.ipfsClient.ID(context.Background())
 	if err != nil {
 		return fmt.Errorf("datastore error:%w", err)

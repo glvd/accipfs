@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/glvd/accipfs/config"
+	"github.com/goextension/io"
 	"github.com/goextension/log"
 	"os"
 	"os/exec"
@@ -26,10 +27,22 @@ func (n *nodeServerIPFS) Node() (Node, error) {
 // Start ...
 func (n *nodeServerIPFS) Start() error {
 	n.cmd = exec.CommandContext(n.ctx, n.name, "daemon", "--routing", "none")
+	fmt.Println("geth cmd: ", n.cmd.Args)
+	pipe, err2 := n.cmd.StderrPipe()
+	if err2 != nil {
+		return err2
+	}
+	stdoutPipe, err2 := n.cmd.StdoutPipe()
+	if err2 != nil {
+		return err2
+	}
+	m := io.MultiReader(pipe, stdoutPipe)
+	go screenOutput(n.ctx, m)
 	err := n.cmd.Start()
 	if err != nil {
 		return err
 	}
+
 	return nil
 }
 

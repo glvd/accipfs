@@ -5,6 +5,7 @@ import (
 	"github.com/glvd/accipfs/account"
 	"github.com/glvd/accipfs/config"
 	"github.com/glvd/accipfs/general"
+	"github.com/glvd/accipfs/service"
 	"github.com/spf13/cobra"
 	"path/filepath"
 )
@@ -22,13 +23,22 @@ func initCmd() *cobra.Command {
 			}
 			config.WorkDir = path
 			cfg := config.Default()
-			acc, e := account.NewAccount(cfg)
-			if e != nil {
-				panic(e)
+
+			ipfs := service.NewNodeServerIPFS(cfg)
+			if err := ipfs.Init(); err != nil {
+				panic(err)
 			}
-			e = acc.Save(cfg)
-			if e != nil {
-				panic(e)
+			eth := service.NewNodeServerETH(cfg)
+			if err := eth.Init(); err != nil {
+				panic(err)
+			}
+			acc, err := account.NewAccount(cfg)
+			if err != nil {
+				panic(err)
+			}
+			err = acc.Save(cfg)
+			if err != nil {
+				panic(err)
 			}
 			//config.SaveConfig(config.Default())
 		},

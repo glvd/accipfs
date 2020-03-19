@@ -78,7 +78,7 @@ func TestNewServer(t *testing.T) {
 	//	t.Fatal(e)
 	//}
 	//go server.Start()
-	url := "http://localhost:1234/rpc"
+	url := "http://47.101.169.94:14009/rpc"
 
 	m1, e := json2.EncodeClientRequest("Accelerate.Ping", &Empty{})
 	if e != nil {

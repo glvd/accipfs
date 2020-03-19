@@ -12,6 +12,7 @@ import (
 	"github.com/gorilla/rpc/v2/json2"
 	"github.com/robfig/cron/v3"
 	"net/http"
+	"time"
 )
 
 // Empty ...
@@ -90,8 +91,37 @@ func (a *Accelerate) Start() {
 
 // Run ...
 func (a *Accelerate) Run() {
-	fmt.Println(outputHead, "Accelerate", "accelerate run")
+	fmt.Println(outputHead, "Accelerate", "sync run")
 	a.nodes.Range(func(info *core.NodeInfo) bool {
+		err := Ping(info.RemoteAddr)
+		if err != nil {
+			a.nodes.Remove(info.Name)
+			a.dummyNodes.Add(info)
+			return true
+		}
+		ipfsTimeout, cancelFunc := context.WithTimeout(context.Background(), time.Duration(a.cfg.Interval)*time.Second)
+		var ipfsErr error
+		for _, addr := range info.DataStore.Addresses {
+			ipfsErr = a.ipfsClient.SwarmConnect(ipfsTimeout, addr)
+			if ipfsErr == nil {
+				break
+			}
+		}
+		cancelFunc()
+		if ipfsErr != nil {
+			a.nodes.Remove(info.Name)
+			a.dummyNodes.Add(info)
+			return true
+		}
+		ethTimeout, cancelFunc := context.WithTimeout(context.Background(), time.Duration(a.cfg.Interval)*time.Second)
+		err = a.ethClient.AddPeer(ethTimeout, info.Contract.Enode)
+		if err != nil {
+			a.nodes.Remove(info.Name)
+			a.dummyNodes.Add(info)
+			return true
+		}
+		cancelFunc()
+		return true
 	})
 }
 

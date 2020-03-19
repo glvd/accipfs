@@ -119,7 +119,8 @@ func (s *nodeStore) Get(key string) *NodeInfo {
 
 // Range ...
 func (s *nodeStore) Range(f func(info *NodeInfo) bool) {
-	s.nodes.Range(func(key, value interface{}) bool {
+	s.nodes.
+		s.nodes.Range(func(key, value interface{}) bool {
 		return f(value.(*NodeInfo))
 	})
 }

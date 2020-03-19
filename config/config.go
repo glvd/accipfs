@@ -69,6 +69,7 @@ type Config struct {
 	ETH        ETHConfig  `json:"eth" mapstructure:"eth"`
 	IPFS       IPFSConfig `json:"ipfs" mapstructure:"ipfs"`
 	AWS        AWSConfig  `json:"aws" mapstructure:"aws"`
+	Interval   int64      `json:"interval" mapstructure:"interval"`
 }
 
 // WorkDir ...

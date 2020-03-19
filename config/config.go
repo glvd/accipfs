@@ -134,6 +134,7 @@ func Default() *Config {
 	def := &Config{
 		Port:       20304,
 		Path:       WorkDir,
+		Account:    "",
 		PrivateKey: "",
 		PublicKey:  "",
 		ETH: ETHConfig{
@@ -147,7 +148,8 @@ func Default() *Config {
 			Port:    5001,
 			Timeout: 30,
 		},
-		AWS: AWSConfig{},
+		AWS:      AWSConfig{},
+		Interval: 30,
 	}
 	if _config == nil {
 		_config = def

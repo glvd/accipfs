@@ -24,6 +24,9 @@ func initCmd() *cobra.Command {
 			config.WorkDir = path
 			cfg := config.Default()
 
+			if err := cfg.Init(); err != nil {
+				panic(err)
+			}
 			ipfs := service.NewNodeServerIPFS(cfg)
 			if err := ipfs.Init(); err != nil {
 				panic(err)

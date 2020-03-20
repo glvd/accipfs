@@ -207,17 +207,16 @@ func (a *Accelerate) Connect(r *http.Request, node *core.NodeInfo, result *bool)
 	node.RemoteAddr, _ = general.SplitIP(r.RemoteAddr)
 	err := Ping(node.RemoteAddr)
 	if err != nil {
+		*result = false
 		if !a.dummyNodes.Check(node.Name) {
 			a.dummyNodes.Add(node)
 		}
-		*result = false
 		return nil
 	}
 	if !a.nodes.Check(node.Name) {
 		a.nodes.Add(node)
 		return nil
 	}
-	*result = false
 	return nil
 }
 

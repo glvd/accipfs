@@ -15,7 +15,7 @@ func nodeCmd() *cobra.Command {
 		Short: "node run",
 		Long:  "node can operate to change the parameters of some nodes",
 	}
-	nodeCmd.AddCommand(nodeConnectCmd())
+	nodeCmd.AddCommand(nodeConnectCmd(), nodePeerCmd())
 	return nodeCmd
 }
 
@@ -45,6 +45,28 @@ func nodeConnectCmd() *cobra.Command {
 			return
 		},
 	}
-	connect.Flags().StringVar(&addr, "addr", "localhost", "set a remote address to connect")
+	connect.Flags().StringVar(&addr, "addr", "localhost:20304", "set a remote address to connect")
 	return connect
+}
+
+func nodePeerCmd() *cobra.Command {
+	peers := &cobra.Command{
+		Use:   "peers",
+		Short: "peers run",
+		Long:  "show the local node peers",
+		Run: func(cmd *cobra.Command, args []string) {
+			config.Initialize()
+			cfg := config.Global()
+			url := fmt.Sprintf("http://localhost:%d/rpc", cfg.Port)
+			reply := new([]*core.NodeInfo)
+			if err := general.RPCPost(url, "Accelerate.Peers", &service.Empty{}, *reply); err != nil {
+				panic(err)
+			}
+			for _, info := range *reply {
+				fmt.Println("Peer:", info.Name)
+			}
+			return
+		},
+	}
+	return peers
 }

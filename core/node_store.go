@@ -69,6 +69,7 @@ type Clique struct {
 type NodeInfo struct {
 	Name       string
 	RemoteAddr string
+	Port       int
 	Contract   ContractNode
 	DataStore  DataStoreNode
 	Version    string

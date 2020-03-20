@@ -183,7 +183,8 @@ func Ping(ip string) error {
 func (a *Accelerate) ID(r *http.Request, e *Empty, result *core.NodeInfo) error {
 	result.Name = a.self.Name
 	result.Version = core.Version
-	fmt.Println(outputHead, "Accelerate", "print remote ip:", r.RemoteAddr)
+	result.Port = a.cfg.Port
+	fmt.Println(outputHead, "Accelerate", "print remote ip:", result.RemoteAddr, ":", result.Port)
 	ds, err := a.ipfsClient.ID(context.Background())
 	if err != nil {
 		return fmt.Errorf("datastore error:%w", err)

@@ -84,7 +84,7 @@ func (a *Accelerate) Start() {
 	//}
 	//fmt.Println(outputHead, "IPFS", "run id", jobIPFS)
 
-	jobAcc, err := a.cron.AddJob("0 0/30 * * *", a)
+	jobAcc, err := a.cron.AddJob("0 0/30 * * * *", a)
 	if err != nil {
 		panic(err)
 	}
@@ -102,6 +102,7 @@ func (a *Accelerate) Run() {
 	defer a.lock.Store(false)
 	ctx := context.TODO()
 	a.nodes.Range(func(info *core.NodeInfo) bool {
+		fmt.Println(outputHead, "Accelerate", "syncing node", info.Name)
 		err := Ping(info)
 		if err != nil {
 			a.nodes.Remove(info.Name)
@@ -115,6 +116,9 @@ func (a *Accelerate) Run() {
 		}
 
 		for _, nodeInfo := range nodeInfos {
+			if a.peerNodes.Load() > a.cfg.Limit {
+				return false
+			}
 			err := Ping(nodeInfo)
 			if err != nil {
 				a.dummyNodes.Add(nodeInfo)
@@ -141,13 +145,11 @@ func (a *Accelerate) Run() {
 				continue
 			}
 			cancelFunc()
-			if a.peerNodes.Load() > a.cfg.Limit {
-				return false
-			}
+
 			a.peerNodes.Add(1)
 			a.nodes.Add(nodeInfo)
 		}
-		time.Sleep(3 * time.Second)
+		time.Sleep(30 * time.Second)
 		return true
 	})
 }

@@ -234,6 +234,7 @@ func (a *Accelerate) addPeer(ctx context.Context, info *core.NodeInfo, result *b
 		return nil
 	}
 	ethTimeout, cancelFunc := context.WithTimeout(ctx, time.Duration(a.cfg.Interval)*time.Second)
+	//fmt.Println("connect eth:", info.Contract.Enode)
 	err = a.ethClient.AddPeer(ethTimeout, info.Contract.Enode)
 	if err != nil {
 		a.dummyNodes.Add(info)

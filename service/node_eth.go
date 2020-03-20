@@ -294,7 +294,7 @@ func (n *nodeClientETH) NodeInfo(ctx context.Context) (*core.ContractNode, error
 
 // AddPeer ...
 func (n *nodeClientETH) AddPeer(ctx context.Context, peer string) error {
-	var node core.ContractNode
+	var b bool
 	cancelCtx, cancel := context.WithCancel(ctx)
 	defer cancel()
 	client, err := rpc.DialContext(cancelCtx, config.ETHAddr())
@@ -302,7 +302,7 @@ func (n *nodeClientETH) AddPeer(ctx context.Context, peer string) error {
 		return err
 	}
 	defer client.Close()
-	err = client.Call(&node, "admin_addPeer", peer)
+	err = client.Call(&b, "admin_addPeer", peer)
 	if err != nil {
 		return err
 	}

@@ -6,6 +6,7 @@ import (
 	"github.com/glvd/accipfs/core"
 	"github.com/glvd/accipfs/general"
 	"github.com/glvd/accipfs/service"
+	"github.com/goextension/log/zap"
 	"github.com/spf13/cobra"
 )
 
@@ -26,6 +27,7 @@ func nodeConnectCmd() *cobra.Command {
 		Short: "connect run",
 		Long:  "connect a remote node",
 		Run: func(cmd *cobra.Command, args []string) {
+			zap.InitZapSugar()
 			config.Initialize()
 			cfg := config.Global()
 			url := fmt.Sprintf("http://localhost:%d/rpc", cfg.Port)

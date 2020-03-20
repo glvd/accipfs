@@ -84,7 +84,7 @@ func (a *Accelerate) Start() {
 	//}
 	//fmt.Println(outputHead, "IPFS", "run id", jobIPFS)
 
-	jobAcc, err := a.cron.AddJob("0 3/30 * * * ? *", a)
+	jobAcc, err := a.cron.AddJob("0 3/30 * * * *", a)
 	if err != nil {
 		panic(err)
 	}

@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"github.com/goextension/log"
 	"github.com/gorilla/rpc/v2/json2"
-	"io/ioutil"
 	"net/http"
 	"os"
 	"strconv"
@@ -47,12 +46,24 @@ func RPCPost(url string, method string, input, output interface{}) error {
 	}
 	defer resp.Body.Close()
 
-	all, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		return err
-	}
-	log.Infof("rpc result", "response", string(all))
-	err = json2.DecodeClientResponse(bytes.NewReader(all), output)
+	buf := &bytes.Buffer{}
+	// If the buffer overflows, we will get bytes.ErrTooLarge.
+	// Return that as an error. Any other panic remains.
+	defer func() {
+		e := recover()
+		if e == nil {
+			return
+		}
+		if panicErr, ok := e.(error); ok && panicErr == bytes.ErrTooLarge {
+			err = panicErr
+		} else {
+			panic(e)
+		}
+	}()
+	buf.Grow(bytes.MinRead)
+	_, err = buf.ReadFrom(resp.Body)
+	log.Infow("rpc result", "response", string(buf.Bytes()))
+	err = json2.DecodeClientResponse(buf, output)
 	if err != nil {
 		return err
 	}

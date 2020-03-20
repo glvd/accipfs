@@ -27,7 +27,7 @@ func (n *nodeServerIPFS) Node() (Node, error) {
 // Start ...
 func (n *nodeServerIPFS) Start() error {
 	n.cmd = exec.CommandContext(n.ctx, n.name, "daemon", "--routing", "none")
-	fmt.Println("geth cmd: ", n.cmd.Args)
+	fmt.Println("ipfs cmd: ", n.cmd.Args)
 	pipe, err2 := n.cmd.StderrPipe()
 	if err2 != nil {
 		return err2

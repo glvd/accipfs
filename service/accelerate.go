@@ -13,6 +13,8 @@ import (
 	"github.com/robfig/cron/v3"
 	"go.uber.org/atomic"
 	"net/http"
+	"strconv"
+	"strings"
 	"time"
 )
 
@@ -103,7 +105,7 @@ func (a *Accelerate) Run() {
 	ctx := context.TODO()
 
 	a.nodes.Range(func(info *core.NodeInfo) bool {
-		err := Ping(info.RemoteAddr)
+		err := Ping(info)
 		if err != nil {
 			a.nodes.Remove(info.Name)
 			a.dummyNodes.Add(info)
@@ -158,8 +160,9 @@ func (a *Accelerate) Ping(r *http.Request, e *Empty, result *string) error {
 }
 
 // Ping ...
-func Ping(ip string) error {
-	url := fmt.Sprintf("http://%s:14009/rpc", ip)
+func Ping(info *core.NodeInfo) error {
+	pingAddr := strings.Join([]string{info.RemoteAddr, strconv.Itoa(info.Port)}, ":")
+	url := fmt.Sprintf("http://%s/rpc", pingAddr)
 	pingReq, err := json2.EncodeClientRequest("Accelerate.Ping", &Empty{})
 	if err != nil {
 		return err
@@ -206,7 +209,8 @@ func (a *Accelerate) Connect(r *http.Request, node *core.NodeInfo, result *bool)
 	}
 	*result = true
 	node.RemoteAddr, _ = general.SplitIP(r.RemoteAddr)
-	err := Ping(node.RemoteAddr)
+
+	err := Ping(node)
 	if err != nil {
 		*result = false
 		if !a.dummyNodes.Check(node.Name) {

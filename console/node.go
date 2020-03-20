@@ -38,9 +38,13 @@ func nodeConnectCmd() *cobra.Command {
 			if err := general.RPCPost(remoteURL, "Accelerate.Connect", reply, remoteNodeInfo); err != nil {
 				fmt.Println("connect error:", err.Error())
 			}
-
-			if err := general.RPCPost(remoteURL, "Accelerate.AddPeer", &service.Empty{}, remoteNodeInfo); err != nil {
+			status := new(bool)
+			if err := general.RPCPost(remoteURL, "Accelerate.AddPeer", remoteNodeInfo, status); err != nil {
 				fmt.Println("remote id error:", err.Error())
+			}
+
+			if !(*status) {
+				fmt.Println("connect error")
 			}
 
 			return

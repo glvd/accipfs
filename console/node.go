@@ -1,7 +1,6 @@
 package main
 
 import (
-	"errors"
 	"fmt"
 	"github.com/glvd/accipfs/config"
 	"github.com/glvd/accipfs/core"
@@ -41,7 +40,7 @@ func nodeConnectCmd() *cobra.Command {
 			}
 
 			if !(*status) {
-				panic(errors.New("failed connect to remote"))
+				fmt.Println("remote server can't connect to you,may be you are an intranet")
 			}
 			return
 		},

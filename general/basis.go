@@ -2,7 +2,7 @@ package general
 
 import (
 	"bytes"
-	"fmt"
+	"github.com/goextension/log"
 	"github.com/gorilla/rpc/v2/json2"
 	"io/ioutil"
 	"net/http"
@@ -50,7 +50,7 @@ func RPCPost(url string, method string, input, output interface{}) error {
 	if err != nil {
 		return err
 	}
-	fmt.Println("response info:", string(all))
+	log.Infof("rpc result", "response", string(all))
 	err = json2.DecodeClientResponse(bytes.NewReader(all), output)
 	if err != nil {
 		return err

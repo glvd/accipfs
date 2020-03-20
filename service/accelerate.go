@@ -21,6 +21,7 @@ type Empty struct {
 // Accelerate ...
 type Accelerate struct {
 	nodes      core.NodeStore
+	peerNodes  *atomic.Int64
 	dummyNodes core.NodeStore
 	lock       *atomic.Bool
 	self       *account.Account
@@ -41,6 +42,7 @@ var BootList = []string{
 func NewAccelerateServer(cfg *config.Config) (acc *Accelerate, err error) {
 	acc = &Accelerate{
 		nodes:      core.NewNodeStore(),
+		peerNodes:  atomic.NewInt64(0),
 		dummyNodes: core.NewNodeStore(),
 		lock:       atomic.NewBool(false),
 		cfg:        cfg,
@@ -99,11 +101,11 @@ func (a *Accelerate) Run() {
 	a.lock.Store(true)
 	defer a.lock.Store(false)
 	ctx := context.TODO()
-
 	a.nodes.Range(func(info *core.NodeInfo) bool {
 		err := Ping(info)
 		if err != nil {
 			a.nodes.Remove(info.Name)
+			a.peerNodes.Add(-1)
 			a.dummyNodes.Add(info)
 			return true
 		}
@@ -139,6 +141,10 @@ func (a *Accelerate) Run() {
 				continue
 			}
 			cancelFunc()
+			if a.peerNodes.Load() > a.cfg.Limit {
+				return false
+			}
+			a.peerNodes.Add(1)
 			a.nodes.Add(nodeInfo)
 		}
 		time.Sleep(3 * time.Second)

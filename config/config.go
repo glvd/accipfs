@@ -70,6 +70,7 @@ type Config struct {
 	IPFS       IPFSConfig `json:"ipfs" mapstructure:"ipfs"`
 	AWS        AWSConfig  `json:"aws" mapstructure:"aws"`
 	Interval   int64      `json:"interval" mapstructure:"interval"`
+	Limit      int64
 }
 
 // WorkDir ...
@@ -150,6 +151,7 @@ func Default() *Config {
 		},
 		AWS:      AWSConfig{},
 		Interval: 30,
+		Limit:    500,
 	}
 	if _config == nil {
 		_config = def

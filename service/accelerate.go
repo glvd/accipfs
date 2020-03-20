@@ -82,7 +82,7 @@ func (a *Accelerate) Start() {
 	//}
 	//fmt.Println(outputHead, "IPFS", "run id", jobIPFS)
 
-	jobAcc, err := a.cron.AddJob("0/5 * * * * *", a)
+	jobAcc, err := a.cron.AddJob("0 0/30 * * *", a)
 	if err != nil {
 		panic(err)
 	}
@@ -93,7 +93,7 @@ func (a *Accelerate) Start() {
 // Run ...
 func (a *Accelerate) Run() {
 	if a.lock.Load() {
-		fmt.Println(outputHead, "Accelerate", "accelerate run is already running")
+		fmt.Println(outputHead, "Accelerate", "accelerate.run is already running")
 		return
 	}
 	a.lock.Store(true)
@@ -107,28 +107,40 @@ func (a *Accelerate) Run() {
 			a.dummyNodes.Add(info)
 			return true
 		}
-		ipfsTimeout, cancelFunc := context.WithTimeout(ctx, time.Duration(a.cfg.Interval)*time.Second)
-		var ipfsErr error
-		for _, addr := range info.DataStore.Addresses {
-			ipfsErr = a.ipfsClient.SwarmConnect(ipfsTimeout, addr)
-			if ipfsErr == nil {
-				break
-			}
-		}
-		cancelFunc()
-		if ipfsErr != nil {
-			a.nodes.Remove(info.Name)
-			a.dummyNodes.Add(info)
-			return true
-		}
-		ethTimeout, cancelFunc := context.WithTimeout(ctx, time.Duration(a.cfg.Interval)*time.Second)
-		err = a.ethClient.AddPeer(ethTimeout, info.Contract.Enode)
+		nodeInfos, err := Peers(info)
 		if err != nil {
-			a.nodes.Remove(info.Name)
-			a.dummyNodes.Add(info)
 			return true
 		}
-		cancelFunc()
+
+		for _, nodeInfo := range nodeInfos {
+			err := Ping(nodeInfo)
+			if err != nil {
+				a.dummyNodes.Add(nodeInfo)
+				continue
+			}
+
+			ipfsTimeout, cancelFunc := context.WithTimeout(ctx, time.Duration(a.cfg.Interval)*time.Second)
+			var ipfsErr error
+			for _, addr := range nodeInfo.DataStore.Addresses {
+				ipfsErr = a.ipfsClient.SwarmConnect(ipfsTimeout, addr)
+				if ipfsErr == nil {
+					break
+				}
+			}
+			cancelFunc()
+			if ipfsErr != nil {
+				a.dummyNodes.Add(nodeInfo)
+				continue
+			}
+			ethTimeout, cancelFunc := context.WithTimeout(ctx, time.Duration(a.cfg.Interval)*time.Second)
+			err = a.ethClient.AddPeer(ethTimeout, nodeInfo.Contract.Enode)
+			if err != nil {
+				a.dummyNodes.Add(nodeInfo)
+				continue
+			}
+			cancelFunc()
+			a.nodes.Add(nodeInfo)
+		}
 		time.Sleep(3 * time.Second)
 		return true
 	})

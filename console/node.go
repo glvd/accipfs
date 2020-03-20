@@ -59,7 +59,7 @@ func nodePeerCmd() *cobra.Command {
 			cfg := config.Global()
 			url := fmt.Sprintf("http://localhost:%d/rpc", cfg.Port)
 			reply := new([]*core.NodeInfo)
-			if err := general.RPCPost(url, "Accelerate.Peers", &service.Empty{}, *reply); err != nil {
+			if err := general.RPCPost(url, "Accelerate.Peers", &service.Empty{}, reply); err != nil {
 				panic(err)
 			}
 			for _, info := range *reply {

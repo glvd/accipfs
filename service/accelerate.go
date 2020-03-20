@@ -152,6 +152,7 @@ func (a *Accelerate) Run() {
 		//time.Sleep(30 * time.Second)
 		return true
 	})
+	fmt.Println(outputHead, "Accelerate", "syncing done")
 }
 
 // Stop ...
@@ -219,9 +220,9 @@ func (a *Accelerate) Connect(r *http.Request, node *core.NodeInfo, result *bool)
 }
 
 // Peers ...
-func (a *Accelerate) Peers(r *http.Request, e *Empty, result []*core.NodeInfo) error {
+func (a *Accelerate) Peers(r *http.Request, e *Empty, result *[]*core.NodeInfo) error {
 	a.nodes.Range(func(info *core.NodeInfo) bool {
-		result = append(result, info)
+		*result = append(*result, info)
 		return true
 	})
 	return nil

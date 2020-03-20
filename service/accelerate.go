@@ -119,35 +119,10 @@ func (a *Accelerate) Run() {
 			if a.peerNodes.Load() > a.cfg.Limit {
 				return false
 			}
-			err := Ping(nodeInfo)
-			if err != nil {
-				a.dummyNodes.Add(nodeInfo)
+			result := new(bool)
+			if err := a.addPeer(ctx, nodeInfo, result); err != nil {
 				continue
 			}
-
-			ipfsTimeout, cancelFunc := context.WithTimeout(ctx, time.Duration(a.cfg.Interval)*time.Second)
-			var ipfsErr error
-			for _, addr := range nodeInfo.DataStore.Addresses {
-				ipfsErr = a.ipfsClient.SwarmConnect(ipfsTimeout, addr)
-				if ipfsErr == nil {
-					break
-				}
-			}
-			cancelFunc()
-			if ipfsErr != nil {
-				a.dummyNodes.Add(nodeInfo)
-				continue
-			}
-			ethTimeout, cancelFunc := context.WithTimeout(ctx, time.Duration(a.cfg.Interval)*time.Second)
-			err = a.ethClient.AddPeer(ethTimeout, nodeInfo.Contract.Enode)
-			if err != nil {
-				a.dummyNodes.Add(nodeInfo)
-				continue
-			}
-			cancelFunc()
-
-			a.peerNodes.Add(1)
-			a.nodes.Add(nodeInfo)
 		}
 		//time.Sleep(30 * time.Second)
 		return true
@@ -217,6 +192,46 @@ func (a *Accelerate) Connect(r *http.Request, node *core.NodeInfo, result *bool)
 		return nil
 	}
 	return nil
+}
+
+func (a *Accelerate) addPeer(ctx context.Context, info *core.NodeInfo, result *bool) error {
+	*result = false
+	err := Ping(info)
+	if err != nil {
+		a.dummyNodes.Add(info)
+		return nil
+	}
+
+	ipfsTimeout, cancelFunc := context.WithTimeout(ctx, time.Duration(a.cfg.Interval)*time.Second)
+	var ipfsErr error
+	for _, addr := range info.DataStore.Addresses {
+		ipfsErr = a.ipfsClient.SwarmConnect(ipfsTimeout, addr)
+		if ipfsErr == nil {
+			break
+		}
+	}
+	cancelFunc()
+	if ipfsErr != nil {
+		a.dummyNodes.Add(info)
+		return nil
+	}
+	ethTimeout, cancelFunc := context.WithTimeout(ctx, time.Duration(a.cfg.Interval)*time.Second)
+	err = a.ethClient.AddPeer(ethTimeout, info.Contract.Enode)
+	if err != nil {
+		a.dummyNodes.Add(info)
+		return nil
+	}
+	cancelFunc()
+
+	a.peerNodes.Add(1)
+	a.nodes.Add(info)
+	*result = true
+	return nil
+}
+
+// AddPeer ...
+func (a *Accelerate) AddPeer(r *http.Request, info *core.NodeInfo, result *bool) error {
+	return a.addPeer(r.Context(), info, result)
 }
 
 // Peers ...

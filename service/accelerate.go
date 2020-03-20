@@ -1,7 +1,6 @@
 package service
 
 import (
-	"bytes"
 	"context"
 	"fmt"
 	"github.com/glvd/accipfs/account"
@@ -9,12 +8,9 @@ import (
 	"github.com/glvd/accipfs/core"
 	"github.com/glvd/accipfs/general"
 	"github.com/goextension/log"
-	"github.com/gorilla/rpc/v2/json2"
 	"github.com/robfig/cron/v3"
 	"go.uber.org/atomic"
 	"net/http"
-	"strconv"
-	"strings"
 	"time"
 )
 
@@ -156,29 +152,6 @@ func (a *Accelerate) Stop() {
 // Ping ...
 func (a *Accelerate) Ping(r *http.Request, e *Empty, result *string) error {
 	*result = "pong"
-	return nil
-}
-
-// Ping ...
-func Ping(info *core.NodeInfo) error {
-	pingAddr := strings.Join([]string{info.RemoteAddr, strconv.Itoa(info.Port)}, ":")
-	url := fmt.Sprintf("http://%s/rpc", pingAddr)
-	pingReq, err := json2.EncodeClientRequest("Accelerate.Ping", &Empty{})
-	if err != nil {
-		return err
-	}
-	resp, err := http.Post(url, "application/json", bytes.NewReader(pingReq))
-	if err != nil {
-		return err
-	}
-	result := new(string)
-	err = json2.DecodeClientResponse(resp.Body, result)
-	if err != nil {
-		return err
-	}
-	if *result != "pong" {
-		return fmt.Errorf("get wrong response data:%s", *result)
-	}
 	return nil
 }
 

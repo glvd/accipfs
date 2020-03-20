@@ -149,7 +149,7 @@ func (a *Accelerate) Run() {
 			a.peerNodes.Add(1)
 			a.nodes.Add(nodeInfo)
 		}
-		time.Sleep(30 * time.Second)
+		//time.Sleep(30 * time.Second)
 		return true
 	})
 }

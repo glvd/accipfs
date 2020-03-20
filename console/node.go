@@ -31,17 +31,18 @@ func nodeConnectCmd() *cobra.Command {
 			url := fmt.Sprintf("http://localhost:%d/rpc", cfg.Port)
 			reply := new(core.NodeInfo)
 			if err := general.RPCPost(url, "Accelerate.ID", &service.Empty{}, reply); err != nil {
-				panic(err)
+				fmt.Println("local id error:", err.Error())
 			}
 			remoteURL := fmt.Sprintf("http://%s/rpc", addr)
-			status := new(bool)
-			if err := general.RPCPost(remoteURL, "Accelerate.Connect", reply, status); err != nil {
-				panic(err)
+			remoteNodeInfo := new(core.NodeInfo)
+			if err := general.RPCPost(remoteURL, "Accelerate.Connect", reply, remoteNodeInfo); err != nil {
+				fmt.Println("connect error:", err.Error())
 			}
 
-			if !(*status) {
-				fmt.Println("remote server can't connect to you,may be you are an intranet")
+			if err := general.RPCPost(remoteURL, "Accelerate.AddPeer", &service.Empty{}, remoteNodeInfo); err != nil {
+				fmt.Println("remote id error:", err.Error())
 			}
+
 			return
 		},
 	}
@@ -60,7 +61,7 @@ func nodePeerCmd() *cobra.Command {
 			url := fmt.Sprintf("http://localhost:%d/rpc", cfg.Port)
 			reply := new([]*core.NodeInfo)
 			if err := general.RPCPost(url, "Accelerate.Peers", &service.Empty{}, reply); err != nil {
-				panic(err)
+				fmt.Println("peers error:", err.Error())
 			}
 			for _, info := range *reply {
 				fmt.Println("Peer:", info.Name)

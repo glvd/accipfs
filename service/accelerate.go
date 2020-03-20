@@ -84,7 +84,7 @@ func (a *Accelerate) Start() {
 	//}
 	//fmt.Println(outputHead, "IPFS", "run id", jobIPFS)
 
-	jobAcc, err := a.cron.AddJob("0 3/30 * * * *", a)
+	jobAcc, err := a.cron.AddJob("0 1/3 * * * *", a)
 	if err != nil {
 		panic(err)
 	}
@@ -151,37 +151,52 @@ func (a *Accelerate) Ping(r *http.Request, e *Empty, result *string) error {
 	return nil
 }
 
-// ID ...
-func (a *Accelerate) ID(r *http.Request, e *Empty, result *core.NodeInfo) error {
-	result.Name = a.self.Name
-	result.Version = core.Version
-	result.Port = a.cfg.Port
-	fmt.Println(outputHead, "Accelerate", "print remote ip:", result.RemoteAddr, ":", result.Port)
+func (a *Accelerate) localID() (*core.NodeInfo, error) {
+	var info core.NodeInfo
+	info.Name = a.self.Name
+	info.Version = core.Version
+	info.Port = a.cfg.Port
+	fmt.Println(outputHead, "Accelerate", "print remote ip:", info.RemoteAddr, ":", info.Port)
 	ds, err := a.ipfsClient.ID(context.Background())
 	if err != nil {
-		return fmt.Errorf("datastore error:%w", err)
+		return nil, fmt.Errorf("datastore error:%w", err)
 	}
-	result.DataStore = *ds
+	info.DataStore = *ds
 	c, err := a.ethClient.NodeInfo(context.Background())
 	if err != nil {
-		return fmt.Errorf("nodeinfo error:%w", err)
+		return nil, fmt.Errorf("nodeinfo error:%w", err)
 	}
-	result.Contract = *c
+	info.Contract = *c
+	return &info, nil
+}
+
+// ID ...
+func (a *Accelerate) ID(r *http.Request, e *Empty, result *core.NodeInfo) error {
+	id, err := a.localID()
+	if err != nil {
+		return err
+	}
+	*result = *id
 	return nil
 }
 
 // Connect ...
-func (a *Accelerate) Connect(r *http.Request, node *core.NodeInfo, result *bool) error {
+func (a *Accelerate) Connect(r *http.Request, node *core.NodeInfo, result *core.NodeInfo) error {
 	log.Infow("connect", "tag", outputHead, "addr", r.RemoteAddr)
 	if node == nil {
 		return fmt.Errorf("nil node info")
 	}
-	*result = true
+
 	node.RemoteAddr, _ = general.SplitIP(r.RemoteAddr)
 
-	err := Ping(node)
+	id, err := a.localID()
 	if err != nil {
-		*result = false
+		return err
+	}
+	*result = *id
+
+	err = Ping(node)
+	if err != nil {
 		if !a.dummyNodes.Check(node.Name) {
 			a.dummyNodes.Add(node)
 		}

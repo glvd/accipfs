@@ -1,15 +1,13 @@
 package main
 
 import (
-	"bytes"
 	"errors"
 	"fmt"
 	"github.com/glvd/accipfs/config"
 	"github.com/glvd/accipfs/core"
+	"github.com/glvd/accipfs/general"
 	"github.com/glvd/accipfs/service"
-	"github.com/gorilla/rpc/v2/json2"
 	"github.com/spf13/cobra"
-	"net/http"
 )
 
 func nodeCmd() *cobra.Command {
@@ -31,37 +29,18 @@ func nodeConnectCmd() *cobra.Command {
 		Run: func(cmd *cobra.Command, args []string) {
 			config.Initialize()
 			cfg := config.Global()
-			message, err := json2.EncodeClientRequest("Accelerate.ID", &service.Empty{})
-			if err != nil {
-				panic(err)
-			}
 			url := fmt.Sprintf("http://localhost:%d/rpc", cfg.Port)
-			resp, err := http.Post(url, "application/json", bytes.NewReader(message))
-			if err != nil {
-				panic(err)
-			}
-			defer resp.Body.Close()
 			reply := new(core.NodeInfo)
-			err = json2.DecodeClientResponse(resp.Body, reply)
-			if err != nil {
-				panic(err)
-			}
-			message2, err := json2.EncodeClientRequest("Accelerate.Connect", reply)
-			if err != nil {
+			if err := general.RPCPost(url, "Accelerate.ID", &service.Empty{}, reply); err != nil {
 				panic(err)
 			}
 			remoteURL := fmt.Sprintf("http://%s/rpc", addr)
-			resp2, err := http.Post(remoteURL, "application/json", bytes.NewReader(message2))
-			if err != nil {
+			status := new(bool)
+			if err := general.RPCPost(remoteURL, "Accelerate.Connect", reply, status); err != nil {
 				panic(err)
 			}
-			defer resp2.Body.Close()
-			reply2 := new(bool)
-			err = json2.DecodeClientResponse(resp.Body, reply2)
-			if err != nil {
-				panic(err)
-			}
-			if !(*reply2) {
+
+			if !(*status) {
 				panic(errors.New("failed connect to remote"))
 			}
 			return

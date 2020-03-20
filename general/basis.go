@@ -1,6 +1,11 @@
 package general
 
 import (
+	"bytes"
+	"fmt"
+	"github.com/gorilla/rpc/v2/json2"
+	"io/ioutil"
+	"net/http"
 	"os"
 	"strconv"
 	"strings"
@@ -27,4 +32,28 @@ func SplitIP(addr string) (ip string, port int) {
 	ip = s[0]
 	port, _ = strconv.Atoi(s[1])
 	return
+}
+
+// RPCPost ...
+func RPCPost(url string, method string, input, output interface{}) error {
+	message, err := json2.EncodeClientRequest(method, input)
+	if err != nil {
+		return err
+	}
+	resp, err := http.Post(url, "application/json", bytes.NewReader(message))
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+
+	all, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return err
+	}
+	fmt.Println("response info:", string(all))
+	err = json2.DecodeClientResponse(bytes.NewReader(all), output)
+	if err != nil {
+		return err
+	}
+	return nil
 }

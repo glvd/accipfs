@@ -6,7 +6,6 @@ import (
 	"github.com/glvd/accipfs/core"
 	"github.com/glvd/accipfs/general"
 	"github.com/glvd/accipfs/service"
-	"github.com/goextension/log/zap"
 	"github.com/spf13/cobra"
 )
 
@@ -16,6 +15,7 @@ func nodeCmd() *cobra.Command {
 		Short: "node run",
 		Long:  "node can operate to change the parameters of some nodes",
 	}
+
 	nodeCmd.AddCommand(nodeConnectCmd(), nodePeerCmd())
 	return nodeCmd
 }
@@ -27,7 +27,7 @@ func nodeConnectCmd() *cobra.Command {
 		Short: "connect run",
 		Long:  "connect a remote node",
 		Run: func(cmd *cobra.Command, args []string) {
-			zap.InitZapSugar()
+
 			config.Initialize()
 			cfg := config.Global()
 			url := fmt.Sprintf("http://localhost:%d/rpc", cfg.Port)

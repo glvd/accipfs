@@ -42,6 +42,7 @@ type ETHConfig struct {
 	NodeAddr    string `json:"node_addr" mapstructure:"node_addr"`       //node contract address
 	TokenAddr   string `json:"token_addr" mapstructure:"token_addr"`     //token contract address
 	MessageAddr string `json:"message_addr" mapstructure:"message_addr"` //dmessage contract address
+	DTagAddr    string `json:"dtag_addr" json:"dtag_addr"`               //dtag contract address
 }
 
 // AWSConfig ...

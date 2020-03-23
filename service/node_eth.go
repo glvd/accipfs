@@ -11,7 +11,7 @@ import (
 	"github.com/fatih/color"
 	"github.com/glvd/accipfs/config"
 	"github.com/glvd/accipfs/contract"
-	"github.com/glvd/accipfs/contract/dmessage"
+	"github.com/glvd/accipfs/contract/dtag"
 	"github.com/glvd/accipfs/contract/node"
 	"github.com/glvd/accipfs/contract/token"
 	"github.com/glvd/accipfs/core"
@@ -246,9 +246,9 @@ func (n *nodeClientETH) IsReady() bool {
 }
 
 // DMessage ...
-func (n *nodeClientETH) DMessage() (*dmessage.DMessage, error) {
+func (n *nodeClientETH) DTag() (*dtag.DTag, error) {
 	address := common.HexToAddress(n.cfg.ETH.MessageAddr)
-	return dmessage.NewDMessage(address, n.client)
+	return dtag.NewDTag(address, n.client)
 }
 
 // NodeClient ...
@@ -319,10 +319,18 @@ func (n *nodeClientETH) AddPeer(ctx context.Context, peer string) error {
 
 // FindNo ...
 func (n *nodeClientETH) FindNo(ctx context.Context, no string) error {
-	_, err := n.Node()
+	t, err := n.DTag()
 	if err != nil {
 		return err
 	}
+	message, err := t.GetTagMessage(&bind.CallOpts{
+		Pending: true,
+		Context: ctx,
+	}, "video", no)
+	if err != nil {
+		return err
+	}
+	fmt.Println("message", message.Value)
 
 	return nil
 }

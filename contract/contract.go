@@ -60,6 +60,7 @@ func FileKey(cfg *config.Config) *ecdsa.PrivateKey {
 func Loader(cfg *config.Config) Contractor {
 	return &instance{
 		cfg:       cfg,
+		tagAddr:   common.HexToAddress(cfg.ETH.DTagAddr),
 		nodeAddr:  common.HexToAddress(cfg.ETH.NodeAddr),
 		tokenAddr: common.HexToAddress(cfg.ETH.TokenAddr),
 		key:       FileKey(cfg),

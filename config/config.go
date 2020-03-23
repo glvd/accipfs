@@ -39,10 +39,9 @@ type ETHConfig struct {
 	//Addr        string       `json:"addr" mapstructure:"addr"`                   //eth rpc address
 	Port int `json:"port" mapstructure:"port"`
 	//KeyHash     string                                    `json:"key_hash" mapstructure:"key_hash"`     //binary key hash
-	NodeAddr  string `json:"node_addr" mapstructure:"node_addr"`   //node contract address
-	TokenAddr string `json:"token_addr" mapstructure:"token_addr"` //token contract address
-	//ETHKeyFile  `json:"key_file" mapstructure:"key_file"` //default key file
-	//KeyFileList []ETHKeyFile                              `json:"key_file_list" mapstructure:"key_file_list"` //key file list
+	NodeAddr    string `json:"node_addr" mapstructure:"node_addr"`       //node contract address
+	TokenAddr   string `json:"token_addr" mapstructure:"token_addr"`     //token contract address
+	MessageAddr string `json:"message_addr" mapstructure:"message_addr"` //dmessage contract address
 }
 
 // AWSConfig ...

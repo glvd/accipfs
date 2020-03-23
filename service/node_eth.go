@@ -11,6 +11,7 @@ import (
 	"github.com/fatih/color"
 	"github.com/glvd/accipfs/config"
 	"github.com/glvd/accipfs/contract"
+	"github.com/glvd/accipfs/contract/dmessage"
 	"github.com/glvd/accipfs/contract/node"
 	"github.com/glvd/accipfs/contract/token"
 	"github.com/glvd/accipfs/core"
@@ -244,6 +245,12 @@ func (n *nodeClientETH) IsReady() bool {
 	return true
 }
 
+// DMessage ...
+func (n *nodeClientETH) DMessage() (*dmessage.DMessage, error) {
+	address := common.HexToAddress(n.cfg.ETH.MessageAddr)
+	return dmessage.NewDMessage(address, n.client)
+}
+
 // NodeClient ...
 func (n *nodeClientETH) Node() (*node.AccelerateNode, error) {
 	address := common.HexToAddress(n.cfg.ETH.NodeAddr)
@@ -303,6 +310,16 @@ func (n *nodeClientETH) AddPeer(ctx context.Context, peer string) error {
 	}
 	defer client.Close()
 	err = client.Call(&b, "admin_addPeer", peer)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// FindNo ...
+func (n *nodeClientETH) FindNo(ctx context.Context, no string) error {
+	_, err := n.Node()
 	if err != nil {
 		return err
 	}

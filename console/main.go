@@ -3,7 +3,11 @@ package main
 
 import (
 	"fmt"
+	"github.com/glvd/accipfs"
+	"github.com/glvd/accipfs/config"
+	"github.com/glvd/accipfs/general"
 	"github.com/spf13/cobra"
+	"path/filepath"
 )
 
 // APP ...
@@ -21,11 +25,16 @@ var rootCmd = &cobra.Command{
 }
 
 func main() {
+	path, err := filepath.Abs(accipfs.DefaultPath)
+	if err != nil {
+		path = general.CurrentDir()
+	}
+	config.WorkDir = path
 	rootCmd.AddCommand(initCmd(), daemonCmd(), nodeCmd(), versionCmd(), tagCmd())
 	if err := rootCmd.Execute(); err != nil {
 		panic(err)
 	}
-
+	rootCmd.Flags().StringVar(&accipfs.DefaultPath, "path", ".", "set work path")
 }
 
 func versionCmd() *cobra.Command {

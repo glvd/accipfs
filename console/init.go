@@ -1,13 +1,10 @@
 package main
 
 import (
-	"github.com/glvd/accipfs"
 	"github.com/glvd/accipfs/account"
 	"github.com/glvd/accipfs/config"
-	"github.com/glvd/accipfs/general"
 	"github.com/glvd/accipfs/service"
 	"github.com/spf13/cobra"
-	"path/filepath"
 )
 
 func initCmd() *cobra.Command {
@@ -17,11 +14,7 @@ func initCmd() *cobra.Command {
 		Short: "init run",
 		Long:  "init will create the config file with a default settings",
 		Run: func(cmd *cobra.Command, args []string) {
-			path, err := filepath.Abs(accipfs.DefaultPath)
-			if err != nil {
-				path = general.CurrentDir()
-			}
-			config.WorkDir = path
+
 			cfg := config.Default()
 
 			if err := cfg.Init(); err != nil {
@@ -46,6 +39,5 @@ func initCmd() *cobra.Command {
 			//config.SaveConfig(config.Default())
 		},
 	}
-	cmd.Flags().StringVar(&accipfs.DefaultPath, "path", ".", "set work path")
 	return cmd
 }

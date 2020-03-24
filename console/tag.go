@@ -24,7 +24,7 @@ func tagListCmd() *cobra.Command {
 		Short: "list videos to screen",
 		Long:  "list and output the video number to screen",
 		Run: func(cmd *cobra.Command, args []string) {
-			fmt.Println("list")
+
 		},
 	}
 }

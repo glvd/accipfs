@@ -7,7 +7,14 @@ func tagCmd() *cobra.Command {
 }
 
 func tagListCmd() *cobra.Command {
-	return &cobra.Command{}
+	return &cobra.Command{
+		Use:   "list",
+		Short: "list videos to screen",
+		Long:  "list and output the video number to screen",
+		Run: func(cmd *cobra.Command, args []string) {
+
+		},
+	}
 }
 
 func tagAddCmd() *cobra.Command {

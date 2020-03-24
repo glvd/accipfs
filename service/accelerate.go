@@ -11,6 +11,7 @@ import (
 	"github.com/robfig/cron/v3"
 	"go.uber.org/atomic"
 	"net/http"
+	"sync"
 	"time"
 )
 
@@ -20,6 +21,7 @@ type Empty struct {
 
 // Accelerate ...
 type Accelerate struct {
+	id         *core.NodeInfo
 	nodes      core.NodeStore
 	peerNodes  *atomic.Int64
 	dummyNodes core.NodeStore
@@ -83,6 +85,27 @@ func (a *Accelerate) Start() {
 	//	panic(err)
 	//}
 	//fmt.Println(outputHead, "IPFS", "run id", jobIPFS)
+	wg := &sync.WaitGroup{}
+	wg.Add(1)
+	go func() {
+		if a.ipfsClient.IsReady() {
+			wg.Done()
+			return
+		}
+	}()
+	wg.Add(1)
+	go func() {
+		if a.ethClient.IsReady() {
+			wg.Done()
+			return
+		}
+	}()
+	a.ethClient.IsReady()
+	id, err := a.localID()
+	if err != nil {
+		return
+	}
+	a.id = id
 
 	jobAcc, err := a.cron.AddJob("0 1/3 * * * *", a)
 	if err != nil {
@@ -103,6 +126,7 @@ func (a *Accelerate) Run() {
 	ctx := context.TODO()
 	a.nodes.Range(func(info *core.NodeInfo) bool {
 		fmt.Println(outputHead, "Accelerate", "syncing node", info.Name)
+
 		err := Ping(info)
 		if err != nil {
 			a.nodes.Remove(info.Name)

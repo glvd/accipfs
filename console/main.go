@@ -17,12 +17,11 @@ var rootCmd = &cobra.Command{
 	Short: "accipfs is a very fast ipfs client",
 	Long:  `accipfs`,
 	Run: func(cmd *cobra.Command, args []string) {
-
 	},
 }
 
 func main() {
-	rootCmd.AddCommand(initCmd(), daemonCmd(), nodeCmd(), versionCmd())
+	rootCmd.AddCommand(initCmd(), daemonCmd(), nodeCmd(), versionCmd(), tagCmd())
 	if err := rootCmd.Execute(); err != nil {
 		panic(err)
 	}

@@ -22,6 +22,7 @@ type instance struct {
 	cli       *ethclient.Client
 	nodeAddr  common.Address
 	tokenAddr common.Address
+	tagAddr   common.Address
 	key       *ecdsa.PrivateKey
 }
 

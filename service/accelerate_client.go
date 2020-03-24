@@ -27,7 +27,7 @@ func Peers(info *core.NodeInfo) ([]*core.NodeInfo, error) {
 	pingAddr := strings.Join([]string{info.RemoteAddr, strconv.Itoa(info.Port)}, ":")
 	url := fmt.Sprintf("http://%s/rpc", pingAddr)
 	result := new([]*core.NodeInfo)
-	if err := general.RPCPost(url, "Accelerate.Peers", &Empty{}, result); err != nil {
+	if err := general.RPCPost(url, "Accelerate.Peers", info, result); err != nil {
 		return nil, err
 	}
 	if len(*result) == 0 {

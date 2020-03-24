@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"github.com/glvd/accipfs/account"
 	"github.com/glvd/accipfs/config"
@@ -279,7 +280,10 @@ func (a *Accelerate) AddPeer(r *http.Request, info *core.NodeInfo, result *bool)
 }
 
 // Peers ...
-func (a *Accelerate) Peers(r *http.Request, e *Empty, result *[]*core.NodeInfo) error {
+func (a *Accelerate) Peers(r *http.Request, info *core.NodeInfo, result *[]*core.NodeInfo) error {
+	if info.Name != a.id.Name {
+		return errors.New("wrong info name")
+	}
 	a.nodes.Range(func(info *core.NodeInfo) bool {
 		*result = append(*result, info)
 		return true

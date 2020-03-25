@@ -21,13 +21,11 @@ func nodeCmd() *cobra.Command {
 }
 
 func nodeConnectCmd() *cobra.Command {
-	var addr string
 	connect := &cobra.Command{
 		Use:   "connect",
 		Short: "connect run",
 		Long:  "connect a remote node",
 		Run: func(cmd *cobra.Command, args []string) {
-
 			config.Initialize()
 			cfg := config.Global()
 			url := fmt.Sprintf("http://localhost:%d/rpc", cfg.Port)
@@ -36,28 +34,29 @@ func nodeConnectCmd() *cobra.Command {
 				fmt.Println("local id error:", err.Error())
 				return
 			}
-			remoteURL := fmt.Sprintf("http://%s/rpc", addr)
-			remoteNodeInfo := new(core.NodeInfo)
-			if err := general.RPCPost(remoteURL, "Accelerate.Connect", reply, remoteNodeInfo); err != nil {
-				fmt.Println("connect error:", err.Error())
-				return
-			}
+			for _, addr := range args {
+				remoteURL := fmt.Sprintf("http://%s/rpc", addr)
+				remoteNodeInfo := new(core.NodeInfo)
+				if err := general.RPCPost(remoteURL, "Accelerate.Connect", reply, remoteNodeInfo); err != nil {
+					fmt.Println("connect error:", err.Error())
+					return
+				}
 
-			remoteNodeInfo.RemoteAddr, remoteNodeInfo.Port = general.SplitIP(addr)
-			status := new(bool)
-			if err := general.RPCPost(url, "Accelerate.AddPeer", remoteNodeInfo, status); err != nil {
-				fmt.Println("remote id error:", err.Error())
-				return
-			}
+				remoteNodeInfo.RemoteAddr, remoteNodeInfo.Port = general.SplitIP(addr)
+				status := new(bool)
+				if err := general.RPCPost(url, "Accelerate.AddPeer", remoteNodeInfo, status); err != nil {
+					fmt.Println("remote id error:", err.Error())
+					return
+				}
 
-			if !(*status) {
-				fmt.Println("connect error")
+				if !(*status) {
+					fmt.Println(addr, "connect error")
+				}
 			}
 
 			return
 		},
 	}
-	connect.Flags().StringVar(&addr, "addr", "localhost:20304", "set a remote address to connect")
 	return connect
 }
 

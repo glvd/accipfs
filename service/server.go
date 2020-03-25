@@ -12,6 +12,7 @@ import (
 	"log"
 	"net/http"
 	"strings"
+	"sync"
 )
 
 // NodeServer ...
@@ -62,6 +63,26 @@ func (s *Server) Start() error {
 	s.httpServer = &http.Server{Addr: port, Handler: s.route}
 
 	go s.accelerateServer.Start()
+	wg := &sync.WaitGroup{}
+	wg.Add(1)
+	go func() {
+		if s.accelerateServer.ipfsClient.IsReady() {
+			wg.Done()
+			return
+		}
+	}()
+	wg.Add(1)
+	go func() {
+		if s.accelerateServer.ethClient.IsReady() {
+			wg.Done()
+			return
+		}
+	}()
+	id, err := s.accelerateServer.localID()
+	if err != nil {
+		return err
+	}
+	s.accelerateServer.id = id
 
 	s.httpServer.ListenAndServe()
 	return nil

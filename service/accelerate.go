@@ -86,27 +86,6 @@ func (a *Accelerate) Start() {
 	//	panic(err)
 	//}
 	//fmt.Println(outputHead, "IPFS", "run id", jobIPFS)
-	wg := &sync.WaitGroup{}
-	wg.Add(1)
-	go func() {
-		if a.ipfsClient.IsReady() {
-			wg.Done()
-			return
-		}
-	}()
-	wg.Add(1)
-	go func() {
-		if a.ethClient.IsReady() {
-			wg.Done()
-			return
-		}
-	}()
-	a.ethClient.IsReady()
-	id, err := a.localID()
-	if err != nil {
-		return
-	}
-	a.id = id
 
 	jobAcc, err := a.cron.AddJob("0 1/3 * * * *", a)
 	if err != nil {

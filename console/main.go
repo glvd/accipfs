@@ -36,8 +36,9 @@ func main() {
 
 	rootCmd.PersistentFlags().StringVar(&accipfs.LogOutput, "log-output", "stderr", "set the output log name")
 	rootCmd.PersistentFlags().StringVar(&accipfs.LogLevel, "log-level", "info", "set the log level(info,debug,warn,error,dpanic,panic,fatal)")
-	accipfs.InitLog()
-
+	rootCmd.PersistentPreRun = func(cmd *cobra.Command, args []string) {
+		accipfs.InitLog()
+	}
 	if err := rootCmd.Execute(); err != nil {
 		panic(err)
 	}

@@ -78,6 +78,8 @@ func (s *Server) Start() error {
 			return
 		}
 	}()
+	wg.Wait()
+
 	id, err := s.accelerateServer.localID()
 	if err != nil {
 		return err

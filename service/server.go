@@ -9,7 +9,6 @@ import (
 	"github.com/gorilla/rpc/v2"
 	"github.com/gorilla/rpc/v2/json2"
 	"io"
-	"log"
 	"net/http"
 	"strings"
 	"sync"
@@ -59,7 +58,6 @@ func NewRPCServer(cfg *config.Config) (*Server, error) {
 func (s *Server) Start() error {
 	s.route.Handle("/rpc", s.rpcServer)
 	port := fmt.Sprintf(":%d", s.cfg.Port)
-	log.Println("JSON RPC service listen and serving on port", port)
 	s.httpServer = &http.Server{Addr: port, Handler: s.route}
 
 	go s.accelerateServer.Start()
@@ -86,6 +84,7 @@ func (s *Server) Start() error {
 	}
 	s.accelerateServer.id = id
 
+	fmt.Println("JSON RPC service listen and serving on port", port)
 	s.httpServer.ListenAndServe()
 	return nil
 }

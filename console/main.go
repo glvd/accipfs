@@ -31,7 +31,7 @@ func main() {
 	}
 	config.WorkDir = path
 
-	rootCmd.AddCommand(initCmd(), daemonCmd(), nodeCmd(), versionCmd(), tagCmd())
+	rootCmd.AddCommand(initCmd(), daemonCmd(), idCmd(), nodeCmd(), versionCmd(), tagCmd())
 	rootCmd.PersistentFlags().StringVar(&accipfs.DefaultPath, "path", ".", "set work path")
 	if err := rootCmd.Execute(); err != nil {
 		panic(err)

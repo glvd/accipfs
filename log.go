@@ -1,14 +1,12 @@
 package accipfs
 
 import (
-	"fmt"
 	"github.com/goextension/log"
-	zap "go.uber.org/zap"
+	"go.uber.org/zap"
 )
 
 // InitLog ...
 func InitLog() {
-	fmt.Println("log init info:", LogLevel, LogOutput)
 	cfg := zap.NewProductionConfig()
 	cfg.Level = logLvToAtomicLv(LogLevel)
 	cfg.OutputPaths = []string{LogOutput}
@@ -21,4 +19,6 @@ func InitLog() {
 		panic(e)
 	}
 	log.Register(logger.Sugar())
+
+	log.Debug("log init", "level", LogLevel, "output", LogOutput)
 }

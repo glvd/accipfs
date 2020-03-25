@@ -80,7 +80,7 @@ func (s *Server) Start() error {
 	wg.Wait()
 
 	var idError error
-	for i := 0; i < 3; i++ {
+	for i := 0; i < 5; i++ {
 		id, err := s.accelerateServer.localID()
 		idError = err
 		if err != nil {
@@ -88,6 +88,7 @@ func (s *Server) Start() error {
 			continue
 		}
 		s.accelerateServer.id = id
+		break
 	}
 
 	if idError != nil {

@@ -4,12 +4,14 @@ import (
 	"fmt"
 	"github.com/glvd/accipfs/core"
 	"github.com/glvd/accipfs/general"
+	"github.com/goextension/log"
 	"strconv"
 	"strings"
 )
 
 // Ping ...
 func Ping(info *core.NodeInfo) error {
+	log.Debugw("ping info", "addr", info.RemoteAddr, "port", info.Port)
 	pingAddr := strings.Join([]string{info.RemoteAddr, strconv.Itoa(info.Port)}, ":")
 	url := fmt.Sprintf("http://%s/rpc", pingAddr)
 	result := new(string)

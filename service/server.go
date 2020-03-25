@@ -12,6 +12,7 @@ import (
 	"net/http"
 	"strings"
 	"sync"
+	"time"
 )
 
 // NodeServer ...
@@ -78,12 +79,20 @@ func (s *Server) Start() error {
 	}()
 	wg.Wait()
 
-	id, err := s.accelerateServer.localID()
-	if err != nil {
-		return err
+	var idError error
+	for i := 0; i < 3; i++ {
+		id, err := s.accelerateServer.localID()
+		idError = err
+		if err != nil {
+			time.Sleep(3 * time.Second)
+			continue
+		}
+		s.accelerateServer.id = id
 	}
-	s.accelerateServer.id = id
 
+	if idError != nil {
+		return idError
+	}
 	fmt.Println("JSON RPC service listen and serving on port", port)
 	s.httpServer.ListenAndServe()
 	return nil

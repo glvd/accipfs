@@ -29,7 +29,8 @@ func idCmd() *cobra.Command {
 			if err != nil {
 				return
 			}
-			fmt.Println(indent)
+			//output your id info to screen
+			fmt.Println(string(indent))
 		},
 	}
 }

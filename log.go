@@ -20,5 +20,5 @@ func InitLog() {
 	}
 	log.Register(logger.Sugar())
 
-	log.Debug("log init", "level", LogLevel, "output", LogOutput)
+	log.Debugw("log init", "level", LogLevel, "output", LogOutput)
 }

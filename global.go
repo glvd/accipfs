@@ -2,6 +2,7 @@ package accipfs
 
 import (
 	"fmt"
+	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 	"os"
 	"os/exec"
@@ -12,7 +13,10 @@ import (
 var DefaultPath = "."
 
 // LogLevel ...
-var LogLevel = zapcore.InfoLevel
+var LogLevel = "info"
+
+// LogOutput ...
+var LogOutput = "stderr"
 
 var _env []string
 
@@ -55,4 +59,28 @@ func RegisterPathEnv(paths ...string) {
 	}
 
 	_env = os.Environ()
+}
+
+func logLvToAtomicLv(lv string) zap.AtomicLevel {
+	a := zap.NewAtomicLevel()
+
+	level := zapcore.InfoLevel
+	switch lv {
+	case "debug":
+		level = zapcore.DebugLevel
+	case "warn":
+		level = zapcore.WarnLevel
+	case "error":
+		level = zapcore.ErrorLevel
+	case "dpanic":
+		level = zapcore.DPanicLevel
+	case "panic":
+		level = zapcore.PanicLevel
+	case "fatal":
+		level = zapcore.FatalLevel
+	}
+
+	a.SetLevel(level)
+
+	return a
 }

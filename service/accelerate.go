@@ -158,6 +158,7 @@ func (a *Accelerate) localID() (*core.NodeInfo, error) {
 	var info core.NodeInfo
 	info.Name = a.self.Name
 	info.Version = core.Version
+	info.RemoteAddr = "127.0.0.1"
 	info.Port = a.cfg.Port
 	log.Debugw("print remote ip", "tag", outputHead, "ip", info.RemoteAddr, "port", info.Port)
 	ds, err := a.ipfsClient.ID(context.Background())

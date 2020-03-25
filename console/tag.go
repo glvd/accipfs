@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"github.com/glvd/accipfs"
 	"github.com/spf13/cobra"
 )
 
@@ -12,6 +13,7 @@ func tagCmd() *cobra.Command {
 		Long:  "tag contract manages all you videos",
 		Run: func(cmd *cobra.Command, args []string) {
 			fmt.Println("tag")
+			fmt.Println("parse flag:", accipfs.DefaultPath)
 		},
 	}
 	cmd.AddCommand(tagListCmd(), tagAddCmd())
@@ -24,7 +26,7 @@ func tagListCmd() *cobra.Command {
 		Short: "list videos to screen",
 		Long:  "list and output the video number to screen",
 		Run: func(cmd *cobra.Command, args []string) {
-
+			fmt.Println("parse flag:", accipfs.DefaultPath)
 		},
 	}
 }
@@ -36,6 +38,7 @@ func tagAddCmd() *cobra.Command {
 		Long:  "add a source to this node for service some users by your self",
 		Run: func(cmd *cobra.Command, args []string) {
 			fmt.Println("add")
+			fmt.Println("parse flag:", accipfs.DefaultPath)
 		},
 	}
 }

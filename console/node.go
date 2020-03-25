@@ -34,17 +34,20 @@ func nodeConnectCmd() *cobra.Command {
 			reply := new(core.NodeInfo)
 			if err := general.RPCPost(url, "Accelerate.ID", &service.Empty{}, reply); err != nil {
 				fmt.Println("local id error:", err.Error())
+				return
 			}
 			remoteURL := fmt.Sprintf("http://%s/rpc", addr)
 			remoteNodeInfo := new(core.NodeInfo)
 			if err := general.RPCPost(remoteURL, "Accelerate.Connect", reply, remoteNodeInfo); err != nil {
 				fmt.Println("connect error:", err.Error())
+				return
 			}
 
 			remoteNodeInfo.RemoteAddr, remoteNodeInfo.Port = general.SplitIP(addr)
 			status := new(bool)
 			if err := general.RPCPost(url, "Accelerate.AddPeer", remoteNodeInfo, status); err != nil {
 				fmt.Println("remote id error:", err.Error())
+				return
 			}
 
 			if !(*status) {

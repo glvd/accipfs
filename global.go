@@ -2,6 +2,7 @@ package accipfs
 
 import (
 	"fmt"
+	"go.uber.org/zap/zapcore"
 	"os"
 	"os/exec"
 	"strings"
@@ -9,6 +10,10 @@ import (
 
 // DefaultPath ...
 var DefaultPath = "."
+
+// LogLevel ...
+var LogLevel = zapcore.InfoLevel
+
 var _env []string
 
 // CheckPort ...

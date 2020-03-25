@@ -159,7 +159,7 @@ func (a *Accelerate) localID() (*core.NodeInfo, error) {
 	info.Name = a.self.Name
 	info.Version = core.Version
 	info.Port = a.cfg.Port
-	fmt.Println(outputHead, "Accelerate", "print remote ip:", info.RemoteAddr, ":", info.Port)
+	log.Debugw("print remote ip", "tag", outputHead, "ip", info.RemoteAddr, "port", info.Port)
 	ds, err := a.ipfsClient.ID(context.Background())
 	if err != nil {
 		return nil, fmt.Errorf("datastore error:%w", err)

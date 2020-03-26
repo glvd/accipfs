@@ -8,7 +8,7 @@ import (
 )
 
 func initCmd() *cobra.Command {
-
+	var restore string
 	cmd := &cobra.Command{
 		Use:   "init",
 		Short: "init run",
@@ -34,8 +34,9 @@ func initCmd() *cobra.Command {
 			if err != nil {
 				panic(err)
 			}
-			//config.SaveConfig(config.Default())
+
 		},
 	}
+	cmd.Flags().StringVar(&restore, "restore", "", "init from a account file")
 	return cmd
 }

@@ -9,6 +9,15 @@ import (
 	"strings"
 )
 
+// ID ...
+func ID(url string) (*core.NodeInfo, error) {
+	reply := new(core.NodeInfo)
+	if err := general.RPCPost(url, "Accelerate.ID", &Empty{}, reply); err != nil {
+		return nil, err
+	}
+	return reply, nil
+}
+
 // Ping ...
 func Ping(info *core.NodeInfo) error {
 	log.Debugw("ping info", "addr", info.RemoteAddr, "port", info.Port)
@@ -36,4 +45,18 @@ func Peers(info *core.NodeInfo) ([]*core.NodeInfo, error) {
 		return nil, fmt.Errorf("no data response")
 	}
 	return *result, nil
+}
+
+// AddPeer ...
+func AddPeer(url string, info *core.NodeInfo) error {
+	status := new(bool)
+	if err := general.RPCPost(url, "Accelerate.AddPeer", info, status); err != nil {
+		log.Errorw("remote id error", "tag", outputHead, "error", err.Error())
+		return err
+	}
+
+	if !(*status) {
+		return fmt.Errorf("connect failed:%s", url)
+	}
+	return nil
 }

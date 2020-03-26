@@ -29,8 +29,8 @@ func nodeConnectCmd() *cobra.Command {
 			config.Initialize()
 			cfg := config.Global()
 			url := fmt.Sprintf("http://localhost:%d/rpc", cfg.Port)
-			reply := new(core.NodeInfo)
-			if err := general.RPCPost(url, "Accelerate.ID", &service.Empty{}, reply); err != nil {
+			id, err := service.ID(url)
+			if err != nil {
 				fmt.Println("local id error:", err.Error())
 				return
 			}
@@ -38,7 +38,7 @@ func nodeConnectCmd() *cobra.Command {
 				fmt.Println("connect:", addr)
 				remoteURL := fmt.Sprintf("http://%s/rpc", addr)
 				remoteNodeInfo := new(core.NodeInfo)
-				if err := general.RPCPost(remoteURL, "Accelerate.Connect", reply, remoteNodeInfo); err != nil {
+				if err := general.RPCPost(remoteURL, "Accelerate.Connect", id, remoteNodeInfo); err != nil {
 					fmt.Println("connect error:", err.Error())
 					return
 				}

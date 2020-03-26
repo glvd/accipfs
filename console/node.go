@@ -44,14 +44,9 @@ func nodeConnectCmd() *cobra.Command {
 				}
 
 				remoteNodeInfo.RemoteAddr, remoteNodeInfo.Port = general.SplitIP(addr)
-				status := new(bool)
-				if err := general.RPCPost(url, "Accelerate.AddPeer", remoteNodeInfo, status); err != nil {
-					fmt.Println("remote id error:", err.Error())
+				if err := service.AddPeer(url, remoteNodeInfo); err != nil {
+					fmt.Println("add peer error:", err)
 					return
-				}
-
-				if !(*status) {
-					fmt.Println(addr, "connect error")
 				}
 			}
 

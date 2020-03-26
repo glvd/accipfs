@@ -4,9 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/glvd/accipfs/config"
-	"github.com/glvd/accipfs/core"
-	"github.com/glvd/accipfs/general"
 	"github.com/glvd/accipfs/service"
+	"github.com/goextension/log"
 	"github.com/spf13/cobra"
 )
 
@@ -20,13 +19,14 @@ func idCmd() *cobra.Command {
 			config.Initialize()
 			cfg := config.Global()
 			url := fmt.Sprintf("http://localhost:%d/rpc", cfg.Port)
-			reply := new(core.NodeInfo)
-			if err := general.RPCPost(url, "Accelerate.ID", &service.Empty{}, reply); err != nil {
-				fmt.Println("local id error:", err.Error())
+			id, err := service.ID(url)
+			if err != nil {
+				log.Errorw("local id", "error", err)
 				return
 			}
-			indent, err := json.MarshalIndent(reply, "", " ")
+			indent, err := json.MarshalIndent(id, "", " ")
 			if err != nil {
+				log.Errorw("json mashal", "error", err)
 				return
 			}
 			//output your id info to screen

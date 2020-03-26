@@ -13,11 +13,18 @@ import (
 	"strings"
 )
 
+// Identity ...
+type Identity struct {
+	PeerID  string
+	PrivKey string
+}
+
 // Account ...
 type Account struct {
 	Name     string
 	Address  string
 	KeyStore KeyStore
+	Identity Identity
 	Password string
 }
 

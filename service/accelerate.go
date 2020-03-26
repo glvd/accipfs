@@ -274,7 +274,7 @@ func (a *Accelerate) Peers(r *http.Request, empty *Empty, result *[]*core.NodeIn
 }
 
 // Exchange ...
-func (a *Accelerate) Exchange(r *http.Request, n *Node, to []string) error {
+func (a *Accelerate) Exchange(r *http.Request, n *core.NodeInfo, to []string) error {
 
 	return nil
 }

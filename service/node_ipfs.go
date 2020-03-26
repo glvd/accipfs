@@ -6,6 +6,7 @@ import (
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/glvd/accipfs/contract/node"
 	"github.com/glvd/accipfs/core"
+	"github.com/ipfs/interface-go-ipfs-core/options"
 	"net"
 	"sort"
 	"strings"
@@ -100,12 +101,12 @@ func (n *nodeClientIPFS) ID(ctx context.Context) (pid *core.DataStoreNode, e err
 // PinAdd ...
 func (n *nodeClientIPFS) PinAdd(ctx context.Context, hash string) (e error) {
 	p := path.New(hash)
-	return n.api.Pin().Add(ctx, p)
+	return n.api.Pin().Add(ctx, p, options.Pin.Recursive(true))
 }
 
 // PinLS ...
 func (n *nodeClientIPFS) PinLS(ctx context.Context) (pins []iface.Pin, e error) {
-	return n.api.Pin().Ls(ctx)
+	return n.api.Pin().Ls(ctx, options.Pin.Type.Recursive())
 }
 
 // PinRm ...

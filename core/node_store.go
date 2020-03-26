@@ -75,6 +75,13 @@ type NodeInfo struct {
 	Version    string
 }
 
+// Node todo need fix
+type _Node struct {
+	RemoteAddr string
+	Info       NodeInfo
+	Hash       []string
+}
+
 // nodeStore ...
 type nodeStore struct {
 	nodes sync.Map

@@ -43,7 +43,6 @@ var BootList = []string{
 func NewAccelerateServer(cfg *config.Config) (acc *Accelerate, err error) {
 	acc = &Accelerate{
 		nodes:      core.NewNodeStore(),
-		peerNodes:  atomic.NewInt64(0),
 		dummyNodes: core.NewNodeStore(),
 		lock:       atomic.NewBool(false),
 		cfg:        cfg,
@@ -108,7 +107,6 @@ func (a *Accelerate) Run() {
 		err := Ping(info)
 		if err != nil {
 			a.nodes.Remove(info.Name)
-			a.peerNodes.Add(-1)
 			a.dummyNodes.Add(info)
 			return true
 		}
@@ -118,7 +116,7 @@ func (a *Accelerate) Run() {
 		}
 
 		for _, nodeInfo := range nodeInfos {
-			if a.peerNodes.Load() > a.cfg.Limit {
+			if a.nodes.Length() > a.cfg.Limit {
 				return false
 			}
 			result := new(bool)
@@ -252,7 +250,6 @@ func (a *Accelerate) addPeer(ctx context.Context, info *core.NodeInfo, result *b
 	}
 	cancelFunc()
 
-	a.peerNodes.Add(1)
 	a.nodes.Add(info)
 	*result = true
 	return nil

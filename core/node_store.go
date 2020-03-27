@@ -81,6 +81,7 @@ type NodeInfo struct {
 // Node todo need fix
 type _Node struct {
 	RemoteAddr string
+	Port       int
 	Info       NodeInfo
 	Hash       []string
 }

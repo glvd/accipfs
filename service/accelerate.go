@@ -5,9 +5,11 @@ import (
 	"errors"
 	"fmt"
 	"github.com/glvd/accipfs/account"
+	"github.com/glvd/accipfs/cache"
 	"github.com/glvd/accipfs/config"
 	"github.com/glvd/accipfs/core"
 	"github.com/glvd/accipfs/general"
+	"github.com/gocacher/cacher"
 	"github.com/goextension/log"
 	"github.com/robfig/cron/v3"
 	"go.uber.org/atomic"
@@ -22,6 +24,7 @@ type Empty struct {
 // Accelerate ...
 type Accelerate struct {
 	id         *core.NodeInfo
+	cache      cacher.Cacher
 	nodes      core.NodeStore
 	dummyNodes core.NodeStore
 	lock       *atomic.Bool
@@ -51,6 +54,7 @@ func NewAccelerateServer(cfg *config.Config) (acc *Accelerate, err error) {
 	acc.ipfsServer = newNodeServerIPFS(cfg)
 	acc.ethClient, _ = newNodeETH(cfg)
 	acc.ipfsClient, _ = newNodeIPFS(cfg)
+	acc.cache = cache.New(cfg)
 	acc.cron = cron.New(cron.WithSeconds())
 	selfAcc, err := account.LoadAccount(cfg)
 	if err != nil {

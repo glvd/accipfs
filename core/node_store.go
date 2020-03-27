@@ -1,6 +1,9 @@
 package core
 
-import "sync"
+import (
+	"go.uber.org/atomic"
+	"sync"
+)
 
 // Version ...
 const Version = "0.0.1"
@@ -84,7 +87,8 @@ type _Node struct {
 
 // nodeStore ...
 type nodeStore struct {
-	nodes sync.Map
+	nodes    sync.Map
+	nodeSize *atomic.Int64
 }
 
 // NodeStore ...
@@ -93,22 +97,30 @@ type NodeStore interface {
 	Check(key string) bool
 	Get(key string) *NodeInfo
 	Remove(key string)
+	Length() int64
 	Range(func(info *NodeInfo) bool)
 }
 
 // NewNodeStore ...
 func NewNodeStore() NodeStore {
-	return &nodeStore{}
+	return &nodeStore{
+		nodes:    sync.Map{},
+		nodeSize: atomic.NewInt64(0),
+	}
 }
 
 // Remove ...
 func (s *nodeStore) Remove(key string) {
-	s.nodes.Delete(key)
+	if s.Check(key) {
+		s.nodeSize.Add(-1)
+		s.nodes.Delete(key)
+	}
 }
 
 // Add ...
 func (s *nodeStore) Add(info *NodeInfo) {
 	s.nodes.Store(info.Name, info)
+	s.nodeSize.Add(1)
 }
 
 // Check ...
@@ -130,4 +142,9 @@ func (s *nodeStore) Range(f func(info *NodeInfo) bool) {
 	s.nodes.Range(func(key, value interface{}) bool {
 		return f(value.(*NodeInfo))
 	})
+}
+
+// Length ...
+func (s *nodeStore) Length() int64 {
+	return s.nodeSize.Load()
 }

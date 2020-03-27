@@ -23,7 +23,6 @@ type Empty struct {
 type Accelerate struct {
 	id         *core.NodeInfo
 	nodes      core.NodeStore
-	peerNodes  *atomic.Int64
 	dummyNodes core.NodeStore
 	lock       *atomic.Bool
 	self       *account.Account

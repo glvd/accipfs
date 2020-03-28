@@ -285,6 +285,10 @@ func (a *Accelerate) Pins(r *http.Request, empty *Empty, result *[]string) error
 	return nil
 }
 
+func (a *Accelerate) Pin(r *http.Request, hash *string, result *bool) error {
+	return nil
+}
+
 // Exchange ...
 func (a *Accelerate) Exchange(r *http.Request, n *core.NodeInfo, to []string) error {
 

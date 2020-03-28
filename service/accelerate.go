@@ -4,6 +4,9 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"net/http"
+	"time"
+
 	"github.com/glvd/accipfs/account"
 	"github.com/glvd/accipfs/cache"
 	"github.com/glvd/accipfs/config"
@@ -13,8 +16,6 @@ import (
 	"github.com/goextension/log"
 	"github.com/robfig/cron/v3"
 	"go.uber.org/atomic"
-	"net/http"
-	"time"
 )
 
 // Empty ...
@@ -270,6 +271,17 @@ func (a *Accelerate) Peers(r *http.Request, empty *Empty, result *[]*core.NodeIn
 		*result = append(*result, info)
 		return true
 	})
+	return nil
+}
+
+func (a *Accelerate) Pins(r *http.Request, empty *Empty, result *[]string) error {
+	pins, e := a.ipfsClient.PinLS(r.Context())
+	if e != nil {
+		return e
+	}
+	for _, p := range pins {
+		*result = append(*result, p.Path().String())
+	}
 	return nil
 }
 

@@ -286,6 +286,10 @@ func (a *Accelerate) Pins(r *http.Request, empty *Empty, result *[]string) error
 }
 
 func (a *Accelerate) Pin(r *http.Request, hash *string, result *bool) error {
+	e := a.ipfsClient.PinAdd(r.Context(), *hash)
+	if e != nil {
+		return e
+	}
 	return nil
 }
 

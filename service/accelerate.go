@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"net/http"
 	"time"
 
@@ -297,6 +298,18 @@ func (a *Accelerate) Pin(r *http.Request, hash *string, result *bool) error {
 
 // TagInfo ...
 func (a Accelerate) TagInfo(r *http.Request, tag *string, info *string) error {
+	dTag, e := a.ethClient.DTag()
+	if e != nil {
+		return e
+	}
+	message, e := dTag.GetTagMessage(&bind.CallOpts{Pending: true}, "video", *tag)
+	if e != nil {
+		return e
+	}
+
+	if message.Size.Int64() > 0 {
+		*info = message.Value[0]
+	}
 	return nil
 }
 

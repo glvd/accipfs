@@ -274,6 +274,7 @@ func (a *Accelerate) Peers(r *http.Request, empty *Empty, result *[]*core.NodeIn
 	return nil
 }
 
+// Pins ...
 func (a *Accelerate) Pins(r *http.Request, empty *Empty, result *[]string) error {
 	pins, e := a.ipfsClient.PinLS(r.Context())
 	if e != nil {
@@ -285,6 +286,7 @@ func (a *Accelerate) Pins(r *http.Request, empty *Empty, result *[]string) error
 	return nil
 }
 
+// Pin ...
 func (a *Accelerate) Pin(r *http.Request, hash *string, result *bool) error {
 	e := a.ipfsClient.PinAdd(r.Context(), *hash)
 	if e != nil {
@@ -293,7 +295,18 @@ func (a *Accelerate) Pin(r *http.Request, hash *string, result *bool) error {
 	return nil
 }
 
+// TagInfo ...
+func (a Accelerate) TagInfo(r *http.Request, tag *string, info *string) error {
+	return nil
+}
+
+// Info ...
 func (a *Accelerate) Info(r *http.Request, hash *string, info *string) error {
+	bytes, e := a.cache.Get(*hash)
+	if e != nil {
+		return e
+	}
+	*info = string(bytes)
 	return nil
 }
 

@@ -2,7 +2,6 @@ package service
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"github.com/glvd/accipfs/account"
 	"github.com/glvd/accipfs/cache"
@@ -229,9 +228,9 @@ func (a Accelerate) ConnectTo(r *http.Request, addr *string, result *core.NodeIn
 func (a *Accelerate) addPeer(ctx context.Context, info *core.NodeInfo, result *bool) error {
 	*result = false
 
-	//skip self add
 	if info.Name == a.id.Name {
-		return errors.New("cannot add your self")
+		//ignore self add
+		return nil
 	}
 
 	err := Ping(info)

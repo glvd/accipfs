@@ -71,6 +71,7 @@ type Clique struct {
 // NodeInfo ...
 type NodeInfo struct {
 	Name       string
+	Schema     string
 	RemoteAddr string
 	Port       int
 	Contract   ContractNode

@@ -278,7 +278,7 @@ func (a *Accelerate) AddPeer(r *http.Request, info *core.NodeInfo, result *bool)
 }
 
 // Peers ...
-func (a *Accelerate) Peers(r *http.Request, empty *core.Empty, result *[]*core.NodeInfo) error {
+func (a *Accelerate) Peers(r *http.Request, _ *core.Empty, result *[]*core.NodeInfo) error {
 	a.nodes.Range(func(info *core.NodeInfo) bool {
 		*result = append(*result, info)
 		return true
@@ -287,7 +287,7 @@ func (a *Accelerate) Peers(r *http.Request, empty *core.Empty, result *[]*core.N
 }
 
 // Pins ...
-func (a *Accelerate) Pins(r *http.Request, empty *Empty, result *[]string) error {
+func (a *Accelerate) Pins(r *http.Request, _ *core.Empty, result *[]string) error {
 	pins, e := a.ipfsClient.PinLS(r.Context())
 	if e != nil {
 		return e
@@ -308,7 +308,7 @@ func (a *Accelerate) Pin(r *http.Request, hash *string, result *bool) error {
 }
 
 // TagInfo ...
-func (a Accelerate) TagInfo(r *http.Request, tag *string, info *string) error {
+func (a Accelerate) TagInfo(_ *http.Request, tag *string, info *string) error {
 	dTag, e := a.ethClient.DTag()
 	if e != nil {
 		return e

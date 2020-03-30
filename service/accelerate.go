@@ -2,9 +2,12 @@ package service
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"net/http"
+	"strings"
+	"sync"
 	"time"
 
 	"github.com/glvd/accipfs/account"
@@ -124,6 +127,7 @@ func (a *Accelerate) Run() {
 			if err := a.addPeer(ctx, nodeInfo, result); err != nil {
 				continue
 			}
+
 		}
 		//time.Sleep(30 * time.Second)
 		return true
@@ -299,21 +303,72 @@ func (a *Accelerate) Pins(r *http.Request, _ *core.Empty, result *[]string) erro
 }
 
 // Pin ...
-func (a *Accelerate) Pin(r *http.Request, hash *string, result *bool) error {
-	e := a.ipfsClient.PinAdd(r.Context(), *hash)
-	if e != nil {
-		return e
+func (a *Accelerate) Pin(r *http.Request, no *string, result *bool) error {
+	info := new(string)
+	err := a.tagInfo(*no, info)
+	if err != nil {
+		return err
 	}
+	var v core.Video
+	reader := strings.NewReader(*info)
+	decoder := json.NewDecoder(reader)
+	err = decoder.Decode(&v)
+	if err != nil {
+		return err
+	}
+	wg := sync.WaitGroup{}
+	var resultErr error
+	wg.Add(1)
+	go func() {
+		e := a.ipfsClient.PinAdd(r.Context(), v.PosterHash)
+		if e != nil && resultErr == nil {
+			resultErr = e
+		}
+		wg.Done()
+	}()
+
+	wg.Add(1)
+	go func() {
+		e := a.ipfsClient.PinAdd(r.Context(), v.ThumbHash)
+		if e != nil && resultErr == nil {
+			resultErr = e
+		}
+		wg.Done()
+	}()
+
+	wg.Add(1)
+	go func() {
+		e := a.ipfsClient.PinAdd(r.Context(), v.SourceHash)
+		if e != nil && resultErr == nil {
+			resultErr = e
+		}
+		wg.Done()
+	}()
+
+	wg.Add(1)
+	go func() {
+		e := a.ipfsClient.PinAdd(r.Context(), v.M3U8Hash)
+		if e != nil && resultErr == nil {
+			resultErr = e
+		}
+		wg.Done()
+	}()
+
+	wg.Wait()
+
+	if resultErr != nil {
+		return resultErr
+	}
+
 	return nil
 }
 
-// TagInfo ...
-func (a Accelerate) TagInfo(_ *http.Request, tag *string, info *string) error {
+func (a *Accelerate) tagInfo(tag string, info *string) error {
 	dTag, e := a.ethClient.DTag()
 	if e != nil {
 		return e
 	}
-	message, e := dTag.GetTagMessage(&bind.CallOpts{Pending: true}, "video", *tag)
+	message, e := dTag.GetTagMessage(&bind.CallOpts{Pending: true}, "video", tag)
 	if e != nil {
 		return e
 	}
@@ -322,6 +377,11 @@ func (a Accelerate) TagInfo(_ *http.Request, tag *string, info *string) error {
 		*info = message.Value[0]
 	}
 	return nil
+}
+
+// TagInfo ...
+func (a *Accelerate) TagInfo(_ *http.Request, tag *string, info *string) error {
+	return a.tagInfo(*tag, info)
 }
 
 // Info ...

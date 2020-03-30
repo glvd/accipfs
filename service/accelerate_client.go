@@ -33,6 +33,18 @@ func Ping(info *core.NodeInfo) error {
 	return nil
 }
 
+// Pins ...
+func Pins(info *core.NodeInfo) ([]string, error) {
+	log.Debugw("ping info", "addr", info.RemoteAddr, "port", info.Port)
+	pingAddr := strings.Join([]string{info.RemoteAddr, strconv.Itoa(info.Port)}, ":")
+	url := fmt.Sprintf("http://%s/rpc", pingAddr)
+	result := new([]string)
+	if err := general.RPCPost(url, "Accelerate.Pins", core.DummyEmpty(), result); err != nil {
+		return nil, err
+	}
+	return *result, nil
+}
+
 // Peers ...
 func Peers(info *core.NodeInfo) ([]*core.NodeInfo, error) {
 	pingAddr := strings.Join([]string{info.RemoteAddr, strconv.Itoa(info.Port)}, ":")

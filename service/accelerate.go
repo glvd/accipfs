@@ -94,7 +94,7 @@ func (a *Accelerate) Start() {
 // Run ...
 func (a *Accelerate) Run() {
 	if a.lock.Load() {
-		fmt.Println(outputHead, "Accelerate", "accelerate.run is already running")
+		fmt.Println(outputHead, "Accelerate", "the previous task has not been completed")
 		return
 	}
 	a.lock.Store(true)

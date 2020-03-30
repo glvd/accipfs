@@ -68,17 +68,6 @@ type Clique struct {
 	Period int64 `json:"period"`
 }
 
-// NodeInfo ...
-type NodeInfo struct {
-	Name       string
-	Schema     string
-	RemoteAddr string
-	Port       int
-	Contract   ContractNode
-	DataStore  DataStoreNode
-	Version    string
-}
-
 // Node todo need fix
 type _Node struct {
 	RemoteAddr string

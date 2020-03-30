@@ -8,6 +8,7 @@ import (
 	"github.com/glvd/accipfs/cache"
 	"github.com/glvd/accipfs/config"
 	"github.com/glvd/accipfs/core"
+	"github.com/glvd/accipfs/general"
 	"github.com/gocacher/cacher"
 	"github.com/goextension/log"
 	"github.com/robfig/cron/v3"
@@ -180,32 +181,48 @@ func (a *Accelerate) ID(r *http.Request, e *core.Empty, result *core.NodeInfo) e
 	return nil
 }
 
-// Connect ...
-func (a *Accelerate) Connect(r *http.Request, node *core.Empty, result *core.NodeInfo) error {
-	log.Infow("connect", "tag", outputHead, "addr", r.RemoteAddr)
+// Connected ...
+func (a *Accelerate) Connected(r *http.Request, node *core.NodeInfo, result *core.NodeInfo) error {
+	log.Infow("connected", "tag", outputHead, "addr", r.RemoteAddr)
 	if node == nil {
 		return fmt.Errorf("nil node info")
 	}
 
-	//node.RemoteAddr, _ = general.SplitIP(r.RemoteAddr)
+	node.RemoteAddr, _ = general.SplitIP(r.RemoteAddr)
 
-	//id, err := a.localID()
-	//if err != nil {
-	//	return err
-	//}
-	//*result = *id
+	id, err := a.localID()
+	if err != nil {
+		return err
+	}
+	*result = *id
 
-	//err = Ping(node)
-	//if err != nil {
-	//	if !a.dummyNodes.Check(node.Name) {
-	//		a.dummyNodes.Add(node)
-	//	}
-	//	return nil
-	//}
-	//if !a.nodes.Check(node.Name) {
-	//	a.nodes.Add(node)
-	//	return nil
-	//}
+	err = Ping(node)
+	if err != nil {
+		if !a.dummyNodes.Check(node.Name) {
+			a.dummyNodes.Add(node)
+		}
+		return nil
+	}
+	if !a.nodes.Check(node.Name) {
+		a.nodes.Add(node)
+		return nil
+	}
+	return nil
+}
+
+// ConnectTo ...
+func (a Accelerate) ConnectTo(r *http.Request, addr *string, result *core.NodeInfo) error {
+	id, err := a.localID()
+	if err != nil {
+		return err
+	}
+	url := fmt.Sprintf("http://%s/rpc", *addr)
+
+	err = general.RPCPost(url, "Accelerate.Connected", id, result)
+	if err != nil {
+		return err
+	}
+	result.RemoteAddr, result.Port = general.SplitIP(*addr)
 	return nil
 }
 

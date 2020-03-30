@@ -5,6 +5,7 @@ import (
 	"github.com/glvd/accipfs/config"
 	"github.com/glvd/accipfs/core"
 	"github.com/glvd/accipfs/general"
+	"github.com/glvd/accipfs/service"
 	"github.com/spf13/cobra"
 )
 
@@ -27,20 +28,20 @@ func nodeConnectCmd() *cobra.Command {
 		Run: func(cmd *cobra.Command, args []string) {
 			config.Initialize()
 			url := config.RPCAddr()
-			fmt.Printf("connect to [%s]", url.String())
 
 			for _, addr := range args {
-				fmt.Println("connect:", addr)
-				if err := general.RPCPost(url.String(), "Accelerate.Connect", &core.Empty{}, addr); err != nil {
-					fmt.Println("connect error:", err.Error())
+				fmt.Printf("connect to [%s]", url.String())
+
+				remoteNodeInfo := new(core.NodeInfo)
+				if err := general.RPCPost(url.String(), "Accelerate.ConnectTo", addr, remoteNodeInfo); err != nil {
+					fmt.Println("connect error:", err)
 					return
 				}
 
-				//remoteNodeInfo.RemoteAddr, remoteNodeInfo.Port = general.SplitIP(addr)
-				//if err := service.AddPeer(url, remoteNodeInfo); err != nil {
-				//	fmt.Println("add peer error:", err)
-				//	return
-				//}
+				if err := service.AddPeer(url.String(), remoteNodeInfo); err != nil {
+					fmt.Println("add peer error:", err)
+					return
+				}
 			}
 
 			return

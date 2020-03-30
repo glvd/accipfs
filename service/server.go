@@ -58,6 +58,7 @@ func NewRPCServer(cfg *config.Config) (*Server, error) {
 // Start ...
 func (s *Server) Start() error {
 	s.route.Handle("/rpc", s.rpcServer)
+
 	port := fmt.Sprintf(":%d", s.cfg.Port)
 	s.httpServer = &http.Server{Addr: port, Handler: s.route}
 

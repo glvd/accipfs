@@ -6,6 +6,7 @@ import (
 	"github.com/goextension/extmap"
 	"github.com/spf13/viper"
 	"io/ioutil"
+	"net/url"
 	"os"
 	"path/filepath"
 )
@@ -62,6 +63,7 @@ type ETHKeyFile struct {
 // Config ...
 type Config struct {
 	Port       int        `json:"port" mapstructure:"port"`
+	Schema     string     `json:"schema" mapstructure:"schema"`
 	Path       string     `json:"path" mapstructure:"path" `
 	Account    string     `json:"account" mapstructure:"account"`
 	PrivateKey string     `json:"private_key" mapstructure:"private_key"`
@@ -70,7 +72,7 @@ type Config struct {
 	IPFS       IPFSConfig `json:"ipfs" mapstructure:"ipfs"`
 	AWS        AWSConfig  `json:"aws" mapstructure:"aws"`
 	Interval   int64      `json:"interval" mapstructure:"interval"`
-	Limit      int64
+	Limit      int64      `json:"limit" mapstructure:"limit"`
 }
 
 // WorkDir ...
@@ -134,6 +136,7 @@ func Global() Config {
 func Default() *Config {
 	def := &Config{
 		Port:       20304,
+		Schema:     "http",
 		Path:       WorkDir,
 		Account:    "",
 		PrivateKey: "",
@@ -166,6 +169,14 @@ func (c *Config) Init() error {
 		return err
 	}
 	return nil
+}
+
+func (c Config) rpcAddr() *url.URL {
+	u := url.URL{
+		Scheme: c.Schema,
+		Path:   fmt.Sprintf("127.0.0.1:%d/rpc", c.Port),
+	}
+	return &u
 }
 
 func currentPath() string {
@@ -209,4 +220,9 @@ func ETHAddr() string {
 // IPFSAddr ...
 func IPFSAddr() string {
 	return fmt.Sprintf(_ipfsGateway, Global().IPFS.Port)
+}
+
+// RPCAddr ...
+func RPCAddr() *url.URL {
+	return Global().rpcAddr()
 }

@@ -5,7 +5,6 @@ import (
 	"github.com/glvd/accipfs/config"
 	"github.com/glvd/accipfs/core"
 	"github.com/glvd/accipfs/general"
-	"github.com/glvd/accipfs/service"
 	"github.com/spf13/cobra"
 )
 
@@ -27,27 +26,21 @@ func nodeConnectCmd() *cobra.Command {
 		Long:  "connect a remote node",
 		Run: func(cmd *cobra.Command, args []string) {
 			config.Initialize()
-			cfg := config.Global()
-			url := fmt.Sprintf("http://localhost:%d/rpc", cfg.Port)
-			id, err := service.ID(url)
-			if err != nil {
-				fmt.Println("local id error:", err.Error())
-				return
-			}
+			url := config.RPCAddr()
+			fmt.Printf("connect to [%s]", url.String())
+
 			for _, addr := range args {
 				fmt.Println("connect:", addr)
-				remoteURL := fmt.Sprintf("http://%s/rpc", addr)
-				remoteNodeInfo := new(core.NodeInfo)
-				if err := general.RPCPost(remoteURL, "Accelerate.Connect", id, remoteNodeInfo); err != nil {
+				if err := general.RPCPost(url.String(), "Accelerate.Connect", &core.Empty{}, addr); err != nil {
 					fmt.Println("connect error:", err.Error())
 					return
 				}
 
-				remoteNodeInfo.RemoteAddr, remoteNodeInfo.Port = general.SplitIP(addr)
-				if err := service.AddPeer(url, remoteNodeInfo); err != nil {
-					fmt.Println("add peer error:", err)
-					return
-				}
+				//remoteNodeInfo.RemoteAddr, remoteNodeInfo.Port = general.SplitIP(addr)
+				//if err := service.AddPeer(url, remoteNodeInfo); err != nil {
+				//	fmt.Println("add peer error:", err)
+				//	return
+				//}
 			}
 
 			return
@@ -66,7 +59,7 @@ func nodePeerCmd() *cobra.Command {
 			cfg := config.Global()
 			url := fmt.Sprintf("http://localhost:%d/rpc", cfg.Port)
 			reply := new([]*core.NodeInfo)
-			if err := general.RPCPost(url, "Accelerate.Peers", &service.Empty{}, reply); err != nil {
+			if err := general.RPCPost(url, "Accelerate.Peers", &core.Empty{}, reply); err != nil {
 				fmt.Println("peers error:", err.Error())
 			}
 			for _, info := range *reply {

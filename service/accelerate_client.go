@@ -12,7 +12,7 @@ import (
 // ID ...
 func ID(url string) (*core.NodeInfo, error) {
 	reply := new(core.NodeInfo)
-	if err := general.RPCPost(url, "Accelerate.ID", &Empty{}, reply); err != nil {
+	if err := general.RPCPost(url, "Accelerate.ID", core.DummyEmpty(), reply); err != nil {
 		return nil, err
 	}
 	return reply, nil
@@ -24,7 +24,7 @@ func Ping(info *core.NodeInfo) error {
 	pingAddr := strings.Join([]string{info.RemoteAddr, strconv.Itoa(info.Port)}, ":")
 	url := fmt.Sprintf("http://%s/rpc", pingAddr)
 	result := new(string)
-	if err := general.RPCPost(url, "Accelerate.Ping", &Empty{}, result); err != nil {
+	if err := general.RPCPost(url, "Accelerate.Ping", core.DummyEmpty(), result); err != nil {
 		return err
 	}
 	if *result != "pong" {

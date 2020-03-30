@@ -8,7 +8,6 @@ import (
 	"github.com/glvd/accipfs/cache"
 	"github.com/glvd/accipfs/config"
 	"github.com/glvd/accipfs/core"
-	"github.com/glvd/accipfs/general"
 	"github.com/gocacher/cacher"
 	"github.com/goextension/log"
 	"github.com/robfig/cron/v3"
@@ -16,10 +15,6 @@ import (
 	"net/http"
 	"time"
 )
-
-// Empty ...
-type Empty struct {
-}
 
 // Accelerate ...
 type Accelerate struct {
@@ -150,7 +145,7 @@ func (a *Accelerate) Stop() {
 }
 
 // Ping ...
-func (a *Accelerate) Ping(r *http.Request, e *Empty, result *string) error {
+func (a *Accelerate) Ping(r *http.Request, e *core.Empty, result *string) error {
 	*result = "pong"
 	return nil
 }
@@ -176,7 +171,7 @@ func (a *Accelerate) localID() (*core.NodeInfo, error) {
 }
 
 // ID ...
-func (a *Accelerate) ID(r *http.Request, e *Empty, result *core.NodeInfo) error {
+func (a *Accelerate) ID(r *http.Request, e *core.Empty, result *core.NodeInfo) error {
 	id, err := a.localID()
 	if err != nil {
 		return err
@@ -186,31 +181,31 @@ func (a *Accelerate) ID(r *http.Request, e *Empty, result *core.NodeInfo) error 
 }
 
 // Connect ...
-func (a *Accelerate) Connect(r *http.Request, node *core.NodeInfo, result *core.NodeInfo) error {
+func (a *Accelerate) Connect(r *http.Request, node *core.Empty, result *core.NodeInfo) error {
 	log.Infow("connect", "tag", outputHead, "addr", r.RemoteAddr)
 	if node == nil {
 		return fmt.Errorf("nil node info")
 	}
 
-	node.RemoteAddr, _ = general.SplitIP(r.RemoteAddr)
+	//node.RemoteAddr, _ = general.SplitIP(r.RemoteAddr)
 
-	id, err := a.localID()
-	if err != nil {
-		return err
-	}
-	*result = *id
+	//id, err := a.localID()
+	//if err != nil {
+	//	return err
+	//}
+	//*result = *id
 
-	err = Ping(node)
-	if err != nil {
-		if !a.dummyNodes.Check(node.Name) {
-			a.dummyNodes.Add(node)
-		}
-		return nil
-	}
-	if !a.nodes.Check(node.Name) {
-		a.nodes.Add(node)
-		return nil
-	}
+	//err = Ping(node)
+	//if err != nil {
+	//	if !a.dummyNodes.Check(node.Name) {
+	//		a.dummyNodes.Add(node)
+	//	}
+	//	return nil
+	//}
+	//if !a.nodes.Check(node.Name) {
+	//	a.nodes.Add(node)
+	//	return nil
+	//}
 	return nil
 }
 
@@ -265,7 +260,7 @@ func (a *Accelerate) AddPeer(r *http.Request, info *core.NodeInfo, result *bool)
 }
 
 // Peers ...
-func (a *Accelerate) Peers(r *http.Request, empty *Empty, result *[]*core.NodeInfo) error {
+func (a *Accelerate) Peers(r *http.Request, empty *core.Empty, result *[]*core.NodeInfo) error {
 	a.nodes.Range(func(info *core.NodeInfo) bool {
 		*result = append(*result, info)
 		return true

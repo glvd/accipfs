@@ -3,6 +3,10 @@ package service
 import (
 	"context"
 	"fmt"
+	"github.com/ethereum/go-ethereum/accounts/abi/bind"
+	"net/http"
+	"time"
+
 	"github.com/glvd/accipfs/account"
 	"github.com/glvd/accipfs/cache"
 	"github.com/glvd/accipfs/config"
@@ -12,8 +16,6 @@ import (
 	"github.com/goextension/log"
 	"github.com/robfig/cron/v3"
 	"go.uber.org/atomic"
-	"net/http"
-	"time"
 )
 
 // Accelerate ...
@@ -281,6 +283,54 @@ func (a *Accelerate) Peers(r *http.Request, empty *core.Empty, result *[]*core.N
 		*result = append(*result, info)
 		return true
 	})
+	return nil
+}
+
+// Pins ...
+func (a *Accelerate) Pins(r *http.Request, empty *Empty, result *[]string) error {
+	pins, e := a.ipfsClient.PinLS(r.Context())
+	if e != nil {
+		return e
+	}
+	for _, p := range pins {
+		*result = append(*result, p.Path().String())
+	}
+	return nil
+}
+
+// Pin ...
+func (a *Accelerate) Pin(r *http.Request, hash *string, result *bool) error {
+	e := a.ipfsClient.PinAdd(r.Context(), *hash)
+	if e != nil {
+		return e
+	}
+	return nil
+}
+
+// TagInfo ...
+func (a Accelerate) TagInfo(r *http.Request, tag *string, info *string) error {
+	dTag, e := a.ethClient.DTag()
+	if e != nil {
+		return e
+	}
+	message, e := dTag.GetTagMessage(&bind.CallOpts{Pending: true}, "video", *tag)
+	if e != nil {
+		return e
+	}
+
+	if message.Size.Int64() > 0 {
+		*info = message.Value[0]
+	}
+	return nil
+}
+
+// Info ...
+func (a *Accelerate) Info(r *http.Request, hash *string, info *string) error {
+	bytes, e := a.cache.Get(*hash)
+	if e != nil {
+		return e
+	}
+	*info = string(bytes)
 	return nil
 }
 

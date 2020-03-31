@@ -342,17 +342,10 @@ func (a *Accelerate) Pin(r *http.Request, no *string, result *bool) error {
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
-		hashInfo, err := a.cache.GetHashInfo(v.PosterHash)
+		err := a.nodeConnect(r.Context(), v.PosterHash)
 		if err != nil {
 			resultErr = err
-		}
-		for info := range hashInfo {
-			nodeInfo, err := a.cache.GetNodeInfo(info)
-			if err != nil {
-				continue
-			}
-			url := nodeInfo.Address().URL()
-			a.ConnectTo(r, url)
+			return
 		}
 		e := a.ipfsClient.PinAdd(r.Context(), v.PosterHash)
 		if e != nil && resultErr == nil {
@@ -363,6 +356,11 @@ func (a *Accelerate) Pin(r *http.Request, no *string, result *bool) error {
 	wg.Add(1)
 	go func() {
 		wg.Done()
+		err := a.nodeConnect(r.Context(), v.ThumbHash)
+		if err != nil {
+			resultErr = err
+			return
+		}
 		e := a.ipfsClient.PinAdd(r.Context(), v.ThumbHash)
 		if e != nil && resultErr == nil {
 			resultErr = e
@@ -373,6 +371,11 @@ func (a *Accelerate) Pin(r *http.Request, no *string, result *bool) error {
 	wg.Add(1)
 	go func() {
 		wg.Done()
+		err := a.nodeConnect(r.Context(), v.SourceHash)
+		if err != nil {
+			resultErr = err
+			return
+		}
 		e := a.ipfsClient.PinAdd(r.Context(), v.SourceHash)
 		if e != nil && resultErr == nil {
 			resultErr = e
@@ -383,6 +386,11 @@ func (a *Accelerate) Pin(r *http.Request, no *string, result *bool) error {
 	wg.Add(1)
 	go func() {
 		wg.Done()
+		err := a.nodeConnect(r.Context(), v.M3U8Hash)
+		if err != nil {
+			resultErr = err
+			return
+		}
 		e := a.ipfsClient.PinAdd(r.Context(), v.M3U8Hash)
 		if e != nil && resultErr == nil {
 			resultErr = e
@@ -433,5 +441,26 @@ func (a *Accelerate) Info(r *http.Request, hash *string, info *string) error {
 // Exchange ...
 func (a *Accelerate) Exchange(r *http.Request, n *core.NodeInfo, to []string) error {
 
+	return nil
+}
+
+func (a *Accelerate) nodeConnect(ctx context.Context, hash string) error {
+	hashInfo, err := a.cache.GetHashInfo(hash)
+	if err != nil {
+		return err
+	}
+	for info := range hashInfo {
+		nodeInfo, err := a.cache.GetNodeInfo(info)
+		if err != nil {
+			continue
+		}
+		var resultErr error
+		for _, addr := range nodeInfo.DataStore.Addresses {
+			resultErr = a.ipfsClient.SwarmConnect(ctx, addr)
+			if resultErr == nil {
+				break
+			}
+		}
+	}
 	return nil
 }

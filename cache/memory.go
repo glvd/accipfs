@@ -98,13 +98,72 @@ func (m *MemoryCache) DeleteMultiple(keys ...string) error {
 	return m.cache.DeleteMultiple(keys...)
 }
 
+// GetHashInfo ...
+func (m *MemoryCache) GetHashInfo(hash string) (map[string][]byte, error) {
+	m2 := make(map[string][]byte)
+	get, err := m.Get(hashPrefix(hash))
+	if err != nil {
+		return nil, err
+	}
+	err = json.Unmarshal(get, &m2)
+	if err != nil {
+		return nil, err
+	}
+	return m2, nil
+}
+
+// SetHashInfo ...
+func (m *MemoryCache) SetHashInfo(hash string, name string) error {
+	m.mut.Lock()
+	defer m.mut.Unlock()
+	m2 := map[string][]byte{
+		name: nil,
+	}
+	marshal, err := json.Marshal(m2)
+	if err != nil {
+		return err
+	}
+	err = m.cache.Set(hashPrefix(hash), marshal)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+// UpdateHashInfo ...
+func (m *MemoryCache) UpdateHashInfo(hash string, name string) error {
+	m.mut.Lock()
+	defer m.mut.Unlock()
+	get, err := m.cache.Get(hashPrefix(hash))
+	if err != nil {
+		return err
+	}
+	m2 := make(map[string][]byte)
+	err = json.Unmarshal(get, &m2)
+	if err != nil {
+		return err
+	}
+	m2[name] = nil
+	marshal, err := json.Marshal(m2)
+	if err != nil {
+		return err
+	}
+	err = m.cache.Set(hashPrefix(hash), marshal)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
 // SetNodeInfo ...
 func (m *MemoryCache) SetNodeInfo(info *core.NodeInfo) error {
+	m.mut.Lock()
+	m.mut.Unlock()
 	marshal, err := json.Marshal(info)
 	if err != nil {
 		return err
 	}
-	err = m.Set(nodePrefix(info.Name), marshal)
+	err = m.cache.Set(nodePrefix(info.Name), marshal)
 	if err != nil {
 		return err
 	}
@@ -113,6 +172,8 @@ func (m *MemoryCache) SetNodeInfo(info *core.NodeInfo) error {
 
 // GetNodeInfo ...
 func (m *MemoryCache) GetNodeInfo(name string) (*core.NodeInfo, error) {
+	m.mut.RLock()
+	defer m.mut.RUnlock()
 	var info core.NodeInfo
 	get, err := m.Get(nodePrefix(name))
 	if err != nil {
@@ -123,6 +184,51 @@ func (m *MemoryCache) GetNodeInfo(name string) (*core.NodeInfo, error) {
 		return nil, err
 	}
 	return &info, nil
+}
+
+// AddOrUpdate ...
+func (m *MemoryCache) AddOrUpdate(hash string, info *core.NodeInfo) error {
+	m.mut.Lock()
+	defer m.mut.Unlock()
+	b, err := m.cache.Has(nodePrefix(info.Name))
+	if err != nil {
+		return err
+	}
+	if !b {
+		marshal, err := json.Marshal(info)
+		if err != nil {
+			return err
+		}
+		err = m.cache.Set(nodePrefix(info.Name), marshal)
+		if err != nil {
+			return err
+		}
+	}
+	nodes := make(map[string][]byte)
+	has, err := m.cache.Has(hashPrefix(hash))
+	if err != nil {
+		return err
+	}
+	if has {
+		get, err := m.cache.Get(hashPrefix(hash))
+		if err != nil {
+			return err
+		}
+		err = json.Unmarshal(get, &nodes)
+		if err != nil {
+			return err
+		}
+	}
+	nodes[info.Name] = nil
+	marshal, err := json.Marshal(nodes)
+	if err != nil {
+		return err
+	}
+	err = m.cache.Set(hashPrefix(hash), marshal)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 // New ...

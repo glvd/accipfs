@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
+	"github.com/glvd/accipfs/task"
 	"net/http"
 	"strings"
 	"sync"
@@ -24,6 +25,7 @@ import (
 // Accelerate ...
 type Accelerate struct {
 	id         *core.NodeInfo
+	tasks      task.Task
 	cache      cacher.Cacher
 	nodes      core.NodeStore
 	dummyNodes core.NodeStore
@@ -55,6 +57,7 @@ func NewAccelerateServer(cfg *config.Config) (acc *Accelerate, err error) {
 	acc.ethClient, _ = newNodeETH(cfg)
 	acc.ipfsClient, _ = newNodeIPFS(cfg)
 	acc.cache = cache.New(cfg)
+	acc.tasks = task.New()
 	acc.cron = cron.New(cron.WithSeconds())
 	selfAcc, err := account.LoadAccount(cfg)
 	if err != nil {

@@ -309,7 +309,7 @@ func (a *Accelerate) Pin(r *http.Request, no *string, result *bool) error {
 	if err != nil {
 		return err
 	}
-	var v core.Video
+	var v core.VideoV1
 	reader := strings.NewReader(*info)
 	decoder := json.NewDecoder(reader)
 	err = decoder.Decode(&v)

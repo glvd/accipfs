@@ -23,6 +23,7 @@ type serviceNode struct {
 func nodeInstance() *serviceNode {
 	return &serviceNode{lock: atomic.NewBool(false)}
 }
+
 func decodeNodes(cfg *config.Config, nodes []string) []string {
 	// init contract
 	var decodeNodes []string

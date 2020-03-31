@@ -1,7 +1,12 @@
 package core
 
-// Video ...
-type Video struct {
+import "encoding/json"
+
+// VersionV1 ...
+const VersionV1 = iota
+
+// VideoV1 ...
+type VideoV1 struct {
 	No           string   `xorm:"no" json:"no"`                       //编号
 	Intro        string   `xorm:"varchar(2048)" json:"intro"`         //简介
 	Alias        []string `xorm:"json" json:"alias"`                  //别名，片名
@@ -32,4 +37,13 @@ type Video struct {
 	Length       string   `xorm:"length" json:"length"`               //时长
 	Sample       []string `xorm:"json sample" json:"sample"`          //样板图
 	Uncensored   bool     `xorm:"uncensored" json:"uncensored"`       //有码,无码
+}
+
+// JSON ...
+func (v *VideoV1) JSON() ([]byte, error) {
+	marshal, err := json.Marshal(v)
+	if err != nil {
+		return nil, err
+	}
+	return marshal, nil
 }

@@ -148,6 +148,18 @@ func (a *Accelerate) Run() {
 						log.Errorw("unmashal nodes", "error", err)
 						continue
 					}
+					nodes[nodeInfo.Name] = nil
+
+					marshal, err := json.Marshal(nodes)
+					if err != nil {
+						log.Errorw("mashal nodes", "error", err)
+						continue
+					}
+					err = a.cache.Set(p, marshal)
+					if err != nil {
+						log.Errorw("cache set", "error", err)
+						continue
+					}
 				}
 			}
 

@@ -16,7 +16,6 @@ import (
 	"github.com/glvd/accipfs/config"
 	"github.com/glvd/accipfs/core"
 	"github.com/glvd/accipfs/general"
-	"github.com/gocacher/cacher"
 	"github.com/goextension/log"
 	"github.com/robfig/cron/v3"
 	"go.uber.org/atomic"
@@ -26,7 +25,7 @@ import (
 type Accelerate struct {
 	id         *core.NodeInfo
 	tasks      task.Task
-	cache      cacher.Cacher
+	cache      *cache.MemoryCache
 	nodes      core.NodeStore
 	dummyNodes core.NodeStore
 	lock       *atomic.Bool
@@ -137,27 +136,9 @@ func (a *Accelerate) Run() {
 					continue
 				}
 				for _, p := range pins {
-					nodes := make(map[string][]byte)
-					get, err := a.cache.Get(p)
+					err := a.cache.AddOrUpdate(p, nodeInfo)
 					if err != nil {
-						log.Errorw("cache get", "error", err)
-						continue
-					}
-					err = json.Unmarshal(get, &nodes)
-					if err != nil {
-						log.Errorw("unmashal nodes", "error", err)
-						continue
-					}
-					nodes[nodeInfo.Name] = nil
-
-					marshal, err := json.Marshal(nodes)
-					if err != nil {
-						log.Errorw("mashal nodes", "error", err)
-						continue
-					}
-					err = a.cache.Set(p, marshal)
-					if err != nil {
-						log.Errorw("cache set", "error", err)
+						log.Errorw("cache add or update", "error", err)
 						continue
 					}
 				}
@@ -348,6 +329,7 @@ func (a *Accelerate) Pin(r *http.Request, no *string, result *bool) error {
 	if err != nil {
 		return err
 	}
+
 	var v core.VideoV1
 	reader := strings.NewReader(*info)
 	decoder := json.NewDecoder(reader)
@@ -359,15 +341,28 @@ func (a *Accelerate) Pin(r *http.Request, no *string, result *bool) error {
 	var resultErr error
 	wg.Add(1)
 	go func() {
+		defer wg.Done()
+		hashInfo, err := a.cache.GetHashInfo(v.PosterHash)
+		if err != nil {
+			resultErr = err
+		}
+		for info := range hashInfo {
+			nodeInfo, err := a.cache.GetNodeInfo(info)
+			if err != nil {
+				continue
+			}
+			url := nodeInfo.Address().URL()
+			a.ConnectTo(r, url)
+		}
 		e := a.ipfsClient.PinAdd(r.Context(), v.PosterHash)
 		if e != nil && resultErr == nil {
 			resultErr = e
 		}
-		wg.Done()
 	}()
 
 	wg.Add(1)
 	go func() {
+		wg.Done()
 		e := a.ipfsClient.PinAdd(r.Context(), v.ThumbHash)
 		if e != nil && resultErr == nil {
 			resultErr = e
@@ -377,20 +372,22 @@ func (a *Accelerate) Pin(r *http.Request, no *string, result *bool) error {
 
 	wg.Add(1)
 	go func() {
+		wg.Done()
 		e := a.ipfsClient.PinAdd(r.Context(), v.SourceHash)
 		if e != nil && resultErr == nil {
 			resultErr = e
 		}
-		wg.Done()
+
 	}()
 
 	wg.Add(1)
 	go func() {
+		wg.Done()
 		e := a.ipfsClient.PinAdd(r.Context(), v.M3U8Hash)
 		if e != nil && resultErr == nil {
 			resultErr = e
 		}
-		wg.Done()
+
 	}()
 
 	wg.Wait()

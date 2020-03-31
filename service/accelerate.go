@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
+	"github.com/glvd/accipfs/client"
 	"github.com/glvd/accipfs/task"
 	"net/http"
 	"strings"
@@ -110,13 +111,14 @@ func (a *Accelerate) Run() {
 	a.nodes.Range(func(info *core.NodeInfo) bool {
 		fmt.Println(outputHead, "Accelerate", "syncing node", info.Name)
 
-		err := Ping(info)
+		err := client.Ping(info)
 		if err != nil {
 			a.nodes.Remove(info.Name)
 			a.dummyNodes.Add(info)
 			return true
 		}
-		nodeInfos, err := Peers(info)
+		url := info.Address().URL()
+		nodeInfos, err := client.Peers(url, info)
 		if err != nil {
 			return true
 		}
@@ -130,7 +132,7 @@ func (a *Accelerate) Run() {
 				continue
 			}
 			if *result {
-				pins, err := Pins(nodeInfo)
+				pins, err := client.Pins(nodeInfo)
 				if err != nil {
 					log.Errorw("get pin list", "error", err)
 					continue
@@ -217,7 +219,7 @@ func (a *Accelerate) Connected(r *http.Request, node *core.NodeInfo, result *cor
 	}
 	*result = *id
 
-	err = Ping(node)
+	err = client.Ping(node)
 	if err != nil {
 		if !a.dummyNodes.Check(node.Name) {
 			a.dummyNodes.Add(node)
@@ -255,7 +257,7 @@ func (a *Accelerate) addPeer(ctx context.Context, info *core.NodeInfo, result *b
 		return nil
 	}
 
-	err := Ping(info)
+	err := client.Ping(info)
 	if err != nil {
 		log.Errorw("add peer", "tag", outputHead, "error", err)
 		a.dummyNodes.Add(info)
@@ -322,8 +324,8 @@ func (a *Accelerate) Pins(r *http.Request, _ *core.Empty, result *[]string) erro
 	return a.pins(r.Context(), result)
 }
 
-// Pin ...
-func (a *Accelerate) Pin(r *http.Request, no *string, result *bool) error {
+// PinVideo ...
+func (a *Accelerate) PinVideo(r *http.Request, no *string, result *bool) error {
 	info := new(string)
 	err := a.tagInfo(*no, info)
 	if err != nil {
@@ -338,72 +340,81 @@ func (a *Accelerate) Pin(r *http.Request, no *string, result *bool) error {
 		return err
 	}
 	wg := sync.WaitGroup{}
-	var resultErr error
+	resultErr := make(chan error)
+	ctx, cancelFunc := context.WithCancel(r.Context())
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
-		err := a.nodeConnect(r.Context(), v.PosterHash)
+		err := a.nodeConnect(ctx, v.PosterHash)
 		if err != nil {
-			resultErr = err
+			cancelFunc()
+			resultErr <- err
 			return
 		}
-		e := a.ipfsClient.PinAdd(r.Context(), v.PosterHash)
-		if e != nil && resultErr == nil {
-			resultErr = e
+		e := a.ipfsClient.PinAdd(ctx, v.PosterHash)
+		if e != nil {
+			cancelFunc()
+			resultErr <- e
 		}
 	}()
 
 	wg.Add(1)
 	go func() {
-		wg.Done()
-		err := a.nodeConnect(r.Context(), v.ThumbHash)
+		defer wg.Done()
+		err := a.nodeConnect(ctx, v.ThumbHash)
 		if err != nil {
-			resultErr = err
+			cancelFunc()
+			resultErr <- err
 			return
 		}
-		e := a.ipfsClient.PinAdd(r.Context(), v.ThumbHash)
-		if e != nil && resultErr == nil {
-			resultErr = e
-		}
-		wg.Done()
-	}()
-
-	wg.Add(1)
-	go func() {
-		wg.Done()
-		err := a.nodeConnect(r.Context(), v.SourceHash)
-		if err != nil {
-			resultErr = err
-			return
-		}
-		e := a.ipfsClient.PinAdd(r.Context(), v.SourceHash)
-		if e != nil && resultErr == nil {
-			resultErr = e
+		e := a.ipfsClient.PinAdd(ctx, v.ThumbHash)
+		if e != nil {
+			cancelFunc()
+			resultErr <- e
 		}
 
 	}()
 
 	wg.Add(1)
 	go func() {
-		wg.Done()
-		err := a.nodeConnect(r.Context(), v.M3U8Hash)
+		defer wg.Done()
+		err := a.nodeConnect(ctx, v.SourceHash)
 		if err != nil {
-			resultErr = err
+			cancelFunc()
+			resultErr <- err
 			return
 		}
-		e := a.ipfsClient.PinAdd(r.Context(), v.M3U8Hash)
-		if e != nil && resultErr == nil {
-			resultErr = e
+		e := a.ipfsClient.PinAdd(ctx, v.SourceHash)
+		if e != nil {
+			cancelFunc()
+			resultErr <- e
 		}
 
+	}()
+
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		err := a.nodeConnect(ctx, v.M3U8Hash)
+		if err != nil {
+			cancelFunc()
+			resultErr <- err
+			return
+		}
+		e := a.ipfsClient.PinAdd(ctx, v.M3U8Hash)
+		if e != nil {
+			cancelFunc()
+			resultErr <- e
+		}
 	}()
 
 	wg.Wait()
-
-	if resultErr != nil {
-		return resultErr
+	select {
+	case e := <-resultErr:
+		return e
+	default:
 	}
-
+	*result = true
 	return nil
 }
 

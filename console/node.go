@@ -2,10 +2,10 @@ package main
 
 import (
 	"fmt"
+	"github.com/glvd/accipfs/client"
 	"github.com/glvd/accipfs/config"
 	"github.com/glvd/accipfs/core"
 	"github.com/glvd/accipfs/general"
-	"github.com/glvd/accipfs/service"
 	"github.com/spf13/cobra"
 )
 
@@ -38,7 +38,7 @@ func nodeConnectCmd() *cobra.Command {
 					return
 				}
 
-				if err := service.AddPeer(url.String(), remoteNodeInfo); err != nil {
+				if err := client.AddPeer(url.String(), remoteNodeInfo); err != nil {
 					fmt.Println("add peer error:", err)
 					return
 				}

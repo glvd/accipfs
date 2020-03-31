@@ -3,8 +3,8 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/glvd/accipfs/client"
 	"github.com/glvd/accipfs/config"
-	"github.com/glvd/accipfs/service"
 	"github.com/goextension/log"
 	"github.com/spf13/cobra"
 )
@@ -19,7 +19,7 @@ func idCmd() *cobra.Command {
 			config.Initialize()
 			cfg := config.Global()
 			url := fmt.Sprintf("http://localhost:%d/rpc", cfg.Port)
-			id, err := service.ID(url)
+			id, err := client.ID(url)
 			if err != nil {
 				log.Errorw("local id", "error", err)
 				return

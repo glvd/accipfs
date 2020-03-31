@@ -130,6 +130,26 @@ func (a *Accelerate) Run() {
 			if err := a.addPeer(ctx, nodeInfo, result); err != nil {
 				continue
 			}
+			if *result {
+				pins, err := Pins(nodeInfo)
+				if err != nil {
+					log.Errorw("get pin list", "error", err)
+					continue
+				}
+				for _, p := range pins {
+					nodes := make(map[string][]byte)
+					get, err := a.cache.Get(p)
+					if err != nil {
+						log.Errorw("cache get", "error", err)
+						continue
+					}
+					err = json.Unmarshal(get, &nodes)
+					if err != nil {
+						log.Errorw("unmashal nodes", "error", err)
+						continue
+					}
+				}
+			}
 
 		}
 		//time.Sleep(30 * time.Second)
@@ -293,9 +313,8 @@ func (a *Accelerate) Peers(r *http.Request, _ *core.Empty, result *[]*core.NodeI
 	return nil
 }
 
-// Pins ...
-func (a *Accelerate) Pins(r *http.Request, _ *core.Empty, result *[]string) error {
-	pins, e := a.ipfsClient.PinLS(r.Context())
+func (a *Accelerate) pins(ctx context.Context, result *[]string) error {
+	pins, e := a.ipfsClient.PinLS(ctx)
 	if e != nil {
 		return e
 	}
@@ -303,6 +322,11 @@ func (a *Accelerate) Pins(r *http.Request, _ *core.Empty, result *[]string) erro
 		*result = append(*result, p.Path().String())
 	}
 	return nil
+}
+
+// Pins ...
+func (a *Accelerate) Pins(r *http.Request, _ *core.Empty, result *[]string) error {
+	return a.pins(r.Context(), result)
 }
 
 // Pin ...

@@ -190,20 +190,17 @@ func (m *MemoryCache) GetNodeInfo(name string) (*core.NodeInfo, error) {
 func (m *MemoryCache) AddOrUpdate(hash string, info *core.NodeInfo) error {
 	m.mut.Lock()
 	defer m.mut.Unlock()
-	b, err := m.cache.Has(nodePrefix(info.Name))
+
+	//always update the new nodeInfo
+	marshal, err := json.Marshal(info)
 	if err != nil {
 		return err
 	}
-	if !b {
-		marshal, err := json.Marshal(info)
-		if err != nil {
-			return err
-		}
-		err = m.cache.Set(nodePrefix(info.Name), marshal)
-		if err != nil {
-			return err
-		}
+	err = m.cache.Set(nodePrefix(info.Name), marshal)
+	if err != nil {
+		return err
 	}
+
 	nodes := make(map[string][]byte)
 	has, err := m.cache.Has(hashPrefix(hash))
 	if err != nil {
@@ -220,11 +217,11 @@ func (m *MemoryCache) AddOrUpdate(hash string, info *core.NodeInfo) error {
 		}
 	}
 	nodes[info.Name] = nil
-	marshal, err := json.Marshal(nodes)
+	marshalNodes, err := json.Marshal(nodes)
 	if err != nil {
 		return err
 	}
-	err = m.cache.Set(hashPrefix(hash), marshal)
+	err = m.cache.Set(hashPrefix(hash), marshalNodes)
 	if err != nil {
 		return err
 	}

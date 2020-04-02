@@ -24,7 +24,7 @@ type Account struct {
 	Name     string
 	Address  string
 	KeyStore KeyStore
-	Identity Identity
+	Identity Identity //todo: not added on init
 	Password string
 }
 

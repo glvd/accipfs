@@ -31,7 +31,7 @@ func main() {
 	}
 	config.WorkDir = path
 
-	rootCmd.AddCommand(initCmd(), daemonCmd(), idCmd(), nodeCmd(), versionCmd(), tagCmd())
+	rootCmd.AddCommand(initCmd(), daemonCmd(), idCmd(), nodeCmd(), versionCmd(), tagCmd(), pinCmd(), addCmd(), accountCmd())
 	rootCmd.PersistentFlags().StringVar(&accipfs.DefaultPath, "path", ".", "set work path")
 
 	rootCmd.PersistentFlags().StringVar(&accipfs.LogOutput, "log-output", "stderr", "set the output log name")

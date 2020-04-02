@@ -30,7 +30,7 @@ func nodeConnectCmd() *cobra.Command {
 			url := config.RPCAddr()
 
 			for _, addr := range args {
-				fmt.Printf("connect to [%s]", url.String())
+				fmt.Printf("connect to [%s]\n", url.String())
 
 				remoteNodeInfo := new(core.NodeInfo)
 				if err := general.RPCPost(url.String(), "Accelerate.ConnectTo", addr, remoteNodeInfo); err != nil {

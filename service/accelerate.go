@@ -261,7 +261,7 @@ func (a *Accelerate) addPeer(ctx context.Context, info *core.NodeInfo, result *b
 	if err != nil {
 		log.Errorw("add peer", "tag", outputHead, "error", err)
 		a.dummyNodes.Add(info)
-		return nil
+		return err
 	}
 
 	ipfsTimeout, cancelFunc := context.WithTimeout(ctx, time.Duration(a.cfg.Interval)*time.Second)
@@ -277,7 +277,7 @@ func (a *Accelerate) addPeer(ctx context.Context, info *core.NodeInfo, result *b
 		a.dummyNodes.Add(info)
 		log.Errorw("add peer", "tag", outputHead, "error", ipfsErr)
 
-		return nil
+		return err
 	}
 	ethTimeout, cancelFunc := context.WithTimeout(ctx, time.Duration(a.cfg.Interval)*time.Second)
 	//fmt.Println("connect eth:", info.Contract.Enode)
@@ -285,7 +285,7 @@ func (a *Accelerate) addPeer(ctx context.Context, info *core.NodeInfo, result *b
 	if err != nil {
 		a.dummyNodes.Add(info)
 		log.Errorw("add peer", "tag", outputHead, "error", err)
-		return nil
+		return err
 	}
 	cancelFunc()
 

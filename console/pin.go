@@ -25,3 +25,8 @@ func pinCmd() *cobra.Command {
 	}
 	return cmd
 }
+
+func pinHashCmd() *cobra.Command {
+	cmd := &cobra.Command{}
+	return cmd
+}

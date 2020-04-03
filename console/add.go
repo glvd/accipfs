@@ -10,7 +10,7 @@ func addCmd() *cobra.Command {
 		Short: "add a source to this node",
 		Long:  "add a source to this node for service some users by your self",
 		Run: func(cmd *cobra.Command, args []string) {
-
+			//add a file with rule to accipfs
 		},
 	}
 }

@@ -14,7 +14,7 @@ func accountCmd() *cobra.Command {
 		Short: "Account info",
 		Long:  "Account show the information with your account",
 	}
-	cmd.AddCommand(accountInfoCmd())
+	cmd.AddCommand(accountInfoCmd(), accountSaveCmd())
 	return cmd
 }
 
@@ -36,6 +36,17 @@ func accountInfoCmd() *cobra.Command {
 			}
 			fmt.Println("Account info:")
 			fmt.Println(string(indent))
+		},
+	}
+}
+
+func accountSaveCmd() *cobra.Command {
+	return &cobra.Command{
+		Use:   "save",
+		Short: "save account to file",
+		Long:  "save your account to a file for backup your account info",
+		Run: func(cmd *cobra.Command, args []string) {
+
 		},
 	}
 }

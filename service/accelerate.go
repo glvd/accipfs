@@ -115,11 +115,13 @@ func (a *Accelerate) Run() {
 		if err != nil {
 			a.nodes.Remove(info.Name)
 			a.dummyNodes.Add(info)
+			log.Errorw("ping failed", "account", info.Name, "error", err)
 			return true
 		}
 		url := info.Address().URL()
 		nodeInfos, err := client.Peers(url, info)
 		if err != nil {
+			log.Errorw("get peers failed", "account", info.Name, "error", err)
 			return true
 		}
 
@@ -129,6 +131,7 @@ func (a *Accelerate) Run() {
 			}
 			result := new(bool)
 			if err := a.addPeer(ctx, nodeInfo, result); err != nil {
+				log.Errorw("add peer failed", "account", info.Name, "error", err)
 				continue
 			}
 			if *result {

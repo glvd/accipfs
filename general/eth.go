@@ -1,5 +1,11 @@
 package general
 
+import (
+	"encoding/json"
+	"io"
+	"io/ioutil"
+)
+
 // Alloc ...
 type Alloc struct {
 	Balance string `json:"balance"`
@@ -25,6 +31,14 @@ type Genesis struct {
 }
 
 // LoadGenesis ...
-func LoadGenesis() {
-
+func LoadGenesis(closer io.ReadCloser) (*Genesis, error) {
+	bytes, e := ioutil.ReadAll(closer)
+	if e != nil {
+		return nil, e
+	}
+	var g Genesis
+	if err := json.Unmarshal(bytes, &g); err != nil {
+		return nil, err
+	}
+	return &g, nil
 }

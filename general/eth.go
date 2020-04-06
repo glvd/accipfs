@@ -6,6 +6,9 @@ import (
 	"io/ioutil"
 )
 
+//todo
+const _genesis = `json...`
+
 // Alloc ...
 type Alloc struct {
 	Balance string `json:"balance"`

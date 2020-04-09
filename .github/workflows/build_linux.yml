@@ -15,7 +15,7 @@ jobs:
     name: Build
     strategy:
       matrix:
-        go-version: [1.13.x]
+        go-version: [1.14.x]
         platform: [ubuntu-latest, macos-latest]
         arch: [386, amd64]
     runs-on: ${{ matrix.platform }}

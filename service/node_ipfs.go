@@ -6,6 +6,7 @@ import (
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/glvd/accipfs/contract/node"
 	"github.com/glvd/accipfs/core"
+	"github.com/goextension/log"
 	"github.com/ipfs/interface-go-ipfs-core/options"
 	"net"
 	"sort"
@@ -14,7 +15,6 @@ import (
 
 	"github.com/glvd/accipfs/config"
 	"github.com/glvd/accipfs/contract"
-	"github.com/goextension/log"
 	"github.com/ipfs/go-ipfs-http-client"
 	iface "github.com/ipfs/interface-go-ipfs-core"
 	"github.com/ipfs/interface-go-ipfs-core/path"
@@ -123,28 +123,23 @@ func (n *nodeClientIPFS) IsReady() bool {
 	}
 	api, e := httpapi.NewApi(ma)
 	if e != nil {
-		log.Errorw("new serviceNode ipfs", "error", e)
+		logE("new serviceNode ipfs", "error", e)
 		return false
 	}
 	n.api = api
 	return true
 }
 
-func (n *nodeClientIPFS) output(v ...interface{}) {
-	v = append([]interface{}{outputHead, "IPFS"}, v...)
-	fmt.Println(v...)
-}
-
 // Run ...
 func (n *nodeClientIPFS) Run() {
 	if n.lock.Load() {
-		n.output("service NodeClient is already running")
+		output("NodeClient is already running")
 		return
 	}
 	n.lock.Store(true)
 	defer n.lock.Store(false)
 	if !n.IsReady() {
-		n.output("waiting for ready")
+		output("waiting for ready")
 		return
 	}
 	// get self serviceNode info
@@ -152,28 +147,28 @@ func (n *nodeClientIPFS) Run() {
 	defer cancelFunc()
 	pid, e := n.ID(timeout)
 	if e != nil {
-		log.Errorw("run get id", "tag", outputHead, "error", e)
+		logE("run get id", "error", e)
 		return
 	}
 
 	nid := pid.ID
-	n.output("id", nid)
+	output("id", nid)
 	// get ipfs swarm nodes
 	publicNodes := make(map[string]bool)
 	timeout2, cancelFunc2 := context.WithTimeout(context.Background(), time.Duration(n.cfg.IPFS.Timeout)*time.Second)
 	defer cancelFunc2()
 	infos, e := n.SwarmPeers(timeout2)
 	if e != nil {
-		log.Errorw(outputHead, "tag", "run get peers", "error", e)
+		logE("run get peers", "error", e)
 		return
 	}
 	for _, info := range infos {
-		n.output("peers", info.ID().String(), "ip", info.Address())
+		output("peers", info.ID().String(), "ip", info.Address())
 		conn, err := manet.Dial(info.Address())
 		// p2p proxy serviceNode
 		if err != nil {
 			//TODO:
-			n.output("err", err.Error())
+			output("err", err.Error())
 			//ipfsAddr := "/ipfs/" + nodeID + "/p2p-circuit/ipfs/" + .ETHPeer
 			//peers = append(peers, ipfsAddr)
 		} else {
@@ -183,7 +178,7 @@ func (n *nodeClientIPFS) Run() {
 		}
 	}
 	//n.output("[当前IPFS总节点数]", len(peers)+len(publicNodes))
-	n.output("exists IPFS nodes:", len(publicNodes))
+	output("exists IPFS nodes:", len(publicNodes))
 	// get nodes info
 	//if len(peers) == 0 {
 	//	fmt.Println("<IPFS节点状态已是最新>")
@@ -259,7 +254,7 @@ func (n *nodeClientIPFS) Run() {
 		return
 	}
 
-	n.output("<IPFS同步完成>")
+	output("<IPFS同步完成>")
 	return
 }
 

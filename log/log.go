@@ -1,7 +1,6 @@
 package log
 
 import (
-	"github.com/goextension/log"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 )
@@ -54,7 +53,7 @@ func InitLog() {
 		panic(e)
 	}
 	_log = logger.Sugar()
-	log.Debugw("log init", "module", module, "level", Level, "output", Output)
+	_log.Debugw("log init", "module", module, "level", Level, "output", Output)
 }
 
 // Module ...

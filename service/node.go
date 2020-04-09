@@ -1,8 +1,8 @@
 package service
 
 import (
+	"bug.vlavr.com/godcong/dhcrypto"
 	"github.com/glvd/accipfs/config"
-	"github.com/glvd/accipfs/dhcrypto"
 	"go.uber.org/atomic"
 	"net"
 	"strings"

@@ -1,10 +1,9 @@
-package service
+package controller
 
 import (
 	"context"
 	"fmt"
 	"github.com/glvd/accipfs/config"
-	"github.com/glvd/accipfs/controller"
 	"github.com/goextension/io"
 	"os"
 	"os/exec"
@@ -19,11 +18,6 @@ type nodeServerETH struct {
 	genesis *config.Genesis
 	name    string
 	cmd     *exec.Cmd
-}
-
-// Node ...
-func (n *nodeServerETH) Node() (Node, error) {
-	return newNodeETH(n.cfg)
 }
 
 // Stop ...
@@ -87,7 +81,7 @@ func NewNodeServerETH(cfg *config.Config) NodeServer {
 }
 
 func newNodeServerETH(cfg *config.Config) *nodeServerETH {
-	path := filepath.Join(cfg.Path, "bin", controller.binName(cfg.ETH.Name))
+	path := filepath.Join(cfg.Path, "bin", binName(cfg.ETH.Name))
 	genesis, err := config.LoadGenesis(cfg)
 	if err != nil {
 		panic(err)

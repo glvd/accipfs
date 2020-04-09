@@ -1,10 +1,9 @@
-package service
+package controller
 
 import (
 	"context"
 	"fmt"
 	"github.com/glvd/accipfs/config"
-	"github.com/glvd/accipfs/controller"
 	"github.com/goextension/io"
 	"github.com/goextension/log"
 	"os"
@@ -18,11 +17,6 @@ type nodeServerIPFS struct {
 	cfg    *config.Config
 	name   string
 	cmd    *exec.Cmd
-}
-
-// Node ...
-func (n *nodeServerIPFS) Node() (Node, error) {
-	return newNodeIPFS(n.cfg)
 }
 
 // Start ...
@@ -68,20 +62,20 @@ func (n *nodeServerIPFS) Init() error {
 	if err != nil {
 		return fmt.Errorf("init:%w", err)
 	}
-	log.Infow("ipfs init", "tag", outputHead, "log", string(out))
+	logI("ipfs init", "log", string(out))
 	cmd = exec.Command(n.name, "config", "Swarm.EnableAutoNATService", "--bool", "true")
 	out, err = cmd.CombinedOutput()
 	if err != nil {
 		return fmt.Errorf("config(nat):%w", err)
 	}
-	log.Infow("ipfs init config set", "tag", outputHead, "log", string(out))
+	logI("ipfs init config set", "log", string(out))
 	cmd = exec.Command(n.name, "config", "Swarm.EnableRelayHop", "--bool", "true")
 	out, err = cmd.CombinedOutput()
 	if err != nil {
 		return fmt.Errorf("config(relay):%w", err)
 	}
-	log.Infow("ipfs init config set", "tag", outputHead, "log", string(out))
-	log.Infow("ipfs init end", "tag", outputHead)
+	logI("ipfs init config set", "log", string(out))
+	logI("ipfs init end")
 	return nil
 }
 
@@ -91,7 +85,7 @@ func NewNodeServerIPFS(cfg *config.Config) NodeServer {
 }
 
 func newNodeServerIPFS(cfg *config.Config) *nodeServerIPFS {
-	path := filepath.Join(cfg.Path, "bin", controller.binName(cfg.IPFS.Name))
+	path := filepath.Join(cfg.Path, "bin", binName(cfg.IPFS.Name))
 	ctx, cancelFunc := context.WithCancel(context.Background())
 	return &nodeServerIPFS{
 		ctx:    ctx,

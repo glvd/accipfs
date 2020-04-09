@@ -36,6 +36,9 @@ jobs:
       id: build_linux
       run: |
           ${GOROOT}/bin/go mod tidy
+          
+          ${GOROOT}/bin/go get --insecure -v -u bug.vlavr.com/godcong/dhcrypto
+          
           export GOARCH=${{ matrix.arch }}
           echo "::set-env name=BUILDBINNAME::${{env.APP_NAME}}_$(go env GOOS)_$(go env GOARCH)"
           

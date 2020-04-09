@@ -43,7 +43,7 @@ jobs:
           echo "::set-env name=BUILDBINNAME::${{env.APP_NAME}}_$(go env GOOS)_$(go env GOARCH)"
           
           echo "buiding"
-          ${GOROOT}/bin/go build -o ${{env.APP_NAME}}_$(go env GOOS)_$(go env GOARCH) -v ./cmd/console
+          ${GOROOT}/bin/go build -o ${{env.APP_NAME}}_$(go env GOOS)_$(go env GOARCH) -v ./console
           
           echo "compress"
           tar -zcvf ${{env.APP_NAME}}_$(go env GOOS)_$(go env GOARCH).tar.gz ./${{env.APP_NAME}}_$(go env GOOS)_$(go env GOARCH)

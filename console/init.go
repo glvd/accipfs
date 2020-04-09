@@ -13,6 +13,9 @@ func initCmd() *cobra.Command {
 		Use:   "init",
 		Short: "init run",
 		Long:  "init will create the config file with a default settings",
+		PreRun: func(cmd *cobra.Command, args []string) {
+
+		},
 		Run: func(cmd *cobra.Command, args []string) {
 			cfg := config.Default()
 			if err := cfg.Init(); err != nil {

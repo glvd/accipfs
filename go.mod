@@ -8,7 +8,7 @@ require (
 	github.com/dgraph-io/badger/v2 v2.0.3 // indirect
 	github.com/elastic/gosigar v0.10.5 // indirect
 	github.com/ethereum/go-ethereum v1.9.11
-	github.com/fatih/color v1.3.0
+	github.com/fatih/color v1.7.0
 	github.com/gocacher/badger-cache/v2 v2.0.1
 	github.com/gocacher/cacher v1.0.5
 	github.com/goextension/extmap v0.0.1
@@ -17,6 +17,8 @@ require (
 	github.com/goextension/tool v0.0.2
 	github.com/gorilla/mux v1.7.4
 	github.com/gorilla/rpc v1.2.0
+	github.com/ipfs/go-ipfs v0.4.23
+	github.com/ipfs/go-ipfs-cmds v0.1.0
 	github.com/ipfs/go-ipfs-http-client v0.0.5
 	github.com/ipfs/interface-go-ipfs-core v0.2.3
 	github.com/libp2p/go-libp2p-core v0.2.3

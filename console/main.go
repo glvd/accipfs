@@ -6,6 +6,7 @@ import (
 	"github.com/glvd/accipfs"
 	"github.com/glvd/accipfs/config"
 	"github.com/glvd/accipfs/general"
+	"github.com/glvd/accipfs/log"
 	"github.com/spf13/cobra"
 	"path/filepath"
 )
@@ -34,10 +35,10 @@ func main() {
 	rootCmd.AddCommand(initCmd(), daemonCmd(), idCmd(), nodeCmd(), versionCmd(), tagCmd(), pinCmd(), addCmd(), accountCmd())
 	rootCmd.PersistentFlags().StringVar(&accipfs.DefaultPath, "path", ".", "set work path")
 
-	rootCmd.PersistentFlags().StringVar(&accipfs.LogOutput, "log-output", "stderr", "set the output log name")
-	rootCmd.PersistentFlags().StringVar(&accipfs.LogLevel, "log-level", "info", "set the log level(info,debug,warn,error,dpanic,panic,fatal)")
+	rootCmd.PersistentFlags().StringVar(&log.Output, "log-output", "stderr", "set the output log name")
+	rootCmd.PersistentFlags().StringVar(&log.Level, "log-level", "info", "set the log level(info,debug,warn,error,dpanic,panic,fatal)")
 	rootCmd.PersistentPreRun = func(cmd *cobra.Command, args []string) {
-		accipfs.InitLog()
+		log.InitLog()
 	}
 	if err := rootCmd.Execute(); err != nil {
 		panic(err)

@@ -34,9 +34,8 @@ jobs:
       if: matrix.platform == 'windows-latest' && matrix.arch == 'amd64'
       id: build_windows_amd64
       run: |
+          go get --insecure -v bug.vlavr.com/godcong/dhcrypto
           go mod tidy
-
-          go get --insecure -v -u bug.vlavr.com/godcong/dhcrypto
 
           set GOARCH=${{ matrix.arch }}
           echo "::set-env name=BUILDBINNAME::accipfs_windows_amd64"

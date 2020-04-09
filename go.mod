@@ -3,11 +3,12 @@ module github.com/glvd/accipfs
 go 1.13
 
 require (
+	bug.vlavr.com/godcong/dhcrypto v0.0.0-20200401081226-8502904592a1
 	github.com/aws/aws-sdk-go v1.25.48
+	github.com/dgraph-io/badger/v2 v2.0.3 // indirect
 	github.com/elastic/gosigar v0.10.5 // indirect
 	github.com/ethereum/go-ethereum v1.9.11
 	github.com/fatih/color v1.3.0
-	github.com/gocacher/badger-cache v0.0.4 // indirect
 	github.com/gocacher/badger-cache/v2 v2.0.0
 	github.com/gocacher/cacher v1.0.5
 	github.com/goextension/extmap v0.0.1

@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/glvd/accipfs/config"
-	"github.com/glvd/accipfs/controller"
+	"github.com/glvd/accipfs/general"
 	"github.com/goextension/io"
 	"github.com/goextension/log"
 	"os"
@@ -91,7 +91,7 @@ func NewNodeServerIPFS(cfg *config.Config) NodeServer {
 }
 
 func newNodeServerIPFS(cfg *config.Config) *nodeServerIPFS {
-	path := filepath.Join(cfg.Path, "bin", binName(cfg.IPFS.Name))
+	path := filepath.Join(cfg.Path, "bin", general.BinName(cfg.IPFS.Name))
 	ctx, cancelFunc := context.WithCancel(context.Background())
 	return &nodeServerIPFS{
 		ctx:    ctx,

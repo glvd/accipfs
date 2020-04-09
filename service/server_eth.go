@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/glvd/accipfs/config"
-	"github.com/glvd/accipfs/controller"
+	"github.com/glvd/accipfs/general"
 	"github.com/goextension/io"
 	"os"
 	"os/exec"
@@ -87,7 +87,7 @@ func NewNodeServerETH(cfg *config.Config) NodeServer {
 }
 
 func newNodeServerETH(cfg *config.Config) *nodeServerETH {
-	path := filepath.Join(cfg.Path, "bin", binName(cfg.ETH.Name))
+	path := filepath.Join(cfg.Path, "bin", general.BinName(cfg.ETH.Name))
 	genesis, err := config.LoadGenesis(cfg)
 	if err != nil {
 		panic(err)

@@ -91,7 +91,7 @@ func NewNodeServerIPFS(cfg *config.Config) NodeServer {
 }
 
 func newNodeServerIPFS(cfg *config.Config) *nodeServerIPFS {
-	path := filepath.Join(cfg.Path, "bin", controller.binName(cfg.IPFS.Name))
+	path := filepath.Join(cfg.Path, "bin", binName(cfg.IPFS.Name))
 	ctx, cancelFunc := context.WithCancel(context.Background())
 	return &nodeServerIPFS{
 		ctx:    ctx,

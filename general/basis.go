@@ -1,9 +1,13 @@
 package general
 
 import (
+	"bufio"
 	"bytes"
+	"context"
+	"fmt"
 	"github.com/goextension/log"
 	"github.com/gorilla/rpc/v2/json2"
+	"io"
 	"net/http"
 	"os"
 	"strconv"
@@ -67,5 +71,28 @@ func RPCPost(url string, method string, input, output interface{}) error {
 	if err != nil {
 		return err
 	}
+	return nil
+}
+
+// PipeScreen ...
+func PipeScreen(ctx context.Context, module string, reader io.Reader) (e error) {
+	r := bufio.NewReader(reader)
+	var lines []byte
+END:
+	for {
+		select {
+		case <-ctx.Done():
+			return
+		default:
+			lines, _, e = r.ReadLine()
+			if e != nil || io.EOF == e {
+				break END
+			}
+			if strings.TrimSpace(string(lines)) != "" {
+				fmt.Printf("[%s]:%+v", module, string(lines))
+			}
+		}
+	}
+
 	return nil
 }

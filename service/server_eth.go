@@ -87,7 +87,7 @@ func NewNodeServerETH(cfg *config.Config) NodeServer {
 }
 
 func newNodeServerETH(cfg *config.Config) *nodeServerETH {
-	path := filepath.Join(cfg.Path, "bin", controller.binName(cfg.ETH.Name))
+	path := filepath.Join(cfg.Path, "bin", binName(cfg.ETH.Name))
 	genesis, err := config.LoadGenesis(cfg)
 	if err != nil {
 		panic(err)

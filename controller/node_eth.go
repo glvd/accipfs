@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/glvd/accipfs/config"
+	"github.com/glvd/accipfs/general"
 	"github.com/goextension/io"
 	"os"
 	"os/exec"
@@ -51,7 +52,7 @@ func (n *nodeServerETH) Start() error {
 		return err2
 	}
 	m := io.MultiReader(pipe, stdoutPipe)
-	go screenOutput(n.ctx, m)
+	go general.PipeScreen(n.ctx, module, m)
 	err := n.cmd.Start()
 	if err != nil {
 		return err
@@ -75,13 +76,8 @@ func (n *nodeServerETH) Init() error {
 	return nil
 }
 
-// NewNodeServerETH ...
-func NewNodeServerETH(cfg *config.Config) NodeServer {
-	return newNodeServerETH(cfg)
-}
-
 func newNodeServerETH(cfg *config.Config) *nodeServerETH {
-	path := filepath.Join(cfg.Path, "bin", binName(cfg.ETH.Name))
+	path := filepath.Join(cfg.Path, "bin", general.BinName(cfg.ETH.Name))
 	genesis, err := config.LoadGenesis(cfg)
 	if err != nil {
 		panic(err)

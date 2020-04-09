@@ -4,8 +4,8 @@ import (
 	"context"
 	"fmt"
 	"github.com/glvd/accipfs/config"
+	"github.com/glvd/accipfs/general"
 	"github.com/goextension/io"
-	"github.com/goextension/log"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -32,7 +32,7 @@ func (n *nodeServerIPFS) Start() error {
 		return err2
 	}
 	m := io.MultiReader(pipe, stdoutPipe)
-	go screenOutput(n.ctx, m)
+	go general.PipeScreen(n.ctx, module, m)
 	err := n.cmd.Start()
 	if err != nil {
 		return err
@@ -79,13 +79,8 @@ func (n *nodeServerIPFS) Init() error {
 	return nil
 }
 
-// NewNodeServerIPFS ...
-func NewNodeServerIPFS(cfg *config.Config) NodeServer {
-	return newNodeServerIPFS(cfg)
-}
-
 func newNodeServerIPFS(cfg *config.Config) *nodeServerIPFS {
-	path := filepath.Join(cfg.Path, "bin", binName(cfg.IPFS.Name))
+	path := filepath.Join(cfg.Path, "bin", general.BinName(cfg.IPFS.Name))
 	ctx, cancelFunc := context.WithCancel(context.Background())
 	return &nodeServerIPFS{
 		ctx:    ctx,

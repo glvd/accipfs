@@ -37,7 +37,7 @@ jobs:
       run: |
           ${GOROOT}/bin/go mod tidy
           export GOARCH=${{ matrix.arch }}
-          echo "::set-env name=BINNAME::${{env.APP_NAME}}_$(go env GOOS)_$(go env GOARCH)"
+          echo "::set-env name=BUILDBINNAME::${{env.APP_NAME}}_$(go env GOOS)_$(go env GOARCH)"
           
           echo "buiding"
           ${GOROOT}/bin/go build -o ${{env.APP_NAME}}_$(go env GOOS)_$(go env GOARCH) -v ./cmd/console
@@ -49,8 +49,8 @@ jobs:
       uses: actions/upload-artifact@master
       if: (matrix.platform == 'ubuntu-latest' || matrix.platform == 'macos-latest') && env.UPLOAD_BIN_FILE
       with:
-        name: ${{ env.FATENAME }}.tar.gz
-        path: ${{ env.BINNAME }}.tar.gz     
+        name: ${{ env.BUILDBINNAME }}.tar.gz
+        path: ${{ env.BUILDBINNAME }}.tar.gz     
 
     - name: Create Release
       id: create_release_linux
@@ -59,7 +59,7 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # This token is provided by Actions, you do not need to create your own token
       with:
-        artifacts: "${{ env.BINNAME }}.tar.gz"
+        artifacts: "${{ env.BUILDBINNAME }}.tar.gz"
         allowUpdates: true 
         commit: master 
         tag: auto_build

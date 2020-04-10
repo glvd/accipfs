@@ -78,7 +78,7 @@ func TestNewServer(t *testing.T) {
 	//go server.Start()
 	url := "http://47.101.169.94:14009/rpc"
 
-	m1, e := json2.EncodeClientRequest("Accelerate.Ping", &Empty{})
+	m1, e := json2.EncodeClientRequest("BustLinker.Ping", &Empty{})
 	if e != nil {
 		return
 	}
@@ -91,7 +91,7 @@ func TestNewServer(t *testing.T) {
 		return
 	}
 	t.Log(string(readAll))
-	message, err := json2.EncodeClientRequest("Accelerate.ID", &Empty{})
+	message, err := json2.EncodeClientRequest("BustLinker.ID", &Empty{})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -110,7 +110,7 @@ func TestNewServer(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	message2, err := json2.EncodeClientRequest("Accelerate.Connect", reply)
+	message2, err := json2.EncodeClientRequest("BustLinker.Connect", reply)
 	if err != nil {
 		t.Fatal(err)
 	}

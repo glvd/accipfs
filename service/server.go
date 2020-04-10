@@ -26,7 +26,7 @@ type NodeServer interface {
 // Server ...
 type Server struct {
 	cfg        *config.Config
-	accelerate *Accelerate
+	accelerate *BustLinker
 	rpcServer  *rpc.Server
 	httpServer *http.Server
 	route      *mux.Router
@@ -38,7 +38,7 @@ func NewRPCServer(cfg *config.Config) (*Server, error) {
 	rpcServer.RegisterCodec(json2.NewCodec(), "application/json")
 	rpcServer.RegisterCodec(json2.NewCodec(), "application/json;charset=UTF-8")
 
-	acc, err := NewAccelerateServer(cfg)
+	acc, err := NewBustLinker(cfg)
 	if err != nil {
 		return nil, err
 	}

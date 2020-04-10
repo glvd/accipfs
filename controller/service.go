@@ -66,9 +66,10 @@ func (c *Controller) Run() {
 
 // StopRun ...
 func (c *Controller) StopRun() (e error) {
-	for _, service := range c.services {
+	for i, service := range c.services {
 		if err := service.Stop(); err != nil {
 			//stop all and collect exceptions
+			logE("stop error", "index", i, "error", err)
 			e = err
 		}
 	}

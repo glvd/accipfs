@@ -26,7 +26,7 @@ type NodeServer interface {
 // Server ...
 type Server struct {
 	cfg        *config.Config
-	accelerate *BustLinker
+	linker     *BustLinker
 	rpcServer  *rpc.Server
 	httpServer *http.Server
 	route      *mux.Router
@@ -48,10 +48,10 @@ func NewRPCServer(cfg *config.Config) (*Server, error) {
 		return nil, err
 	}
 	return &Server{
-		cfg:        cfg,
-		rpcServer:  rpcServer,
-		accelerate: acc,
-		route:      mux.NewRouter(),
+		cfg:       cfg,
+		rpcServer: rpcServer,
+		linker:    acc,
+		route:     mux.NewRouter(),
 	}, nil
 }
 
@@ -62,18 +62,18 @@ func (s *Server) Start() error {
 	port := fmt.Sprintf(":%d", s.cfg.Port)
 	s.httpServer = &http.Server{Addr: port, Handler: s.route}
 
-	go s.accelerate.Start()
+	go s.linker.Start()
 	wg := &sync.WaitGroup{}
 	wg.Add(1)
 	go func() {
-		if s.accelerate.ipfsClient.IsReady() {
+		if s.linker.ipfsClient.IsReady() {
 			wg.Done()
 			return
 		}
 	}()
 	wg.Add(1)
 	go func() {
-		if s.accelerate.ethClient.IsReady() {
+		if s.linker.ethClient.IsReady() {
 			wg.Done()
 			return
 		}
@@ -82,13 +82,13 @@ func (s *Server) Start() error {
 
 	var idError error
 	for i := 0; i < 5; i++ {
-		id, err := s.accelerate.localID()
+		id, err := s.linker.localID()
 		idError = err
 		if err != nil {
 			time.Sleep(3 * time.Second)
 			continue
 		}
-		s.accelerate.id = id
+		s.linker.id = id
 		break
 	}
 
@@ -105,7 +105,7 @@ func (s *Server) Stop() error {
 	if err := s.httpServer.Shutdown(context.Background()); err != nil {
 		return err
 	}
-	s.accelerate.Stop()
+	s.linker.Stop()
 	return nil
 }
 

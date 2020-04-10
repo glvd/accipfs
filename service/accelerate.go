@@ -139,16 +139,9 @@ func (l *BustLinker) Run() {
 func (l *BustLinker) Stop() {
 	ctx := l.cron.Stop()
 	<-ctx.Done()
-	if err := l.ethServer.Stop(); err != nil {
-		log.Errorw("eth stop error", "tag", outputHead, "error", err)
+	if err := l.c.StopRun(); err != nil {
 		return
 	}
-
-	if err := l.ipfsServer.Stop(); err != nil {
-		log.Errorw("ipfs stop error", "tag", outputHead, "error", err)
-		return
-	}
-
 }
 
 // Ping ...

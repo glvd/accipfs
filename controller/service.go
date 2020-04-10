@@ -2,6 +2,7 @@ package controller
 
 import (
 	"github.com/glvd/accipfs/config"
+	"github.com/glvd/accipfs/core"
 	"sync"
 )
 
@@ -15,23 +16,16 @@ const (
 	IndexIPFS
 )
 
-// Service ...
-type Service interface {
-	Start() error
-	Stop() error
-	Init() error
-}
-
 // Controller ...
 type Controller struct {
 	wg       *sync.WaitGroup
-	services map[ServiceIndex]Service
+	services map[ServiceIndex]core.Service
 }
 
 // New ...
 func New(cfg *config.Config) *Controller {
 	c := &Controller{
-		services: map[ServiceIndex]Service{},
+		services: map[ServiceIndex]core.Service{},
 	}
 	c.wg = &sync.WaitGroup{}
 	c.services[IndexETH] = newNodeBinETH(cfg)

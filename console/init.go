@@ -3,7 +3,7 @@ package main
 import (
 	"github.com/glvd/accipfs/account"
 	"github.com/glvd/accipfs/config"
-	"github.com/glvd/accipfs/service"
+	"github.com/glvd/accipfs/controller"
 	"github.com/spf13/cobra"
 )
 
@@ -21,12 +21,8 @@ func initCmd() *cobra.Command {
 			if err := cfg.Init(); err != nil {
 				panic(err)
 			}
-			ipfs := service.NewNodeServerIPFS(cfg)
-			if err := ipfs.Init(); err != nil {
-				panic(err)
-			}
-			eth := service.NewNodeServerETH(cfg)
-			if err := eth.Init(); err != nil {
+			c := controller.New(cfg)
+			if err := c.Init(); err != nil {
 				panic(err)
 			}
 			acc, err := account.NewAccount(cfg)

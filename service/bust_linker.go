@@ -129,7 +129,6 @@ func (l *BustLinker) Run() {
 			}
 
 		}
-		//time.Sleep(30 * time.Second)
 		return true
 	})
 	fmt.Println(outputHead, "BustLinker", "syncing done")

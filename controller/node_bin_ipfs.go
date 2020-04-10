@@ -11,7 +11,7 @@ import (
 	"path/filepath"
 )
 
-type nodeServerIPFS struct {
+type nodeBinIPFS struct {
 	ctx    context.Context
 	cancel context.CancelFunc
 	cfg    *config.Config
@@ -20,7 +20,7 @@ type nodeServerIPFS struct {
 }
 
 // Start ...
-func (n *nodeServerIPFS) Start() error {
+func (n *nodeBinIPFS) Start() error {
 	n.cmd = exec.CommandContext(n.ctx, n.name, "daemon", "--routing", "none")
 	fmt.Println("ipfs cmd: ", n.cmd.Args)
 	pipe, err2 := n.cmd.StderrPipe()
@@ -42,7 +42,7 @@ func (n *nodeServerIPFS) Start() error {
 }
 
 // Stop ...
-func (n *nodeServerIPFS) Stop() error {
+func (n *nodeBinIPFS) Stop() error {
 	if n.cmd != nil {
 		n.cancel()
 		n.cmd = nil
@@ -51,7 +51,7 @@ func (n *nodeServerIPFS) Stop() error {
 }
 
 // Init ...
-func (n *nodeServerIPFS) Init() error {
+func (n *nodeBinIPFS) Init() error {
 	_, err := os.Stat(config.DataDirIPFS())
 	if err != nil && os.IsNotExist(err) {
 		_ = os.MkdirAll(config.DataDirIPFS(), 0755)
@@ -79,10 +79,10 @@ func (n *nodeServerIPFS) Init() error {
 	return nil
 }
 
-func newNodeServerIPFS(cfg *config.Config) *nodeServerIPFS {
+func newNodeBinIPFS(cfg *config.Config) *nodeBinIPFS {
 	path := filepath.Join(cfg.Path, "bin", general.BinName(cfg.IPFS.Name))
 	ctx, cancelFunc := context.WithCancel(context.Background())
-	return &nodeServerIPFS{
+	return &nodeBinIPFS{
 		ctx:    ctx,
 		cancel: cancelFunc,
 		cfg:    cfg,

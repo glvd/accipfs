@@ -12,7 +12,7 @@ import (
 	"strconv"
 )
 
-type nodeServerETH struct {
+type nodeBinETH struct {
 	ctx     context.Context
 	cancel  context.CancelFunc
 	cfg     *config.Config
@@ -22,7 +22,7 @@ type nodeServerETH struct {
 }
 
 // Stop ...
-func (n *nodeServerETH) Stop() error {
+func (n *nodeBinETH) Stop() error {
 	if n.cmd != nil {
 		n.cancel()
 		n.cmd = nil
@@ -31,11 +31,11 @@ func (n *nodeServerETH) Stop() error {
 }
 
 // Start ...
-func (n *nodeServerETH) Start() error {
+func (n *nodeBinETH) Start() error {
 	n.cmd = exec.CommandContext(n.ctx, n.name,
 		"--datadir", config.DataDirETH(),
 		"--networkid", strconv.FormatInt(n.genesis.Config.ChainID, 10),
-		"--allow-insecure-unlock",
+		//"--allow-insecure-unlock",
 		"--rpccorsdomain", "*", "--rpc", "--rpcport", "8545", "--rpcaddr", "127.0.0.1",
 		"--rpcapi", "admin,eth,net,web3,personal,miner",
 		//"--unlock", "945d35cd4a6549213e8d37feb5d708ec98906902",
@@ -62,7 +62,7 @@ func (n *nodeServerETH) Start() error {
 }
 
 // Init ...
-func (n *nodeServerETH) Init() error {
+func (n *nodeBinETH) Init() error {
 	_, err := os.Stat(config.DataDirETH())
 	if err != nil && os.IsNotExist(err) {
 		_ = os.MkdirAll(config.DataDirETH(), 0755)
@@ -76,14 +76,14 @@ func (n *nodeServerETH) Init() error {
 	return nil
 }
 
-func newNodeServerETH(cfg *config.Config) *nodeServerETH {
+func newNodeBinETH(cfg *config.Config) *nodeBinETH {
 	path := filepath.Join(cfg.Path, "bin", general.BinName(cfg.ETH.Name))
 	genesis, err := config.LoadGenesis(cfg)
 	if err != nil {
 		panic(err)
 	}
 	ctx, cancelFunc := context.WithCancel(context.Background())
-	return &nodeServerETH{
+	return &nodeBinETH{
 		ctx:     ctx,
 		cancel:  cancelFunc,
 		cfg:     cfg,

@@ -61,4 +61,16 @@ func (c *Controller) Run() {
 			}
 		}()
 	}
+	c.wg.Wait()
+}
+
+// StopRun ...
+func (c *Controller) StopRun() (e error) {
+	for _, service := range c.services {
+		if err := service.Stop(); err != nil {
+			//stop all and collect exceptions
+			e = err
+		}
+	}
+	return
 }

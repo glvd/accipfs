@@ -70,21 +70,16 @@ type ETHProtocol struct {
 	Eth ETHProtocolInfo `json:"eth"`
 }
 
-func (n *nodeETH) output(v ...interface{}) {
-	v = append([]interface{}{outputHead, "ETH"}, v...)
-	fmt.Println(v...)
-}
-
 // Run ...
 func (n *nodeETH) Run() {
 	if n.lock.Load() {
-		n.output("service NodeClient is already running")
+		output("service NodeClient is already running")
 		return
 	}
 	n.lock.Store(true)
 	defer n.lock.Store(false)
 	if !n.IsReady() {
-		n.output("waiting for ready")
+		output("waiting for ready")
 		return
 	}
 	ctx := context.TODO()
@@ -109,9 +104,9 @@ func (n *nodeETH) Run() {
 	var activePeers []string
 	peers, err := n.AllPeers(ctx)
 	if err != nil {
-		n.output("get active eth node failed", err.Error())
+		output("get active eth node failed", err.Error())
 	} else {
-		n.output("get active eth nodes", len(peers))
+		output("get active eth nodes", len(peers))
 	}
 	for _, peer := range peers {
 		jsStr, _ := json.Marshal(peer.Protocols)
@@ -135,20 +130,20 @@ func (n *nodeETH) Run() {
 		o := &bind.CallOpts{Pending: true}
 		nodes, e := node.GetEthNodes(o)
 		if e != nil {
-			n.output("get contract node failed", e.Error())
+			output("get contract node failed", e.Error())
 			return e
 		}
-		n.output("get contract nodes", len(nodes))
+		output("get contract nodes", len(nodes))
 
 		nodes = decodeNodes(n.cfg, nodes)
 		//fmt.Println("[cPeers]", cPeers)
 		// get decoded contract signer nodes
 		masterNodes, e := node.GetSignerNodes(o)
 		if e != nil {
-			n.output("get contract node failed", e.Error())
+			output("get contract node failed", e.Error())
 			return e
 		}
-		n.output("get contract nodes", len(masterNodes))
+		output("get contract nodes", len(masterNodes))
 
 		masterNodes = decodeNodes(n.cfg, masterNodes)
 		// filter public network accessible nodes
@@ -223,7 +218,7 @@ func (n *nodeETH) Run() {
 		return
 	}
 
-	n.output("sync eth node complete")
+	output("sync eth node complete")
 	return
 }
 

@@ -7,7 +7,9 @@ const (
 	// NodeUndefined ...
 	NodeUndefined NodeType = -1
 	// NodeAccount ...
-	NodeAccount NodeType = iota
+	NodeAccount NodeType = 0x01
+	// NodeAccelerate ...
+	NodeAccelerate NodeType = 0x02
 )
 
 // NodeInfo ...
@@ -15,7 +17,7 @@ type NodeInfo struct {
 	Name       string
 	Schema     string
 	RemoteAddr string
-	NodeType   string
+	NodeType   NodeType
 	Port       int
 	Contract   ContractNode
 	DataStore  DataStoreNode

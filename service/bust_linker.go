@@ -33,6 +33,8 @@ type BustLinker struct {
 	lock       *atomic.Bool
 	self       *account.Account
 	cfg        *config.Config
+	eth        *nodeETH
+	ipfs       *nodeIPFS
 	c          *controller.Controller
 	cron       *cron.Cron
 }
@@ -52,8 +54,8 @@ func NewBustLinker(cfg *config.Config) (linker *BustLinker, err error) {
 	}
 	//linker.ethServer = newNodeServerETH(cfg)
 	//linker.ipfsServer = newNodeServerIPFS(cfg)
-	//linker.ethClient, _ = newNodeETH(cfg)
-	//linker.ipfsClient, _ = newNodeIPFS(cfg)
+	linker.eth, _ = newNodeETH(cfg)
+	linker.ipfs, _ = newNodeIPFS(cfg)
 	linker.cache = cache.New(cfg)
 	linker.tasks = task.New()
 	linker.cron = cron.New(cron.WithSeconds())
@@ -75,7 +77,7 @@ func (l *BustLinker) Start() {
 		panic(err)
 	}
 	output("BustLinker", "run id", jobAcc)
-	l.cron.Run()
+	go l.cron.Run()
 }
 
 // Run ...
@@ -131,7 +133,27 @@ func (l *BustLinker) Run() {
 		}
 		return true
 	})
-	fmt.Println(outputHead, "BustLinker", "syncing done")
+	output("BustLinker", "syncing done")
+}
+
+// WaitingForReady ...
+func (l *BustLinker) WaitingForReady() {
+	wg := &sync.WaitGroup{}
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		if l.eth.IsReady() {
+			return
+		}
+	}()
+
+	go func() {
+		defer wg.Done()
+		if l.ipfs.IsReady() {
+			return
+		}
+	}()
+	wg.Wait()
 }
 
 // Stop ...
@@ -156,12 +178,12 @@ func (l *BustLinker) localID() (*core.NodeInfo, error) {
 	info.RemoteAddr = "127.0.0.1"
 	info.Port = l.cfg.Port
 	log.Debugw("print remote ip", "tag", outputHead, "ip", info.RemoteAddr, "port", info.Port)
-	ds, err := l.ipfsClient.ID(context.Background())
+	ds, err := l.ipfs.ID(context.Background())
 	if err != nil {
 		return nil, fmt.Errorf("datastore error:%w", err)
 	}
 	info.DataStore = *ds
-	c, err := l.ethClient.NodeInfo(context.Background())
+	c, err := l.eth.NodeInfo(context.Background())
 	if err != nil {
 		return nil, fmt.Errorf("nodeinfo error:%w", err)
 	}
@@ -242,7 +264,7 @@ func (l *BustLinker) addPeer(ctx context.Context, info *core.NodeInfo, result *b
 	ipfsTimeout, cancelFunc := context.WithTimeout(ctx, time.Duration(l.cfg.Interval)*time.Second)
 	var ipfsErr error
 	for _, addr := range info.DataStore.Addresses {
-		ipfsErr = l.ipfsClient.SwarmConnect(ipfsTimeout, addr)
+		ipfsErr = l.ipfs.SwarmConnect(ipfsTimeout, addr)
 		if ipfsErr == nil {
 			break
 		}
@@ -256,7 +278,7 @@ func (l *BustLinker) addPeer(ctx context.Context, info *core.NodeInfo, result *b
 	}
 	ethTimeout, cancelFunc := context.WithTimeout(ctx, time.Duration(l.cfg.Interval)*time.Second)
 	//fmt.Println("connect eth:", info.Contract.Enode)
-	err = l.ethClient.AddPeer(ethTimeout, info.Contract.Enode)
+	err = l.eth.AddPeer(ethTimeout, info.Contract.Enode)
 	if err != nil {
 		l.dummyNodes.Add(info)
 		log.Errorw("add peer", "tag", outputHead, "error", err)
@@ -284,7 +306,7 @@ func (l *BustLinker) Peers(r *http.Request, _ *core.Empty, result *[]*core.NodeI
 }
 
 func (l *BustLinker) pins(ctx context.Context, result *[]string) error {
-	pins, e := l.ipfsClient.PinLS(ctx)
+	pins, e := l.ipfs.PinLS(ctx)
 	if e != nil {
 		return e
 	}
@@ -326,7 +348,7 @@ func (l *BustLinker) PinVideo(r *http.Request, no *string, result *bool) error {
 			resultErr <- err
 			return
 		}
-		e := l.ipfsClient.PinAdd(ctx, v.PosterHash)
+		e := l.ipfs.PinAdd(ctx, v.PosterHash)
 		if e != nil {
 			cancelFunc()
 			resultErr <- e
@@ -342,7 +364,7 @@ func (l *BustLinker) PinVideo(r *http.Request, no *string, result *bool) error {
 			resultErr <- err
 			return
 		}
-		e := l.ipfsClient.PinAdd(ctx, v.ThumbHash)
+		e := l.ipfs.PinAdd(ctx, v.ThumbHash)
 		if e != nil {
 			cancelFunc()
 			resultErr <- e
@@ -359,7 +381,7 @@ func (l *BustLinker) PinVideo(r *http.Request, no *string, result *bool) error {
 			resultErr <- err
 			return
 		}
-		e := l.ipfsClient.PinAdd(ctx, v.SourceHash)
+		e := l.ipfs.PinAdd(ctx, v.SourceHash)
 		if e != nil {
 			cancelFunc()
 			resultErr <- e
@@ -376,7 +398,7 @@ func (l *BustLinker) PinVideo(r *http.Request, no *string, result *bool) error {
 			resultErr <- err
 			return
 		}
-		e := l.ipfsClient.PinAdd(ctx, v.M3U8Hash)
+		e := l.ipfs.PinAdd(ctx, v.M3U8Hash)
 		if e != nil {
 			cancelFunc()
 			resultErr <- e
@@ -394,7 +416,7 @@ func (l *BustLinker) PinVideo(r *http.Request, no *string, result *bool) error {
 }
 
 func (l *BustLinker) tagInfo(tag string, info *string) error {
-	dTag, e := l.ethClient.DTag()
+	dTag, e := l.eth.DTag()
 	if e != nil {
 		return e
 	}
@@ -442,7 +464,7 @@ func (l *BustLinker) nodeConnect(ctx context.Context, hash string) error {
 		}
 		var resultErr error
 		for _, addr := range nodeInfo.DataStore.Addresses {
-			resultErr = l.ipfsClient.SwarmConnect(ctx, addr)
+			resultErr = l.ipfs.SwarmConnect(ctx, addr)
 			if resultErr == nil {
 				break
 			}

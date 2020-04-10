@@ -26,7 +26,7 @@ import (
 const ipfsPath = ".ipfs"
 const ipfsAPI = "api"
 
-type nodeClientIPFS struct {
+type nodeIPFS struct {
 	*serviceNode
 	cfg *config.Config
 	api *httpapi.HttpApi
@@ -46,8 +46,8 @@ func NewNodeIPFS(cfg *config.Config) (Node, error) {
 	return newNodeIPFS(cfg)
 }
 
-func newNodeIPFS(cfg *config.Config) (*nodeClientIPFS, error) {
-	node := &nodeClientIPFS{
+func newNodeIPFS(cfg *config.Config) (*nodeIPFS, error) {
+	node := &nodeIPFS{
 		cfg:         cfg,
 		serviceNode: nodeInstance(),
 	}
@@ -58,7 +58,7 @@ func newNodeIPFS(cfg *config.Config) (*nodeClientIPFS, error) {
 }
 
 // SwarmConnect ...
-func (n *nodeClientIPFS) SwarmConnect(ctx context.Context, addr string) (e error) {
+func (n *nodeIPFS) SwarmConnect(ctx context.Context, addr string) (e error) {
 	ma, e := multiaddr.NewMultiaddr(addr)
 	if e != nil {
 		return e
@@ -74,7 +74,7 @@ func (n *nodeClientIPFS) SwarmConnect(ctx context.Context, addr string) (e error
 	return nil
 }
 
-func (n *nodeClientIPFS) connect() (e error) {
+func (n *nodeIPFS) connect() (e error) {
 	ma, err := multiaddr.NewMultiaddr(config.IPFSAddr())
 	if err != nil {
 		return err
@@ -84,12 +84,12 @@ func (n *nodeClientIPFS) connect() (e error) {
 }
 
 // SwarmPeers ...
-func (n *nodeClientIPFS) SwarmPeers(ctx context.Context) ([]iface.ConnectionInfo, error) {
+func (n *nodeIPFS) SwarmPeers(ctx context.Context) ([]iface.ConnectionInfo, error) {
 	return n.api.Swarm().Peers(ctx)
 }
 
 // ID get self serviceNode info
-func (n *nodeClientIPFS) ID(ctx context.Context) (pid *core.DataStoreNode, e error) {
+func (n *nodeIPFS) ID(ctx context.Context) (pid *core.DataStoreNode, e error) {
 	pid = &core.DataStoreNode{}
 	e = n.api.Request("id").Exec(ctx, pid)
 	if e != nil {
@@ -99,24 +99,24 @@ func (n *nodeClientIPFS) ID(ctx context.Context) (pid *core.DataStoreNode, e err
 }
 
 // PinAdd ...
-func (n *nodeClientIPFS) PinAdd(ctx context.Context, hash string) (e error) {
+func (n *nodeIPFS) PinAdd(ctx context.Context, hash string) (e error) {
 	p := path.New(hash)
 	return n.api.Pin().Add(ctx, p, options.Pin.Recursive(true))
 }
 
 // PinLS ...
-func (n *nodeClientIPFS) PinLS(ctx context.Context) (pins []iface.Pin, e error) {
+func (n *nodeIPFS) PinLS(ctx context.Context) (pins []iface.Pin, e error) {
 	return n.api.Pin().Ls(ctx, options.Pin.Type.Recursive())
 }
 
 // PinRm ...
-func (n *nodeClientIPFS) PinRm(ctx context.Context, hash string) (e error) {
+func (n *nodeIPFS) PinRm(ctx context.Context, hash string) (e error) {
 	p := path.New(hash)
 	return n.api.Pin().Rm(ctx, p)
 }
 
 // IsReady ...
-func (n *nodeClientIPFS) IsReady() bool {
+func (n *nodeIPFS) IsReady() bool {
 	ma, err := multiaddr.NewMultiaddr(config.IPFSAddr())
 	if err != nil {
 		return false
@@ -131,7 +131,7 @@ func (n *nodeClientIPFS) IsReady() bool {
 }
 
 // Run ...
-func (n *nodeClientIPFS) Run() {
+func (n *nodeIPFS) Run() {
 	if n.lock.Load() {
 		output("NodeClient is already running")
 		return

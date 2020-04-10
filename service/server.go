@@ -11,7 +11,6 @@ import (
 	"io"
 	"net/http"
 	"strings"
-	"sync"
 	"time"
 )
 
@@ -63,22 +62,8 @@ func (s *Server) Start() error {
 	s.httpServer = &http.Server{Addr: port, Handler: s.route}
 
 	go s.linker.Start()
-	wg := &sync.WaitGroup{}
-	wg.Add(1)
-	go func() {
-		if s.linker.ipfsClient.IsReady() {
-			wg.Done()
-			return
-		}
-	}()
-	wg.Add(1)
-	go func() {
-		if s.linker.ethClient.IsReady() {
-			wg.Done()
-			return
-		}
-	}()
-	wg.Wait()
+
+	s.linker.WaitingForReady()
 
 	var idError error
 	for i := 0; i < 5; i++ {

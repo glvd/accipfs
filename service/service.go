@@ -20,9 +20,9 @@ type Service struct {
 	cron       *cron.Cron
 	serveMutex sync.RWMutex
 	ipfsServer NodeServer
-	//ipfsNode   Node
+	//ipfs   Node
 	ethServer NodeServer
-	//ethNode    Node
+	//eth    Node
 	nodes map[string]bool
 }
 

@@ -17,13 +17,15 @@ require (
 	github.com/goextension/tool v0.0.2
 	github.com/gorilla/mux v1.7.4
 	github.com/gorilla/rpc v1.2.0
-	github.com/ipfs/go-ipfs v0.4.23
-	github.com/ipfs/go-ipfs-cmds v0.1.0
+	github.com/ipfs/bbloom v0.0.4 // indirect
+	github.com/ipfs/go-cid v0.0.4 // indirect
 	github.com/ipfs/go-ipfs-http-client v0.0.5
 	github.com/ipfs/interface-go-ipfs-core v0.2.3
+	github.com/libp2p/go-flow-metrics v0.0.3 // indirect
 	github.com/libp2p/go-libp2p-core v0.2.3
 	github.com/multiformats/go-multiaddr v0.1.1
 	github.com/multiformats/go-multiaddr-net v0.1.0
+	github.com/prometheus/tsdb v0.7.1 // indirect
 	github.com/robfig/cron/v3 v3.0.1
 	github.com/spf13/cobra v0.0.5
 	github.com/spf13/viper v1.3.2

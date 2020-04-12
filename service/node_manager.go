@@ -15,3 +15,8 @@ func (m *nodeManager) Add(info *core.NodeInfo) {
 func (m *nodeManager) Get(name string) *core.NodeInfo {
 	return nil
 }
+
+// Filter ...
+func (m *nodeManager) Filter() *core.NodeInfo {
+	return nil
+}

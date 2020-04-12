@@ -17,6 +17,6 @@ func (m *nodeManager) Get(name string) *core.NodeInfo {
 }
 
 // Filter ...
-func (m *nodeManager) Filter() *core.NodeInfo {
+func (m *nodeManager) Filter(rule string) *core.NodeInfo {
 	return nil
 }

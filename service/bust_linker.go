@@ -99,29 +99,29 @@ func (l *BustLinker) Run() {
 		})
 
 		url := fmt.Sprintf("http://%s:%d", node.NodeAddress.Address, node.NodeAddress.Port)
-		nodeInfos, err := client.Peers(url, &node.NodeInfo)
+		remoteNodes, err := client.Peers(url, node)
 		if err != nil {
 			logE("get peers failed", "account", node.Name, "error", err)
 			return true
 		}
 
-		for _, nodeInfo := range nodeInfos {
+		for _, rnode := range remoteNodes {
 			if l.nodes.Length() > l.cfg.Limit {
 				return false
 			}
 			result := new(bool)
-			if err := l.addPeer(ctx, node, result); err != nil {
-				logE("add peer failed", "account", node.Name, "error", err)
+			if err := l.addPeer(ctx, rnode, result); err != nil {
+				logE("add peer failed", "account", rnode.Name, "error", err)
 				continue
 			}
 			if *result {
-				pins, err := client.Pins(node.NodeAddress)
+				pins, err := client.Pins(rnode.NodeAddress)
 				if err != nil {
 					logE("get pin list", "error", err)
 					continue
 				}
 				for _, p := range pins {
-					err := l.cache.AddOrUpdate(p, nodeInfo)
+					err := l.cache.AddOrUpdate(p, &rnode.NodeInfo)
 					if err != nil {
 						logE("cache add or update", "error", err)
 						continue

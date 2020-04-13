@@ -10,8 +10,8 @@ import (
 )
 
 // ID ...
-func ID(url string) (*core.NodeInfo, error) {
-	reply := new(core.NodeInfo)
+func ID(url string) (*core.Node, error) {
+	reply := new(core.Node)
 	if err := general.RPCPost(url, "Accelerate.ID", core.DummyEmpty(), reply); err != nil {
 		return nil, err
 	}

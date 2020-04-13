@@ -6,6 +6,17 @@ type nodeManager struct {
 	nodes map[string]core.NodeInfo
 }
 
+// NodeManager ...
+type NodeManager interface {
+}
+
+// New ...
+func New() NodeManager {
+	return nodeManager{
+		nodes: map[string]core.NodeInfo{},
+	}
+}
+
 // Add ...
 func (m *nodeManager) Add(info *core.NodeInfo) {
 

@@ -60,10 +60,10 @@ func PinVideo(url string, no string) error {
 }
 
 // Peers ...
-func Peers(url string, info *core.NodeInfo) ([]*core.NodeInfo, error) {
+func Peers(url string, info *core.Node) ([]*core.Node, error) {
 	//pingAddr := strings.Join([]string{info.RemoteAddr, strconv.Itoa(info.Port)}, ":")
 	//url := fmt.Sprintf("http://%s/rpc", pingAddr)
-	result := new([]*core.NodeInfo)
+	result := new([]*core.Node)
 	if err := general.RPCPost(url, "Accelerate.Peers", info, result); err != nil {
 		return nil, err
 	}
@@ -74,7 +74,7 @@ func Peers(url string, info *core.NodeInfo) ([]*core.NodeInfo, error) {
 }
 
 // AddPeer ...
-func AddPeer(url string, info *core.NodeInfo) error {
+func AddPeer(url string, info *core.Node) error {
 	status := new(bool)
 	if err := general.RPCPost(url, "Accelerate.AddPeer", info, status); err != nil {
 		log.Errorw("remote id error", "error", err.Error())

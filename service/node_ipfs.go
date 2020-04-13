@@ -6,7 +6,6 @@ import (
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/glvd/accipfs/contract/node"
 	"github.com/glvd/accipfs/core"
-	"github.com/goextension/log"
 	"github.com/ipfs/interface-go-ipfs-core/options"
 	"net"
 	"sort"
@@ -184,12 +183,12 @@ func (n *nodeIPFS) Run() {
 		op := &bind.CallOpts{Pending: true}
 		cPeers, err := node.GetIpfsNodes(op)
 		if err != nil {
-			log.Errorw("get ipfs node error", "tag", outputHead, "error", err)
+			logE("get ipfs node error", "error", err)
 			return err
 		}
 		cNodes, err := node.GetPublicIpfsNodes(op)
 		if err != nil {
-			log.Errorw("get public ipfs node error", "tag", outputHead, "error", err)
+			logE("get public ipfs node error", "error", err)
 			return err
 		}
 		cPeers = decodeNodes(n.cfg, cPeers)
@@ -245,7 +244,7 @@ func (n *nodeIPFS) Run() {
 	})
 
 	if err != nil {
-		log.Errorw("ipfs node process error", "tag", outputHead, "err", err)
+		logE("ipfs node process error", "err", err)
 		return
 	}
 

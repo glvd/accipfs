@@ -15,7 +15,6 @@ import (
 	"github.com/glvd/accipfs/contract/node"
 	"github.com/glvd/accipfs/contract/token"
 	"github.com/glvd/accipfs/core"
-	"github.com/goextension/log"
 	"os"
 	"sort"
 	"strings"
@@ -87,7 +86,7 @@ func (n *nodeETH) Run() {
 	// get self node info
 	nodeInfo, err := n.NodeInfo(ctx)
 	if err != nil {
-		log.Errorw("get eth node info", "tag", outputHead, "error", err.Error(), "node", nodeInfo)
+		logE("get eth node info", "error", err.Error(), "node", nodeInfo)
 		return
 	}
 	cnode := nodeInfo.Enode
@@ -214,7 +213,7 @@ func (n *nodeETH) Run() {
 	})
 
 	if err != nil {
-		log.Errorw("eth node process error", "tag", outputHead, "error", err)
+		logE("eth node process error", "error", err)
 		return
 	}
 
@@ -233,7 +232,7 @@ func newNodeETH(cfg *config.Config) (*nodeETH, error) {
 func (n *nodeETH) IsReady() bool {
 	client, err := ethclient.Dial(config.ETHAddr())
 	if err != nil {
-		log.Errorw("new serviceNode eth", "tag", outputHead, "error", err)
+		logE("new serviceNode eth", "error", err)
 		return false
 	}
 	n.client = client

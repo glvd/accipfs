@@ -1,17 +1,13 @@
 package service
 
 import (
-	"fmt"
 	"github.com/glvd/accipfs/aws"
 	"github.com/glvd/accipfs/config"
 	"github.com/gocacher/cacher"
-	"github.com/goextension/log"
 	"github.com/robfig/cron/v3"
 	"strings"
 	"sync"
 )
-
-const outputHead = "<Service>"
 
 // Service ...
 type Service struct {
@@ -43,7 +39,7 @@ func syncDNS(cfg *config.Config, nodes map[string]bool) {
 	if len(records) == 0 {
 		return
 	}
-	fmt.Println(outputHead, "<正在更新网关数据...>", records)
+	//fmt.Println(outputHead, "<正在更新网关数据...>", records)
 
 	dnsService := aws.NewRoute53(cfg)
 
@@ -51,7 +47,7 @@ func syncDNS(cfg *config.Config, nodes map[string]bool) {
 	remoteIPs := make(map[string]bool)
 	remoteRecordSets, err := dnsService.GetRecordSets()
 	if err != nil {
-		log.Infow("visit remote record failed", "tag", outputHead, "error", err.Error())
+		logI("visit remote record failed", "error", err.Error())
 		return
 	}
 	if len(remoteRecordSets) != 0 {
@@ -62,25 +58,25 @@ func syncDNS(cfg *config.Config, nodes map[string]bool) {
 	// add new record
 	ipAdd := DiffStrArray(records, remoteIPs)
 	setsAdd := dnsService.BuildMultiValueRecordSets(ipAdd)
-	log.Infow("resource adding", "tag", outputHead, "list", ipAdd, "count", len(setsAdd))
+	logI("resource adding", "list", ipAdd, "count", len(setsAdd))
 	if len(setsAdd) > 0 {
 		res, err := dnsService.ChangeSets(setsAdd, "UPSERT")
 		if err != nil {
-			log.Infow("add resource record fail", "tag", outputHead, "error", err)
+			logI("add resource record fail", "error", err)
 		} else {
-			log.Infow("add resource record success", "tag", outputHead, "error", "result", res.String())
+			logI("add resource record success", "error", "result", res.String())
 		}
 	}
 
 	// delete record out of date
 	failedSets := dnsService.FilterFailedRecords(remoteRecordSets)
-	log.Infow("resource deleting", "tag", outputHead, "list", remoteRecordSets, "count", len(failedSets))
+	logI("resource deleting", "list", remoteRecordSets, "count", len(failedSets))
 	if len(failedSets) > 0 {
 		res, err := dnsService.ChangeSets(failedSets, "DELETE")
 		if err != nil {
-			log.Infow("delete resource record fail", "tag", outputHead, "error", err)
+			logI("delete resource record fail", "error", err)
 		} else {
-			log.Infow("delete resource record success", "tag", outputHead, "error", "result", res.String())
+			logI("delete resource record success", "error", "result", res.String())
 		}
 	}
 

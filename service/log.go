@@ -10,7 +10,9 @@ const module = "service"
 func logI(msg string, v ...interface{}) {
 	alog.Module(module).Infow(msg, v...)
 }
-
+func logD(msg string, v ...interface{}) {
+	alog.Module(module).Debugw(msg, v...)
+}
 func logE(msg string, v ...interface{}) {
 	alog.Module(module).Errorw(msg, v...)
 }

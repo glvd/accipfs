@@ -79,7 +79,7 @@ func (s *Server) Start() error {
 	if idError != nil {
 		return idError
 	}
-	fmt.Println(outputHead, "JSON RPC service listen and serving on port", port)
+	output("JSON RPC service listen and serving on port", port)
 	s.httpServer.ListenAndServe()
 	return nil
 }
@@ -107,7 +107,7 @@ END:
 				break END
 			}
 			if strings.TrimSpace(string(lines)) != "" {
-				fmt.Println(outputHead, string(lines))
+				output(string(lines))
 			}
 		}
 	}

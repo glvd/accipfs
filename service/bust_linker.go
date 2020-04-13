@@ -18,7 +18,6 @@ import (
 	"github.com/glvd/accipfs/config"
 	"github.com/glvd/accipfs/core"
 	"github.com/glvd/accipfs/general"
-	"github.com/goextension/log"
 	"github.com/robfig/cron/v3"
 	"go.uber.org/atomic"
 )
@@ -177,7 +176,7 @@ func (l *BustLinker) localID() (*core.Node, error) {
 	info.ProtocolVersion = core.Version
 	info.Address = "127.0.0.1"
 	info.Port = l.cfg.Port
-	log.Debugw("print remote ip", "tag", outputHead, "ip", info.Address, "port", info.Port)
+	logD("print remote ip", "ip", info.Address, "port", info.Port)
 	ds, err := l.ipfs.ID(context.Background())
 	if err != nil {
 		return nil, fmt.Errorf("datastore error:%w", err)
@@ -208,7 +207,7 @@ func (l *BustLinker) Connected(r *http.Request, req *core.ConnectReq, resp *core
 
 // Connected ...
 func (l *BustLinker) connected(r *http.Request, node *core.Node, result *core.Node) error {
-	log.Infow("connected", "tag", outputHead, "addr", r.RemoteAddr)
+	logI("connected", "addr", r.RemoteAddr)
 	if node == nil {
 		return fmt.Errorf("nil node info")
 	}
@@ -269,7 +268,7 @@ func (l *BustLinker) addPeer(ctx context.Context, node *core.Node, result *bool)
 
 	err := client.Ping(general.RPCAddress(node.NodeAddress))
 	if err != nil {
-		log.Errorw("add peer", "tag", outputHead, "error", err)
+		logE("add peer", "error", err)
 		l.nodes.Fault(node)
 		return err
 	}
@@ -284,7 +283,7 @@ func (l *BustLinker) addPeer(ctx context.Context, node *core.Node, result *bool)
 	}
 	cancelFunc()
 	if ipfsErr != nil {
-		log.Errorw("add peer", "tag", outputHead, "error", ipfsErr)
+		logE("add peer", "tag", ipfsErr)
 		l.nodes.Fault(node)
 		return err
 	}
@@ -292,7 +291,7 @@ func (l *BustLinker) addPeer(ctx context.Context, node *core.Node, result *bool)
 	//fmt.Println("connect eth:", node.Contract.Enode)
 	err = l.eth.AddPeer(ethTimeout, node.Contract.Enode)
 	if err != nil {
-		log.Errorw("add peer", "tag", outputHead, "error", err)
+		logE("add peer", "error", err)
 		l.nodes.Fault(node)
 		return err
 	}

@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"github.com/glvd/accipfs/core"
 	"github.com/glvd/accipfs/general"
-	"github.com/goextension/log"
 	"strconv"
 	"strings"
 )
@@ -20,7 +19,7 @@ func ID(url string) (*core.Node, error) {
 
 // Ping ...
 func Ping(url string) error {
-	log.Debugw("ping info", "url", url)
+	logD("ping info", "url", url)
 	result := new(core.PingResp)
 	if err := general.RPCPost(url, "BustLinker.Ping", &core.PingReq{}, result); err != nil {
 		return err
@@ -33,7 +32,7 @@ func Ping(url string) error {
 
 // Pins ...
 func Pins(address core.NodeAddress) ([]string, error) {
-	log.Debugw("ping info", "addr", address.Address, "port", address.Port)
+	logD("ping info", "addr", address.Address, "port", address.Port)
 	pingAddr := strings.Join([]string{address.Address, strconv.Itoa(address.Port)}, ":")
 	url := fmt.Sprintf("http://%s/rpc", pingAddr)
 	result := new([]string)
@@ -45,7 +44,7 @@ func Pins(address core.NodeAddress) ([]string, error) {
 
 // PinVideo ...
 func PinVideo(url string, no string) error {
-	log.Debugw("pin hash", "hash", no)
+	logD("pin hash", "hash", no)
 	b := new(bool)
 	err := general.RPCPost(url, "BustLinker.PinVideo", &no, b)
 	if err != nil {

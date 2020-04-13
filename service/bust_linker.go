@@ -387,7 +387,6 @@ func (l *BustLinker) PinVideo(r *http.Request, no *string, result *bool) error {
 			cancelFunc()
 			resultErr <- e
 		}
-
 	}()
 
 	wg.Add(1)

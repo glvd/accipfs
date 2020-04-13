@@ -339,6 +339,7 @@ func (l *BustLinker) PinVideo(r *http.Request, no *string, result *bool) error {
 	wg := sync.WaitGroup{}
 	resultErr := make(chan error)
 	ctx, cancelFunc := context.WithCancel(r.Context())
+	defer cancelFunc()
 	wg.Add(1)
 	go func() {
 		defer wg.Done()

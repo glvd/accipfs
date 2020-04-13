@@ -19,16 +19,14 @@ func ID(url string) (*core.Node, error) {
 }
 
 // Ping ...
-func Ping(address core.NodeAddress) error {
-	log.Debugw("ping info", "addr", address.Address, "port", address.Port)
-	pingAddr := strings.Join([]string{address.Address, strconv.Itoa(address.Port)}, ":")
-	url := fmt.Sprintf("http://%s/rpc", pingAddr)
-	result := new(string)
-	if err := general.RPCPost(url, "Accelerate.Ping", core.DummyEmpty(), result); err != nil {
+func Ping(url string) error {
+	log.Debugw("ping info", "url", url)
+	result := new(core.PingResp)
+	if err := general.RPCPost(url, "Accelerate.Ping", &core.PingReq{}, result); err != nil {
 		return err
 	}
-	if *result != "pong" {
-		return fmt.Errorf("get wrong response data:%s", *result)
+	if result.Resp != "pong" {
+		return fmt.Errorf("get wrong response data:%+v", *result)
 	}
 	return nil
 }

@@ -5,6 +5,7 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	"github.com/glvd/accipfs/core"
 	"github.com/goextension/log"
 	"github.com/gorilla/rpc/v2/json2"
 	"io"
@@ -72,6 +73,11 @@ func RPCPost(url string, method string, input, output interface{}) error {
 		return err
 	}
 	return nil
+}
+
+// RPCAddress ...
+func RPCAddress(addr core.NodeAddress) string {
+	return fmt.Sprintf("http://%s:%d", addr.Address, addr.Port)
 }
 
 // PipeScreen ...

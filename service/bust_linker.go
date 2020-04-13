@@ -90,7 +90,7 @@ func (l *BustLinker) Run() {
 	l.nodes.Range(func(node *core.Node) bool {
 		output("BustLinker", "syncing node", node.Name)
 		l.nodes.Validate(node.NodeInfo.Name, func(node *core.Node) bool {
-			err := client.Ping(node.NodeAddress)
+			err := client.Ping(general.RPCAddress(node.NodeAddress))
 			if err != nil {
 				logE("ping failed", "account", node.Name, "error", err)
 				return false
@@ -219,7 +219,7 @@ func (l *BustLinker) connected(r *http.Request, node *core.Node, result *core.No
 		return err
 	}
 	*result = *id
-	err = client.Ping(node.NodeAddress)
+	err = client.Ping(general.RPCAddress(node.NodeAddress))
 	if err != nil {
 		return err
 	}
@@ -266,7 +266,7 @@ func (l *BustLinker) addPeer(ctx context.Context, node *core.Node, result *bool)
 
 	node.LastTime = time.Now().Add(3600 * time.Second)
 
-	err := client.Ping(node.NodeAddress)
+	err := client.Ping(general.RPCAddress(node.NodeAddress))
 	if err != nil {
 		log.Errorw("add peer", "tag", outputHead, "error", err)
 		l.nodes.Fault(node)

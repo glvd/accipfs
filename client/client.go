@@ -75,7 +75,7 @@ func Peers(url string, info *core.Node) ([]*core.Node, error) {
 func AddPeer(url string, info *core.Node) error {
 	status := new(bool)
 	if err := general.RPCPost(url, "BustLinker.AddPeer", info, status); err != nil {
-		log.Errorw("remote id error", "error", err.Error())
+		logE("remote id error", "error", err.Error())
 		return fmt.Errorf("remote id error: %w", err)
 	}
 

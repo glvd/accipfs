@@ -201,7 +201,7 @@ func (l *BustLinker) ID(r *http.Request, req *core.IDReq, resp *core.IDResp) err
 }
 
 // Connected ...
-func (l *BustLinker) Connected(r *http.Request, req *core.ConnectReq, resp *core.ConnectResp) error {
+func (l *BustLinker) Connected(r *http.Request, req *core.ConnectedReq, resp *core.ConnectedResp) error {
 	return l.connected(r, &req.Node, &resp.Node)
 }
 
@@ -240,12 +240,15 @@ func (l *BustLinker) connectTo(r *http.Request, addr *string, respNode *core.Nod
 		return err
 	}
 	url := fmt.Sprintf("http://%s/rpc", *addr)
-
-	err = general.RPCPost(url, "BustLinker.Connected", id, respNode)
+	connReq := &core.ConnectedReq{Node: *id}
+	resp := new(core.ConnectedResp)
+	err = general.RPCPost(url, "BustLinker.Connected", connReq, resp)
 	if err != nil {
 		return err
 	}
+	respNode = &resp.Node
 	respNode.NodeAddress.Address, respNode.NodeAddress.Port = general.SplitIP(*addr)
+
 	return nil
 }
 

@@ -31,13 +31,13 @@ type IDResp struct {
 	Node
 }
 
-// ConnectReq ...
-type ConnectReq struct {
+// ConnectedReq ...
+type ConnectedReq struct {
 	Node
 }
 
-// ConnectResp ...
-type ConnectResp struct {
+// ConnectedResp ...
+type ConnectedResp struct {
 	Node
 }
 
@@ -80,7 +80,7 @@ type GetResp struct {
 type Linker interface {
 	Ping(r *http.Request, req *PingReq, resp *PingResp) error
 	ID(r *http.Request, req *IDReq, resp *IDResp) error
-	Connected(r *http.Request, req *ConnectReq, resp *ConnectResp) error
+	Connected(r *http.Request, req *ConnectedReq, resp *ConnectedResp) error
 	ConnectTo(r *http.Request, req *ConnectToReq, resp *ConnectToResp) error
 	Add(r *http.Request, req *AddReq, resp *AddResp) error
 	Get(r *http.Request, req *GetReq, resp *GetResp) error

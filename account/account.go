@@ -74,7 +74,7 @@ func saveAccountToConfig(cfg *config.Config, account *Account) error {
 	return config.SaveConfig(cfg)
 }
 
-// Check ...
+// Validate ...
 func (acc *Account) Check() error {
 	path := filepath.Join(config.KeyStoreDirETH(), acc.Address)
 	_, e := os.Stat(path)

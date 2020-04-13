@@ -34,7 +34,7 @@ func Ping(address core.NodeAddress) error {
 }
 
 // Pins ...
-func Pins(address *core.NodeAddress) ([]string, error) {
+func Pins(address core.NodeAddress) ([]string, error) {
 	log.Debugw("ping info", "addr", address.Address, "port", address.Port)
 	pingAddr := strings.Join([]string{address.Address, strconv.Itoa(address.Port)}, ":")
 	url := fmt.Sprintf("http://%s/rpc", pingAddr)

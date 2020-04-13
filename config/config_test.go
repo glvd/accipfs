@@ -9,7 +9,7 @@ func TestLoadConfig(t *testing.T) {
 		IPFS: IPFSConfig{},
 	}))
 
-	v, err := LoadConfig()
+	err := LoadConfig()
 	if err != nil {
 		panic(err)
 	}

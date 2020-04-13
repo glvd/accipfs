@@ -25,7 +25,7 @@ import (
 
 // BustLinker ...
 type BustLinker struct {
-	id    *core.NodeInfo
+	id    *core.Node
 	tasks task.Task
 	cache *cache.MemoryCache
 	nodes NodeManager
@@ -89,18 +89,19 @@ func (l *BustLinker) Run() {
 	ctx := context.TODO()
 	l.nodes.Range(func(node *core.Node) bool {
 		output("BustLinker", "syncing node", node.Name)
-
-		err := client.Ping(node.NodeAddress)
-		if err != nil {
-			l.nodes.Remove(node.NodeInfo.Name)
-			l.dummyNodes.Add(info)
-			logE("ping failed", "account", info.Name, "error", err)
+		l.nodes.Validate(node.NodeInfo.Name, func(node *core.Node) bool {
+			err := client.Ping(node.NodeAddress)
+			if err != nil {
+				logE("ping failed", "account", node.Name, "error", err)
+				return false
+			}
 			return true
-		}
-		url := info.Address().URL()
-		nodeInfos, err := client.Peers(url, info)
+		})
+
+		url := fmt.Sprintf("http://%s:%d", node.NodeAddress.Address, node.NodeAddress.Port)
+		nodeInfos, err := client.Peers(url, &node.NodeInfo)
 		if err != nil {
-			logE("get peers failed", "account", info.Name, "error", err)
+			logE("get peers failed", "account", node.Name, "error", err)
 			return true
 		}
 
@@ -109,12 +110,12 @@ func (l *BustLinker) Run() {
 				return false
 			}
 			result := new(bool)
-			if err := l.addPeer(ctx, nodeInfo, result); err != nil {
-				logE("add peer failed", "account", info.Name, "error", err)
+			if err := l.addPeer(ctx, node, result); err != nil {
+				logE("add peer failed", "account", node.Name, "error", err)
 				continue
 			}
 			if *result {
-				pins, err := client.Pins(nodeInfo)
+				pins, err := client.Pins(node.NodeAddress)
 				if err != nil {
 					logE("get pin list", "error", err)
 					continue
@@ -169,13 +170,13 @@ func (l *BustLinker) Ping(r *http.Request, e *core.Empty, result *string) error 
 	return nil
 }
 
-func (l *BustLinker) localID() (*core.NodeInfo, error) {
-	var info core.PingReq
+func (l *BustLinker) localID() (*core.Node, error) {
+	var info core.Node
 	info.Name = l.self.Name
-	info.Version = core.Version
+	info.ProtocolVersion = core.Version
 	info.Address = "127.0.0.1"
 	info.Port = l.cfg.Port
-	log.Debugw("print remote ip", "tag", outputHead, "ip", info.RemoteAddr, "port", info.Port)
+	log.Debugw("print remote ip", "tag", outputHead, "ip", info.Address, "port", info.Port)
 	ds, err := l.ipfs.ID(context.Background())
 	if err != nil {
 		return nil, fmt.Errorf("datastore error:%w", err)
@@ -190,88 +191,91 @@ func (l *BustLinker) localID() (*core.NodeInfo, error) {
 }
 
 // ID ...
-func (l *BustLinker) ID(r *http.Request, e *core.Empty, result *core.NodeInfo) error {
+func (l *BustLinker) ID(r *http.Request, req *core.IDReq, resp *core.IDResp) error {
 	id, err := l.localID()
 	if err != nil {
 		return err
 	}
-	*result = *id
+	resp.Node = *id
 	return nil
 }
 
 // Connected ...
 func (l *BustLinker) Connected(r *http.Request, req *core.ConnectReq, resp *core.ConnectResp) error {
-	return l.connected(r, &req.NodeInfo, &resp.NodeInfo)
+	return l.connected(r, &req.Node, &resp.Node)
 }
 
 // Connected ...
-func (l *BustLinker) connected(r *http.Request, node *core.NodeInfo, result *core.NodeInfo) error {
+func (l *BustLinker) connected(r *http.Request, node *core.Node, result *core.Node) error {
 	log.Infow("connected", "tag", outputHead, "addr", r.RemoteAddr)
 	if node == nil {
 		return fmt.Errorf("nil node info")
 	}
 
-	node.RemoteAddr, _ = general.SplitIP(r.RemoteAddr)
+	node.NodeAddress.Address, _ = general.SplitIP(r.RemoteAddr)
 
 	id, err := l.localID()
 	if err != nil {
 		return err
 	}
 	*result = *id
-
-	err = client.Ping(node)
+	err = client.Ping(node.NodeAddress)
 	if err != nil {
-		if !l.dummyNodes.Check(node.Name) {
-			l.dummyNodes.Add(node)
-		}
-		return nil
+		return err
 	}
-	if !l.nodes.Check(node.Name) {
-		l.nodes.Add(node)
-		return nil
-	}
+
+	l.nodes.Add(node)
 	return nil
 }
 
 // ConnectTo ...
 func (l *BustLinker) ConnectTo(r *http.Request, req *core.ConnectToReq, resp *core.ConnectToResp) error {
-	return l.connectTo(r, &req.Addr, &resp.NodeInfo)
+	return l.connectTo(r, &req.Addr, &resp.Node)
 }
 
 // ConnectTo ...
-func (l *BustLinker) connectTo(r *http.Request, addr *string, result *core.NodeInfo) error {
+func (l *BustLinker) connectTo(r *http.Request, addr *string, respNode *core.Node) error {
 	id, err := l.localID()
 	if err != nil {
 		return err
 	}
 	url := fmt.Sprintf("http://%s/rpc", *addr)
 
-	err = general.RPCPost(url, "BustLinker.Connected", id, result)
+	err = general.RPCPost(url, "BustLinker.Connected", id, respNode)
 	if err != nil {
 		return err
 	}
-	result.RemoteAddr, result.Port = general.SplitIP(*addr)
+	respNode.NodeAddress.Address, respNode.NodeAddress.Port = general.SplitIP(*addr)
 	return nil
 }
 
-func (l *BustLinker) addPeer(ctx context.Context, info *core.NodeInfo, result *bool) error {
+func (l *BustLinker) addPeer(ctx context.Context, node *core.Node, result *bool) error {
 	*result = false
 
-	if info.Name == l.id.Name {
+	if node.Name == l.id.Name {
 		//ignore self add
 		return nil
 	}
 
-	err := client.Ping(info)
+	faultNode := l.nodes.IsFault(node.NodeInfo.Name)
+
+	if faultNode != nil && faultNode.LastTime.Before(time.Now()) {
+		remain := faultNode.LastTime.Unix() - time.Now().Unix()
+		return fmt.Errorf("fault check error,waiting remain %d", remain)
+	}
+
+	node.LastTime = time.Now().Add(3600 * time.Second)
+
+	err := client.Ping(node.NodeAddress)
 	if err != nil {
 		log.Errorw("add peer", "tag", outputHead, "error", err)
-		l.dummyNodes.Add(info)
+		l.nodes.Fault(node)
 		return err
 	}
 
 	ipfsTimeout, cancelFunc := context.WithTimeout(ctx, time.Duration(l.cfg.Interval)*time.Second)
 	var ipfsErr error
-	for _, addr := range info.DataStore.Addresses {
+	for _, addr := range node.DataStore.Addresses {
 		ipfsErr = l.ipfs.SwarmConnect(ipfsTimeout, addr)
 		if ipfsErr == nil {
 			break
@@ -279,22 +283,21 @@ func (l *BustLinker) addPeer(ctx context.Context, info *core.NodeInfo, result *b
 	}
 	cancelFunc()
 	if ipfsErr != nil {
-		l.dummyNodes.Add(info)
 		log.Errorw("add peer", "tag", outputHead, "error", ipfsErr)
-
+		l.nodes.Fault(node)
 		return err
 	}
 	ethTimeout, cancelFunc := context.WithTimeout(ctx, time.Duration(l.cfg.Interval)*time.Second)
-	//fmt.Println("connect eth:", info.Contract.Enode)
-	err = l.eth.AddPeer(ethTimeout, info.Contract.Enode)
+	//fmt.Println("connect eth:", node.Contract.Enode)
+	err = l.eth.AddPeer(ethTimeout, node.Contract.Enode)
 	if err != nil {
-		l.dummyNodes.Add(info)
 		log.Errorw("add peer", "tag", outputHead, "error", err)
+		l.nodes.Fault(node)
 		return err
 	}
 	cancelFunc()
 
-	l.nodes.Add(info)
+	l.nodes.Add(node)
 	*result = true
 	return nil
 }
@@ -302,20 +305,20 @@ func (l *BustLinker) addPeer(ctx context.Context, info *core.NodeInfo, result *b
 // Add ...
 func (l *BustLinker) Add(r *http.Request, req *core.AddReq, resp *core.AddResp) error {
 	if req.AddType == core.AddTypePeer {
-		return l.addPeer(r.Context(), &req.NodeInfo, &resp.IsSuccess)
+		return l.addPeer(r.Context(), &req.Node, &resp.IsSuccess)
 	}
 	return nil
 }
 
 // AddPeer ...
-func (l *BustLinker) AddPeer(r *http.Request, info *core.NodeInfo, result *bool) error {
+func (l *BustLinker) AddPeer(r *http.Request, info *core.Node, result *bool) error {
 	return l.addPeer(r.Context(), info, result)
 }
 
 // Peers ...
-func (l *BustLinker) Peers(r *http.Request, _ *core.Empty, result *[]*core.NodeInfo) error {
-	l.nodes.Range(func(info *core.NodeInfo) bool {
-		*result = append(*result, info)
+func (l *BustLinker) Peers(r *http.Request, _ *core.Empty, result *[]*core.Node) error {
+	l.nodes.Range(func(node *core.Node) bool {
+		*result = append(*result, node)
 		return true
 	})
 	return nil

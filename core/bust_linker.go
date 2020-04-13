@@ -6,7 +6,7 @@ import (
 
 // PingReq ...
 type PingReq struct {
-	NodeAddress
+	Node
 }
 
 // PingResp ...
@@ -28,17 +28,17 @@ type IDReq struct {
 
 // IDResp ...
 type IDResp struct {
-	NodeInfo
+	Node
 }
 
 // ConnectReq ...
 type ConnectReq struct {
-	NodeInfo
+	Node
 }
 
 // ConnectResp ...
 type ConnectResp struct {
-	NodeInfo
+	Node
 }
 
 // ConnectToReq ...
@@ -48,7 +48,7 @@ type ConnectToReq struct {
 
 // ConnectToResp ...
 type ConnectToResp struct {
-	NodeInfo
+	Node
 }
 
 // AddType ...
@@ -60,7 +60,7 @@ const AddTypePeer AddType = 0x01
 // AddReq ...
 type AddReq struct {
 	AddType
-	NodeInfo
+	Node
 }
 
 // AddResp ...

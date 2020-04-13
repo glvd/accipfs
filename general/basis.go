@@ -95,7 +95,7 @@ END:
 				break END
 			}
 			if strings.TrimSpace(string(lines)) != "" {
-				fmt.Printf("[%s]:%+v", module, string(lines))
+				fmt.Printf("[%s]:%+v\n", module, string(lines))
 			}
 		}
 	}

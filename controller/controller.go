@@ -46,14 +46,14 @@ func (c *Controller) Init() (e error) {
 
 // Run ...
 func (c *Controller) Run() {
-	for _, service := range c.services {
+	for idx := range c.services {
 		c.wg.Add(1)
 		go func(service core.Service) {
 			defer c.wg.Done()
 			if err := service.Start(); err != nil {
 				return
 			}
-		}(service)
+		}(c.services[idx])
 	}
 	c.wg.Wait()
 }

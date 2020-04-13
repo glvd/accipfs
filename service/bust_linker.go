@@ -28,8 +28,8 @@ type BustLinker struct {
 	id         *core.NodeInfo
 	tasks      task.Task
 	cache      *cache.MemoryCache
-	nodes      core.NodeStore
-	dummyNodes core.NodeStore
+	nodes      NodeManager
+	dummyNodes nodeManager
 	lock       *atomic.Bool
 	self       *account.Account
 	cfg        *config.Config
@@ -47,8 +47,8 @@ var BootList = []string{
 // NewBustLinker ...
 func NewBustLinker(cfg *config.Config) (linker *BustLinker, err error) {
 	linker = &BustLinker{
-		nodes:      core.NewNodeStore(),
-		dummyNodes: core.NewNodeStore(),
+		nodes:      NewNodeManager(),
+		dummyNodes: NewNodeManager(),
 		lock:       atomic.NewBool(false),
 		cfg:        cfg,
 	}
@@ -89,7 +89,7 @@ func (l *BustLinker) Run() {
 	l.lock.Store(true)
 	defer l.lock.Store(false)
 	ctx := context.TODO()
-	l.nodes.Range(func(info *core.NodeInfo) bool {
+	l.nodes.Range(func(info *core.Node) bool {
 		output("BustLinker", "syncing node", info.Name)
 
 		err := client.Ping(info)
@@ -172,10 +172,10 @@ func (l *BustLinker) Ping(r *http.Request, e *core.Empty, result *string) error 
 }
 
 func (l *BustLinker) localID() (*core.NodeInfo, error) {
-	var info core.NodeInfo
+	var info core.PingReq
 	info.Name = l.self.Name
 	info.Version = core.Version
-	info.RemoteAddr = "127.0.0.1"
+	info.Address = "127.0.0.1"
 	info.Port = l.cfg.Port
 	log.Debugw("print remote ip", "tag", outputHead, "ip", info.RemoteAddr, "port", info.Port)
 	ds, err := l.ipfs.ID(context.Background())

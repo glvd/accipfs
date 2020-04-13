@@ -19,9 +19,9 @@ func ID(url string) (*core.NodeInfo, error) {
 }
 
 // Ping ...
-func Ping(info *core.NodeInfo) error {
-	log.Debugw("ping info", "addr", info.RemoteAddr, "port", info.Port)
-	pingAddr := strings.Join([]string{info.RemoteAddr, strconv.Itoa(info.Port)}, ":")
+func Ping(address *core.NodeAddress) error {
+	log.Debugw("ping info", "addr", address.Address, "port", address.Port)
+	pingAddr := strings.Join([]string{address.Address, strconv.Itoa(address.Port)}, ":")
 	url := fmt.Sprintf("http://%s/rpc", pingAddr)
 	result := new(string)
 	if err := general.RPCPost(url, "Accelerate.Ping", core.DummyEmpty(), result); err != nil {
@@ -34,9 +34,9 @@ func Ping(info *core.NodeInfo) error {
 }
 
 // Pins ...
-func Pins(info *core.NodeInfo) ([]string, error) {
-	log.Debugw("pin info", "addr", info.RemoteAddr, "port", info.Port)
-	pingAddr := strings.Join([]string{info.RemoteAddr, strconv.Itoa(info.Port)}, ":")
+func Pins(address *core.NodeAddress) ([]string, error) {
+	log.Debugw("ping info", "addr", address.Address, "port", address.Port)
+	pingAddr := strings.Join([]string{address.Address, strconv.Itoa(address.Port)}, ":")
 	url := fmt.Sprintf("http://%s/rpc", pingAddr)
 	result := new([]string)
 	if err := general.RPCPost(url, "Accelerate.Pins", core.DummyEmpty(), result); err != nil {

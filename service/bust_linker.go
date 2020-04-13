@@ -48,6 +48,7 @@ func NewBustLinker(cfg *config.Config) (linker *BustLinker, err error) {
 	linker = &BustLinker{
 		nodes: NewNodeManager(),
 		lock:  atomic.NewBool(false),
+		c:     controller.New(cfg),
 		cfg:   cfg,
 	}
 	//linker.ethServer = newNodeServerETH(cfg)
@@ -145,7 +146,7 @@ func (l *BustLinker) WaitingForReady() {
 			return
 		}
 	}()
-
+	wg.Add(1)
 	go func() {
 		defer wg.Done()
 		if l.ipfs.IsReady() {

@@ -29,9 +29,18 @@ type MessageReq struct {
 type MessageResp struct {
 }
 
+// PayReq ...
+type PayReq struct {
+}
+
+// PayResp ...
+type PayResp struct {
+}
+
 // BustLinker ...
 type BustLinker interface {
 	Ping(r *http.Request, req *PingReq, resp *PingResp) error
 	Source(r *http.Request, req *SourceReq, resp *SourceResp) error
 	Message(r *http.Request, req *MessageReq, resp *MessageResp) error
+	Pay(r *http.Request, req *PayReq, resp *PayResp) error
 }

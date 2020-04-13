@@ -19,7 +19,7 @@ func ID(url string) (*core.NodeInfo, error) {
 }
 
 // Ping ...
-func Ping(address *core.NodeAddress) error {
+func Ping(address core.NodeAddress) error {
 	log.Debugw("ping info", "addr", address.Address, "port", address.Port)
 	pingAddr := strings.Join([]string{address.Address, strconv.Itoa(address.Port)}, ":")
 	url := fmt.Sprintf("http://%s/rpc", pingAddr)

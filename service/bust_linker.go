@@ -25,18 +25,17 @@ import (
 
 // BustLinker ...
 type BustLinker struct {
-	id         *core.NodeInfo
-	tasks      task.Task
-	cache      *cache.MemoryCache
-	nodes      NodeManager
-	dummyNodes nodeManager
-	lock       *atomic.Bool
-	self       *account.Account
-	cfg        *config.Config
-	eth        *nodeETH
-	ipfs       *nodeIPFS
-	c          *controller.Controller
-	cron       *cron.Cron
+	id    *core.NodeInfo
+	tasks task.Task
+	cache *cache.MemoryCache
+	nodes NodeManager
+	lock  *atomic.Bool
+	self  *account.Account
+	cfg   *config.Config
+	eth   *nodeETH
+	ipfs  *nodeIPFS
+	c     *controller.Controller
+	cron  *cron.Cron
 }
 
 // BootList ...
@@ -47,10 +46,9 @@ var BootList = []string{
 // NewBustLinker ...
 func NewBustLinker(cfg *config.Config) (linker *BustLinker, err error) {
 	linker = &BustLinker{
-		nodes:      NewNodeManager(),
-		dummyNodes: NewNodeManager(),
-		lock:       atomic.NewBool(false),
-		cfg:        cfg,
+		nodes: NewNodeManager(),
+		lock:  atomic.NewBool(false),
+		cfg:   cfg,
 	}
 	//linker.ethServer = newNodeServerETH(cfg)
 	//linker.ipfsServer = newNodeServerIPFS(cfg)
@@ -89,12 +87,12 @@ func (l *BustLinker) Run() {
 	l.lock.Store(true)
 	defer l.lock.Store(false)
 	ctx := context.TODO()
-	l.nodes.Range(func(info *core.Node) bool {
-		output("BustLinker", "syncing node", info.Name)
+	l.nodes.Range(func(node *core.Node) bool {
+		output("BustLinker", "syncing node", node.Name)
 
-		err := client.Ping(info)
+		err := client.Ping(node.NodeAddress)
 		if err != nil {
-			l.nodes.Remove(info.Name)
+			l.nodes.Remove(node.NodeInfo.Name)
 			l.dummyNodes.Add(info)
 			logE("ping failed", "account", info.Name, "error", err)
 			return true

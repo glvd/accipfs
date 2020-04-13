@@ -16,7 +16,7 @@ type nodeManager struct {
 // NodeManager ...
 type NodeManager interface {
 	Add(info *core.Node)
-	Check(key string) bool
+	Check(key string, fs ...func(node *core.Node) bool) bool
 	Get(key string) *core.Node
 	Remove(key string)
 	Length() int64
@@ -24,7 +24,7 @@ type NodeManager interface {
 }
 
 // NewNodeManager ...
-func NewNodeManager() *nodeManager {
+func NewNodeManager() NodeManager {
 	return &nodeManager{
 		nodes:    sync.Map{},
 		nodeSize: atomic.NewInt64(0),
@@ -46,8 +46,15 @@ func (s *nodeManager) Add(info *core.Node) {
 }
 
 // Check ...
-func (s *nodeManager) Check(key string) (b bool) {
-	_, b = s.nodes.Load(key)
+func (s *nodeManager) Check(key string, fs ...func(node *core.Node) bool) (b bool) {
+	n, exist := s.nodes.Load(key)
+	if exist && fs != nil {
+		b = fs[0](n.(*core.Node))
+		if !b {
+			s.Remove(key)
+			s.dummy.Store(key, n)
+		}
+	}
 	return
 }
 

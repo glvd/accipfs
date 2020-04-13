@@ -31,14 +31,14 @@ func nodeConnectCmd() *cobra.Command {
 
 			for _, addr := range args {
 				fmt.Printf("connect to [%s]\n", url.String())
-
-				remoteNode := new(core.Node)
-				if err := general.RPCPost(url.String(), "BustLinker.ConnectTo", addr, remoteNode); err != nil {
+				req := &core.ConnectToReq{Addr: addr}
+				remoteNode := new(core.ConnectToResp)
+				if err := general.RPCPost(url.String(), "BustLinker.ConnectTo", req, remoteNode); err != nil {
 					fmt.Println("connect error:", err)
 					return
 				}
 
-				if err := client.AddPeer(url.String(), remoteNode); err != nil {
+				if err := client.AddPeer(url.String(), &remoteNode.Node); err != nil {
 					fmt.Println("add peer error:", err)
 					return
 				}

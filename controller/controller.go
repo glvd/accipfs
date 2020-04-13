@@ -48,12 +48,12 @@ func (c *Controller) Init() (e error) {
 func (c *Controller) Run() {
 	for _, service := range c.services {
 		c.wg.Add(1)
-		go func() {
+		go func(service core.Service) {
 			defer c.wg.Done()
 			if err := service.Start(); err != nil {
 				return
 			}
-		}()
+		}(service)
 	}
 	c.wg.Wait()
 }

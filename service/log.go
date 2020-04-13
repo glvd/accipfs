@@ -18,5 +18,5 @@ func logE(msg string, v ...interface{}) {
 }
 
 func output(v ...interface{}) {
-	fmt.Printf("[%s]:%+v", module, v)
+	fmt.Printf("[%s]:%+v\n", module, v)
 }

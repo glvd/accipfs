@@ -12,7 +12,7 @@ import (
 // ID ...
 func ID(url string) (*core.Node, error) {
 	reply := new(core.Node)
-	if err := general.RPCPost(url, "Accelerate.ID", core.DummyEmpty(), reply); err != nil {
+	if err := general.RPCPost(url, "BustLinker.ID", core.DummyEmpty(), reply); err != nil {
 		return nil, err
 	}
 	return reply, nil
@@ -22,7 +22,7 @@ func ID(url string) (*core.Node, error) {
 func Ping(url string) error {
 	log.Debugw("ping info", "url", url)
 	result := new(core.PingResp)
-	if err := general.RPCPost(url, "Accelerate.Ping", &core.PingReq{}, result); err != nil {
+	if err := general.RPCPost(url, "BustLinker.Ping", &core.PingReq{}, result); err != nil {
 		return err
 	}
 	if result.Resp != "pong" {
@@ -37,7 +37,7 @@ func Pins(address core.NodeAddress) ([]string, error) {
 	pingAddr := strings.Join([]string{address.Address, strconv.Itoa(address.Port)}, ":")
 	url := fmt.Sprintf("http://%s/rpc", pingAddr)
 	result := new([]string)
-	if err := general.RPCPost(url, "Accelerate.Pins", core.DummyEmpty(), result); err != nil {
+	if err := general.RPCPost(url, "BustLinker.Pins", core.DummyEmpty(), result); err != nil {
 		return nil, err
 	}
 	return *result, nil
@@ -47,7 +47,7 @@ func Pins(address core.NodeAddress) ([]string, error) {
 func PinVideo(url string, no string) error {
 	log.Debugw("pin hash", "hash", no)
 	b := new(bool)
-	err := general.RPCPost(url, "Accelerate.PinVideo", &no, b)
+	err := general.RPCPost(url, "BustLinker.PinVideo", &no, b)
 	if err != nil {
 		return err
 	}
@@ -62,7 +62,7 @@ func Peers(url string, info *core.Node) ([]*core.Node, error) {
 	//pingAddr := strings.Join([]string{info.RemoteAddr, strconv.Itoa(info.Port)}, ":")
 	//url := fmt.Sprintf("http://%s/rpc", pingAddr)
 	result := new([]*core.Node)
-	if err := general.RPCPost(url, "Accelerate.Peers", info, result); err != nil {
+	if err := general.RPCPost(url, "BustLinker.Peers", info, result); err != nil {
 		return nil, err
 	}
 	if len(*result) == 0 {
@@ -74,7 +74,7 @@ func Peers(url string, info *core.Node) ([]*core.Node, error) {
 // AddPeer ...
 func AddPeer(url string, info *core.Node) error {
 	status := new(bool)
-	if err := general.RPCPost(url, "Accelerate.AddPeer", info, status); err != nil {
+	if err := general.RPCPost(url, "BustLinker.AddPeer", info, status); err != nil {
 		log.Errorw("remote id error", "error", err.Error())
 		return fmt.Errorf("remote id error: %w", err)
 	}

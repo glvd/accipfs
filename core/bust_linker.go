@@ -42,18 +42,29 @@ type ConnectResp struct {
 
 // ConnectToReq ...
 type ConnectToReq struct {
+	Addr string
 }
 
 // ConnectToResp ...
 type ConnectToResp struct {
+	NodeInfo
 }
+
+// AddType ...
+type AddType int
+
+// AddTypePeer ...
+const AddTypePeer AddType = 0x01
 
 // AddReq ...
 type AddReq struct {
+	AddType
+	NodeInfo
 }
 
 // AddResp ...
 type AddResp struct {
+	IsSuccess bool
 }
 
 // GetReq ...
@@ -64,8 +75,8 @@ type GetReq struct {
 type GetResp struct {
 }
 
-// BustLinker ...
-type BustLinker interface {
+// Linker ...
+type Linker interface {
 	Ping(r *http.Request, req *PingReq, resp *PingResp) error
 	ID(r *http.Request, req *IDReq, resp *IDResp) error
 	Connected(r *http.Request, req *ConnectReq, resp *ConnectResp) error

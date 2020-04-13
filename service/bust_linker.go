@@ -202,7 +202,12 @@ func (l *BustLinker) ID(r *http.Request, e *core.Empty, result *core.NodeInfo) e
 }
 
 // Connected ...
-func (l *BustLinker) Connected(r *http.Request, node *core.NodeInfo, result *core.NodeInfo) error {
+func (l *BustLinker) Connected(r *http.Request, req *core.ConnectReq, resp *core.ConnectResp) error {
+	return l.connected(r, &req.NodeInfo, &resp.NodeInfo)
+}
+
+// Connected ...
+func (l *BustLinker) connected(r *http.Request, node *core.NodeInfo, result *core.NodeInfo) error {
 	log.Infow("connected", "tag", outputHead, "addr", r.RemoteAddr)
 	if node == nil {
 		return fmt.Errorf("nil node info")
@@ -231,7 +236,12 @@ func (l *BustLinker) Connected(r *http.Request, node *core.NodeInfo, result *cor
 }
 
 // ConnectTo ...
-func (l BustLinker) ConnectTo(r *http.Request, addr *string, result *core.NodeInfo) error {
+func (l *BustLinker) ConnectTo(r *http.Request, req *core.ConnectToReq, resp *core.ConnectToResp) error {
+	return l.connectTo(r, &req.Addr, &resp.NodeInfo)
+}
+
+// ConnectTo ...
+func (l *BustLinker) connectTo(r *http.Request, addr *string, result *core.NodeInfo) error {
 	id, err := l.localID()
 	if err != nil {
 		return err
@@ -288,6 +298,14 @@ func (l *BustLinker) addPeer(ctx context.Context, info *core.NodeInfo, result *b
 
 	l.nodes.Add(info)
 	*result = true
+	return nil
+}
+
+// Add ...
+func (l *BustLinker) Add(r *http.Request, req *core.AddReq, resp *core.AddResp) error {
+	if req.AddType == core.AddTypePeer {
+		return l.addPeer(r.Context(), &req.NodeInfo, &resp.IsSuccess)
+	}
 	return nil
 }
 

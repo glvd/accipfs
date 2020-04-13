@@ -13,16 +13,25 @@ type PingResp struct {
 	Resp string
 }
 
-// UploadReq ...
-type UploadReq struct {
+// SourceReq ...
+type SourceReq struct {
 }
 
-// UploadResp ...
-type UploadResp struct {
+// SourceResp ...
+type SourceResp struct {
+}
+
+// MessageReq ...
+type MessageReq struct {
+}
+
+// MessageResp ...
+type MessageResp struct {
 }
 
 // BustLinker ...
 type BustLinker interface {
 	Ping(r *http.Request, req *PingReq, resp *PingResp) error
-	Upload(r *http.Request, req *UploadReq, resp *UploadResp) error
+	Source(r *http.Request, req *SourceReq, resp *SourceResp) error
+	Message(r *http.Request, req *MessageReq, resp *MessageResp) error
 }

@@ -6,7 +6,6 @@ import (
 	"context"
 	"fmt"
 	"github.com/glvd/accipfs/core"
-	"github.com/goextension/log"
 	"github.com/gorilla/rpc/v2/json2"
 	"io"
 	"net/http"
@@ -40,7 +39,6 @@ func SplitIP(addr string) (ip string, port int) {
 
 // RPCPost ...
 func RPCPost(url string, method string, input, output interface{}) error {
-	log.Debugw("rpc post", "url", url, "method", method, "input", input)
 	message, err := json2.EncodeClientRequest(method, input)
 	if err != nil {
 		return err
@@ -67,7 +65,6 @@ func RPCPost(url string, method string, input, output interface{}) error {
 	}()
 	buf.Grow(bytes.MinRead)
 	_, err = buf.ReadFrom(resp.Body)
-	log.Debugw("rpc result", "response", string(buf.Bytes()))
 	err = json2.DecodeClientResponse(buf, output)
 	if err != nil {
 		return err

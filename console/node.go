@@ -32,13 +32,13 @@ func nodeConnectCmd() *cobra.Command {
 			for _, addr := range args {
 				fmt.Printf("connect to [%s]\n", url.String())
 
-				remoteNodeInfo := new(core.NodeInfo)
-				if err := general.RPCPost(url.String(), "Accelerate.ConnectTo", addr, remoteNodeInfo); err != nil {
+				remoteNode := new(core.Node)
+				if err := general.RPCPost(url.String(), "Accelerate.ConnectTo", addr, remoteNode); err != nil {
 					fmt.Println("connect error:", err)
 					return
 				}
 
-				if err := client.AddPeer(url.String(), remoteNodeInfo); err != nil {
+				if err := client.AddPeer(url.String(), remoteNode); err != nil {
 					fmt.Println("add peer error:", err)
 					return
 				}
@@ -59,7 +59,7 @@ func nodePeerCmd() *cobra.Command {
 			config.Initialize()
 			cfg := config.Global()
 			url := fmt.Sprintf("http://localhost:%d/rpc", cfg.Port)
-			reply := new([]*core.NodeInfo)
+			reply := new([]*core.Node)
 			if err := general.RPCPost(url, "Accelerate.Peers", &core.Empty{}, reply); err != nil {
 				fmt.Println("peers error:", err.Error())
 			}

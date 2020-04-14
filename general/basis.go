@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"bytes"
 	"context"
+	"errors"
 	"fmt"
 	"github.com/glvd/accipfs/core"
 	"github.com/gorilla/rpc/v2/json2"
@@ -65,7 +66,12 @@ func RPCPost(url string, method string, input, output interface{}) error {
 		}
 	}()
 	buf.Grow(bytes.MinRead)
-	_, err = buf.ReadFrom(resp.Body)
+	var size int64
+	size, err = buf.ReadFrom(resp.Body)
+	if size == 0 {
+		return errors.New("no data response from remote node")
+	}
+
 	err = json2.DecodeClientResponse(buf, output)
 	if err != nil {
 		logE("decode failed", "data", buf.String())

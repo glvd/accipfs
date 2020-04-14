@@ -165,8 +165,8 @@ func (l *BustLinker) Stop() {
 }
 
 // Ping ...
-func (l *BustLinker) Ping(r *http.Request, e *core.Empty, result *string) error {
-	*result = "pong"
+func (l *BustLinker) Ping(r *http.Request, req *core.PingReq, resp *core.PingResp) error {
+	resp.Resp = "pong"
 	return nil
 }
 

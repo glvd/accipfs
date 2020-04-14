@@ -39,6 +39,7 @@ func SplitIP(addr string) (ip string, port int) {
 
 // RPCPost ...
 func RPCPost(url string, method string, input, output interface{}) error {
+	logI("rpcpost", "url", url)
 	message, err := json2.EncodeClientRequest(method, input)
 	if err != nil {
 		return err
@@ -67,6 +68,7 @@ func RPCPost(url string, method string, input, output interface{}) error {
 	_, err = buf.ReadFrom(resp.Body)
 	err = json2.DecodeClientResponse(buf, output)
 	if err != nil {
+		logE("decode failed", "data", buf.String())
 		return err
 	}
 	return nil

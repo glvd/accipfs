@@ -82,7 +82,10 @@ func RPCPost(url string, method string, input, output interface{}) error {
 
 // RPCAddress ...
 func RPCAddress(addr core.NodeAddress) string {
-	return fmt.Sprintf("http://%s:%d", addr.Address, addr.Port)
+	if addr.Prefix == "" {
+		addr.Prefix = "rpc"
+	}
+	return fmt.Sprintf("http://%s:%d/%s", addr.Address, addr.Port, addr.Prefix)
 }
 
 // PipeScreen ...

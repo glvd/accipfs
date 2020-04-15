@@ -15,7 +15,7 @@ func pinCmd() *cobra.Command {
 		Run: func(cmd *cobra.Command, args []string) {
 			config.Initialize()
 			for _, no := range args {
-				err := client.PinVideo(config.RPCAddr().String(), no)
+				err := client.PinVideo(config.RPCAddr(), no)
 				if err != nil {
 					fmt.Printf("failed to pin (%s) with error(%v)\n", no, err.Error())
 					return

@@ -40,7 +40,7 @@ func SplitIP(addr string) (ip string, port int) {
 
 // RPCPost ...
 func RPCPost(url string, method string, input, output interface{}) error {
-	logI("rpcpost", "url", url, "input", input)
+	logI("rpcpost", "url", url, "method", method, "input", input)
 	message, err := json2.EncodeClientRequest(method, input)
 	if err != nil {
 		return err

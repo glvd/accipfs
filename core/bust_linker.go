@@ -6,7 +6,6 @@ import (
 
 // PingReq ...
 type PingReq struct {
-	Node
 }
 
 // PingResp ...

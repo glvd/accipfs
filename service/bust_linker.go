@@ -99,8 +99,7 @@ func (l *BustLinker) Run() {
 		})
 
 		if v {
-			url := fmt.Sprintf("http://%s:%d", node.NodeAddress.Address, node.NodeAddress.Port)
-			remoteNodes, err := client.Peers(url, node)
+			remoteNodes, err := client.Peers(general.RPCAddress(node.NodeAddress), node)
 			if err != nil {
 				logE("get peers failed", "account", node.Name, "error", err)
 				return true

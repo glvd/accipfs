@@ -6,7 +6,6 @@ import (
 	"github.com/goextension/extmap"
 	"github.com/spf13/viper"
 	"io/ioutil"
-	"net/url"
 	"os"
 	"path/filepath"
 )
@@ -171,12 +170,8 @@ func (c *Config) Init() error {
 	return nil
 }
 
-func (c Config) rpcAddr() *url.URL {
-	u := url.URL{
-		Scheme: c.Schema,
-		Path:   fmt.Sprintf("127.0.0.1:%d/rpc", c.Port),
-	}
-	return &u
+func (c Config) rpcAddr() string {
+	return fmt.Sprintf("http://127.0.0.1:%d/rpc", c.Port)
 }
 
 func currentPath() string {
@@ -223,6 +218,6 @@ func IPFSAddr() string {
 }
 
 // RPCAddr ...
-func RPCAddr() *url.URL {
+func RPCAddr() string {
 	return Global().rpcAddr()
 }

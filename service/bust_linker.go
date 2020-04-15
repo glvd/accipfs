@@ -89,7 +89,7 @@ func (l *BustLinker) Run() {
 	ctx := context.TODO()
 	l.nodes.Range(func(node *core.Node) bool {
 		output("BustLinker", "syncing node", node.Name)
-		l.nodes.Validate(node.NodeInfo.Name, func(node *core.Node) bool {
+		v := l.nodes.Validate(node.NodeInfo.Name, func(node *core.Node) bool {
 			err := client.Ping(general.RPCAddress(node.NodeAddress))
 			if err != nil {
 				logE("ping failed", "account", node.Name, "error", err)
@@ -98,37 +98,39 @@ func (l *BustLinker) Run() {
 			return true
 		})
 
-		url := fmt.Sprintf("http://%s:%d", node.NodeAddress.Address, node.NodeAddress.Port)
-		remoteNodes, err := client.Peers(url, node)
-		if err != nil {
-			logE("get peers failed", "account", node.Name, "error", err)
-			return true
-		}
+		if v {
+			url := fmt.Sprintf("http://%s:%d", node.NodeAddress.Address, node.NodeAddress.Port)
+			remoteNodes, err := client.Peers(url, node)
+			if err != nil {
+				logE("get peers failed", "account", node.Name, "error", err)
+				return true
+			}
 
-		for _, rnode := range remoteNodes {
-			if l.nodes.Length() > l.cfg.Limit {
-				return false
-			}
-			result := new(bool)
-			if err := l.addPeer(ctx, rnode, result); err != nil {
-				logE("add peer failed", "account", rnode.Name, "error", err)
-				continue
-			}
-			if *result {
-				pins, err := client.Pins(rnode.NodeAddress)
-				if err != nil {
-					logE("get pin list", "error", err)
+			for _, rnode := range remoteNodes {
+				if l.nodes.Length() > l.cfg.Limit {
+					return false
+				}
+				result := new(bool)
+				if err := l.addPeer(ctx, rnode, result); err != nil {
+					logE("add peer failed", "account", rnode.Name, "error", err)
 					continue
 				}
-				for _, p := range pins {
-					err := l.cache.AddOrUpdate(p, &rnode.NodeInfo)
+				if *result {
+					pins, err := client.Pins(rnode.NodeAddress)
 					if err != nil {
-						logE("cache add or update", "error", err)
+						logE("get pin list", "error", err)
 						continue
 					}
+					for _, p := range pins {
+						err := l.cache.AddOrUpdate(p, &rnode.NodeInfo)
+						if err != nil {
+							logE("cache add or update", "error", err)
+							continue
+						}
+					}
 				}
-			}
 
+			}
 		}
 		return true
 	})
@@ -319,7 +321,7 @@ func (l *BustLinker) AddPeer(r *http.Request, info *core.Node, result *bool) err
 }
 
 // Peers ...
-func (l *BustLinker) Peers(r *http.Request, _ *core.Empty, result *[]*core.Node) error {
+func (l *BustLinker) Peers(r *http.Request, _ *core.Node, result *[]*core.Node) error {
 	l.nodes.Range(func(node *core.Node) bool {
 		*result = append(*result, node)
 		return true

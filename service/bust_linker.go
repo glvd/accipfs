@@ -248,7 +248,7 @@ func (l *BustLinker) connectTo(r *http.Request, addr *string, respNode *core.Nod
 	if err != nil {
 		return err
 	}
-	respNode = &resp.Node
+	*respNode = resp.Node
 	respNode.NodeAddress.Address, respNode.NodeAddress.Port = general.SplitIP(*addr)
 
 	return nil

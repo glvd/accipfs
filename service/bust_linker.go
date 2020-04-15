@@ -74,21 +74,21 @@ func (l *BustLinker) Start() {
 	if err != nil {
 		panic(err)
 	}
-	output("BustLinker", "run id", jobAcc)
+	output("bust linker", "run id", jobAcc)
 	go l.cron.Run()
 }
 
 // Run ...
 func (l *BustLinker) Run() {
 	if l.lock.Load() {
-		output("BustLinker", "the previous task has not been completed")
+		output("bust linker", "the previous task has not been completed")
 		return
 	}
 	l.lock.Store(true)
 	defer l.lock.Store(false)
 	ctx := context.TODO()
 	l.nodes.Range(func(node *core.Node) bool {
-		output("BustLinker", "syncing node", node.Name)
+		output("bust linker", "syncing node", node.Name)
 		v := l.nodes.Validate(node.NodeInfo.Name, func(node *core.Node) bool {
 			err := client.Ping(general.RPCAddress(node.NodeAddress))
 			if err != nil {
@@ -133,7 +133,7 @@ func (l *BustLinker) Run() {
 		}
 		return true
 	})
-	output("BustLinker", "syncing done")
+	output("bust linker", "syncing done")
 }
 
 // WaitingForReady ...

@@ -398,17 +398,23 @@ func (l *BustLinker) PinVideo(r *http.Request, no *string, result *bool) error {
 
 	wg.Add(1)
 	go func() {
-		defer wg.Done()
-		err := l.nodeConnect(ctx, v.SourceHash)
+		var err error
+		defer func() {
+			wg.Done()
+			if err != nil {
+				resultErr <- err
+			}
+		}()
+
+		err = l.nodeConnect(ctx, v.SourceHash)
 		if err != nil {
 			cancelFunc()
-			resultErr <- err
 			return
 		}
-		e := l.ipfs.PinAdd(ctx, v.SourceHash)
-		if e != nil {
+		err = l.ipfs.PinAdd(ctx, v.SourceHash)
+		if err != nil {
 			cancelFunc()
-			resultErr <- e
+			return
 		}
 	}()
 

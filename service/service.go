@@ -74,8 +74,5 @@ func (s *service) Stop() error {
 
 	s.linker.Stop()
 
-	if err := s.controller.StopRun(); err != nil {
-		return err
-	}
-	return nil
+	return s.controller.StopRun()
 }

@@ -49,16 +49,10 @@ func (s *rpcServer) Start() error {
 	s.httpServer = &http.Server{Addr: port, Handler: s.route}
 
 	output("JSON RPC service listen and serving on port", port)
-	if err := s.httpServer.ListenAndServe(); err != nil {
-		return err
-	}
-	return nil
+	return s.httpServer.ListenAndServe()
 }
 
 // Stop ...
 func (s *rpcServer) Stop() error {
-	if err := s.httpServer.Shutdown(context.Background()); err != nil {
-		return err
-	}
-	return nil
+	return s.httpServer.Shutdown(context.Background())
 }

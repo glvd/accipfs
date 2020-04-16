@@ -16,7 +16,7 @@ import (
 )
 
 const ethPath = ".ethereum"
-const endPoint = "geth.ipc"
+const ethEndPoint = "geth.ipc"
 
 type nodeETH struct {
 	*serviceNode

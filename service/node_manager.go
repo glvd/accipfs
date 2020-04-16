@@ -1,10 +1,12 @@
 package service
 
 import (
+	"sync"
+
 	"github.com/glvd/accipfs/core"
+
 	"github.com/gocacher/cacher"
 	"go.uber.org/atomic"
-	"sync"
 )
 
 // nodeManager ...

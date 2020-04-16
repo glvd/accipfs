@@ -9,7 +9,6 @@ import (
 	"sync"
 	"time"
 
-	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/glvd/accipfs/account"
 	"github.com/glvd/accipfs/cache"
 	"github.com/glvd/accipfs/client"
@@ -17,6 +16,8 @@ import (
 	"github.com/glvd/accipfs/core"
 	"github.com/glvd/accipfs/general"
 	"github.com/glvd/accipfs/task"
+
+	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/robfig/cron/v3"
 	"go.uber.org/atomic"
 )

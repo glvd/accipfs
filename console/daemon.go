@@ -14,7 +14,7 @@ func daemonCmd() *cobra.Command {
 		Run: func(cmd *cobra.Command, args []string) {
 			config.Initialize()
 			cfg := config.Global()
-			s, e := service.NewRPCServer(&cfg)
+			s, e := service.New(&cfg)
 			if e != nil {
 				panic(e)
 			}

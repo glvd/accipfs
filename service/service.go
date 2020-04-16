@@ -15,6 +15,8 @@ type service struct {
 
 // Service ...
 type Service interface {
+	Start() (e error)
+	Stop() (e error)
 }
 
 // New ...

@@ -15,7 +15,7 @@ import (
 const ipfsPath = ".ipfs"
 const ipfsAPI = "api"
 
-type nodeIPFS struct {
+type ipfsNode struct {
 	*serviceNode
 	cfg *config.Config
 	api *httpapi.HttpApi
@@ -30,8 +30,8 @@ type PeerID struct {
 	PublicKey       string   `json:"PublicKey"`
 }
 
-func newNodeIPFS(cfg *config.Config) (*nodeIPFS, error) {
-	node := &nodeIPFS{
+func newNodeIPFS(cfg *config.Config) (*ipfsNode, error) {
+	node := &ipfsNode{
 		cfg:         cfg,
 		serviceNode: nodeInstance(),
 	}
@@ -42,7 +42,7 @@ func newNodeIPFS(cfg *config.Config) (*nodeIPFS, error) {
 }
 
 // SwarmConnect ...
-func (n *nodeIPFS) SwarmConnect(ctx context.Context, addr string) (e error) {
+func (n *ipfsNode) SwarmConnect(ctx context.Context, addr string) (e error) {
 	ma, e := multiaddr.NewMultiaddr(addr)
 	if e != nil {
 		return e
@@ -58,7 +58,7 @@ func (n *nodeIPFS) SwarmConnect(ctx context.Context, addr string) (e error) {
 	return nil
 }
 
-func (n *nodeIPFS) connect() (e error) {
+func (n *ipfsNode) connect() (e error) {
 	ma, err := multiaddr.NewMultiaddr(config.IPFSAddr())
 	if err != nil {
 		return err
@@ -68,12 +68,12 @@ func (n *nodeIPFS) connect() (e error) {
 }
 
 // SwarmPeers ...
-func (n *nodeIPFS) SwarmPeers(ctx context.Context) ([]iface.ConnectionInfo, error) {
+func (n *ipfsNode) SwarmPeers(ctx context.Context) ([]iface.ConnectionInfo, error) {
 	return n.api.Swarm().Peers(ctx)
 }
 
 // ID get self serviceNode info
-func (n *nodeIPFS) ID(ctx context.Context) (pid *core.DataStoreNode, e error) {
+func (n *ipfsNode) ID(ctx context.Context) (pid *core.DataStoreNode, e error) {
 	pid = &core.DataStoreNode{}
 	e = n.api.Request("id").Exec(ctx, pid)
 	if e != nil {
@@ -83,24 +83,24 @@ func (n *nodeIPFS) ID(ctx context.Context) (pid *core.DataStoreNode, e error) {
 }
 
 // PinAdd ...
-func (n *nodeIPFS) PinAdd(ctx context.Context, hash string) (e error) {
+func (n *ipfsNode) PinAdd(ctx context.Context, hash string) (e error) {
 	p := path.New(hash)
 	return n.api.Pin().Add(ctx, p, options.Pin.Recursive(true))
 }
 
 // PinLS ...
-func (n *nodeIPFS) PinLS(ctx context.Context) (pins []iface.Pin, e error) {
+func (n *ipfsNode) PinLS(ctx context.Context) (pins []iface.Pin, e error) {
 	return n.api.Pin().Ls(ctx, options.Pin.Type.Recursive())
 }
 
 // PinRm ...
-func (n *nodeIPFS) PinRm(ctx context.Context, hash string) (e error) {
+func (n *ipfsNode) PinRm(ctx context.Context, hash string) (e error) {
 	p := path.New(hash)
 	return n.api.Pin().Rm(ctx, p)
 }
 
 // IsReady ...
-func (n *nodeIPFS) IsReady() bool {
+func (n *ipfsNode) IsReady() bool {
 	ma, err := multiaddr.NewMultiaddr(config.IPFSAddr())
 	if err != nil {
 		return false

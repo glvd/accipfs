@@ -18,7 +18,7 @@ import (
 const ethPath = ".ethereum"
 const ethEndPoint = "geth.ipc"
 
-type nodeETH struct {
+type ethNode struct {
 	*serviceNode
 	cfg    *config.Config
 	client *ethclient.Client
@@ -63,15 +63,15 @@ type ETHProtocol struct {
 	Eth ETHProtocolInfo `json:"eth"`
 }
 
-func newNodeETH(cfg *config.Config) (*nodeETH, error) {
-	return &nodeETH{
+func newNodeETH(cfg *config.Config) (*ethNode, error) {
+	return &ethNode{
 		cfg:         cfg,
 		serviceNode: nodeInstance(),
 	}, nil
 }
 
 // IsReady ...
-func (n *nodeETH) IsReady() bool {
+func (n *ethNode) IsReady() bool {
 	client, err := ethclient.Dial(config.ETHAddr())
 	if err != nil {
 		logE("new serviceNode eth", "error", err)
@@ -82,25 +82,25 @@ func (n *nodeETH) IsReady() bool {
 }
 
 // DMessage ...
-func (n *nodeETH) DTag() (*dtag.DTag, error) {
+func (n *ethNode) DTag() (*dtag.DTag, error) {
 	address := common.HexToAddress(n.cfg.ETH.MessageAddr)
 	return dtag.NewDTag(address, n.client)
 }
 
 // NodeClient ...
-func (n *nodeETH) Node() (*node.AccelerateNode, error) {
+func (n *ethNode) Node() (*node.AccelerateNode, error) {
 	address := common.HexToAddress(n.cfg.ETH.NodeAddr)
 	return node.NewAccelerateNode(address, n.client)
 }
 
 // Token ...
-func (n *nodeETH) Token() (*token.DhToken, error) {
+func (n *ethNode) Token() (*token.DhToken, error) {
 	address := common.HexToAddress(n.cfg.ETH.TokenAddr)
 	return token.NewDhToken(address, n.client)
 }
 
 // Peers ...
-func (n *nodeETH) AllPeers(ctx context.Context) ([]ETHPeer, error) {
+func (n *ethNode) AllPeers(ctx context.Context) ([]ETHPeer, error) {
 	var peers []ETHPeer
 	cancelCtx, cancel := context.WithCancel(ctx)
 	defer cancel()
@@ -118,7 +118,7 @@ func (n *nodeETH) AllPeers(ctx context.Context) ([]ETHPeer, error) {
 }
 
 // NewAccount ...
-func (n *nodeETH) NodeInfo(ctx context.Context) (*core.ContractNode, error) {
+func (n *ethNode) NodeInfo(ctx context.Context) (*core.ContractNode, error) {
 	var node core.ContractNode
 	cancelCtx, cancel := context.WithCancel(ctx)
 	defer cancel()
@@ -136,7 +136,7 @@ func (n *nodeETH) NodeInfo(ctx context.Context) (*core.ContractNode, error) {
 }
 
 // AddPeer ...
-func (n *nodeETH) AddPeer(ctx context.Context, peer string) error {
+func (n *ethNode) AddPeer(ctx context.Context, peer string) error {
 	var b bool
 	cancelCtx, cancel := context.WithCancel(ctx)
 	defer cancel()
@@ -154,7 +154,7 @@ func (n *nodeETH) AddPeer(ctx context.Context, peer string) error {
 }
 
 // FindNo ...
-func (n *nodeETH) FindNo(ctx context.Context, no string) error {
+func (n *ethNode) FindNo(ctx context.Context, no string) error {
 	t, err := n.DTag()
 	if err != nil {
 		return err

@@ -30,8 +30,8 @@ type BustLinker struct {
 	lock  *atomic.Bool
 	self  *account.Account
 	cfg   *config.Config
-	eth   *nodeETH
-	ipfs  *nodeIPFS
+	eth   *ethNode
+	ipfs  *ipfsNode
 	cron  *cron.Cron
 }
 

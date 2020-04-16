@@ -47,7 +47,6 @@ func NewBustLinker(cfg *config.Config) (linker *BustLinker, err error) {
 	linker = &BustLinker{
 		nodes: NewNodeManager(),
 		lock:  atomic.NewBool(false),
-		c:     controller.New(cfg),
 		cfg:   cfg,
 	}
 	//linker.ethServer = newNodeServerETH(cfg)

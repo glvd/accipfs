@@ -365,33 +365,42 @@ func (l *BustLinker) PinVideo(r *http.Request, no *string, result *bool) error {
 	defer cancelFunc()
 	wg.Add(1)
 	go func() {
-		defer wg.Done()
-		err := l.nodeConnect(ctx, v.PosterHash)
+		var err error
+		defer func() {
+			wg.Done()
+			if err != nil && resultErr != nil {
+				resultErr <- err
+			}
+		}()
+		err = l.nodeConnect(ctx, v.PosterHash)
 		if err != nil {
 			cancelFunc()
-			resultErr <- err
 			return
 		}
-		e := l.ipfs.PinAdd(ctx, v.PosterHash)
-		if e != nil {
+		err = l.ipfs.PinAdd(ctx, v.PosterHash)
+		if err != nil {
 			cancelFunc()
-			resultErr <- e
+			return
 		}
 	}()
 
 	wg.Add(1)
 	go func() {
-		defer wg.Done()
-		err := l.nodeConnect(ctx, v.ThumbHash)
+		var err error
+		defer func() {
+			wg.Done()
+			if err != nil && resultErr != nil {
+				resultErr <- err
+			}
+		}()
+		err = l.nodeConnect(ctx, v.ThumbHash)
 		if err != nil {
 			cancelFunc()
-			resultErr <- err
 			return
 		}
-		e := l.ipfs.PinAdd(ctx, v.ThumbHash)
-		if e != nil {
+		err = l.ipfs.PinAdd(ctx, v.ThumbHash)
+		if err != nil {
 			cancelFunc()
-			resultErr <- e
 		}
 
 	}()
@@ -401,7 +410,7 @@ func (l *BustLinker) PinVideo(r *http.Request, no *string, result *bool) error {
 		var err error
 		defer func() {
 			wg.Done()
-			if err != nil {
+			if err != nil && resultErr != nil {
 				resultErr <- err
 			}
 		}()
@@ -420,23 +429,29 @@ func (l *BustLinker) PinVideo(r *http.Request, no *string, result *bool) error {
 
 	wg.Add(1)
 	go func() {
-		defer wg.Done()
-		err := l.nodeConnect(ctx, v.M3U8Hash)
+		var err error
+		defer func() {
+			wg.Done()
+			if err != nil && resultErr != nil {
+				resultErr <- err
+			}
+		}()
+		err = l.nodeConnect(ctx, v.M3U8Hash)
 		if err != nil {
 			cancelFunc()
-			resultErr <- err
 			return
 		}
-		e := l.ipfs.PinAdd(ctx, v.M3U8Hash)
-		if e != nil {
+		err = l.ipfs.PinAdd(ctx, v.M3U8Hash)
+		if err != nil {
 			cancelFunc()
-			resultErr <- e
+			return
 		}
 	}()
 
 	wg.Wait()
 	select {
 	case e := <-resultErr:
+		close(resultErr)
 		return e
 	default:
 	}

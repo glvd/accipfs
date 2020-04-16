@@ -14,7 +14,6 @@ import (
 	"github.com/glvd/accipfs/cache"
 	"github.com/glvd/accipfs/client"
 	"github.com/glvd/accipfs/config"
-	"github.com/glvd/accipfs/controller"
 	"github.com/glvd/accipfs/core"
 	"github.com/glvd/accipfs/general"
 	"github.com/glvd/accipfs/task"
@@ -33,7 +32,6 @@ type BustLinker struct {
 	cfg   *config.Config
 	eth   *nodeETH
 	ipfs  *nodeIPFS
-	c     *controller.Controller
 	cron  *cron.Cron
 }
 
@@ -67,8 +65,6 @@ func NewBustLinker(cfg *config.Config) (linker *BustLinker, err error) {
 
 // Start ...
 func (l *BustLinker) Start() {
-	go l.c.Run()
-
 	jobAcc, err := l.cron.AddJob("0 1/3 * * * *", l)
 	if err != nil {
 		panic(err)
@@ -159,9 +155,6 @@ func (l *BustLinker) WaitingForReady() {
 func (l *BustLinker) Stop() {
 	ctx := l.cron.Stop()
 	<-ctx.Done()
-	if err := l.c.StopRun(); err != nil {
-		return
-	}
 }
 
 // Ping ...

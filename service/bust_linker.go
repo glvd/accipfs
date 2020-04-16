@@ -451,7 +451,7 @@ func (l *BustLinker) PinVideo(r *http.Request, no *string, result *bool) error {
 	wg.Wait()
 	select {
 	case e := <-resultErr:
-		close(resultErr)
+		resultErr = nil
 		return e
 	default:
 	}
@@ -487,12 +487,6 @@ func (l *BustLinker) Info(r *http.Request, hash *string, info *string) error {
 		return e
 	}
 	*info = string(bytes)
-	return nil
-}
-
-// Exchange ...
-func (l *BustLinker) Exchange(r *http.Request, n *core.NodeInfo, to []string) error {
-
 	return nil
 }
 

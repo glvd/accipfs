@@ -1,16 +1,13 @@
 package service
 
 import (
-	"bufio"
 	"context"
 	"fmt"
 	"github.com/glvd/accipfs/config"
 	"github.com/gorilla/mux"
 	"github.com/gorilla/rpc/v2"
 	"github.com/gorilla/rpc/v2/json2"
-	"io"
 	"net/http"
-	"strings"
 	"time"
 )
 
@@ -33,7 +30,7 @@ type Server struct {
 // NewRPCServer ...
 func NewRPCServer(cfg *config.Config) (*Server, error) {
 	rpcServer := rpc.NewServer()
-	rpcServer.RegisterCodec(json2.NewCodec(), "application/json")
+	//rpcServer.RegisterCodec(json2.NewCodec(), "application/json")
 	rpcServer.RegisterCodec(json2.NewCodec(), "application/json;charset=UTF-8")
 
 	acc, err := NewBustLinker(cfg)
@@ -90,27 +87,5 @@ func (s *Server) Stop() error {
 		return err
 	}
 	s.linker.Stop()
-	return nil
-}
-
-func screenOutput(ctx context.Context, reader io.Reader) (e error) {
-	r := bufio.NewReader(reader)
-	var lines []byte
-END:
-	for {
-		select {
-		case <-ctx.Done():
-			return
-		default:
-			lines, _, e = r.ReadLine()
-			if e != nil || io.EOF == e {
-				break END
-			}
-			if strings.TrimSpace(string(lines)) != "" {
-				output(string(lines))
-			}
-		}
-	}
-
 	return nil
 }

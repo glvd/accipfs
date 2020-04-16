@@ -2,7 +2,6 @@ package service
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
@@ -10,15 +9,10 @@ import (
 	"github.com/ethereum/go-ethereum/rpc"
 	"github.com/fatih/color"
 	"github.com/glvd/accipfs/config"
-	"github.com/glvd/accipfs/contract"
 	"github.com/glvd/accipfs/contract/dtag"
 	"github.com/glvd/accipfs/contract/node"
 	"github.com/glvd/accipfs/contract/token"
 	"github.com/glvd/accipfs/core"
-	"os"
-	"sort"
-	"strings"
-	"time"
 )
 
 const ethPath = ".ethereum"
@@ -67,158 +61,6 @@ type ETHProtocolInfo struct {
 // ETHProtocol ...
 type ETHProtocol struct {
 	Eth ETHProtocolInfo `json:"eth"`
-}
-
-// Run ...
-func (n *nodeETH) Run() {
-	if n.lock.Load() {
-		output("service NodeClient is already running")
-		return
-	}
-	n.lock.Store(true)
-	defer n.lock.Store(false)
-	if !n.IsReady() {
-		output("waiting for ready")
-		return
-	}
-	ctx := context.TODO()
-
-	// get self node info
-	nodeInfo, err := n.NodeInfo(ctx)
-	if err != nil {
-		logE("get eth node info", "error", err.Error(), "node", nodeInfo)
-		return
-	}
-	cnode := nodeInfo.Enode
-	jsonString, _ := json.Marshal(nodeInfo.Protocols)
-	var nodeProtocal ETHProtocol
-	err = json.Unmarshal(jsonString, &nodeProtocal)
-	if err != nil {
-		return
-	}
-	ip := os.Getenv("IP")
-	cnode = strings.Split(cnode, "@")[0] + "@" + ip + ":30303"
-	//
-	//// get active nodes
-	var activePeers []string
-	peers, err := n.AllPeers(ctx)
-	if err != nil {
-		output("get active eth node failed", err.Error())
-	} else {
-		output("get active eth nodes", len(peers))
-	}
-	for _, peer := range peers {
-		jsStr, _ := json.Marshal(peer.Protocols)
-		var peerProtocol ETHProtocol
-		err := json.Unmarshal(jsStr, &peerProtocol)
-		if err != nil {
-			return
-		}
-		fmt.Println("peer difficulty", peerProtocol.Eth.Difficulty)
-		// check if peers had enough blocks
-		if float64(peerProtocol.Eth.Difficulty)/float64(nodeProtocal.Eth.Difficulty) > 0.9 {
-			activePeers = append(activePeers, peer.Enode)
-		}
-	}
-
-	// init contract
-	cl := contract.Loader(n.cfg)
-
-	// get decoded contract nodes
-	err = cl.Node(func(node *node.AccelerateNode, opts *bind.TransactOpts) error {
-		o := &bind.CallOpts{Pending: true}
-		nodes, e := node.GetEthNodes(o)
-		if e != nil {
-			output("get contract node failed", e.Error())
-			return e
-		}
-		output("get contract nodes", len(nodes))
-
-		nodes = decodeNodes(n.cfg, nodes)
-		//fmt.Println("[cPeers]", cPeers)
-		// get decoded contract signer nodes
-		masterNodes, e := node.GetSignerNodes(o)
-		if e != nil {
-			output("get contract node failed", e.Error())
-			return e
-		}
-		output("get contract nodes", len(masterNodes))
-
-		masterNodes = decodeNodes(n.cfg, masterNodes)
-		// filter public network accessible nodes
-		accessibleNodes := getAccessibleEthNodes(activePeers, "30303", 3*time.Second)
-		// sync nodes
-		newSignerNodes := difference([]string{cnode}, masterNodes)
-		newAccNodes := difference(accessibleNodes, nodes)
-		// node to be deleted
-		deleteNodes := difference(nodes, getAccessibleEthNodes(nodes, "30303", 3*time.Second))
-		var deleteIdx []int
-		for _, dNode := range deleteNodes {
-			for idx, cNode := range nodes {
-				if cNode == dNode {
-					deleteIdx = append(deleteIdx, idx)
-				}
-			}
-		}
-
-		// delete rest node
-		if len(deleteIdx) > 0 {
-			var err error
-			sort.Sort(sort.Reverse(sort.IntSlice(deleteIdx)))
-			for _, idx := range deleteIdx {
-				_, err = node.DeleteEthNodes(opts, uint32(idx))
-			}
-
-			if err != nil {
-				fmt.Println("<删除失效节点失败>", err.Error())
-			} else {
-				fmt.Println("[删除失效节点成功]")
-			}
-		}
-
-		// crypto node info && add to contract
-		if len(newAccNodes) > 0 {
-			var err error
-			fmt.Println("[adding node]", newAccNodes)
-			for _, n := range encodeNodes(n.cfg, newAccNodes) {
-				_, err = node.AddEthNodes(opts, []string{n})
-			}
-			if err != nil {
-				fmt.Println("[add node failed]", err.Error())
-			} else {
-				fmt.Println("[add node success]")
-			}
-			// update gateway info
-		} else {
-			fmt.Println("[已经是最新节点数据]")
-		}
-
-		// add signer nodes
-		if len(newSignerNodes) > 0 {
-			fmt.Println("[adding signer node]", newSignerNodes)
-			_, err := node.AddSignerNodes(opts, encodeNodes(n.cfg, newSignerNodes))
-			if err != nil {
-				fmt.Println("<添加主节点失败>", err.Error())
-			} else {
-				fmt.Println("[添加主节点成功]")
-			}
-		}
-		vNodes := difference(accessibleNodes, masterNodes)
-		mNodes := make(map[string]bool)
-		for _, value := range vNodes {
-			mNodes[value] = true
-		}
-		syncDNS(n.cfg, mNodes)
-		return nil
-	})
-
-	if err != nil {
-		logE("eth node process error", "error", err)
-		return
-	}
-
-	output("sync eth node complete")
-	return
 }
 
 func newNodeETH(cfg *config.Config) (*nodeETH, error) {

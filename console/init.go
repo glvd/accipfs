@@ -18,6 +18,12 @@ func initCmd() *cobra.Command {
 		},
 		Run: func(cmd *cobra.Command, args []string) {
 			cfg := config.Default()
+
+			err := config.SaveGenesis(cfg)
+			if err != nil {
+				panic(err)
+			}
+
 			if err := cfg.Init(); err != nil {
 				panic(err)
 			}

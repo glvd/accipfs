@@ -2,6 +2,7 @@ package config
 
 import (
 	"encoding/json"
+	"io/ioutil"
 	"os"
 	"path/filepath"
 )
@@ -102,4 +103,17 @@ func LoadGenesis(cfg *Config) (*Genesis, error) {
 		return nil, err
 	}
 	return &g, nil
+}
+
+// SaveGenesis write genesis file when the file is not exist
+func SaveGenesis(cfg *Config) (err error) {
+	path := filepath.Join(cfg.Path, "genesis.json")
+	_, err = os.Stat(path)
+	if err != nil && !os.IsNotExist(err) {
+		return err
+	}
+	if os.IsNotExist(err) {
+		return ioutil.WriteFile(path, []byte(genesisData), 0755)
+	}
+	return nil
 }

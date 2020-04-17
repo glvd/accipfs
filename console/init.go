@@ -25,10 +25,19 @@ func initCmd() *cobra.Command {
 			if err := c.Init(); err != nil {
 				panic(err)
 			}
+
+			serverConfig, err := config.LoadIPFSServerConfig(cfg)
+			if err != nil {
+				panic(err)
+			}
+
 			acc, err := account.NewAccount(cfg)
 			if err != nil {
 				panic(err)
 			}
+			acc.Identity.PeerID = serverConfig.Identity.PeerID
+			acc.Identity.PrivKey = serverConfig.Identity.PrivKey
+
 			err = acc.Save(cfg)
 			if err != nil {
 				panic(err)

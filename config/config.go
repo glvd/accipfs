@@ -71,6 +71,7 @@ type Config struct {
 	IPFS       IPFSConfig `json:"ipfs" mapstructure:"ipfs"`
 	AWS        AWSConfig  `json:"aws" mapstructure:"aws"`
 	Interval   int64      `json:"interval" mapstructure:"interval"`
+	NodeType   int        `json:"node_type" mapstructure:"node_type"`
 	Limit      int64      `json:"limit" mapstructure:"limit"`
 }
 
@@ -153,6 +154,7 @@ func Default() *Config {
 		},
 		AWS:      AWSConfig{},
 		Interval: 30,
+		NodeType: 0x01,
 		Limit:    500,
 	}
 	if _config == nil {

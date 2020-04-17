@@ -12,13 +12,6 @@ import (
 	"github.com/gorilla/rpc/v2/json2"
 )
 
-// NodeServer ...
-type NodeServer interface {
-	Start() error
-	Init() error
-	Stop() error
-}
-
 // rpcServer ...
 type rpcServer struct {
 	cfg        *config.Config

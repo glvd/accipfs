@@ -13,6 +13,8 @@ import (
 	"strings"
 )
 
+var accountName = "account.json"
+
 // Identity ...
 type Identity struct {
 	PeerID  string

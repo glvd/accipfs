@@ -14,5 +14,4 @@ func TestLoadConfig(t *testing.T) {
 		panic(err)
 	}
 
-	t.Logf("%+v", v)
 }

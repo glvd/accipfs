@@ -167,7 +167,7 @@ type ConnMgr struct {
 // LoadIPFSServerConfig ...
 func LoadIPFSServerConfig(cfg Config) (*IPFSServerConfig, error) {
 	var c IPFSServerConfig
-	path := filepath.Join(cfg.Path, "genesis.json")
+	path := filepath.Join(cfg.Path, _dataDirIPFS, "config")
 	open, err := os.Open(path)
 	if err != nil {
 		return nil, err

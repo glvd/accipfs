@@ -21,7 +21,6 @@ const ethPath = ".ethereum"
 const ethEndPoint = "geth.ipc"
 
 type ethNode struct {
-	*serviceNode
 	cfg    *config.Config
 	client *ethclient.Client
 	out    *color.Color
@@ -67,8 +66,7 @@ type ETHProtocol struct {
 
 func newNodeETH(cfg *config.Config) (*ethNode, error) {
 	return &ethNode{
-		cfg:         cfg,
-		serviceNode: nodeInstance(),
+		cfg: cfg,
 	}, nil
 }
 

@@ -18,7 +18,6 @@ const ipfsPath = ".ipfs"
 const ipfsAPI = "api"
 
 type ipfsNode struct {
-	*serviceNode
 	cfg *config.Config
 	api *httpapi.HttpApi
 }
@@ -34,8 +33,7 @@ type PeerID struct {
 
 func newNodeIPFS(cfg *config.Config) (*ipfsNode, error) {
 	node := &ipfsNode{
-		cfg:         cfg,
-		serviceNode: nodeInstance(),
+		cfg: cfg,
 	}
 	if err := node.connect(); err != nil {
 		return nil, err

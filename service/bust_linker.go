@@ -365,6 +365,10 @@ func (l *BustLinker) PinVideo(r *http.Request, no *string, result *bool) error {
 				resultErr <- err
 			}
 		}()
+		if v.PosterHash == "" {
+			return
+		}
+
 		err = l.nodeConnect(ctx, v.PosterHash)
 		if err != nil {
 			cancelFunc()
@@ -386,6 +390,9 @@ func (l *BustLinker) PinVideo(r *http.Request, no *string, result *bool) error {
 				resultErr <- err
 			}
 		}()
+		if v.ThumbHash == "" {
+			return
+		}
 		err = l.nodeConnect(ctx, v.ThumbHash)
 		if err != nil {
 			cancelFunc()
@@ -407,7 +414,9 @@ func (l *BustLinker) PinVideo(r *http.Request, no *string, result *bool) error {
 				resultErr <- err
 			}
 		}()
-
+		if v.SourceHash == "" {
+			return
+		}
 		err = l.nodeConnect(ctx, v.SourceHash)
 		if err != nil {
 			cancelFunc()
@@ -429,6 +438,11 @@ func (l *BustLinker) PinVideo(r *http.Request, no *string, result *bool) error {
 				resultErr <- err
 			}
 		}()
+
+		if v.M3U8Hash == "" {
+			return
+		}
+
 		err = l.nodeConnect(ctx, v.M3U8Hash)
 		if err != nil {
 			cancelFunc()

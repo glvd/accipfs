@@ -1,13 +1,17 @@
 package service
 
 import (
-	"github.com/glvd/accipfs/core"
-	"go.uber.org/atomic"
 	"sync"
+
+	"github.com/glvd/accipfs/core"
+
+	"github.com/gocacher/cacher"
+	"go.uber.org/atomic"
 )
 
 // nodeManager ...
 type nodeManager struct {
+	nodeCache  cacher.Cacher
 	nodes      sync.Map
 	faultNodes sync.Map
 	nodeSize   *atomic.Int64

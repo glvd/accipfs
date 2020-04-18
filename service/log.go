@@ -7,6 +7,9 @@ import (
 
 const module = "service"
 
+// LogOutput ...
+var LogOutput = true
+
 func logI(msg string, v ...interface{}) {
 	alog.Module(module).Infow(msg, v...)
 }

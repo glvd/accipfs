@@ -1,95 +1,79 @@
 package service
 
 import (
-	"github.com/glvd/accipfs/aws"
+	"time"
+
 	"github.com/glvd/accipfs/config"
-	"github.com/gocacher/cacher"
-	"github.com/robfig/cron/v3"
-	"strings"
-	"sync"
+	"github.com/glvd/accipfs/controller"
 )
 
 // Service ...
-type Service struct {
-	cfg        *config.Config
-	cache      cacher.Cacher
-	cron       *cron.Cron
-	serveMutex sync.RWMutex
-	ipfsServer NodeServer
-	//ipfs   Node
-	ethServer NodeServer
-	//eth    Node
-	nodes map[string]bool
+type service struct {
+	linker     *BustLinker
+	server     *rpcServer
+	controller *controller.Controller
 }
 
-func syncDNS(cfg *config.Config, nodes map[string]bool) {
-	//defer fmt.Println("<更新网关数据完成...>")
-	var records []string
-	// build serviceNode records
-	for node := range nodes {
-		if !strings.Contains(node, "enode") {
+// Service ...
+type Service interface {
+	Start() (e error)
+	Stop() (e error)
+}
+
+// New ...
+func New(cfg *config.Config) (s Service, e error) {
+	linker, e := NewBustLinker(cfg)
+	if e != nil {
+		return nil, e
+	}
+
+	server, e := newRPCServer(cfg, linker)
+	if e != nil {
+		return nil, e
+	}
+	s = &service{
+		controller: controller.New(cfg),
+		linker:     linker,
+		server:     server,
+	}
+	return s, nil
+}
+
+// Start ...
+func (s *service) Start() error {
+	s.controller.Run()
+
+	go s.linker.Start()
+
+	s.linker.WaitingForReady()
+
+	var idError error
+	for i := 0; i < 5; i++ {
+		id, err := s.linker.localID()
+		idError = err
+		if err != nil {
+			time.Sleep(3 * time.Second)
 			continue
 		}
-		// get ip address
-		uri := strings.Split(node, "@")[1]
-		ip := strings.Split(uri, ":")[0]
-		records = append(records, ip)
+		s.linker.id = id
+		break
 	}
 
-	if len(records) == 0 {
-		return
-	}
-	//fmt.Println(outputHead, "<正在更新网关数据...>", records)
-
-	dnsService := aws.NewRoute53(cfg)
-
-	// get remote dns record
-	remoteIPs := make(map[string]bool)
-	remoteRecordSets, err := dnsService.GetRecordSets()
-	if err != nil {
-		logI("visit remote record failed", "error", err.Error())
-		return
-	}
-	if len(remoteRecordSets) != 0 {
-		for _, recordSet := range remoteRecordSets {
-			remoteIPs[*recordSet.ResourceRecords[0].Value] = true
-		}
-	}
-	// add new record
-	ipAdd := DiffStrArray(records, remoteIPs)
-	setsAdd := dnsService.BuildMultiValueRecordSets(ipAdd)
-	logI("resource adding", "list", ipAdd, "count", len(setsAdd))
-	if len(setsAdd) > 0 {
-		res, err := dnsService.ChangeSets(setsAdd, "UPSERT")
-		if err != nil {
-			logI("add resource record fail", "error", err)
-		} else {
-			logI("add resource record success", "error", "result", res.String())
-		}
+	if idError != nil {
+		return idError
 	}
 
-	// delete record out of date
-	failedSets := dnsService.FilterFailedRecords(remoteRecordSets)
-	logI("resource deleting", "list", remoteRecordSets, "count", len(failedSets))
-	if len(failedSets) > 0 {
-		res, err := dnsService.ChangeSets(failedSets, "DELETE")
-		if err != nil {
-			logI("delete resource record fail", "error", err)
-		} else {
-			logI("delete resource record success", "error", "result", res.String())
-		}
-	}
-
-	return
+	s.server.Start()
+	return nil
 }
 
-// DiffStrArray return the elements in `a` that aren't in `b`.
-func DiffStrArray(a []string, b map[string]bool) []string {
-	var diff []string
-	for _, x := range a {
-		if _, found := b[x]; !found {
-			diff = append(diff, x)
-		}
+// Stop ...
+func (s *service) Stop() error {
+	if err := s.server.Stop(); err != nil {
+		return err
 	}
-	return diff
+
+	s.linker.Stop()
+
+	return s.controller.StopRun()
 }

@@ -1,12 +1,14 @@
 package service
 
 import (
-	"bug.vlavr.com/godcong/dhcrypto"
-	"github.com/glvd/accipfs/config"
-	"go.uber.org/atomic"
 	"net"
 	"strings"
 	"time"
+
+	"github.com/glvd/accipfs/config"
+
+	"bug.vlavr.com/godcong/dhcrypto"
+	"go.uber.org/atomic"
 )
 
 var dateKey = time.Date(2019, time.November, 11, 10, 20, 10, 300, time.Local)

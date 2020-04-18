@@ -9,15 +9,15 @@ import (
 	"sync"
 	"time"
 
-	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/glvd/accipfs/account"
 	"github.com/glvd/accipfs/cache"
 	"github.com/glvd/accipfs/client"
 	"github.com/glvd/accipfs/config"
-	"github.com/glvd/accipfs/controller"
 	"github.com/glvd/accipfs/core"
 	"github.com/glvd/accipfs/general"
 	"github.com/glvd/accipfs/task"
+
+	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/robfig/cron/v3"
 	"go.uber.org/atomic"
 )
@@ -31,9 +31,8 @@ type BustLinker struct {
 	lock  *atomic.Bool
 	self  *account.Account
 	cfg   *config.Config
-	eth   *nodeETH
-	ipfs  *nodeIPFS
-	c     *controller.Controller
+	eth   *ethNode
+	ipfs  *ipfsNode
 	cron  *cron.Cron
 }
 
@@ -47,7 +46,6 @@ func NewBustLinker(cfg *config.Config) (linker *BustLinker, err error) {
 	linker = &BustLinker{
 		nodes: NewNodeManager(),
 		lock:  atomic.NewBool(false),
-		c:     controller.New(cfg),
 		cfg:   cfg,
 	}
 	//linker.ethServer = newNodeServerETH(cfg)
@@ -68,8 +66,6 @@ func NewBustLinker(cfg *config.Config) (linker *BustLinker, err error) {
 
 // Start ...
 func (l *BustLinker) Start() {
-	go l.c.Run()
-
 	jobAcc, err := l.cron.AddJob("0 1/3 * * * *", l)
 	if err != nil {
 		panic(err)
@@ -160,9 +156,6 @@ func (l *BustLinker) WaitingForReady() {
 func (l *BustLinker) Stop() {
 	ctx := l.cron.Stop()
 	<-ctx.Done()
-	if err := l.c.StopRun(); err != nil {
-		return
-	}
 }
 
 // Ping ...
@@ -365,72 +358,93 @@ func (l *BustLinker) PinVideo(r *http.Request, no *string, result *bool) error {
 	defer cancelFunc()
 	wg.Add(1)
 	go func() {
-		defer wg.Done()
-		err := l.nodeConnect(ctx, v.PosterHash)
+		var err error
+		defer func() {
+			wg.Done()
+			if err != nil && resultErr != nil {
+				resultErr <- err
+			}
+		}()
+		err = l.nodeConnect(ctx, v.PosterHash)
 		if err != nil {
 			cancelFunc()
-			resultErr <- err
 			return
 		}
-		e := l.ipfs.PinAdd(ctx, v.PosterHash)
-		if e != nil {
+		err = l.ipfs.PinAdd(ctx, v.PosterHash)
+		if err != nil {
 			cancelFunc()
-			resultErr <- e
+			return
 		}
 	}()
 
 	wg.Add(1)
 	go func() {
-		defer wg.Done()
-		err := l.nodeConnect(ctx, v.ThumbHash)
+		var err error
+		defer func() {
+			wg.Done()
+			if err != nil && resultErr != nil {
+				resultErr <- err
+			}
+		}()
+		err = l.nodeConnect(ctx, v.ThumbHash)
 		if err != nil {
 			cancelFunc()
-			resultErr <- err
 			return
 		}
-		e := l.ipfs.PinAdd(ctx, v.ThumbHash)
-		if e != nil {
+		err = l.ipfs.PinAdd(ctx, v.ThumbHash)
+		if err != nil {
 			cancelFunc()
-			resultErr <- e
 		}
 
 	}()
 
 	wg.Add(1)
 	go func() {
-		defer wg.Done()
-		err := l.nodeConnect(ctx, v.SourceHash)
+		var err error
+		defer func() {
+			wg.Done()
+			if err != nil && resultErr != nil {
+				resultErr <- err
+			}
+		}()
+
+		err = l.nodeConnect(ctx, v.SourceHash)
 		if err != nil {
 			cancelFunc()
-			resultErr <- err
 			return
 		}
-		e := l.ipfs.PinAdd(ctx, v.SourceHash)
-		if e != nil {
+		err = l.ipfs.PinAdd(ctx, v.SourceHash)
+		if err != nil {
 			cancelFunc()
-			resultErr <- e
+			return
 		}
 	}()
 
 	wg.Add(1)
 	go func() {
-		defer wg.Done()
-		err := l.nodeConnect(ctx, v.M3U8Hash)
+		var err error
+		defer func() {
+			wg.Done()
+			if err != nil && resultErr != nil {
+				resultErr <- err
+			}
+		}()
+		err = l.nodeConnect(ctx, v.M3U8Hash)
 		if err != nil {
 			cancelFunc()
-			resultErr <- err
 			return
 		}
-		e := l.ipfs.PinAdd(ctx, v.M3U8Hash)
-		if e != nil {
+		err = l.ipfs.PinAdd(ctx, v.M3U8Hash)
+		if err != nil {
 			cancelFunc()
-			resultErr <- e
+			return
 		}
 	}()
 
 	wg.Wait()
 	select {
 	case e := <-resultErr:
+		resultErr = nil
 		return e
 	default:
 	}
@@ -466,12 +480,6 @@ func (l *BustLinker) Info(r *http.Request, hash *string, info *string) error {
 		return e
 	}
 	*info = string(bytes)
-	return nil
-}
-
-// Exchange ...
-func (l *BustLinker) Exchange(r *http.Request, n *core.NodeInfo, to []string) error {
-
 	return nil
 }
 

@@ -2,9 +2,51 @@ package config
 
 import (
 	"encoding/json"
+	"io/ioutil"
 	"os"
 	"path/filepath"
 )
+
+const genesisData = `{
+  "config": {
+    "chainId": 20190723,
+    "homesteadBlock": 1,
+    "eip150Block": 2,
+    "eip150Hash": "0x0000000000000000000000000000000000000000000000000000000000000000",
+    "eip155Block": 3,
+    "eip158Block": 3,
+    "byzantiumBlock": 4,
+    "constantinopleBlock": 5,
+    "clique": {
+      "period": 10,
+      "epoch": 30000
+    }
+  },
+  "nonce": "0x0",
+  "timestamp": "0x5d38141c",
+  "extraData": "0x000000000000000000000000000000000000000000000000000000000000000054c0fa4a3d982656c51fe7dfbdcc21923a7678cb0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+  "gasLimit": "0xffffffff",
+  "difficulty": "0x1",
+  "mixHash": "0x0000000000000000000000000000000000000000000000000000000000000000",
+  "coinbase": "0x0000000000000000000000000000000000000000",
+  "alloc": {
+    "20b98bEec5AE2e7149e70848a247406bE2c0cCA5": {
+      "balance": "0x900000000000000000000000000000000000000000000000000000000000"
+    },
+    "2972Dd69A5242A4DF80f886b2fdD7a2DC99CD8A6": {
+      "balance": "0x900000000000000000000000000000000000000000000000000000000000"
+    },
+    "945d35cd4a6549213e8D37Feb5d708EC98906902": {
+      "balance": "0x900000000000000000000000000000000000000000000000000000000000"
+    },
+    "54c0fa4a3d982656c51fe7dfbdcc21923a7678cb": {
+      "balance": "0x0"
+    }
+  },
+  "number": "0x0",
+  "gasUsed": "0x0",
+  "parentHash": "0x0000000000000000000000000000000000000000000000000000000000000000"
+}`
 
 // Genesis ...
 type Genesis struct {
@@ -61,4 +103,17 @@ func LoadGenesis(cfg *Config) (*Genesis, error) {
 		return nil, err
 	}
 	return &g, nil
+}
+
+// SaveGenesis write genesis file when the file is not exist
+func SaveGenesis(cfg *Config) (err error) {
+	path := filepath.Join(cfg.Path, "genesis.json")
+	_, err = os.Stat(path)
+	if err != nil && !os.IsNotExist(err) {
+		return err
+	}
+	if os.IsNotExist(err) {
+		return ioutil.WriteFile(path, []byte(genesisData), 0755)
+	}
+	return nil
 }

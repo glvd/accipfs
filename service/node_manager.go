@@ -92,6 +92,14 @@ func (s *nodeManager) Get(key string) *core.Node {
 	return nil
 }
 
+// GetAccount ...
+func (s *nodeManager) GetAccount(key string) *core.Node {
+	if v, b := s.accountNodes.Load(key); b {
+		return v.(*core.Node)
+	}
+	return nil
+}
+
 // Range ...
 func (s *nodeManager) Range(f func(info *core.Node) bool) {
 	s.nodes.Range(func(key, value interface{}) bool {

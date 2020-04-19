@@ -11,10 +11,11 @@ import (
 
 // nodeManager ...
 type nodeManager struct {
-	nodeCache  cacher.Cacher
-	nodes      sync.Map
-	faultNodes sync.Map
-	nodeSize   *atomic.Int64
+	nodeCache    cacher.Cacher
+	accountNodes sync.Map
+	nodes        sync.Map
+	faultNodes   sync.Map
+	nodeSize     *atomic.Int64
 }
 
 // NodeManager ...
@@ -45,6 +46,9 @@ func (s *nodeManager) Remove(key string) {
 
 // Add ...
 func (s *nodeManager) Add(info *core.Node) {
+	if info.NodeType == core.NodeAccount {
+		s.accountNodes.Store(info.Name, info)
+	}
 	s.nodes.Store(info.Name, info)
 	s.nodeSize.Add(1)
 }

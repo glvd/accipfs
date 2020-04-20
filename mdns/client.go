@@ -303,12 +303,12 @@ func (c *client) recv(l *net.UDPConn, msgCh chan *dns.Msg) {
 		}
 
 		if err != nil {
-			log.Printf("[ERR] mdns: Failed to read packet: %v", err)
+			logE("failed to read packet: %v", err)
 			continue
 		}
 		msg := new(dns.Msg)
 		if err := msg.Unpack(buf[:n]); err != nil {
-			log.Printf("[ERR] mdns: Failed to unpack packet: %v", err)
+			logE("failed to unpack packet: %v", err)
 			continue
 		}
 		select {

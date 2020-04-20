@@ -84,7 +84,7 @@ func (dns *MulticastDNS) Client() (c Client, err error) {
 
 	var uudp6Err error
 	uniConn[udp6], uudp6Err = net.ListenUDP("udp6", &net.UDPAddr{IP: net.IPv6zero, Port: 0})
-	if uudp4Err == nil && uudp6Err == nil {
+	if uudp4Err != nil && uudp6Err != nil {
 		logE("failed to bind to port", "uudp6Err", uudp4Err, "uudp4Err", uudp6Err)
 		return nil, fmt.Errorf("failed to bind to any unicast udp port")
 	}

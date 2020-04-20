@@ -26,7 +26,7 @@ func TestMulticastDNS_Server(t *testing.T) {
 	defer s2.Stop()
 }
 
-func TestServer_Lookup(t *testing.T) {
+func TestMulticastDNS_Lookup(t *testing.T) {
 	mdns, err := New(config.Default(), func(cfg *OptionConfig) {
 		cfg.Service = "_foobar._tcp"
 	})
@@ -45,7 +45,7 @@ func TestServer_Lookup(t *testing.T) {
 		t.Fatal(err)
 	}
 	entries := make(chan *ServiceEntry, 1)
-	var found int32 = 0
+	var found int32
 	go func() {
 		select {
 		case e := <-entries:

@@ -208,11 +208,11 @@ func (s *server) sendResponse(resp *dns.Msg, from net.Addr, unicast bool) error 
 	if addr.IP.To4() != nil {
 		_, err = s.conn[udp4].WriteToUDP(buf, addr)
 		return err
-	} else {
-		_, err = s.conn[udp6].WriteToUDP(buf, addr)
-		return err
 	}
+	_, err = s.conn[udp6].WriteToUDP(buf, addr)
+	return err
 }
+
 func (s *server) zoneInstance(q dns.Question) []dns.RR {
 	switch q.Name {
 	case s.cfg.EnumAddr:

@@ -241,7 +241,7 @@ func (s *server) enumRecords(q dns.Question) []dns.RR {
 				Name:   q.Name,
 				Rrtype: dns.TypePTR,
 				Class:  dns.ClassINET,
-				Ttl:    defaultTTL,
+				Ttl:    s.cfg.TTL,
 			},
 			Ptr: s.cfg.ServiceAddr,
 		}
@@ -262,7 +262,7 @@ func (s *server) serviceRecords(q dns.Question) []dns.RR {
 				Name:   q.Name,
 				Rrtype: dns.TypePTR,
 				Class:  dns.ClassINET,
-				Ttl:    defaultTTL,
+				Ttl:    s.cfg.TTL,
 			},
 			Ptr: s.cfg.InstanceAddr,
 		}
@@ -306,7 +306,7 @@ func (s *server) instanceRecords(q dns.Question) []dns.RR {
 						Name:   s.cfg.HostName,
 						Rrtype: dns.TypeA,
 						Class:  dns.ClassINET,
-						Ttl:    defaultTTL,
+						Ttl:    s.cfg.TTL,
 					},
 					A: ip4,
 				})
@@ -331,7 +331,7 @@ func (s *server) instanceRecords(q dns.Question) []dns.RR {
 						Name:   s.cfg.HostName,
 						Rrtype: dns.TypeAAAA,
 						Class:  dns.ClassINET,
-						Ttl:    defaultTTL,
+						Ttl:    s.cfg.TTL,
 					},
 					AAAA: ip16,
 				})
@@ -346,7 +346,7 @@ func (s *server) instanceRecords(q dns.Question) []dns.RR {
 				Name:   q.Name,
 				Rrtype: dns.TypeSRV,
 				Class:  dns.ClassINET,
-				Ttl:    defaultTTL,
+				Ttl:    s.cfg.TTL,
 			},
 			Priority: 10,
 			Weight:   1,
@@ -374,7 +374,7 @@ func (s *server) instanceRecords(q dns.Question) []dns.RR {
 				Name:   q.Name,
 				Rrtype: dns.TypeTXT,
 				Class:  dns.ClassINET,
-				Ttl:    defaultTTL,
+				Ttl:    s.cfg.TTL,
 			},
 			Txt: s.cfg.TXT,
 		}

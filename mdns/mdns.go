@@ -32,6 +32,7 @@ type OptionConfig struct {
 	ServiceAddr       string
 	EnumAddr          string
 	Port              uint16
+	TTL               uint32
 	TXT               []string
 	IPs               []net.IP
 }
@@ -121,7 +122,18 @@ func defaultConfig(cfg *config.Config) *OptionConfig {
 		Port: mdnsPort,
 	}
 	return &OptionConfig{
-		IPV4Addr: ipv4Addr,
-		IPV6Addr: ipv6Addr,
+		Zone:              "",
+		NetInterface:      nil,
+		IPV4Addr:          ipv4Addr,
+		IPV6Addr:          ipv6Addr,
+		LogEmptyResponses: false,
+		HostName:          "",
+		InstanceAddr:      "",
+		ServiceAddr:       "",
+		EnumAddr:          "",
+		Port:              0,
+		TTL:               defaultTTL,
+		TXT:               nil,
+		IPs:               nil,
 	}
 }

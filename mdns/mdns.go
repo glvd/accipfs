@@ -92,7 +92,9 @@ func New(cfg *config.Config, opts ...OptionConfigFunc) (mdns *MulticastDNS, err 
 		op(optionConfig)
 	}
 
-	return &MulticastDNS{}, nil
+	return &MulticastDNS{
+		cfg: optionConfig,
+	}, nil
 }
 
 func defaultConfig(cfg *config.Config) *OptionConfig {

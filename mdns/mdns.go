@@ -20,6 +20,7 @@ const (
 
 // OptionConfig ...
 type OptionConfig struct {
+	Zone     string
 	IPV4Addr *net.UDPAddr
 	IPV6Addr *net.UDPAddr
 }
@@ -30,6 +31,16 @@ type OptionConfigFunc func(cfg *OptionConfig)
 // MulticastDNS ...
 type MulticastDNS struct {
 	conn []*net.UDPConn
+}
+
+// Server ...
+func (dns *MulticastDNS) Server() *Server {
+	return nil
+}
+
+// Client ...
+func (dns *MulticastDNS) Client() *Client {
+	return nil
 }
 
 // New ...

@@ -74,30 +74,36 @@ func (dns *MulticastDNS) Server() (s Server, err error) {
 // Client ...
 func (dns *MulticastDNS) Client() (c Client, err error) {
 	// Create the listeners
+	uniConn := make([]*net.UDPConn, ipmax)
+	var uudp4Err error
+	uniConn[udp4], uudp4Err = net.ListenUDP("udp4", &net.UDPAddr{IP: net.IPv4zero, Port: 0})
+
+	var uudp6Err error
+	uniConn[udp6], uudp6Err = net.ListenUDP("udp6", &net.UDPAddr{IP: net.IPv6zero, Port: 0})
+	if uudp4Err == nil && uudp6Err == nil {
+		logE("failed to bind to port", "uudp6Err", uudp4Err, "uudp4Err", uudp6Err)
+		return nil, fmt.Errorf("failed to bind to any unicast udp port")
+	}
 	conn := make([]*net.UDPConn, ipmax)
+	var udp4Err error
 	if dns.cfg.IPV4Addr != nil {
-		conn[udp4], err = net.ListenMulticastUDP("udp4", nil, dns.cfg.IPV4Addr)
-		if err != nil {
-			return nil, err
-		}
+		conn[udp4], udp4Err = net.ListenMulticastUDP("udp4", dns.cfg.NetInterface, dns.cfg.IPV4Addr)
 	}
-
+	var udp6Err error
 	if dns.cfg.IPV6Addr != nil {
-		conn[udp6], err = net.ListenMulticastUDP("udp6", nil, dns.cfg.IPV6Addr)
-		if err != nil {
-			return nil, err
-		}
+		conn[udp6], udp6Err = net.ListenMulticastUDP("udp6", dns.cfg.NetInterface, dns.cfg.IPV6Addr)
 	}
-
 	// Check if we have any listener
-	if conn[udp4] == nil && conn[udp6] == nil {
-		return nil, fmt.Errorf("no multicast listeners could be started")
+	if udp4Err != nil && udp6Err != nil {
+		logE("failed to bind to port", "udp6Err", udp6Err, "udp4Err", udp4Err)
+		return nil, fmt.Errorf("failed to bind to any multicast udp port")
 	}
 
 	return &client{
-		cfg:  dns.cfg,
-		conn: conn,
-		stop: atomic.NewBool(false),
+		cfg:     dns.cfg,
+		uniConn: uniConn,
+		conn:    conn,
+		stop:    atomic.NewBool(false),
 	}, nil
 }
 

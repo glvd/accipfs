@@ -9,7 +9,8 @@ import (
 type Client interface {
 }
 type client struct {
-	cfg  *OptionConfig
-	conn []*net.UDPConn
-	stop *atomic.Bool
+	cfg     *OptionConfig
+	uniConn []*net.UDPConn
+	conn    []*net.UDPConn
+	stop    *atomic.Bool
 }

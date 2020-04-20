@@ -73,7 +73,7 @@ func (s *server) recv(c *net.UDPConn) {
 func (s *server) parsePacket(packet []byte, from net.Addr) error {
 	var msg dns.Msg
 	if err := msg.Unpack(packet); err != nil {
-		log.Printf("[ERR] mdns: Failed to unpack packet: %v", err)
+		logE("failed to unpack packet", "error", err)
 		return err
 	}
 	return s.handleQuery(&msg, from)

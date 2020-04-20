@@ -5,7 +5,6 @@ import (
 	"go.uber.org/atomic"
 	"golang.org/x/net/ipv4"
 	"golang.org/x/net/ipv6"
-	"log"
 	"net"
 	"strings"
 	"time"
@@ -155,6 +154,7 @@ func (c *client) setInterface(iface *net.Interface) error {
 
 // query is used to perform a lookup and stream results
 func (c *client) query(params *QueryParam) error {
+	logI("query")
 	// Create the service name
 	//serviceAddr := fmt.Sprintf("%s.%s.", trimDot(params.Service), trimDot(params.Domain))
 	sa := serviceAddr(params.Service, params.Domain)
@@ -187,15 +187,17 @@ func (c *client) query(params *QueryParam) error {
 		m.Question[0].Qclass |= 1 << 15
 	}
 	m.RecursionDesired = false
+	logI("sendQuery")
 	if err := c.sendQuery(m); err != nil {
 		return err
 	}
 
 	// Map the in-progress responses
-	inprogress := make(map[string]*ServiceEntry)
+	inProgress := make(map[string]*ServiceEntry)
 
 	// Listen until we reach the timeout
 	finish := time.After(params.Timeout)
+	logI("receive")
 	for {
 		select {
 		case resp := <-msgCh:
@@ -205,35 +207,35 @@ func (c *client) query(params *QueryParam) error {
 				switch rr := answer.(type) {
 				case *dns.PTR:
 					// Create new entry for this
-					inp = ensureName(inprogress, rr.Ptr)
+					inp = ensureName(inProgress, rr.Ptr)
 
 				case *dns.SRV:
 					// Check for a target mismatch
 					if rr.Target != rr.Hdr.Name {
-						alias(inprogress, rr.Hdr.Name, rr.Target)
+						alias(inProgress, rr.Hdr.Name, rr.Target)
 					}
 
 					// Get the port
-					inp = ensureName(inprogress, rr.Hdr.Name)
+					inp = ensureName(inProgress, rr.Hdr.Name)
 					inp.Host = rr.Target
 					inp.Port = int(rr.Port)
 
 				case *dns.TXT:
 					// Pull out the txt
-					inp = ensureName(inprogress, rr.Hdr.Name)
+					inp = ensureName(inProgress, rr.Hdr.Name)
 					inp.Info = strings.Join(rr.Txt, "|")
 					inp.InfoFields = rr.Txt
 					inp.hasTXT = true
 
 				case *dns.A:
 					// Pull out the IP
-					inp = ensureName(inprogress, rr.Hdr.Name)
+					inp = ensureName(inProgress, rr.Hdr.Name)
 					inp.Addr = rr.A // @Deprecated
 					inp.AddrV4 = rr.A
 
 				case *dns.AAAA:
 					// Pull out the IP
-					inp = ensureName(inprogress, rr.Hdr.Name)
+					inp = ensureName(inProgress, rr.Hdr.Name)
 					inp.Addr = rr.AAAA // @Deprecated
 					inp.AddrV6 = rr.AAAA
 				}
@@ -259,10 +261,11 @@ func (c *client) query(params *QueryParam) error {
 				m.SetQuestion(inp.Name, dns.TypePTR)
 				m.RecursionDesired = false
 				if err := c.sendQuery(m); err != nil {
-					log.Printf("[ERR] mdns: Failed to query instance %s: %v", inp.Name, err)
+					logE("failed to query instance %s: %v", inp.Name, err)
 				}
 			}
 		case <-finish:
+			logI("finished")
 			return nil
 		}
 	}
@@ -296,12 +299,13 @@ func (c *client) recv(l *net.UDPConn, msgCh chan *dns.Msg) {
 	}
 	buf := make([]byte, 65536)
 	for !c.stop.Load() {
-		n, err := l.Read(buf)
+		logI("recv")
+		n, err, _ := l.ReadFrom(buf)
 
 		if c.stop.Load() {
 			return
 		}
-
+		logI("read packet")
 		if err != nil {
 			logE("failed to read packet: %v", err)
 			continue

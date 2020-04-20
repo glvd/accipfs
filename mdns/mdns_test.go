@@ -60,7 +60,7 @@ func TestMulticastDNS_Lookup(t *testing.T) {
 			}
 			atomic.StoreInt32(&found, 1)
 
-		case <-time.After(80 * time.Millisecond):
+		case <-time.After(3 * time.Second):
 			t.Fatalf("timeout")
 		}
 	}()
@@ -68,7 +68,7 @@ func TestMulticastDNS_Lookup(t *testing.T) {
 	params := &QueryParam{
 		Service: "_foobar._tcp",
 		Domain:  "local",
-		Timeout: 50 * time.Millisecond,
+		Timeout: 3 * time.Second,
 		Entries: entries,
 	}
 	err = c.Query(params)

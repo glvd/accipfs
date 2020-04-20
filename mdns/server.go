@@ -214,21 +214,25 @@ func (s *server) sendResponse(resp *dns.Msg, from net.Addr, unicast bool) error 
 }
 
 func (s *server) zoneInstance(q dns.Question) []dns.RR {
-	switch q.Name {
-	case s.cfg.EnumAddr:
-		return s.enumRecords(q)
-	case s.cfg.ServiceAddr:
-		return s.serviceRecords(q)
-	case s.cfg.InstanceAddr:
-		return s.instanceRecords(q)
-	case s.cfg.HostName:
-		if q.Qtype == dns.TypeA || q.Qtype == dns.TypeAAAA {
-			return s.instanceRecords(q)
-		}
-		fallthrough
-	default:
-		return nil
+	list := map[string]func(question dns.Question) []dns.RR{
+		s.cfg.EnumAddr:     s.enumRecords,
+		s.cfg.ServiceAddr:  s.serviceRecords,
+		s.cfg.InstanceAddr: s.instanceRecords,
+		s.cfg.HostName:     s.instanceRecords,
 	}
+
+	f, b := list[q.Name]
+	if b {
+		if q.Name == s.cfg.HostName {
+			if q.Qtype == dns.TypeA || q.Qtype == dns.TypeAAAA {
+				//do nothing
+			} else {
+				return nil
+			}
+		}
+		return f(q)
+	}
+	return nil
 }
 
 func (s *server) enumRecords(q dns.Question) []dns.RR {

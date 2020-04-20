@@ -13,6 +13,8 @@ const forceUnicastResponses = false
 
 // Server ...
 type Server interface {
+	Start()
+	Stop() error
 }
 
 type server struct {
@@ -24,11 +26,31 @@ type server struct {
 	stop         *atomic.Bool
 }
 
+// Stop ...
+func (s *server) Stop() (err error) {
+	if !s.stop.CAS(false, true) {
+		return nil
+	}
+	if s.conn[udp4] != nil {
+		e := s.conn[udp4].Close()
+		if e != nil {
+			err = e
+		}
+	}
+	if s.conn[udp6] != nil {
+		e := s.conn[udp6].Close()
+		if e != nil {
+			err = e
+		}
+	}
+	return err
+}
+
 // Start ...
 func (s *server) Start() {
 	for i := range s.conn {
 		if s.conn[i] != nil {
-
+			go s.recv(s.conn[i])
 		}
 	}
 }
@@ -215,9 +237,9 @@ func (s *server) sendResponse(resp *dns.Msg, from net.Addr, unicast bool) error 
 
 func (s *server) zoneInstance(q dns.Question) []dns.RR {
 	list := map[string]func(question dns.Question) []dns.RR{
-		s.cfg.EnumAddr:     s.enumRecords,
-		s.cfg.ServiceAddr:  s.serviceRecords,
-		s.cfg.InstanceAddr: s.instanceRecords,
+		s.cfg.enumAddr:     s.enumRecords,
+		s.cfg.serviceAddr:  s.serviceRecords,
+		s.cfg.instanceAddr: s.instanceRecords,
 		s.cfg.HostName:     s.instanceRecords,
 	}
 
@@ -247,7 +269,7 @@ func (s *server) enumRecords(q dns.Question) []dns.RR {
 				Class:  dns.ClassINET,
 				Ttl:    s.cfg.TTL,
 			},
-			Ptr: s.cfg.ServiceAddr,
+			Ptr: s.cfg.serviceAddr,
 		}
 		return []dns.RR{rr}
 	default:
@@ -268,13 +290,13 @@ func (s *server) serviceRecords(q dns.Question) []dns.RR {
 				Class:  dns.ClassINET,
 				Ttl:    s.cfg.TTL,
 			},
-			Ptr: s.cfg.InstanceAddr,
+			Ptr: s.cfg.instanceAddr,
 		}
 		servRec := []dns.RR{rr}
 
 		// Get the instance records
 		instRecs := s.instanceRecords(dns.Question{
-			Name:  s.cfg.InstanceAddr,
+			Name:  s.cfg.instanceAddr,
 			Qtype: dns.TypeANY,
 		})
 
@@ -290,13 +312,13 @@ func (s *server) instanceRecords(q dns.Question) []dns.RR {
 	case dns.TypeANY:
 		// Get the SRV, which includes A and AAAA
 		recs := s.instanceRecords(dns.Question{
-			Name:  s.cfg.InstanceAddr,
+			Name:  s.cfg.instanceAddr,
 			Qtype: dns.TypeSRV,
 		})
 
 		// Add the TXT record
 		recs = append(recs, s.instanceRecords(dns.Question{
-			Name:  s.cfg.InstanceAddr,
+			Name:  s.cfg.instanceAddr,
 			Qtype: dns.TypeTXT,
 		})...)
 		return recs
@@ -361,13 +383,13 @@ func (s *server) instanceRecords(q dns.Question) []dns.RR {
 
 		// Add the A record
 		recs = append(recs, s.instanceRecords(dns.Question{
-			Name:  s.cfg.InstanceAddr,
+			Name:  s.cfg.instanceAddr,
 			Qtype: dns.TypeA,
 		})...)
 
 		// Add the AAAA record
 		recs = append(recs, s.instanceRecords(dns.Question{
-			Name:  s.cfg.InstanceAddr,
+			Name:  s.cfg.instanceAddr,
 			Qtype: dns.TypeAAAA,
 		})...)
 		return recs

@@ -23,6 +23,7 @@ require (
 	github.com/ipfs/interface-go-ipfs-core v0.2.3
 	github.com/libp2p/go-flow-metrics v0.0.3 // indirect
 	github.com/libp2p/go-libp2p-core v0.2.3
+	github.com/miekg/dns v1.1.12
 	github.com/multiformats/go-multiaddr v0.1.1
 	github.com/multiformats/go-multiaddr-net v0.1.0
 	github.com/prometheus/tsdb v0.7.1 // indirect
@@ -32,5 +33,6 @@ require (
 	go.uber.org/atomic v1.5.0
 	go.uber.org/zap v1.13.0
 	golang.org/x/crypto v0.0.0-20200302210943-78000ba7a073 // indirect
+	golang.org/x/net v0.0.0-20190628185345-da137c7871d7
 	golang.org/x/sys v0.0.0-20200302150141-5c8b2ff67527 // indirect
 )

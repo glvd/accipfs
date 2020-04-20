@@ -29,13 +29,17 @@ type OptionConfig struct {
 	IPV6Addr          *net.UDPAddr
 	LogEmptyResponses bool
 	HostName          string
-	InstanceAddr      string
-	ServiceAddr       string
-	EnumAddr          string
+	instanceAddr      string
+	serviceAddr       string
+	enumAddr          string
 	Port              uint16
 	TTL               uint32
 	TXT               []string
 	IPs               []net.IP
+	Instance          string
+	Service           string
+	Enum              string
+	Domain            string
 }
 
 // OptionConfigFunc ...
@@ -113,7 +117,9 @@ func New(cfg *config.Config, opts ...OptionConfigFunc) (mdns *MulticastDNS, err 
 	for _, op := range opts {
 		op(optionConfig)
 	}
-
+	optionConfig.instanceAddr = instanceAddr(optionConfig.Instance, optionConfig.Service, optionConfig.Domain)
+	optionConfig.serviceAddr = serviceAddr(optionConfig.Service, optionConfig.Domain)
+	optionConfig.enumAddr = enumAddr(optionConfig.Domain)
 	return &MulticastDNS{
 		cfg: optionConfig,
 	}, nil
@@ -141,9 +147,13 @@ func defaultConfig(cfg *config.Config) *OptionConfig {
 		IPV6Addr:          ipv6Addr,
 		LogEmptyResponses: false,
 		HostName:          hostName,
-		InstanceAddr:      instanceAddr(instance, service, domain),
-		ServiceAddr:       serviceAddr(service, domain),
-		EnumAddr:          enumAddr(domain),
+		Instance:          instance,
+		instanceAddr:      instanceAddr(instance, service, domain),
+		Service:           service,
+		serviceAddr:       serviceAddr(service, domain),
+		Enum:              "",
+		enumAddr:          enumAddr(domain),
+		Domain:            domain,
 		Port:              80,
 		TTL:               defaultTTL,
 		TXT:               nil,

@@ -99,9 +99,8 @@ type client struct {
 
 // Close ...
 func (c *client) Close() (err error) {
-	if c.stop.Load() {
-		// something else already closed it
-		return nil
+	if !c.stop.CAS(false, true) {
+		return
 	}
 
 	for i := range c.uniConn {

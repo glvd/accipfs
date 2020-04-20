@@ -53,6 +53,7 @@ func (dns *MulticastDNS) Server() (s Server, err error) {
 	}
 
 	return &server{
+		cfg:  dns.cfg,
 		conn: conn,
 	}, nil
 }
@@ -81,6 +82,7 @@ func (dns *MulticastDNS) Client() (c Client, err error) {
 	}
 
 	return &client{
+		cfg:  dns.cfg,
 		conn: conn,
 	}, nil
 }

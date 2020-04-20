@@ -6,5 +6,6 @@ import "net"
 type Client interface {
 }
 type client struct {
+	cfg  *OptionConfig
 	conn []*net.UDPConn
 }

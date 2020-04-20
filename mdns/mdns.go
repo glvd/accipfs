@@ -20,9 +20,10 @@ const (
 
 // OptionConfig ...
 type OptionConfig struct {
-	Zone     string
-	IPV4Addr *net.UDPAddr
-	IPV6Addr *net.UDPAddr
+	Zone         string
+	NetInterface *net.Interface
+	IPV4Addr     *net.UDPAddr
+	IPV6Addr     *net.UDPAddr
 }
 
 // OptionConfigFunc ...
@@ -37,45 +38,38 @@ type MulticastDNS struct {
 func (dns *MulticastDNS) Server() (s Server, err error) {
 	// Create the listeners
 	conn := make([]*net.UDPConn, ipmax)
+	var udp4Err error
 	if dns.cfg.IPV4Addr != nil {
-		conn[udp4], err = net.ListenMulticastUDP("udp4", config.Iface, optionConfig.IPV4Addr)
-		if err != nil {
-			return nil, err
-		}
+		conn[udp4], udp4Err = net.ListenMulticastUDP("udp4", dns.cfg.NetInterface, dns.cfg.IPV4Addr)
 	}
-
+	var udp6Err error
 	if dns.cfg.IPV6Addr != nil {
-		conn[udp6], err = net.ListenMulticastUDP("udp6", config.Iface, optionConfig.IPV6Addr)
-		if err != nil {
-			return nil, err
-		}
+		conn[udp6], udp6Err = net.ListenMulticastUDP("udp6", dns.cfg.NetInterface, dns.cfg.IPV6Addr)
 	}
 
 	// Check if we have any listener
-	if conn[udp4] == nil && conn[udp6] == nil {
+	if udp4Err != nil && udp6Err != nil {
 		return nil, fmt.Errorf("no multicast listeners could be started")
 	}
 
 	return &server{
 		conn: conn,
 	}, nil
-
-	panic("unbelievable")
 }
 
 // Client ...
-func (dns *MulticastDNS) Client() (c *Client, err error) {
+func (dns *MulticastDNS) Client() (c Client, err error) {
 	// Create the listeners
 	conn := make([]*net.UDPConn, ipmax)
 	if dns.cfg.IPV4Addr != nil {
-		conn[udp4], err = net.ListenMulticastUDP("udp4", config.Iface, optionConfig.IPV4Addr)
+		conn[udp4], err = net.ListenMulticastUDP("udp4", nil, dns.cfg.IPV4Addr)
 		if err != nil {
 			return nil, err
 		}
 	}
 
 	if dns.cfg.IPV6Addr != nil {
-		conn[udp6], err = net.ListenMulticastUDP("udp6", config.Iface, optionConfig.IPV6Addr)
+		conn[udp6], err = net.ListenMulticastUDP("udp6", nil, dns.cfg.IPV6Addr)
 		if err != nil {
 			return nil, err
 		}
@@ -98,9 +92,7 @@ func New(cfg *config.Config, opts ...OptionConfigFunc) (mdns *MulticastDNS, err 
 		op(optionConfig)
 	}
 
-	return &MulticastDNS{
-		conn: conn,
-	}, nil
+	return &MulticastDNS{}, nil
 }
 
 func defaultConfig(cfg *config.Config) *OptionConfig {

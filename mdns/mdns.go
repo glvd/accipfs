@@ -3,6 +3,7 @@ package mdns
 import (
 	"fmt"
 	"github.com/glvd/accipfs/config"
+	"go.uber.org/atomic"
 	"net"
 )
 
@@ -20,10 +21,11 @@ const (
 
 // OptionConfig ...
 type OptionConfig struct {
-	Zone         string
-	NetInterface *net.Interface
-	IPV4Addr     *net.UDPAddr
-	IPV6Addr     *net.UDPAddr
+	Zone              string
+	NetInterface      *net.Interface
+	IPV4Addr          *net.UDPAddr
+	IPV6Addr          *net.UDPAddr
+	LogEmptyResponses bool
 }
 
 // OptionConfigFunc ...
@@ -55,6 +57,7 @@ func (dns *MulticastDNS) Server() (s Server, err error) {
 	return &server{
 		cfg:  dns.cfg,
 		conn: conn,
+		stop: atomic.NewBool(false),
 	}, nil
 }
 
@@ -84,6 +87,7 @@ func (dns *MulticastDNS) Client() (c Client, err error) {
 	return &client{
 		cfg:  dns.cfg,
 		conn: conn,
+		stop: atomic.NewBool(false),
 	}, nil
 }
 

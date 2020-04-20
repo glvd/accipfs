@@ -1,6 +1,9 @@
 package mdns
 
-import "net"
+import (
+	"go.uber.org/atomic"
+	"net"
+)
 
 // Client ...
 type Client interface {
@@ -8,4 +11,5 @@ type Client interface {
 type client struct {
 	cfg  *OptionConfig
 	conn []*net.UDPConn
+	stop *atomic.Bool
 }

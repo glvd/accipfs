@@ -16,9 +16,12 @@ type Server interface {
 }
 
 type server struct {
-	cfg  *OptionConfig
-	conn []*net.UDPConn
-	stop *atomic.Bool
+	serviceAddr  string
+	instanceAddr string
+	enumAddr     string
+	cfg          *OptionConfig
+	conn         []*net.UDPConn
+	stop         *atomic.Bool
 }
 
 // Start ...
@@ -168,7 +171,7 @@ func (s *server) handleQuery(query *dns.Msg, from net.Addr) error {
 // The response to a question may be transmitted over multicast, unicast, or
 // both.  The return values are DNS records for each transmission type.
 func (s *server) handleQuestion(q dns.Question) (multicastRecs, unicastRecs []dns.RR) {
-	records := s.config.Zone.Records(q)
+	records := s.zoneInstance(q)
 
 	if len(records) == 0 {
 		return nil, nil
@@ -209,4 +212,173 @@ func (s *server) sendResponse(resp *dns.Msg, from net.Addr, unicast bool) error 
 		_, err = s.conn[udp6].WriteToUDP(buf, addr)
 		return err
 	}
+}
+func (s *server) zoneInstance(q dns.Question) []dns.RR {
+	switch q.Name {
+	case s.cfg.EnumAddr:
+		return s.enumRecords(q)
+	case s.cfg.ServiceAddr:
+		return s.serviceRecords(q)
+	case s.cfg.InstanceAddr:
+		return s.instanceRecords(q)
+	case s.cfg.HostName:
+		if q.Qtype == dns.TypeA || q.Qtype == dns.TypeAAAA {
+			return s.instanceRecords(q)
+		}
+		fallthrough
+	default:
+		return nil
+	}
+}
+
+func (s *server) enumRecords(q dns.Question) []dns.RR {
+	switch q.Qtype {
+	case dns.TypeANY:
+		fallthrough
+	case dns.TypePTR:
+		rr := &dns.PTR{
+			Hdr: dns.RR_Header{
+				Name:   q.Name,
+				Rrtype: dns.TypePTR,
+				Class:  dns.ClassINET,
+				Ttl:    defaultTTL,
+			},
+			Ptr: s.cfg.ServiceAddr,
+		}
+		return []dns.RR{rr}
+	default:
+		return nil
+	}
+}
+
+func (s *server) serviceRecords(q dns.Question) []dns.RR {
+	switch q.Qtype {
+	case dns.TypeANY:
+		fallthrough
+	case dns.TypePTR:
+		// Build a PTR response for the service
+		rr := &dns.PTR{
+			Hdr: dns.RR_Header{
+				Name:   q.Name,
+				Rrtype: dns.TypePTR,
+				Class:  dns.ClassINET,
+				Ttl:    defaultTTL,
+			},
+			Ptr: s.cfg.InstanceAddr,
+		}
+		servRec := []dns.RR{rr}
+
+		// Get the instance records
+		instRecs := s.instanceRecords(dns.Question{
+			Name:  s.cfg.InstanceAddr,
+			Qtype: dns.TypeANY,
+		})
+
+		// Return the service record with the instance records
+		return append(servRec, instRecs...)
+	default:
+		return nil
+	}
+}
+
+func (s *server) instanceRecords(q dns.Question) []dns.RR {
+	switch q.Qtype {
+	case dns.TypeANY:
+		// Get the SRV, which includes A and AAAA
+		recs := s.instanceRecords(dns.Question{
+			Name:  s.cfg.InstanceAddr,
+			Qtype: dns.TypeSRV,
+		})
+
+		// Add the TXT record
+		recs = append(recs, s.instanceRecords(dns.Question{
+			Name:  s.cfg.InstanceAddr,
+			Qtype: dns.TypeTXT,
+		})...)
+		return recs
+
+	case dns.TypeA:
+		var rr []dns.RR
+		for _, ip := range s.cfg.IPs {
+			if ip4 := ip.To4(); ip4 != nil {
+				rr = append(rr, &dns.A{
+					Hdr: dns.RR_Header{
+						Name:   s.cfg.HostName,
+						Rrtype: dns.TypeA,
+						Class:  dns.ClassINET,
+						Ttl:    defaultTTL,
+					},
+					A: ip4,
+				})
+			}
+		}
+		return rr
+
+	case dns.TypeAAAA:
+		var rr []dns.RR
+		for _, ip := range s.cfg.IPs {
+			if ip.To4() != nil {
+				// TODO(reddaly): IPv4 addresses could be encoded in IPv6 format and
+				// putinto AAAA records, but the current logic puts ipv4-encodable
+				// addresses into the A records exclusively.  Perhaps this should be
+				// configurable?
+				continue
+			}
+
+			if ip16 := ip.To16(); ip16 != nil {
+				rr = append(rr, &dns.AAAA{
+					Hdr: dns.RR_Header{
+						Name:   s.cfg.HostName,
+						Rrtype: dns.TypeAAAA,
+						Class:  dns.ClassINET,
+						Ttl:    defaultTTL,
+					},
+					AAAA: ip16,
+				})
+			}
+		}
+		return rr
+
+	case dns.TypeSRV:
+		// Create the SRV Record
+		srv := &dns.SRV{
+			Hdr: dns.RR_Header{
+				Name:   q.Name,
+				Rrtype: dns.TypeSRV,
+				Class:  dns.ClassINET,
+				Ttl:    defaultTTL,
+			},
+			Priority: 10,
+			Weight:   1,
+			Port:     s.cfg.Port,
+			Target:   s.cfg.HostName,
+		}
+		recs := []dns.RR{srv}
+
+		// Add the A record
+		recs = append(recs, s.instanceRecords(dns.Question{
+			Name:  s.cfg.InstanceAddr,
+			Qtype: dns.TypeA,
+		})...)
+
+		// Add the AAAA record
+		recs = append(recs, s.instanceRecords(dns.Question{
+			Name:  s.cfg.InstanceAddr,
+			Qtype: dns.TypeAAAA,
+		})...)
+		return recs
+
+	case dns.TypeTXT:
+		txt := &dns.TXT{
+			Hdr: dns.RR_Header{
+				Name:   q.Name,
+				Rrtype: dns.TypeTXT,
+				Class:  dns.ClassINET,
+				Ttl:    defaultTTL,
+			},
+			Txt: s.cfg.TXT,
+		}
+		return []dns.RR{txt}
+	}
+	return nil
 }

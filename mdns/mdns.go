@@ -12,6 +12,7 @@ const (
 	mdnsIPV6Addr = "FF02::FB"
 	mdnsPort     = 5353
 )
+const defaultTTL = 120
 
 const (
 	udp4  = 0
@@ -26,6 +27,13 @@ type OptionConfig struct {
 	IPV4Addr          *net.UDPAddr
 	IPV6Addr          *net.UDPAddr
 	LogEmptyResponses bool
+	HostName          string
+	InstanceAddr      string
+	ServiceAddr       string
+	EnumAddr          string
+	Port              uint16
+	TXT               []string
+	IPs               []net.IP
 }
 
 // OptionConfigFunc ...

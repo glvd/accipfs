@@ -5,6 +5,7 @@ import (
 	"github.com/glvd/accipfs/config"
 	"go.uber.org/atomic"
 	"net"
+	"os"
 )
 
 const (
@@ -22,7 +23,7 @@ const (
 
 // OptionConfig ...
 type OptionConfig struct {
-	Zone              string
+	//Zone              string
 	NetInterface      *net.Interface
 	IPV4Addr          *net.UDPAddr
 	IPV6Addr          *net.UDPAddr
@@ -121,17 +122,23 @@ func defaultConfig(cfg *config.Config) *OptionConfig {
 		IP:   net.ParseIP(mdnsIPV6Addr),
 		Port: mdnsPort,
 	}
+
+	hostName, _ := os.Hostname()
+	hostName = fmt.Sprintf("%s.", hostName)
+	service := "_http._tcp"
+	instance := "hostname"
+	domain := "local."
 	return &OptionConfig{
-		Zone:              "",
+		//Zone:              "",
 		NetInterface:      nil,
 		IPV4Addr:          ipv4Addr,
 		IPV6Addr:          ipv6Addr,
 		LogEmptyResponses: false,
-		HostName:          "",
-		InstanceAddr:      "",
-		ServiceAddr:       "",
-		EnumAddr:          "",
-		Port:              0,
+		HostName:          hostName,
+		InstanceAddr:      instanceAddr(instance, service, domain),
+		ServiceAddr:       serviceAddr(service, domain),
+		EnumAddr:          enumAddr(domain),
+		Port:              80,
 		TTL:               defaultTTL,
 		TXT:               nil,
 		IPs:               nil,

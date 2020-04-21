@@ -389,7 +389,6 @@ func (c *client) recv(l *net.UDPConn, msgCh chan<- *dns.Msg) {
 		logI("recv")
 		n, err := l.Read(buf)
 
-
 		if c.stop.Load() {
 			return
 		}

@@ -15,6 +15,8 @@ var rootCmd = &cobra.Command{}
 
 func main() {
 	var client bool
+	port := 8080
+	info := "accipfs local server"
 	rootCmd.PersistentFlags().BoolVar(&client, "client", false, "enable client model")
 
 	log.InitLog()
@@ -34,6 +36,7 @@ func main() {
 					cfg.IPs = append(cfg.IPs, cidr)
 				}
 			}
+			cfg.Port = uint16(port)
 		})
 		if err != nil {
 			panic(err)
@@ -67,12 +70,11 @@ func main() {
 					if e.Name != "hostname._foobar._tcp.local." {
 						log.Module("main").Fatalf("bad: %v", e)
 					}
-					if e.Port != 80 {
-						log.Module("main").Fatalf("bad: %v", e)
-					}
-					if e.Info != "Local web server" {
-						log.Module("main").Fatalf("bad: %v", e)
-					}
+					log.Module("main").Info("host", e.Host, "fields", e.InfoFields, "ipv4", e.AddrV4.String(), "ipv6", e.AddrV6.String())
+					log.Module("main").Info(e.Addr.String())
+					log.Module("main").Info("port", e.Port, "want", port)
+					log.Module("main").Info("info", e.Info, "want", info)
+
 					atomic.StoreInt32(&found, 1)
 
 				case <-time.After(80 * time.Second):

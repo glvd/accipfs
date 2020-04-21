@@ -1,6 +1,7 @@
 package mdns
 
 import (
+	"context"
 	"github.com/miekg/dns"
 	"go.uber.org/atomic"
 	"golang.org/x/net/ipv4"
@@ -19,8 +20,9 @@ type ServiceEntry struct {
 	Port       int
 	Info       string
 	InfoFields []string
-
-	Addr net.IP // @Deprecated
+	TTL        int
+	Type       uint16
+	Addr       net.IP // @Deprecated
 
 	hasTXT bool
 	sent   bool
@@ -35,7 +37,9 @@ func (s *ServiceEntry) complete() bool {
 type QueryParam struct {
 	Service             string               // Service to lookup
 	Domain              string               // Lookup domain, default "local"
-	Timeout             time.Duration        // Lookup timeout, default 1 second
+	Type                uint16               // Lookup type, defaults to dns.TypePTR
+	Context             context.Context      // Context
+	Timeout             time.Duration        // Lookup timeout, default 1 second. Ignored if Context is provided
 	Interface           *net.Interface       // Multicast interface to use
 	Entries             chan<- *ServiceEntry // Entries Channel
 	WantUnicastResponse bool                 // Unicast response desired, as per 5.4 in RFC
@@ -59,7 +63,7 @@ func DefaultParams(service string) *QueryParam {
 func (c *client) Query(params *QueryParam) error {
 	// Set the multicast interface
 	if params.Interface != nil {
-		if err := c.setInterface(params.Interface); err != nil {
+		if err := c.setInterface(params.Interface, false); err != nil {
 			return err
 		}
 	}
@@ -68,12 +72,77 @@ func (c *client) Query(params *QueryParam) error {
 	if params.Domain == "" {
 		params.Domain = "local"
 	}
+
+	if params.Context == nil {
+		if params.Timeout == 0 {
+			params.Timeout = time.Second
+		}
+		params.Context, _ = context.WithTimeout(context.Background(), params.Timeout)
+	}
+
 	if params.Timeout == 0 {
 		params.Timeout = time.Second
 	}
 
 	// Run the query
 	return c.query(params)
+}
+
+// Listen listens indefinitely for multicast updates
+func (c *client) Listen(entries chan<- *ServiceEntry, exit chan struct{}) error {
+	c.setInterface(nil, true)
+
+	// Start listening for response packets
+	msgCh := make(chan *dns.Msg, 32)
+
+	if c.uniConn[udp4] != nil {
+		go c.recv(c.uniConn[udp4], msgCh)
+	}
+	if c.uniConn[udp6] != nil {
+		go c.recv(c.uniConn[udp6], msgCh)
+	}
+	if c.conn[udp4] != nil {
+		go c.recv(c.conn[udp4], msgCh)
+	}
+
+	if c.conn[udp6] != nil {
+		go c.recv(c.conn[udp6], msgCh)
+	}
+
+	ip := make(map[string]*ServiceEntry)
+
+	for {
+		select {
+		case <-exit:
+			return nil
+
+		case m := <-msgCh:
+			e := messageToEntry(m, ip)
+			if e == nil {
+				continue
+			}
+
+			// Check if this entry is complete
+			if e.complete() {
+				if e.sent {
+					continue
+				}
+				e.sent = true
+				entries <- e
+				ip = make(map[string]*ServiceEntry)
+			} else {
+				// Fire off a node specific query
+				m := new(dns.Msg)
+				m.SetQuestion(e.Name, dns.TypePTR)
+				m.RecursionDesired = false
+				if err := c.sendQuery(m); err != nil {
+					logE("failed to query instance", "name", e.Name, "error", err)
+				}
+			}
+		}
+	}
+
+	return nil
 }
 
 // Lookup is the same as Query, however it uses all the default parameters
@@ -124,31 +193,39 @@ func (c *client) Close() (err error) {
 
 // setInterface is used to set the query interface, uses system
 // default if not provided
-func (c *client) setInterface(iface *net.Interface) error {
+func (c *client) setInterface(iface *net.Interface, loopback bool) error {
+	var p *ipv4.PacketConn
+	var p2 *ipv6.PacketConn
 	if c.uniConn[udp4] != nil {
-		p := ipv4.NewPacketConn(c.uniConn[udp4])
-		if err := p.SetMulticastInterface(iface); err != nil {
+		p = ipv4.NewPacketConn(c.uniConn[udp4])
+		if err := p.JoinGroup(iface, &net.UDPAddr{IP: net.ParseIP(mdnsIPv4Addr)}); err != nil {
 			return err
 		}
 	}
 	if c.uniConn[udp6] != nil {
-		p2 := ipv6.NewPacketConn(c.uniConn[udp6])
-		if err := p2.SetMulticastInterface(iface); err != nil {
+		p2 = ipv6.NewPacketConn(c.uniConn[udp6])
+		if err := p2.JoinGroup(iface, &net.UDPAddr{IP: net.ParseIP(mdnsIPv6Addr)}); err != nil {
 			return err
 		}
 	}
 	if c.conn[udp4] != nil {
-		p := ipv4.NewPacketConn(c.conn[udp4])
-		if err := p.SetMulticastInterface(iface); err != nil {
+		p = ipv4.NewPacketConn(c.conn[udp4])
+		if err := p.JoinGroup(iface, &net.UDPAddr{IP: net.ParseIP(mdnsIPv4Addr)}); err != nil {
 			return err
 		}
 	}
 	if c.conn[udp6] != nil {
-		p2 := ipv6.NewPacketConn(c.conn[udp6])
-		if err := p2.SetMulticastInterface(iface); err != nil {
+		p2 = ipv6.NewPacketConn(c.conn[udp6])
+		if err := p2.JoinGroup(iface, &net.UDPAddr{IP: net.ParseIP(mdnsIPv6Addr)}); err != nil {
 			return err
 		}
 	}
+
+	if loopback {
+		p.SetMulticastLoopback(true)
+		p2.SetMulticastLoopback(true)
+	}
+
 	return nil
 }
 
@@ -158,6 +235,7 @@ func (c *client) query(params *QueryParam) error {
 	// Create the service name
 	//serviceAddr := fmt.Sprintf("%s.%s.", trimDot(params.Service), trimDot(params.Domain))
 	sa := serviceAddr(params.Service, params.Domain)
+
 	// Start listening for response packets
 	msgCh := make(chan *dns.Msg, 32)
 	if c.uniConn[udp4] != nil {
@@ -176,7 +254,12 @@ func (c *client) query(params *QueryParam) error {
 
 	// Send the query
 	m := new(dns.Msg)
-	m.SetQuestion(sa, dns.TypePTR)
+
+	if params.Type == dns.TypeNone {
+		m.SetQuestion(sa, dns.TypePTR)
+	} else {
+		m.SetQuestion(sa, params.Type)
+	}
 	// RFC 6762, section 18.12.  Repurposing of Top Bit of qclass in Question
 	// Section
 	//
@@ -193,53 +276,54 @@ func (c *client) query(params *QueryParam) error {
 	}
 
 	// Map the in-progress responses
-	inProgress := make(map[string]*ServiceEntry)
+	inprogress := make(map[string]*ServiceEntry)
 
 	// Listen until we reach the timeout
-	finish := time.After(params.Timeout)
+
 	logI("receive")
 	for {
 		select {
 		case resp := <-msgCh:
-			var inp *ServiceEntry
-			for _, answer := range append(resp.Answer, resp.Extra...) {
-				// TODO(reddaly): Check that response corresponds to serviceAddr?
-				switch rr := answer.(type) {
-				case *dns.PTR:
-					// Create new entry for this
-					inp = ensureName(inProgress, rr.Ptr)
-
-				case *dns.SRV:
-					// Check for a target mismatch
-					if rr.Target != rr.Hdr.Name {
-						alias(inProgress, rr.Hdr.Name, rr.Target)
-					}
-
-					// Get the port
-					inp = ensureName(inProgress, rr.Hdr.Name)
-					inp.Host = rr.Target
-					inp.Port = int(rr.Port)
-
-				case *dns.TXT:
-					// Pull out the txt
-					inp = ensureName(inProgress, rr.Hdr.Name)
-					inp.Info = strings.Join(rr.Txt, "|")
-					inp.InfoFields = rr.Txt
-					inp.hasTXT = true
-
-				case *dns.A:
-					// Pull out the IP
-					inp = ensureName(inProgress, rr.Hdr.Name)
-					inp.Addr = rr.A // @Deprecated
-					inp.AddrV4 = rr.A
-
-				case *dns.AAAA:
-					// Pull out the IP
-					inp = ensureName(inProgress, rr.Hdr.Name)
-					inp.Addr = rr.AAAA // @Deprecated
-					inp.AddrV6 = rr.AAAA
-				}
-			}
+			inp := messageToEntry(resp, inprogress)
+			//var inp *ServiceEntry
+			//for _, answer := range append(resp.Answer, resp.Extra...) {
+			//	// TODO(reddaly): Check that response corresponds to serviceAddr?
+			//	switch rr := answer.(type) {
+			//	case *dns.PTR:
+			//		// Create new entry for this
+			//		inp = ensureName(inprogress, rr.Ptr)
+			//
+			//	case *dns.SRV:
+			//		// Check for a target mismatch
+			//		if rr.Target != rr.Hdr.Name {
+			//			alias(inprogress, rr.Hdr.Name, rr.Target)
+			//		}
+			//
+			//		// Get the port
+			//		inp = ensureName(inprogress, rr.Hdr.Name)
+			//		inp.Host = rr.Target
+			//		inp.Port = int(rr.Port)
+			//
+			//	case *dns.TXT:
+			//		// Pull out the txt
+			//		inp = ensureName(inprogress, rr.Hdr.Name)
+			//		inp.Info = strings.Join(rr.Txt, "|")
+			//		inp.InfoFields = rr.Txt
+			//		inp.hasTXT = true
+			//
+			//	case *dns.A:
+			//		// Pull out the IP
+			//		inp = ensureName(inprogress, rr.Hdr.Name)
+			//		inp.Addr = rr.A // @Deprecated
+			//		inp.AddrV4 = rr.A
+			//
+			//	case *dns.AAAA:
+			//		// Pull out the IP
+			//		inp = ensureName(inprogress, rr.Hdr.Name)
+			//		inp.Addr = rr.AAAA // @Deprecated
+			//		inp.AddrV6 = rr.AAAA
+			//	}
+			//}
 
 			if inp == nil {
 				continue
@@ -253,6 +337,8 @@ func (c *client) query(params *QueryParam) error {
 				inp.sent = true
 				select {
 				case params.Entries <- inp:
+				case <-params.Context.Done():
+					return nil
 				default:
 				}
 			} else {
@@ -261,11 +347,12 @@ func (c *client) query(params *QueryParam) error {
 				m.SetQuestion(inp.Name, dns.TypePTR)
 				m.RecursionDesired = false
 				if err := c.sendQuery(m); err != nil {
-					logE("failed to query instance %s: %v", inp.Name, err)
+					logE("failed to query instance", "name", inp.Name, "error", err)
 				}
 			}
-		case <-finish:
-			logI("finished")
+		case <-params.Context.Done():
+
+			logI("done")
 			return nil
 		}
 	}
@@ -278,41 +365,42 @@ func (c *client) sendQuery(q *dns.Msg) error {
 		return err
 	}
 	if c.uniConn[udp4] != nil {
-		_, err = c.uniConn[udp4].WriteToUDP(buf, c.cfg.IPV4Addr)
+		_, err = c.uniConn[udp4].WriteToUDP(buf, c.cfg.IPv4Addr)
 		if err != nil {
-			return err
+			logE("send query ipv4", "error", err)
 		}
 	}
 	if c.uniConn[udp6] != nil {
-		_, err = c.uniConn[udp6].WriteToUDP(buf, c.cfg.IPV6Addr)
+		_, err = c.uniConn[udp6].WriteToUDP(buf, c.cfg.IPv6Addr)
 		if err != nil {
-			return err
+			logE("send query ipv6", "error", err)
 		}
 	}
 	return nil
 }
 
 // recv is used to receive until we get a shutdown
-func (c *client) recv(l *net.UDPConn, msgCh chan *dns.Msg) {
+func (c *client) recv(l *net.UDPConn, msgCh chan<- *dns.Msg) {
 	if l == nil {
 		return
 	}
 	buf := make([]byte, 65536)
 	for !c.stop.Load() {
 		logI("recv")
-		n, err, _ := l.ReadFrom(buf)
+		n, err := l.Read(buf)
+
 
 		if c.stop.Load() {
 			return
 		}
 		logI("read packet")
 		if err != nil {
-			logE("failed to read packet: %v", err)
+			logE("failed to read packet", "error", err)
 			continue
 		}
 		msg := new(dns.Msg)
 		if err := msg.Unpack(buf[:n]); err != nil {
-			logE("failed to unpack packet: %v", err)
+			logE("failed to unpack packet", "error", err)
 			continue
 		}
 		select {
@@ -322,19 +410,80 @@ func (c *client) recv(l *net.UDPConn, msgCh chan *dns.Msg) {
 }
 
 // ensureName is used to ensure the named node is in progress
-func ensureName(inprogress map[string]*ServiceEntry, name string) *ServiceEntry {
+func ensureName(inprogress map[string]*ServiceEntry, name string, typ uint16) *ServiceEntry {
 	if inp, ok := inprogress[name]; ok {
 		return inp
 	}
 	inp := &ServiceEntry{
 		Name: name,
+		Type: typ,
 	}
 	inprogress[name] = inp
 	return inp
 }
 
 // alias is used to setup an alias between two entries
-func alias(inprogress map[string]*ServiceEntry, src, dst string) {
-	srcEntry := ensureName(inprogress, src)
+func alias(inprogress map[string]*ServiceEntry, src, dst string, typ uint16) {
+	srcEntry := ensureName(inprogress, src, typ)
 	inprogress[dst] = srcEntry
+}
+
+func messageToEntry(m *dns.Msg, inprogress map[string]*ServiceEntry) *ServiceEntry {
+	var inp *ServiceEntry
+
+	for _, answer := range append(m.Answer, m.Extra...) {
+		// TODO(reddaly): Check that response corresponds to serviceAddr?
+		switch rr := answer.(type) {
+		case *dns.PTR:
+			// Create new entry for this
+			inp = ensureName(inprogress, rr.Ptr, rr.Hdr.Rrtype)
+			if inp.complete() {
+				continue
+			}
+		case *dns.SRV:
+			// Check for a target mismatch
+			if rr.Target != rr.Hdr.Name {
+				alias(inprogress, rr.Hdr.Name, rr.Target, rr.Hdr.Rrtype)
+			}
+
+			// Get the port
+			inp = ensureName(inprogress, rr.Hdr.Name, rr.Hdr.Rrtype)
+			if inp.complete() {
+				continue
+			}
+			inp.Host = rr.Target
+			inp.Port = int(rr.Port)
+		case *dns.TXT:
+			// Pull out the txt
+			inp = ensureName(inprogress, rr.Hdr.Name, rr.Hdr.Rrtype)
+			if inp.complete() {
+				continue
+			}
+			inp.Info = strings.Join(rr.Txt, "|")
+			inp.InfoFields = rr.Txt
+			inp.hasTXT = true
+		case *dns.A:
+			// Pull out the IP
+			inp = ensureName(inprogress, rr.Hdr.Name, rr.Hdr.Rrtype)
+			if inp.complete() {
+				continue
+			}
+			inp.Addr = rr.A // @Deprecated
+			inp.AddrV4 = rr.A
+		case *dns.AAAA:
+			// Pull out the IP
+			inp = ensureName(inprogress, rr.Hdr.Name, rr.Hdr.Rrtype)
+			if inp.complete() {
+				continue
+			}
+			inp.Addr = rr.AAAA // @Deprecated
+			inp.AddrV6 = rr.AAAA
+		}
+
+		if inp != nil {
+			inp.TTL = int(answer.Header().Ttl)
+		}
+	}
+
+	return inp
 }

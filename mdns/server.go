@@ -5,8 +5,10 @@ import (
 	"github.com/miekg/dns"
 	"go.uber.org/atomic"
 	"log"
+	"math/rand"
 	"net"
 	"strings"
+	"time"
 )
 
 const forceUnicastResponses = false
@@ -24,6 +26,7 @@ type server struct {
 	cfg          *OptionConfig
 	conn         []*net.UDPConn
 	stop         *atomic.Bool
+	//wg           sync.WaitGroup
 }
 
 // Stop ...
@@ -53,16 +56,20 @@ func (s *server) Start() {
 			go s.recv(s.conn[i])
 		}
 	}
+	go s.probe()
 }
 
 // recv is a long running routine to receive packets from an interface
 func (s *server) recv(c *net.UDPConn) {
 	buf := make([]byte, 65536)
 	for !s.stop.Load() {
+		logI("reading from remote conn")
 		n, from, err := c.ReadFrom(buf)
 		if err != nil {
+			logE("failed to read from buffer")
 			continue
 		}
+		logI("parse from", "addr", from.String())
 		if err := s.parsePacket(buf[:n], from); err != nil {
 			logE("failed to handle query", "error", err)
 		}
@@ -166,22 +173,24 @@ func (s *server) handleQuery(query *dns.Msg, from net.Addr) error {
 			Answer: answer,
 		}
 	}
-
+	logI("query detail", "id", query.Id, "question", query.Question, "answer", query.Answer)
 	if s.cfg.LogEmptyResponses && len(multicastAnswer) == 0 && len(unicastAnswer) == 0 {
 		questions := make([]string, len(query.Question))
 		for i, q := range query.Question {
 			questions[i] = q.Name
 		}
-		log.Printf("no responses for query with questions: %s", strings.Join(questions, ", "))
+		logE("no responses for query with questions", "question", strings.Join(questions, ", "))
 	}
 
 	if mresp := resp(false); mresp != nil {
+		logI("multicast", "response", *mresp)
 		if err := s.sendResponse(mresp, from, false); err != nil {
 			return fmt.Errorf("mdns: error sending multicast response: %v", err)
 		}
 	}
 	if uresp := resp(true); uresp != nil {
 		if err := s.sendResponse(uresp, from, true); err != nil {
+			logI("unicast", "response", *uresp)
 			return fmt.Errorf("mdns: error sending unicast response: %v", err)
 		}
 	}
@@ -193,7 +202,7 @@ func (s *server) handleQuery(query *dns.Msg, from net.Addr) error {
 // The response to a question may be transmitted over multicast, unicast, or
 // both.  The return values are DNS records for each transmission type.
 func (s *server) handleQuestion(q dns.Question) (multicastRecs, unicastRecs []dns.RR) {
-	records := s.zoneInstance(q)
+	records := s.Records(q)
 
 	if len(records) == 0 {
 		return nil, nil
@@ -235,7 +244,9 @@ func (s *server) sendResponse(resp *dns.Msg, from net.Addr, unicast bool) error 
 	return err
 }
 
-func (s *server) zoneInstance(q dns.Question) []dns.RR {
+// Records ...
+func (s *server) Records(q dns.Question) []dns.RR {
+	var recs []dns.RR
 	list := map[string]func(question dns.Question) []dns.RR{
 		s.cfg.enumAddr:     s.enumRecords,
 		s.cfg.serviceAddr:  s.serviceRecords,
@@ -251,6 +262,12 @@ func (s *server) zoneInstance(q dns.Question) []dns.RR {
 			} else {
 				return nil
 			}
+			//TODO
+		} else if q.Name == "_services._dns-sd._udp."+s.cfg.Domain+"." {
+			recs = s.dnssdMetaQueryRecords(q)
+		}
+		if recs != nil {
+			return append(recs, f(q)...)
 		}
 		return f(q)
 	}
@@ -405,6 +422,131 @@ func (s *server) instanceRecords(q dns.Question) []dns.RR {
 			Txt: s.cfg.TXT,
 		}
 		return []dns.RR{txt}
+	}
+	return nil
+}
+
+// dnssdMetaQueryRecords returns the DNS records in response to a "meta-query"
+// issued to browse for DNS-SD services, as per section 9. of RFC6763.
+//
+// A meta-query has a name of the form "_services._dns-sd._udp.<Domain>" where
+// Domain is a fully-qualified domain, such as "local."
+func (s *server) dnssdMetaQueryRecords(q dns.Question) []dns.RR {
+	// Intended behavior, as described in the RFC:
+	//     ...it may be useful for network administrators to find the list of
+	//     advertised service types on the network, even if those Service Names
+	//     are just opaque identifiers and not particularly informative in
+	//     isolation.
+	//
+	//     For this purpose, a special meta-query is defined.  A DNS query for PTR
+	//     records with the name "_services._dns-sd._udp.<Domain>" yields a set of
+	//     PTR records, where the rdata of each PTR record is the two-abel
+	//     <Service> name, plus the same domain, e.g., "_http._tcp.<Domain>".
+	//     Including the domain in the PTR rdata allows for slightly better name
+	//     compression in Unicast DNS responses, but only the first two labels are
+	//     relevant for the purposes of service type enumeration.  These two-label
+	//     service types can then be used to construct subsequent Service Instance
+	//     Enumeration PTR queries, in this <Domain> or others, to discover
+	//     instances of that service type.
+	return []dns.RR{
+		&dns.PTR{
+			Hdr: dns.RR_Header{
+				Name:   q.Name,
+				Rrtype: dns.TypePTR,
+				Class:  dns.ClassINET,
+				Ttl:    defaultTTL,
+			},
+			Ptr: s.serviceAddr,
+		},
+	}
+}
+func (s *server) probe() {
+	//defer s.wg.Done()
+
+	name := fmt.Sprintf("%s.%s.%s.", s.cfg.Instance, trimDot(s.cfg.Service), trimDot(s.cfg.Domain))
+
+	q := new(dns.Msg)
+	q.SetQuestion(name, dns.TypePTR)
+	q.RecursionDesired = false
+
+	srv := &dns.SRV{
+		Hdr: dns.RR_Header{
+			Name:   name,
+			Rrtype: dns.TypeSRV,
+			Class:  dns.ClassINET,
+			Ttl:    defaultTTL,
+		},
+		Priority: 0,
+		Weight:   0,
+		Port:     s.cfg.Port,
+		Target:   s.cfg.HostName,
+	}
+	txt := &dns.TXT{
+		Hdr: dns.RR_Header{
+			Name:   name,
+			Rrtype: dns.TypeTXT,
+			Class:  dns.ClassINET,
+			Ttl:    defaultTTL,
+		},
+		Txt: s.cfg.TXT,
+	}
+	q.Ns = []dns.RR{srv, txt}
+
+	randomizer := rand.New(rand.NewSource(time.Now().UnixNano()))
+
+	for i := 0; i < 3; i++ {
+		if err := s.SendMulticast(q); err != nil {
+			log.Println("[ERR] mdns: failed to send probe:", err.Error())
+		}
+		time.Sleep(time.Duration(randomizer.Intn(250)) * time.Millisecond)
+	}
+
+	resp := new(dns.Msg)
+	resp.MsgHdr.Response = true
+
+	// set for query
+	q.SetQuestion(name, dns.TypeANY)
+
+	resp.Answer = append(resp.Answer, s.Records(q.Question[0])...)
+
+	// reset
+	q.SetQuestion(name, dns.TypePTR)
+
+	// From RFC6762
+	//    The Multicast DNS responder MUST send at least two unsolicited
+	//    responses, one second apart. To provide increased robustness against
+	//    packet loss, a responder MAY send up to eight unsolicited responses,
+	//    provided that the interval between unsolicited responses increases by
+	//    at least a factor of two with every response sent.
+	timeout := 1 * time.Second
+	timer := time.NewTimer(timeout)
+	for i := 0; i < 3; i++ {
+		if err := s.SendMulticast(resp); err != nil {
+			logE("failed to send announcement", "error", err)
+		}
+		select {
+		case <-timer.C:
+			timeout *= 2
+			timer.Reset(timeout)
+		default:
+			if s.stop.Load() {
+				return
+			}
+		}
+	}
+}
+
+// multicastResponse us used to send a multicast response packet
+func (s *server) SendMulticast(msg *dns.Msg) error {
+	buf, err := msg.Pack()
+	if err != nil {
+		return err
+	}
+	if s.conn[udp4] != nil {
+		s.conn[udp4].WriteToUDP(buf, s.cfg.IPv4Addr)
+	}
+	if s.conn[udp6] != nil {
+		s.conn[udp6].WriteToUDP(buf, s.cfg.IPv4Addr)
 	}
 	return nil
 }

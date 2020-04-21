@@ -246,6 +246,7 @@ func (s *server) sendResponse(resp *dns.Msg, from net.Addr, unicast bool) error 
 
 // Records ...
 func (s *server) Records(q dns.Question) []dns.RR {
+	var recs []dns.RR
 	list := map[string]func(question dns.Question) []dns.RR{
 		s.cfg.enumAddr:     s.enumRecords,
 		s.cfg.serviceAddr:  s.serviceRecords,
@@ -261,6 +262,12 @@ func (s *server) Records(q dns.Question) []dns.RR {
 			} else {
 				return nil
 			}
+			//TODO
+		} else if q.Name == "_services._dns-sd._udp."+s.cfg.Domain+"." {
+			recs = s.dnssdMetaQueryRecords(q)
+		}
+		if recs != nil {
+			return append(recs, f(q)...)
 		}
 		return f(q)
 	}
@@ -419,6 +426,40 @@ func (s *server) instanceRecords(q dns.Question) []dns.RR {
 	return nil
 }
 
+// dnssdMetaQueryRecords returns the DNS records in response to a "meta-query"
+// issued to browse for DNS-SD services, as per section 9. of RFC6763.
+//
+// A meta-query has a name of the form "_services._dns-sd._udp.<Domain>" where
+// Domain is a fully-qualified domain, such as "local."
+func (s *server) dnssdMetaQueryRecords(q dns.Question) []dns.RR {
+	// Intended behavior, as described in the RFC:
+	//     ...it may be useful for network administrators to find the list of
+	//     advertised service types on the network, even if those Service Names
+	//     are just opaque identifiers and not particularly informative in
+	//     isolation.
+	//
+	//     For this purpose, a special meta-query is defined.  A DNS query for PTR
+	//     records with the name "_services._dns-sd._udp.<Domain>" yields a set of
+	//     PTR records, where the rdata of each PTR record is the two-abel
+	//     <Service> name, plus the same domain, e.g., "_http._tcp.<Domain>".
+	//     Including the domain in the PTR rdata allows for slightly better name
+	//     compression in Unicast DNS responses, but only the first two labels are
+	//     relevant for the purposes of service type enumeration.  These two-label
+	//     service types can then be used to construct subsequent Service Instance
+	//     Enumeration PTR queries, in this <Domain> or others, to discover
+	//     instances of that service type.
+	return []dns.RR{
+		&dns.PTR{
+			Hdr: dns.RR_Header{
+				Name:   q.Name,
+				Rrtype: dns.TypePTR,
+				Class:  dns.ClassINET,
+				Ttl:    defaultTTL,
+			},
+			Ptr: s.serviceAddr,
+		},
+	}
+}
 func (s *server) probe() {
 	//defer s.wg.Done()
 

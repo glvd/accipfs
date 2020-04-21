@@ -116,6 +116,7 @@ func (s *server) handleQuery(query *dns.Msg, from net.Addr) error {
 		multicastAnswer = append(multicastAnswer, mrecs...)
 		unicastAnswer = append(unicastAnswer, urecs...)
 	}
+
 	// See section 18 of RFC 6762 for rules about DNS headers.
 	resp := func(unicast bool) *dns.Msg {
 		// 18.1: ID (Query Identifier)
@@ -168,7 +169,7 @@ func (s *server) handleQuery(query *dns.Msg, from net.Addr) error {
 			Answer: answer,
 		}
 	}
-
+	logI("query detail", "id", query.Id, "question", query.Question, "answer", query.Answer)
 	if s.cfg.LogEmptyResponses && len(multicastAnswer) == 0 && len(unicastAnswer) == 0 {
 		questions := make([]string, len(query.Question))
 		for i, q := range query.Question {

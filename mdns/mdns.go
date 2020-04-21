@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"github.com/glvd/accipfs/config"
 	"go.uber.org/atomic"
+	"golang.org/x/net/ipv4"
+	"golang.org/x/net/ipv6"
 	"net"
 	"os"
 )
@@ -83,12 +85,14 @@ func (dns *MulticastDNS) Client() (c Client, err error) {
 	uniConn[udp4], uudp4Err = net.ListenUDP("udp4", &net.UDPAddr{IP: net.IPv4zero, Port: 0})
 	if uudp4Err != nil {
 		logE("failed to bind to port", "uudp4Err", uudp4Err)
+		uniConn[udp4] = &net.UDPConn{}
 	}
 
 	var uudp6Err error
 	uniConn[udp6], uudp6Err = net.ListenUDP("udp6", &net.UDPAddr{IP: net.IPv6zero, Port: 0})
 	if uudp6Err != nil {
 		logE("failed to bind to port", "uudp6Err", uudp6Err)
+		uniConn[udp6] = &net.UDPConn{}
 	}
 	if uudp4Err != nil && uudp6Err != nil {
 		logE("failed to bind to port", "uudp4Err", uudp4Err, "uudp6Err", uudp6Err)
@@ -101,6 +105,7 @@ func (dns *MulticastDNS) Client() (c Client, err error) {
 	}
 	if udp4Err != nil {
 		logE("failed to bind to port", "udp4Err", udp4Err)
+		conn[udp4] = &net.UDPConn{}
 	}
 	var udp6Err error
 	if dns.cfg.IPV6Addr != nil {
@@ -108,11 +113,36 @@ func (dns *MulticastDNS) Client() (c Client, err error) {
 	}
 	if udp6Err != nil {
 		logE("failed to bind to port", "udp6Err", udp6Err)
+		conn[udp6] = &net.UDPConn{}
 	}
 	// Check if we have any listener
 	if udp4Err != nil && udp6Err != nil {
 		logE("failed to bind to port", "udp6Err", udp6Err, "udp4Err", udp4Err)
 		return nil, fmt.Errorf("failed to bind to any multicast udp port")
+	}
+	p1 := ipv4.NewPacketConn(conn[udp4])
+	p2 := ipv6.NewPacketConn(conn[udp6])
+	p1.SetMulticastLoopback(true)
+	p2.SetMulticastLoopback(true)
+
+	ifaces, err := net.Interfaces()
+	if err != nil {
+		return nil, err
+	}
+
+	var errCount1, errCount2 int
+
+	for _, iface := range ifaces {
+		if err := p1.JoinGroup(&iface, &net.UDPAddr{IP: net.ParseIP(mdnsIPV4Addr)}); err != nil {
+			errCount1++
+		}
+		if err := p2.JoinGroup(&iface, &net.UDPAddr{IP: net.ParseIP(mdnsIPV6Addr)}); err != nil {
+			errCount2++
+		}
+	}
+
+	if len(ifaces) == errCount1 && len(ifaces) == errCount2 {
+		return nil, fmt.Errorf("failed to join multicast group on all interfaces")
 	}
 
 	return &client{

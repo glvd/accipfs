@@ -70,10 +70,10 @@ func main() {
 					if e.Name != "hostname._foobar._tcp.local." {
 						log.Module("main").Fatalf("bad: %v", e)
 					}
-					log.Module("main").Info("host", e.Host, "fields", e.InfoFields, "ipv4", e.AddrV4.String(), "ipv6", e.AddrV6.String())
-					log.Module("main").Info(e.Addr.String())
-					log.Module("main").Info("port", e.Port, "want", port)
-					log.Module("main").Info("info", e.Info, "want", info)
+					log.Module("main").Infow("name", e.Name, "host", e.Host, "fields", e.InfoFields, "ipv4", e.AddrV4.String(), "ipv6", e.AddrV6.String())
+					log.Module("main").Infow(e.Addr.String())
+					log.Module("main").Infow("port", e.Port, "want", port)
+					log.Module("main").Infow("info", e.Info, "want", info)
 
 					atomic.StoreInt32(&found, 1)
 

@@ -6,7 +6,6 @@ import (
 	"go.uber.org/atomic"
 	"golang.org/x/net/ipv4"
 	"golang.org/x/net/ipv6"
-	"log"
 	"net"
 	"strings"
 	"time"
@@ -64,7 +63,7 @@ func DefaultParams(service string) *QueryParam {
 func (c *client) Query(params *QueryParam) error {
 	// Set the multicast interface
 	if params.Interface != nil {
-		if err := client.setInterface(params.Interface, false); err != nil {
+		if err := c.setInterface(params.Interface, false); err != nil {
 			return err
 		}
 	}
@@ -136,8 +135,8 @@ func (c *client) Listen(entries chan<- *ServiceEntry, exit chan struct{}) error 
 				m := new(dns.Msg)
 				m.SetQuestion(e.Name, dns.TypePTR)
 				m.RecursionDesired = false
-				if err := client.sendQuery(m); err != nil {
-					log.Printf("[ERR] mdns: Failed to query instance %s: %v", e.Name, err)
+				if err := c.sendQuery(m); err != nil {
+					logE("failed to query instance", "name", e.Name, "error", err)
 				}
 			}
 		}

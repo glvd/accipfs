@@ -5,7 +5,6 @@ import (
 	"go.uber.org/atomic"
 	"golang.org/x/net/ipv4"
 	"golang.org/x/net/ipv6"
-	"log"
 	"net"
 	"strings"
 	"time"
@@ -259,7 +258,7 @@ func (c *client) query(params *QueryParam) error {
 				m.SetQuestion(inp.Name, dns.TypePTR)
 				m.RecursionDesired = false
 				if err := c.sendQuery(m); err != nil {
-					log.Printf("[ERR] mdns: Failed to query instance %s: %v", inp.Name, err)
+					logE("failed to query instance", "name", inp.Name, "error", err)
 				}
 			}
 		case <-finish:
@@ -303,12 +302,12 @@ func (c *client) recv(l *net.UDPConn, msgCh chan<- *dns.Msg) {
 		}
 
 		if err != nil {
-			log.Printf("[ERR] mdns: Failed to read packet: %v", err)
+			logE("failed to read packet", "error", err)
 			continue
 		}
 		msg := new(dns.Msg)
 		if err := msg.Unpack(buf[:n]); err != nil {
-			log.Printf("[ERR] mdns: Failed to unpack packet: %v", err)
+			logE("failed to unpack packet", "error", err)
 			continue
 		}
 		select {

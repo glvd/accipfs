@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"github.com/miekg/dns"
 	"go.uber.org/atomic"
-	"log"
 	"net"
 	"strings"
 )
@@ -175,7 +174,7 @@ func (s *server) handleQuery(query *dns.Msg, from net.Addr) error {
 		for i, q := range query.Question {
 			questions[i] = q.Name
 		}
-		log.Printf("no responses for query with questions: %s", strings.Join(questions, ", "))
+		logE("no responses for query with questions", "question", strings.Join(questions, ", "))
 	}
 
 	if mresp := resp(false); mresp != nil {

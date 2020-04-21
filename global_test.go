@@ -10,7 +10,7 @@ func TestRun(t *testing.T) {
 	config.WorkDir = "D:\\workspace\\pvt"
 	config.Initialize()
 	cfg := config.Global()
-	s, e := service.NewRPCServer(&cfg)
+	s, e := service.New(&cfg)
 	t.Log("accelerate new")
 	if e != nil {
 		panic(e)

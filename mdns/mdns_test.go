@@ -3,6 +3,7 @@ package mdns
 import (
 	"github.com/glvd/accipfs/config"
 	"github.com/glvd/accipfs/log"
+	"net"
 	"sync/atomic"
 	"testing"
 	"time"
@@ -29,6 +30,17 @@ func TestMulticastDNS_Server(t *testing.T) {
 func TestMulticastDNS_Lookup(t *testing.T) {
 	mdns, err := New(config.Default(), func(cfg *OptionConfig) {
 		cfg.Service = "_foobar._tcp"
+		addrs, err := net.InterfaceAddrs()
+		if err != nil {
+			t.Log(err)
+			return
+		}
+		for i := range addrs {
+			cidr, _, err := net.ParseCIDR(addrs[i].String())
+			if err == nil {
+				cfg.IPs = append(cfg.IPs, cidr)
+			}
+		}
 	})
 	if err != nil {
 		t.Fatal(err)
@@ -40,6 +52,7 @@ func TestMulticastDNS_Lookup(t *testing.T) {
 	}
 	s.Start()
 	defer s.Stop()
+
 	c, err := mdns.Client()
 	if err != nil {
 		t.Fatal(err)
@@ -49,6 +62,7 @@ func TestMulticastDNS_Lookup(t *testing.T) {
 	go func() {
 		select {
 		case e := <-entries:
+			t.Log("entries")
 			if e.Name != "hostname._foobar._tcp.local." {
 				t.Fatalf("bad: %v", e)
 			}

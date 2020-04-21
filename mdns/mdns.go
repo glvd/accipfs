@@ -97,14 +97,14 @@ func (dns *MulticastDNS) Client() (c Client, err error) {
 	conn := make([]*net.UDPConn, ipmax)
 	var udp4Err error
 	if dns.cfg.IPV4Addr != nil {
-		conn[udp4], udp4Err = net.ListenMulticastUDP("udp4", dns.cfg.NetInterface, dns.cfg.IPV4Addr)
+		conn[udp4], udp4Err = net.ListenMulticastUDP("udp4", nil, dns.cfg.IPV4Addr)
 	}
 	if udp4Err != nil {
 		logE("failed to bind to port", "udp4Err", udp4Err)
 	}
 	var udp6Err error
 	if dns.cfg.IPV6Addr != nil {
-		conn[udp6], udp6Err = net.ListenMulticastUDP("udp6", dns.cfg.NetInterface, dns.cfg.IPV6Addr)
+		conn[udp6], udp6Err = net.ListenMulticastUDP("udp6", nil, dns.cfg.IPV6Addr)
 	}
 	if udp6Err != nil {
 		logE("failed to bind to port", "udp6Err", udp6Err)
@@ -169,7 +169,7 @@ func defaultConfig(cfg *config.Config) *OptionConfig {
 		Domain:            domain,
 		Port:              80,
 		TTL:               defaultTTL,
-		TXT:               []string{"Local web server"}, // TXT,
-		IPs:               []net.IP{[]byte{192, 168, 0, 42}, net.ParseIP("2620:0:1000:1900:b0c2:d0b2:c411:18bc")},
+		TXT:               []string{"accipfs local server"}, // TXT,
+		//IPs:               []net.IP{[]byte{192, 168, 0, 42}, net.ParseIP("2620:0:1000:1900:b0c2:d0b2:c411:18bc")},
 	}
 }

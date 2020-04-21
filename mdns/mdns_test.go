@@ -30,34 +30,43 @@ func TestMulticastDNS_Server(t *testing.T) {
 func TestMulticastDNS_Lookup(t *testing.T) {
 	mdns, err := New(config.Default(), func(cfg *OptionConfig) {
 		cfg.Service = "_foobar._tcp"
-		addrs, err := net.InterfaceAddrs()
-		if err != nil {
-			t.Log(err)
-			return
-		}
-		for i := range addrs {
-			cidr, _, err := net.ParseCIDR(addrs[i].String())
-			if err == nil {
-				cfg.IPs = append(cfg.IPs, cidr)
-			}
-		}
+		//addrs, err := net.InterfaceAddrs()
+		//if err != nil {
+		//	t.Log(err)
+		//	return
+		//}
+		//for i := range addrs {
+		//	cidr, _, err := net.ParseCIDR(addrs[i].String())
+		//	if err == nil {
+		//		cfg.IPs = append(cfg.IPs, cidr)
+		//	}
+		//}
+		cfg.IPs = append(cfg.IPs, net.ParseIP("192.168.1.45"), net.ParseIP("192.168.1.13"))
 	})
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	s, err := mdns.Server()
-	if err != nil {
-		t.Fatal(err)
-	}
-	s.Start()
-	defer s.Stop()
+	//s, err := mdns.Server()
+	//if err != nil {
+	//	t.Fatal(err)
+	//}
+	//s.Start()
+	//defer s.Stop()
 
 	c, err := mdns.Client()
 	if err != nil {
 		t.Fatal(err)
 	}
+
 	entries := make(chan *ServiceEntry, 1)
+
+	//err = c.Lookup("_foobar._tcp", entries)
+	//if err != nil {
+	//	t.Log(err)
+	//}
+	//fmt.Printf("entries:%+v", entries)
+
 	var found int32
 	go func() {
 		select {
@@ -74,7 +83,7 @@ func TestMulticastDNS_Lookup(t *testing.T) {
 			}
 			atomic.StoreInt32(&found, 1)
 
-		case <-time.After(80 * time.Millisecond):
+		case <-time.After(80 * time.Second):
 			t.Fatalf("timeout")
 		}
 	}()
@@ -87,8 +96,12 @@ func TestMulticastDNS_Lookup(t *testing.T) {
 	}
 	err = c.Query(params)
 	if err != nil {
-		t.Fatalf("err: %v", err)
+		t.Fatalf("err: %v\n", err)
 	}
+	//err = c.Lookup("_foobar._tcp", entries)
+	//if err != nil {
+	//	t.Fatalf("err: %v\n", err)
+	//}
 	if atomic.LoadInt32(&found) == 0 {
 		t.Fatalf("record not found")
 	}

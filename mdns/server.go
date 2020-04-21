@@ -179,12 +179,14 @@ func (s *server) handleQuery(query *dns.Msg, from net.Addr) error {
 	}
 
 	if mresp := resp(false); mresp != nil {
+		logI("multicast", "response", *mresp)
 		if err := s.sendResponse(mresp, from, false); err != nil {
 			return fmt.Errorf("mdns: error sending multicast response: %v", err)
 		}
 	}
 	if uresp := resp(true); uresp != nil {
 		if err := s.sendResponse(uresp, from, true); err != nil {
+			logI("unicast", "response", *uresp)
 			return fmt.Errorf("mdns: error sending unicast response: %v", err)
 		}
 	}

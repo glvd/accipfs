@@ -290,7 +290,7 @@ func (c *client) sendQuery(q *dns.Msg) error {
 }
 
 // recv is used to receive until we get a shutdown
-func (c *client) recv(l *net.UDPConn, msgCh chan *dns.Msg) {
+func (c *client) recv(l *net.UDPConn, msgCh chan<- *dns.Msg) {
 	if l == nil {
 		return
 	}

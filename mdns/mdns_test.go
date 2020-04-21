@@ -30,18 +30,18 @@ func TestMulticastDNS_Server(t *testing.T) {
 func TestMulticastDNS_Lookup(t *testing.T) {
 	mdns, err := New(config.Default(), func(cfg *OptionConfig) {
 		cfg.Service = "_foobar._tcp"
-		//addrs, err := net.InterfaceAddrs()
-		//if err != nil {
-		//	t.Log(err)
-		//	return
-		//}
-		//for i := range addrs {
-		//	cidr, _, err := net.ParseCIDR(addrs[i].String())
-		//	if err == nil {
-		//		cfg.IPs = append(cfg.IPs, cidr)
-		//	}
-		//}
-		cfg.IPs = append(cfg.IPs, net.ParseIP("192.168.1.45"), net.ParseIP("192.168.1.13"))
+		addrs, err := net.InterfaceAddrs()
+		if err != nil {
+			t.Log(err)
+			return
+		}
+		for i := range addrs {
+			cidr, _, err := net.ParseCIDR(addrs[i].String())
+			if err == nil {
+				cfg.IPs = append(cfg.IPs, cidr)
+			}
+		}
+		//cfg.IPs = append(cfg.IPs, net.ParseIP("192.168.1.45"), net.ParseIP("192.168.1.13"))
 	})
 	if err != nil {
 		t.Fatal(err)
@@ -72,15 +72,14 @@ func TestMulticastDNS_Lookup(t *testing.T) {
 		select {
 		case e := <-entries:
 			t.Log("entries")
-			if e.Name != "hostname._foobar._tcp.local." {
-				t.Fatalf("bad: %v", e)
+			if e.Name != "accipfs._foobar._tcp.local." {
+				log.Module("main").Fatalf("bad: %v", e)
 			}
-			if e.Port != 80 {
-				t.Fatalf("bad: %v", e)
-			}
-			if e.Info != "accipfs local server" {
-				t.Fatalf("bad: %v", e)
-			}
+			log.Module("main").Infow("output detail", "name", e.Name, "host", e.Host, "fields", e.InfoFields, "ipv4", e.AddrV4.String(), "ipv6", e.AddrV6.String())
+			log.Module("main").Infow("output addr", "addr", e.Addr.String())
+			log.Module("main").Infow("output port", "port", e.Port, "want", 0)
+			log.Module("main").Infow("output info", "info", e.Info, "want", 0)
+
 			atomic.StoreInt32(&found, 1)
 
 		case <-time.After(80 * time.Millisecond):

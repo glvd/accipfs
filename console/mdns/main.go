@@ -11,11 +11,7 @@ import (
 	"time"
 )
 
-var rootCmd = &cobra.Command{
-	Run: func(cmd *cobra.Command, args []string) {
-
-	},
-}
+var rootCmd = &cobra.Command{}
 
 func main() {
 	var client bool
@@ -99,5 +95,7 @@ func main() {
 			}
 		}
 	}
-
+	if err := rootCmd.Execute(); err != nil {
+		panic(err)
+	}
 }

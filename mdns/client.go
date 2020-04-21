@@ -199,25 +199,25 @@ func (c *client) setInterface(iface *net.Interface, loopback bool) error {
 	var p2 *ipv6.PacketConn
 	if c.uniConn[udp4] != nil {
 		p = ipv4.NewPacketConn(c.uniConn[udp4])
-		if err := p.JoinGroup(iface, &net.UDPAddr{IP: net.ParseIP(mdnsIPV4Addr)}); err != nil {
+		if err := p.JoinGroup(iface, &net.UDPAddr{IP: net.ParseIP(mdnsIPv4Addr)}); err != nil {
 			return err
 		}
 	}
 	if c.uniConn[udp6] != nil {
 		p2 = ipv6.NewPacketConn(c.uniConn[udp6])
-		if err := p2.JoinGroup(iface, &net.UDPAddr{IP: net.ParseIP(mdnsIPV6Addr)}); err != nil {
+		if err := p2.JoinGroup(iface, &net.UDPAddr{IP: net.ParseIP(mdnsIPv6Addr)}); err != nil {
 			return err
 		}
 	}
 	if c.conn[udp4] != nil {
 		p = ipv4.NewPacketConn(c.conn[udp4])
-		if err := p.JoinGroup(iface, &net.UDPAddr{IP: net.ParseIP(mdnsIPV4Addr)}); err != nil {
+		if err := p.JoinGroup(iface, &net.UDPAddr{IP: net.ParseIP(mdnsIPv4Addr)}); err != nil {
 			return err
 		}
 	}
 	if c.conn[udp6] != nil {
 		p2 = ipv6.NewPacketConn(c.conn[udp6])
-		if err := p2.JoinGroup(iface, &net.UDPAddr{IP: net.ParseIP(mdnsIPV6Addr)}); err != nil {
+		if err := p2.JoinGroup(iface, &net.UDPAddr{IP: net.ParseIP(mdnsIPv6Addr)}); err != nil {
 			return err
 		}
 	}
@@ -360,13 +360,13 @@ func (c *client) sendQuery(q *dns.Msg) error {
 		return err
 	}
 	if c.uniConn[udp4] != nil {
-		_, err = c.uniConn[udp4].WriteToUDP(buf, c.cfg.IPV4Addr)
+		_, err = c.uniConn[udp4].WriteToUDP(buf, c.cfg.IPv4Addr)
 		if err != nil {
 			logE("send query ipv4", "error", err)
 		}
 	}
 	if c.uniConn[udp6] != nil {
-		_, err = c.uniConn[udp6].WriteToUDP(buf, c.cfg.IPV6Addr)
+		_, err = c.uniConn[udp6].WriteToUDP(buf, c.cfg.IPv6Addr)
 		if err != nil {
 			logE("send query ipv6", "error", err)
 		}

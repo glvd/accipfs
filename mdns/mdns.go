@@ -11,9 +11,11 @@ import (
 )
 
 const (
-	mdnsIPV4Addr = "224.0.0.251"
-	mdnsIPV6Addr = "FF02::FB"
-	mdnsPort     = 5353
+	mdnsIPv4Addr         = "224.0.0.251"
+	mdnsWildcardIPv4Addr = "224.0.0.0"
+	mdnsIPv6Addr         = "FF02::FB"
+	mdnsWildcardIPv6Addr = "FF02::"
+	mdnsPort             = 5353
 )
 const defaultTTL = 120
 
@@ -27,13 +29,16 @@ const (
 type OptionConfig struct {
 	//Zone              string
 	NetInterface      *net.Interface
-	IPV4Addr          *net.UDPAddr
-	IPV6Addr          *net.UDPAddr
+	IPv4Addr          *net.UDPAddr
+	IPv6Addr          *net.UDPAddr
+	WildcardAddrIPv4  *net.UDPAddr
+	WildcardAddrIPv6  *net.UDPAddr
 	LogEmptyResponses bool
 	HostName          string
 	instanceAddr      string
 	serviceAddr       string
 	enumAddr          string
+	CustomPort        int
 	Port              uint16
 	TTL               uint32
 	TXT               []string
@@ -56,18 +61,55 @@ type MulticastDNS struct {
 func (dns *MulticastDNS) Server() (s Server, err error) {
 	// Create the listeners
 	conn := make([]*net.UDPConn, ipmax)
+
 	var udp4Err error
-	if dns.cfg.IPV4Addr != nil {
-		conn[udp4], udp4Err = net.ListenMulticastUDP("udp4", dns.cfg.NetInterface, dns.cfg.IPV4Addr)
+	if dns.cfg.IPv4Addr != nil {
+		conn[udp4], udp4Err = net.ListenUDP("udp4", dns.cfg.WildcardAddrIPv4)
+		if udp4Err != nil {
+			conn[udp4] = &net.UDPConn{}
+		}
 	}
 	var udp6Err error
-	if dns.cfg.IPV6Addr != nil {
-		conn[udp6], udp6Err = net.ListenMulticastUDP("udp6", dns.cfg.NetInterface, dns.cfg.IPV6Addr)
+	if dns.cfg.IPv6Addr != nil {
+		conn[udp6], udp6Err = net.ListenUDP("udp6", dns.cfg.WildcardAddrIPv6)
+		if udp6Err != nil {
+			conn[udp6] = &net.UDPConn{}
+		}
 	}
 
 	// Check if we have any listener
 	if udp4Err != nil && udp6Err != nil {
 		return nil, fmt.Errorf("no multicast listeners could be started")
+	}
+	p1 := ipv4.NewPacketConn(conn[udp4])
+	p2 := ipv6.NewPacketConn(conn[udp6])
+	p1.SetMulticastLoopback(true)
+	p2.SetMulticastLoopback(true)
+
+	if dns.cfg.NetInterface != nil {
+		if err := p1.JoinGroup(dns.cfg.NetInterface, &net.UDPAddr{IP: net.ParseIP(mdnsIPv4Addr)}); err != nil {
+			return nil, err
+		}
+		if err := p2.JoinGroup(dns.cfg.NetInterface, &net.UDPAddr{IP: net.ParseIP(mdnsIPv6Addr)}); err != nil {
+			return nil, err
+		}
+	} else {
+		ifaces, err := net.Interfaces()
+		if err != nil {
+			return nil, err
+		}
+		errCount1, errCount2 := 0, 0
+		for _, iface := range ifaces {
+			if err := p1.JoinGroup(&iface, &net.UDPAddr{IP: net.ParseIP(mdnsIPv4Addr)}); err != nil {
+				errCount1++
+			}
+			if err := p2.JoinGroup(&iface, &net.UDPAddr{IP: net.ParseIP(mdnsIPv6Addr)}); err != nil {
+				errCount2++
+			}
+		}
+		if len(ifaces) == errCount1 && len(ifaces) == errCount2 {
+			return nil, fmt.Errorf("failed to join multicast group on all interfaces")
+		}
 	}
 
 	return &server{
@@ -100,16 +142,16 @@ func (dns *MulticastDNS) Client() (c Client, err error) {
 	}
 	conn := make([]*net.UDPConn, ipmax)
 	var udp4Err error
-	if dns.cfg.IPV4Addr != nil {
-		conn[udp4], udp4Err = net.ListenMulticastUDP("udp4", nil, dns.cfg.IPV4Addr)
+	if dns.cfg.IPv4Addr != nil {
+		conn[udp4], udp4Err = net.ListenMulticastUDP("udp4", nil, dns.cfg.IPv4Addr)
 	}
 	if udp4Err != nil {
 		logE("failed to bind to port", "udp4Err", udp4Err)
 		conn[udp4] = &net.UDPConn{}
 	}
 	var udp6Err error
-	if dns.cfg.IPV6Addr != nil {
-		conn[udp6], udp6Err = net.ListenMulticastUDP("udp6", nil, dns.cfg.IPV6Addr)
+	if dns.cfg.IPv6Addr != nil {
+		conn[udp6], udp6Err = net.ListenMulticastUDP("udp6", nil, dns.cfg.IPv6Addr)
 	}
 	if udp6Err != nil {
 		logE("failed to bind to port", "udp6Err", udp6Err)
@@ -133,10 +175,10 @@ func (dns *MulticastDNS) Client() (c Client, err error) {
 	var errCount1, errCount2 int
 
 	for _, iface := range ifaces {
-		if err := p1.JoinGroup(&iface, &net.UDPAddr{IP: net.ParseIP(mdnsIPV4Addr)}); err != nil {
+		if err := p1.JoinGroup(&iface, &net.UDPAddr{IP: net.ParseIP(mdnsIPv4Addr)}); err != nil {
 			errCount1++
 		}
-		if err := p2.JoinGroup(&iface, &net.UDPAddr{IP: net.ParseIP(mdnsIPV6Addr)}); err != nil {
+		if err := p2.JoinGroup(&iface, &net.UDPAddr{IP: net.ParseIP(mdnsIPv6Addr)}); err != nil {
 			errCount2++
 		}
 	}
@@ -159,6 +201,24 @@ func New(cfg *config.Config, opts ...OptionConfigFunc) (mdns *MulticastDNS, err 
 	for _, op := range opts {
 		op(optionConfig)
 	}
+	optionConfig.IPv4Addr = &net.UDPAddr{
+		IP:   net.ParseIP(mdnsIPv4Addr),
+		Port: optionConfig.CustomPort,
+	}
+	optionConfig.IPv6Addr = &net.UDPAddr{
+		IP:   net.ParseIP(mdnsIPv6Addr),
+		Port: optionConfig.CustomPort,
+	}
+
+	optionConfig.WildcardAddrIPv4 = &net.UDPAddr{
+		IP:   net.ParseIP(mdnsWildcardIPv4Addr),
+		Port: optionConfig.CustomPort,
+	}
+	optionConfig.WildcardAddrIPv6 = &net.UDPAddr{
+		IP:   net.ParseIP(mdnsWildcardIPv6Addr),
+		Port: optionConfig.CustomPort,
+	}
+
 	optionConfig.instanceAddr = instanceAddr(optionConfig.Instance, optionConfig.Service, optionConfig.Domain)
 	optionConfig.serviceAddr = serviceAddr(optionConfig.Service, optionConfig.Domain)
 	optionConfig.enumAddr = enumAddr(optionConfig.Domain)
@@ -168,14 +228,14 @@ func New(cfg *config.Config, opts ...OptionConfigFunc) (mdns *MulticastDNS, err 
 }
 
 func defaultConfig(cfg *config.Config) *OptionConfig {
-	ipv4Addr := &net.UDPAddr{
-		IP:   net.ParseIP(mdnsIPV4Addr),
-		Port: mdnsPort,
-	}
-	ipv6Addr := &net.UDPAddr{
-		IP:   net.ParseIP(mdnsIPV6Addr),
-		Port: mdnsPort,
-	}
+	//ipv4Addr := &net.UDPAddr{
+	//	IP:   net.ParseIP(mdnsIPv4Addr),
+	//	Port: mdnsPort,
+	//}
+	//ipv6Addr := &net.UDPAddr{
+	//	IP:   net.ParseIP(mdnsIPv6Addr),
+	//	Port: mdnsPort,
+	//}
 
 	hostName, _ := os.Hostname()
 	hostName = fmt.Sprintf("%s.", hostName)
@@ -186,8 +246,8 @@ func defaultConfig(cfg *config.Config) *OptionConfig {
 	return &OptionConfig{
 		//Zone:              "",
 		NetInterface:      nil,
-		IPV4Addr:          ipv4Addr,
-		IPV6Addr:          ipv6Addr,
+		IPv4Addr:          nil,
+		IPv6Addr:          nil,
 		LogEmptyResponses: false,
 		HostName:          hostName,
 		Instance:          instance,
@@ -197,6 +257,7 @@ func defaultConfig(cfg *config.Config) *OptionConfig {
 		Enum:              "",
 		enumAddr:          enumAddr(domain),
 		Domain:            domain,
+		CustomPort:        mdnsPort,
 		Port:              80,
 		TTL:               defaultTTL,
 		TXT:               []string{"accipfs local server"}, // TXT,

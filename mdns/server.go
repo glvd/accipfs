@@ -4,8 +4,11 @@ import (
 	"fmt"
 	"github.com/miekg/dns"
 	"go.uber.org/atomic"
+	"log"
+	"math/rand"
 	"net"
 	"strings"
+	"time"
 )
 
 const forceUnicastResponses = false
@@ -23,6 +26,7 @@ type server struct {
 	cfg          *OptionConfig
 	conn         []*net.UDPConn
 	stop         *atomic.Bool
+	//wg           sync.WaitGroup
 }
 
 // Stop ...
@@ -52,6 +56,7 @@ func (s *server) Start() {
 			go s.recv(s.conn[i])
 		}
 	}
+	go s.probe()
 }
 
 // recv is a long running routine to receive packets from an interface
@@ -197,7 +202,7 @@ func (s *server) handleQuery(query *dns.Msg, from net.Addr) error {
 // The response to a question may be transmitted over multicast, unicast, or
 // both.  The return values are DNS records for each transmission type.
 func (s *server) handleQuestion(q dns.Question) (multicastRecs, unicastRecs []dns.RR) {
-	records := s.zoneInstance(q)
+	records := s.Records(q)
 
 	if len(records) == 0 {
 		return nil, nil
@@ -239,7 +244,8 @@ func (s *server) sendResponse(resp *dns.Msg, from net.Addr, unicast bool) error 
 	return err
 }
 
-func (s *server) zoneInstance(q dns.Question) []dns.RR {
+// Records ...
+func (s *server) Records(q dns.Question) []dns.RR {
 	list := map[string]func(question dns.Question) []dns.RR{
 		s.cfg.enumAddr:     s.enumRecords,
 		s.cfg.serviceAddr:  s.serviceRecords,
@@ -409,6 +415,97 @@ func (s *server) instanceRecords(q dns.Question) []dns.RR {
 			Txt: s.cfg.TXT,
 		}
 		return []dns.RR{txt}
+	}
+	return nil
+}
+
+func (s *server) probe() {
+	//defer s.wg.Done()
+
+	name := fmt.Sprintf("%s.%s.%s.", s.cfg.Instance, trimDot(s.cfg.Service), trimDot(s.cfg.Domain))
+
+	q := new(dns.Msg)
+	q.SetQuestion(name, dns.TypePTR)
+	q.RecursionDesired = false
+
+	srv := &dns.SRV{
+		Hdr: dns.RR_Header{
+			Name:   name,
+			Rrtype: dns.TypeSRV,
+			Class:  dns.ClassINET,
+			Ttl:    defaultTTL,
+		},
+		Priority: 0,
+		Weight:   0,
+		Port:     s.cfg.Port,
+		Target:   s.cfg.HostName,
+	}
+	txt := &dns.TXT{
+		Hdr: dns.RR_Header{
+			Name:   name,
+			Rrtype: dns.TypeTXT,
+			Class:  dns.ClassINET,
+			Ttl:    defaultTTL,
+		},
+		Txt: s.cfg.TXT,
+	}
+	q.Ns = []dns.RR{srv, txt}
+
+	randomizer := rand.New(rand.NewSource(time.Now().UnixNano()))
+
+	for i := 0; i < 3; i++ {
+		if err := s.SendMulticast(q); err != nil {
+			log.Println("[ERR] mdns: failed to send probe:", err.Error())
+		}
+		time.Sleep(time.Duration(randomizer.Intn(250)) * time.Millisecond)
+	}
+
+	resp := new(dns.Msg)
+	resp.MsgHdr.Response = true
+
+	// set for query
+	q.SetQuestion(name, dns.TypeANY)
+
+	resp.Answer = append(resp.Answer, s.Records(q.Question[0])...)
+
+	// reset
+	q.SetQuestion(name, dns.TypePTR)
+
+	// From RFC6762
+	//    The Multicast DNS responder MUST send at least two unsolicited
+	//    responses, one second apart. To provide increased robustness against
+	//    packet loss, a responder MAY send up to eight unsolicited responses,
+	//    provided that the interval between unsolicited responses increases by
+	//    at least a factor of two with every response sent.
+	timeout := 1 * time.Second
+	timer := time.NewTimer(timeout)
+	for i := 0; i < 3; i++ {
+		if err := s.SendMulticast(resp); err != nil {
+			logE("failed to send announcement", "error", err)
+		}
+		select {
+		case <-timer.C:
+			timeout *= 2
+			timer.Reset(timeout)
+		default:
+			if s.stop.Load() {
+				return
+			}
+		}
+	}
+}
+
+// multicastResponse us used to send a multicast response packet
+func (s *server) SendMulticast(msg *dns.Msg) error {
+	buf, err := msg.Pack()
+	if err != nil {
+		return err
+	}
+	if s.conn[udp4] != nil {
+		s.conn[udp4].WriteToUDP(buf, s.cfg.IPv4Addr)
+	}
+	if s.conn[udp6] != nil {
+		s.conn[udp6].WriteToUDP(buf, s.cfg.IPv4Addr)
 	}
 	return nil
 }

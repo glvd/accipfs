@@ -71,7 +71,6 @@ func RPCPost(url string, method string, input, output interface{}) error {
 	if size == 0 {
 		return errors.New("no data response from remote node")
 	}
-
 	err = json2.DecodeClientResponse(buf, output)
 	if err != nil {
 		logE("decode failed", "data", buf.String())

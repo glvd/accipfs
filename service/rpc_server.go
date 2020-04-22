@@ -23,6 +23,7 @@ type rpcServer struct {
 // NewRPCServer ...
 func newRPCServer(cfg *config.Config, linker *BustLinker) (*rpcServer, error) {
 	serv := rpc.NewServer()
+	serv.RegisterCodec(json2.NewCodec(), "application/json")
 	serv.RegisterCodec(json2.NewCodec(), "application/json;charset=UTF-8")
 
 	err := serv.RegisterService(linker, "")

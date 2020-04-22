@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"github.com/miekg/dns"
 	"go.uber.org/atomic"
-	"log"
 	"math/rand"
 	"net"
 	"strings"
@@ -496,7 +495,7 @@ func (s *server) probe() {
 
 	for i := 0; i < 3; i++ {
 		if err := s.SendMulticast(q); err != nil {
-			log.Println("[ERR] mdns: failed to send probe:", err.Error())
+			logI("failed to send probe", "error", err)
 		}
 		time.Sleep(time.Duration(randomizer.Intn(250)) * time.Millisecond)
 	}

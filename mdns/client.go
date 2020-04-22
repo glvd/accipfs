@@ -386,15 +386,13 @@ func (c *client) recv(l *net.UDPConn, msgCh chan<- *dns.Msg) {
 	}
 	buf := make([]byte, 65536)
 	for !c.stop.Load() {
-		logI("recv")
 		n, err := l.Read(buf)
 
 		if c.stop.Load() {
 			return
 		}
-		logI("read packet")
 		if err != nil {
-			logE("failed to read packet", "error", err)
+			//logE("failed to read packet", "error", err)
 			continue
 		}
 		msg := new(dns.Msg)

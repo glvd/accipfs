@@ -36,9 +36,14 @@ func TestMulticastDNS_Lookup(t *testing.T) {
 			return
 		}
 		for i := range addrs {
-			cidr, _, err := net.ParseCIDR(addrs[i].String())
-			if err == nil {
-				cfg.IPs = append(cfg.IPs, cidr)
+			if ipnet, ok := addrs[i].(*net.IPNet); ok && !ipnet.IP.IsLoopback() {
+				if ipnet.IP.To4() != nil {
+					cidr, _, err := net.ParseCIDR(addrs[i].String())
+					if err == nil {
+						cfg.IPs = append(cfg.IPs, cidr)
+					}
+					cfg.IPs = append(cfg.IPs, cidr)
+				}
 			}
 		}
 		//cfg.IPs = append(cfg.IPs, net.ParseIP("192.168.1.45"), net.ParseIP("192.168.1.13"))

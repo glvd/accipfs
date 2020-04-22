@@ -30,10 +30,14 @@ func main() {
 				return
 			}
 			for i := range addrs {
-				cidr, _, err := net.ParseCIDR(addrs[i].String())
-				if err == nil {
-					fmt.Println("ip added:", addrs[i].String())
-					cfg.IPs = append(cfg.IPs, cidr)
+				if ipnet, ok := addrs[i].(*net.IPNet); ok && !ipnet.IP.IsLoopback() {
+					if ipnet.IP.To4() != nil {
+						cidr, _, err := net.ParseCIDR(addrs[i].String())
+						if err == nil {
+							cfg.IPs = append(cfg.IPs, cidr)
+						}
+						cfg.IPs = append(cfg.IPs, cidr)
+					}
 				}
 			}
 			cfg.Port = uint16(port)
@@ -62,7 +66,6 @@ func main() {
 			//	t.Log(err)
 			//}
 			//fmt.Printf("entries:%+v", entries)
-
 			var found int32
 			go func() {
 				select {
@@ -85,7 +88,7 @@ func main() {
 			params := &mdns.QueryParam{
 				Service: "_foobar._tcp",
 				Domain:  "local",
-				Timeout: 50 * time.Millisecond,
+				Timeout: 3 * time.Second,
 				Entries: entries,
 			}
 			err = c.Query(params)

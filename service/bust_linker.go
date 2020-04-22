@@ -256,9 +256,11 @@ func (l *BustLinker) addPeer(ctx context.Context, node *core.Node, result *bool)
 	}
 
 	faultNode := l.nodes.IsFault(node.NodeInfo.Name)
-	remain, b := faultTimeCheck(faultNode, 30)
-	if faultNode != nil && b {
-		return fmt.Errorf("fault check error,waiting remain %d", remain)
+
+	if faultNode != nil {
+		if remain, b := faultTimeCheck(faultNode, 30); !b {
+			return fmt.Errorf("fault check error,waiting remain %d", remain)
+		}
 	}
 
 	err := client.Ping(general.RPCAddress(node.NodeAddress))

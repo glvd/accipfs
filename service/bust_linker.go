@@ -258,7 +258,7 @@ func (l *BustLinker) addPeer(ctx context.Context, node *core.Node, result *bool)
 	faultNode := l.nodes.IsFault(node.NodeInfo.Name)
 
 	if faultNode != nil {
-		if remain, b := faultTimeCheck(faultNode, 30); !b {
+		if remain, b := faultTimeCheck(faultNode, 180); !b {
 			return fmt.Errorf("fault check error,waiting remain %d", remain)
 		}
 	}

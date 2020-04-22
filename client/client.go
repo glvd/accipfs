@@ -30,6 +30,15 @@ func Ping(url string) error {
 	return nil
 }
 
+// ConnectTo ...
+func ConnectTo(url string, req *core.ConnectToReq) (*core.ConnectToResp, error) {
+	remoteNode := new(core.ConnectToResp)
+	if err := general.RPCPost(url, "BustLinker.ConnectTo", req, remoteNode); err != nil {
+		return nil, err
+	}
+	return remoteNode, nil
+}
+
 // Pins ...
 func Pins(address core.NodeAddress) ([]string, error) {
 	logD("ping info", "addr", address.Address, "port", address.Port)

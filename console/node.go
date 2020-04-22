@@ -30,15 +30,15 @@ func nodeConnectCmd() *cobra.Command {
 			url := config.RPCAddr()
 
 			for _, addr := range args {
-				fmt.Printf("connect to [%s]\n", url)
+				fmt.Printf("connect to [%s]\n", addr)
 				req := &core.ConnectToReq{Addr: addr}
-				remoteNode := new(core.ConnectToResp)
-				if err := general.RPCPost(url, "BustLinker.ConnectTo", req, remoteNode); err != nil {
+				remote, err := client.ConnectTo(url, req)
+				if err != nil {
 					fmt.Printf("connect error: %v\n", err)
 					return
 				}
 
-				if err := client.AddPeer(url, &remoteNode.Node); err != nil {
+				if err := client.AddPeer(url, &remote.Node); err != nil {
 					fmt.Printf("add peer error: %v\n", err)
 					return
 				}

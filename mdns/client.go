@@ -15,8 +15,8 @@ import (
 type ServiceEntry struct {
 	Name       string
 	Host       string
-	AddrV4     net.IP
-	AddrV6     net.IP
+	AddrV4     []net.IP
+	AddrV6     []net.IP
 	Port       int
 	Info       string
 	InfoFields []string
@@ -285,46 +285,6 @@ func (c *client) query(params *QueryParam) error {
 		select {
 		case resp := <-msgCh:
 			inp := messageToEntry(resp, inprogress)
-			//var inp *ServiceEntry
-			//for _, answer := range append(resp.Answer, resp.Extra...) {
-			//	// TODO(reddaly): Check that response corresponds to serviceAddr?
-			//	switch rr := answer.(type) {
-			//	case *dns.PTR:
-			//		// Create new entry for this
-			//		inp = ensureName(inprogress, rr.Ptr)
-			//
-			//	case *dns.SRV:
-			//		// Check for a target mismatch
-			//		if rr.Target != rr.Hdr.Name {
-			//			alias(inprogress, rr.Hdr.Name, rr.Target)
-			//		}
-			//
-			//		// Get the port
-			//		inp = ensureName(inprogress, rr.Hdr.Name)
-			//		inp.Host = rr.Target
-			//		inp.Port = int(rr.Port)
-			//
-			//	case *dns.TXT:
-			//		// Pull out the txt
-			//		inp = ensureName(inprogress, rr.Hdr.Name)
-			//		inp.Info = strings.Join(rr.Txt, "|")
-			//		inp.InfoFields = rr.Txt
-			//		inp.hasTXT = true
-			//
-			//	case *dns.A:
-			//		// Pull out the IP
-			//		inp = ensureName(inprogress, rr.Hdr.Name)
-			//		inp.Addr = rr.A // @Deprecated
-			//		inp.AddrV4 = rr.A
-			//
-			//	case *dns.AAAA:
-			//		// Pull out the IP
-			//		inp = ensureName(inprogress, rr.Hdr.Name)
-			//		inp.Addr = rr.AAAA // @Deprecated
-			//		inp.AddrV6 = rr.AAAA
-			//	}
-			//}
-
 			if inp == nil {
 				continue
 			}
@@ -466,7 +426,7 @@ func messageToEntry(m *dns.Msg, inprogress map[string]*ServiceEntry) *ServiceEnt
 				continue
 			}
 			inp.Addr = rr.A // @Deprecated
-			inp.AddrV4 = rr.A
+			inp.AddrV4 = append(inp.AddrV4, rr.A)
 		case *dns.AAAA:
 			// Pull out the IP
 			inp = ensureName(inprogress, rr.Hdr.Name, rr.Hdr.Rrtype)
@@ -474,7 +434,7 @@ func messageToEntry(m *dns.Msg, inprogress map[string]*ServiceEntry) *ServiceEnt
 				continue
 			}
 			inp.Addr = rr.AAAA // @Deprecated
-			inp.AddrV6 = rr.AAAA
+			inp.AddrV6 = append(inp.AddrV6, rr.AAAA)
 		}
 
 		if inp != nil {

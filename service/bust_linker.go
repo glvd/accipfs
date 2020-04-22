@@ -67,7 +67,7 @@ func NewBustLinker(cfg *config.Config) (linker *BustLinker, err error) {
 // Start ...
 func (l *BustLinker) Start() {
 	//jobAcc, err := l.cron.AddJob("0 1/3 * * * *", l)
-	jobAcc, err := l.cron.AddJob("0/30 * * * * *", l)
+	jobAcc, err := l.cron.AddJob("0/5 * * * * *", l)
 	if err != nil {
 		panic(err)
 	}
@@ -95,6 +95,7 @@ func (l *BustLinker) Run() {
 			return true
 		})
 
+		output("bust linker", "get peers", node.Name)
 		if v {
 			remoteNodes, err := client.Peers(general.RPCAddress(node.NodeAddress), node)
 			if err != nil {
@@ -107,11 +108,13 @@ func (l *BustLinker) Run() {
 					return false
 				}
 				result := new(bool)
+				output("bust linker", "add peer", rnode.Name)
 				if err := l.addPeer(ctx, rnode, result); err != nil {
 					logE("add peer failed", "account", rnode.Name, "error", err)
 					continue
 				}
 				if *result {
+					output("bust linker", "pin source ", rnode.Name)
 					pins, err := client.Pins(rnode.NodeAddress)
 					if err != nil {
 						logE("get pin list", "error", err)

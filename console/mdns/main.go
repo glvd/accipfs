@@ -21,7 +21,7 @@ func main() {
 	port := 8080
 	info := "accipfs local server"
 	rootCmd.PersistentFlags().BoolVar(&client, "client", false, "enable client model")
-	rootCmd.PersistentFlags().StringVar(&service, "service", "_ipfs._udp", "set the service name")
+	rootCmd.PersistentFlags().StringVar(&service, "service", "_foobar._tcp", "set the service name")
 
 	rootCmd.Run = func(cmd *cobra.Command, args []string) {
 		fmt.Println("mdns test running")

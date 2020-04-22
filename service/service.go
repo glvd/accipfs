@@ -42,11 +42,9 @@ func New(cfg *config.Config) (s Service, e error) {
 // Start ...
 func (s *service) Start() error {
 	s.controller.Run()
-
-	go s.linker.Start()
-
 	s.linker.WaitingForReady()
 
+	go s.linker.Start()
 	var idError error
 	for i := 0; i < 5; i++ {
 		id, err := s.linker.localID()

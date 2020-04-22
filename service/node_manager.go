@@ -58,10 +58,9 @@ func (s *nodeManager) Add(info *core.Node) {
 func (s *nodeManager) Validate(key string, fs ...func(node *core.Node) bool) (b bool) {
 	n, exist := s.nodes.Load(key)
 	if exist && fs != nil {
-		b = fs[0](n.(*core.Node))
-		if !b {
-			s.Remove(key)
-			s.faultNodes.Store(key, n)
+		node := n.(*core.Node)
+		if b = fs[0](node); !b {
+			s.Fault(node)
 		}
 	}
 	return

@@ -66,7 +66,8 @@ func NewBustLinker(cfg *config.Config) (linker *BustLinker, err error) {
 
 // Start ...
 func (l *BustLinker) Start() {
-	jobAcc, err := l.cron.AddJob("0 1/3 * * * *", l)
+	//jobAcc, err := l.cron.AddJob("0 1/3 * * * *", l)
+	jobAcc, err := l.cron.AddJob("0/30 * * * * *", l)
 	if err != nil {
 		panic(err)
 	}
@@ -255,13 +256,10 @@ func (l *BustLinker) addPeer(ctx context.Context, node *core.Node, result *bool)
 	}
 
 	faultNode := l.nodes.IsFault(node.NodeInfo.Name)
-
-	if faultNode != nil && faultNode.LastTime.Before(time.Now()) {
-		remain := faultNode.LastTime.Unix() - time.Now().Unix()
+	remain, b := faultTimeCheck(faultNode, 30)
+	if faultNode != nil && b {
 		return fmt.Errorf("fault check error,waiting remain %d", remain)
 	}
-
-	node.LastTime = time.Now().Add(3600 * time.Second)
 
 	err := client.Ping(general.RPCAddress(node.NodeAddress))
 	if err != nil {

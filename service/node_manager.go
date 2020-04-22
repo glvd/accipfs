@@ -2,6 +2,7 @@ package service
 
 import (
 	"sync"
+	"time"
 
 	"github.com/glvd/accipfs/core"
 
@@ -72,6 +73,7 @@ func (s *nodeManager) Fault(node *core.Node, fs ...func(info *core.Node) *core.N
 	if fs != nil {
 		node = fs[0](node)
 	}
+	node.LastTime = time.Now()
 	s.faultNodes.Store(node.NodeInfo.Name, node)
 }
 
@@ -110,4 +112,14 @@ func (s *nodeManager) Range(f func(info *core.Node) bool) {
 // Length ...
 func (s *nodeManager) Length() int64 {
 	return s.nodeSize.Load()
+}
+
+func faultTimeCheck(fault *core.Node, limit int64) (remain int64, fa bool) {
+	now := time.Now().Unix()
+	f := fault.LastTime.Unix() + limit
+	remain = -(now - f)
+	if remain < 0 {
+		remain = 0
+	}
+	return remain, remain <= 0
 }

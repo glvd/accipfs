@@ -34,7 +34,7 @@ type NodeManager interface {
 }
 
 // NewNodeManager ...
-func NewNodeManager() NodeManager {
+func NewNodeManager(cfg *config.Config) NodeManager {
 	return &nodeManager{
 		nodes:    sync.Map{},
 		nodeSize: atomic.NewInt64(0),

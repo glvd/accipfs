@@ -13,22 +13,22 @@ import (
 type rpcHandle struct {
 	cfg       *config.Config
 	rpcServer *rpc.Server
-	linker    *BustLinker
+	//linker    *BustLinker
 }
 
-func newRPCHandle(cfg *config.Config, linker *BustLinker) (*rpcHandle, error) {
+func newRPCHandle(cfg *config.Config, handle interface{}) (*rpcHandle, error) {
 	serv := rpc.NewServer()
 	serv.RegisterCodec(json2.NewCodec(), "application/json")
 	serv.RegisterCodec(json2.NewCodec(), "application/json;charset=UTF-8")
 
-	err := serv.RegisterService(linker, "")
+	err := serv.RegisterService(handle, "")
 	if err != nil {
 		return nil, err
 	}
 	return &rpcHandle{
 		cfg:       cfg,
 		rpcServer: serv,
-		linker:    linker,
+		//linker:    handle,
 	}, nil
 }
 

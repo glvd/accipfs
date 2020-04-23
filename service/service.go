@@ -30,12 +30,16 @@ func New(cfg *config.Config) (s Service, e error) {
 
 	server := newHTTPService(cfg)
 
-	handle, e := newRPCHandle(cfg, linker)
+	rpc, e := newRPCHandle(cfg, linker)
 	if e != nil {
 		return nil, e
 	}
-	e = server.Register(handle.Handler())
-
+	http, e := newHTTPHandle(cfg)
+	if e != nil {
+		return nil, e
+	}
+	e = server.Register(rpc.Handler())
+	e = server.Register(http.Handler())
 	s = &service{
 		controller: controller.New(cfg),
 		linker:     linker,

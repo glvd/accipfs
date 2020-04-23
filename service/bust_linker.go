@@ -44,7 +44,7 @@ var BootList = []string{
 // NewBustLinker ...
 func NewBustLinker(cfg *config.Config) (linker *BustLinker, err error) {
 	linker = &BustLinker{
-		nodes: NewNodeManager(),
+		nodes: NewNodeManager(cfg),
 		lock:  atomic.NewBool(false),
 		cfg:   cfg,
 	}

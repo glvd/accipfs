@@ -14,10 +14,12 @@ type httpHandle struct {
 func newHTTPHandle(cfg *config.Config) (*httpHandle, error) {
 	g := gin.Default()
 
-	return &httpHandle{
+	h := &httpHandle{
 		cfg: cfg,
 		eng: g,
-	}, nil
+	}
+	h.handleList()
+	return h, nil
 }
 
 // Handler ...

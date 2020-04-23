@@ -10,8 +10,9 @@ import (
 // Service ...
 type service struct {
 	linker     *BustLinker
-	server     *rpcServer
 	controller *controller.Controller
+
+	server *httpService
 }
 
 // Service ...
@@ -27,10 +28,14 @@ func New(cfg *config.Config) (s Service, e error) {
 		return nil, e
 	}
 
-	server, e := newRPCServer(cfg, linker)
+	server := newHTTPService(cfg)
+
+	handle, e := newRPCHandle(cfg, linker)
 	if e != nil {
 		return nil, e
 	}
+	e = server.Register(handle.Handler())
+
 	s = &service{
 		controller: controller.New(cfg),
 		linker:     linker,
@@ -67,10 +72,7 @@ func (s *service) Start() error {
 
 // Stop ...
 func (s *service) Stop() error {
-	if err := s.server.Stop(); err != nil {
-		return err
-	}
-
+	s.server.Stop()
 	s.linker.Stop()
 
 	return s.controller.StopRun()

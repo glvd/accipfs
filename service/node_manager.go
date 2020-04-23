@@ -1,6 +1,7 @@
 package service
 
 import (
+	"github.com/glvd/accipfs/config"
 	"sync"
 	"time"
 
@@ -12,6 +13,7 @@ import (
 
 // nodeManager ...
 type nodeManager struct {
+	cfg          *config.Config
 	nodeCache    cacher.Cacher
 	accountNodes sync.Map
 	nodes        sync.Map

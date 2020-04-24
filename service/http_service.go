@@ -47,3 +47,8 @@ func (s *httpService) Stop() {
 		return
 	}
 }
+
+// ServeHTTP ...
+func (s *httpService) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	//TODO handle api
+}

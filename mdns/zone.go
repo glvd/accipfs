@@ -2,6 +2,7 @@ package mdns
 
 import (
 	"fmt"
+	"github.com/glvd/accipfs/config"
 	"net"
 	"strings"
 )
@@ -47,4 +48,24 @@ func enumAddr(domain string) string {
 // trimDot is used to trim the dots from the start or end of a string
 func trimDot(s string) string {
 	return strings.Trim(s, ".")
+}
+
+// RegisterLocalIP ...
+func (cfg *OptionConfig) RegisterLocalIP(c *config.Config) {
+	addrs, err := net.InterfaceAddrs()
+	if err != nil {
+		return
+	}
+	for i := range addrs {
+		if ipnet, ok := addrs[i].(*net.IPNet); ok && !ipnet.IP.IsLoopback() {
+			if ipnet.IP.To4() != nil {
+				cidr, _, err := net.ParseCIDR(addrs[i].String())
+				if err == nil {
+					fmt.Println("register ip addr:", cidr.String())
+					cfg.IPs = append(cfg.IPs, cidr)
+				}
+			}
+		}
+	}
+	cfg.Port = uint16(c.Port)
 }

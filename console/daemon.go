@@ -2,6 +2,7 @@ package main
 
 import (
 	"github.com/glvd/accipfs/config"
+	"github.com/glvd/accipfs/mdns"
 	"github.com/glvd/accipfs/service"
 	"github.com/spf13/cobra"
 )
@@ -18,6 +19,20 @@ func daemonCmd() *cobra.Command {
 			if e != nil {
 				panic(e)
 			}
+			dns, e := mdns.New(&cfg, func(c *mdns.OptionConfig) {
+				c.RegisterLocalIP(&cfg)
+			})
+			if e != nil {
+				panic(e)
+			}
+			server, e := dns.Server()
+			if e != nil {
+				panic(e)
+			}
+			defer func() {
+				server.Stop()
+			}()
+			server.Start()
 			defer func() {
 				if err := s.Stop(); err != nil {
 					panic(err)

@@ -62,15 +62,15 @@ func (s *server) Start() {
 func (s *server) recv(c *net.UDPConn) {
 	buf := make([]byte, 65536)
 	for !s.stop.Load() {
-		logI("reading from remote conn")
+		//logI("reading from remote conn")
 		n, from, err := c.ReadFrom(buf)
 		if err != nil {
-			logE("failed to read from buffer")
+			//logE("failed to read from buffer")
 			continue
 		}
-		logI("parse from", "addr", from.String())
+		//logI("parse from", "addr", from.String())
 		if err := s.parsePacket(buf[:n], from); err != nil {
-			logE("failed to handle query", "error", err)
+			//logE("failed to handle query", "error", err)
 		}
 	}
 }
@@ -79,7 +79,7 @@ func (s *server) recv(c *net.UDPConn) {
 func (s *server) parsePacket(packet []byte, from net.Addr) error {
 	var msg dns.Msg
 	if err := msg.Unpack(packet); err != nil {
-		logE("failed to unpack packet", "error", err)
+		//logE("failed to unpack packet", "error", err)
 		return err
 	}
 	return s.handleQuery(&msg, from)

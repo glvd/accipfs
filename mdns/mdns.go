@@ -204,7 +204,7 @@ func defaultConfig(cfg *config.Config) *OptionConfig {
 
 	hostName, _ := os.Hostname()
 	hostName = fmt.Sprintf("%s.", hostName)
-	service := "_http._tcp"
+	service := "_http._udp"
 	instance := "accipfs"
 	domain := "local."
 

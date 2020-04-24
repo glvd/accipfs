@@ -21,6 +21,7 @@ func daemonCmd() *cobra.Command {
 			}
 			dns, e := mdns.New(&cfg, func(c *mdns.OptionConfig) {
 				c.RegisterLocalIP(&cfg)
+				c.Service = "_bustlinker._udp"
 			})
 			if e != nil {
 				panic(e)

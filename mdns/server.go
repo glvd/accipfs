@@ -172,7 +172,7 @@ func (s *server) handleQuery(query *dns.Msg, from net.Addr) error {
 			Answer: answer,
 		}
 	}
-	logI("query detail", "id", query.Id, "question", query.Question, "answer", query.Answer)
+	//logI("query detail", "id", query.Id, "question", query.Question, "answer", query.Answer)
 	if s.cfg.LogEmptyResponses && len(multicastAnswer) == 0 && len(unicastAnswer) == 0 {
 		questions := make([]string, len(query.Question))
 		for i, q := range query.Question {
@@ -182,14 +182,14 @@ func (s *server) handleQuery(query *dns.Msg, from net.Addr) error {
 	}
 
 	if mresp := resp(false); mresp != nil {
-		logI("multicast", "response", *mresp)
+		//logI("multicast", "response", *mresp)
 		if err := s.sendResponse(mresp, from, false); err != nil {
 			return fmt.Errorf("mdns: error sending multicast response: %v", err)
 		}
 	}
 	if uresp := resp(true); uresp != nil {
 		if err := s.sendResponse(uresp, from, true); err != nil {
-			logI("unicast", "response", *uresp)
+			//logI("unicast", "response", *uresp)
 			return fmt.Errorf("mdns: error sending unicast response: %v", err)
 		}
 	}

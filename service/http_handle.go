@@ -28,12 +28,6 @@ func newHTTPHandle(cfg *config.Config, eng interface{}) (*httpHandle, error) {
 	h.handleList()
 	return h, nil
 }
-
-// Handler ...
-func (s *httpHandle) Handler() (string, http.Handler) {
-	return "/api/*uri", s.eng
-}
-
 func (s *httpHandle) handleList() {
 	g := s.eng.Group("/api")
 	g.GET("/ping", func(context *gin.Context) {
@@ -42,4 +36,14 @@ func (s *httpHandle) handleList() {
 			"status":  "success",
 		})
 	})
+}
+
+// Handler ...
+func (s *httpHandle) Handler() (string, http.Handler) {
+	return "/api/*uri", s
+}
+
+// ServeHTTP ...
+func (s *httpHandle) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	s.eng.ServeHTTP(w, r)
 }

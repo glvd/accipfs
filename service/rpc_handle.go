@@ -46,5 +46,5 @@ func (s *rpcHandle) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 // Handler ...
 func (s *rpcHandle) Handler() (string, http.Handler) {
-	return "/rpc", s.rpcServer
+	return "/rpc", s
 }

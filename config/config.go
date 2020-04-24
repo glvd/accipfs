@@ -67,19 +67,20 @@ type TLSCertificate struct {
 
 // Config ...
 type Config struct {
-	TLS
-	Port       int        `json:"port" mapstructure:"port"`
-	Schema     string     `json:"schema" mapstructure:"schema"`
-	Path       string     `json:"path" mapstructure:"path" `
-	Account    string     `json:"account" mapstructure:"account"`
-	PrivateKey string     `json:"private_key" mapstructure:"private_key"`
-	PublicKey  string     `json:"public_key" mapstructure:"public_key"`
-	ETH        ETHConfig  `json:"eth" mapstructure:"eth"`
-	IPFS       IPFSConfig `json:"ipfs" mapstructure:"ipfs"`
-	AWS        AWSConfig  `json:"aws" mapstructure:"aws"`
-	Interval   int64      `json:"interval" mapstructure:"interval"`
-	NodeType   int        `json:"node_type" mapstructure:"node_type"`
-	Limit      int64      `json:"limit" mapstructure:"limit"`
+	UseTLS     bool           `json:"use_tls" mapstructure:"use_tls"`
+	TLS        TLSCertificate `json:"tls" mapstructure:"tls"`
+	Port       int            `json:"port" mapstructure:"port"`
+	Schema     string         `json:"schema" mapstructure:"schema"`
+	Path       string         `json:"path" mapstructure:"path" `
+	Account    string         `json:"account" mapstructure:"account"`
+	PrivateKey string         `json:"private_key" mapstructure:"private_key"`
+	PublicKey  string         `json:"public_key" mapstructure:"public_key"`
+	ETH        ETHConfig      `json:"eth" mapstructure:"eth"`
+	IPFS       IPFSConfig     `json:"ipfs" mapstructure:"ipfs"`
+	AWS        AWSConfig      `json:"aws" mapstructure:"aws"`
+	Interval   int64          `json:"interval" mapstructure:"interval"`
+	NodeType   int            `json:"node_type" mapstructure:"node_type"`
+	Limit      int64          `json:"limit" mapstructure:"limit"`
 }
 
 // WorkDir ...

@@ -22,6 +22,9 @@ func newHTTPService(cfg *config.Config) *httpService {
 	port := fmt.Sprintf(":%d", s.cfg.Port)
 
 	s.server = &http.Server{Addr: port, Handler: s.route}
+	s.route.Any("/", func(c *gin.Context) {
+		c.String(http.StatusOK, "text/plain; charset=utf-8", "service is already running")
+	})
 	return s
 }
 

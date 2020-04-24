@@ -36,6 +36,9 @@ func (s *httpHandle) handleList() {
 			"status":  "success",
 		})
 	})
+	g.GET("/medias", func(context *gin.Context) {
+
+	})
 }
 
 // Handler ...

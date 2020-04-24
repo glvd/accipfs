@@ -83,7 +83,7 @@ jobs:
         tag: auto_build
         body: |
           this is only a latest build from master
-          version: https://github.com/glvd/accipfse/commit/${{ github.sha }}
+          version: https://github.com/glvd/accipfs/commit/${{ github.sha }}
         token: ${{ secrets.GITHUB_TOKEN }}
         draft: false
         prerelease: false

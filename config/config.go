@@ -59,8 +59,15 @@ type ETHKeyFile struct {
 	Pass string `json:"pass" mapstructure:"pass"`
 }
 
+// TLSCertificate ...
+type TLSCertificate struct {
+	KeyFile     string `json:"key_file" mapstructure:"key_file"`
+	KeyPassFile string `json:"key_pass_file" mapstructure:"key_pass_file"`
+}
+
 // Config ...
 type Config struct {
+	TLS
 	Port       int        `json:"port" mapstructure:"port"`
 	Schema     string     `json:"schema" mapstructure:"schema"`
 	Path       string     `json:"path" mapstructure:"path" `

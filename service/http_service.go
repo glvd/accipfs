@@ -23,7 +23,7 @@ func newHTTPService(cfg *config.Config) *httpService {
 
 	s.server = &http.Server{Addr: port, Handler: s.route}
 	s.route.Any("/", func(c *gin.Context) {
-		c.String(http.StatusOK, "text/plain; charset=utf-8", "service is already running")
+		c.String(http.StatusOK, "service is already running")
 	})
 	return s
 }
@@ -39,7 +39,7 @@ func (s *httpService) Register(path string, handler http.Handler) error {
 // Start ...
 func (s *httpService) Start() {
 	output("JSON RPC service listen and serving on port", s.cfg.Port)
-	if err := s.server.ListenAndServe(); err != nil {
+	if err := s.server(); err != nil {
 		return
 	}
 }

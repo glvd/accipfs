@@ -58,14 +58,18 @@ func (cfg *OptionConfig) RegisterLocalIP(c *config.Config) {
 	}
 	for i := range addrs {
 		if ipnet, ok := addrs[i].(*net.IPNet); ok && !ipnet.IP.IsLoopback() {
+			var local bool
 			if ipv4 := ipnet.IP.To4(); ipv4 != nil {
-				if isLocalIP(ipv4) {
+				if local = isLocalIP(ipv4); local {
 					output("register mdns service ipv4 addr:", ipv4.String())
 					cfg.IPs = append(cfg.IPs, ipv4)
 				}
-			} else if ipv6 := ipnet.IP.To16(); ipv6 != nil {
-				output("register mdns service ipv6 addr:", ipv6.String())
-				cfg.IPs = append(cfg.IPs, ipv6)
+			}
+			if local {
+				if ipv6 := ipnet.IP.To16(); ipv6 != nil {
+					output("register mdns service ipv6 addr:", ipv6.String())
+					cfg.IPs = append(cfg.IPs, ipv6)
+				}
 			}
 		}
 	}

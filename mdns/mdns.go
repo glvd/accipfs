@@ -2,7 +2,9 @@ package mdns
 
 import (
 	"fmt"
+	"github.com/glvd/accipfs/account"
 	"github.com/glvd/accipfs/config"
+	"github.com/goextension/tool"
 	"go.uber.org/atomic"
 	"golang.org/x/net/ipv4"
 	"golang.org/x/net/ipv6"
@@ -18,7 +20,7 @@ const (
 	mdnsPort             = 5353
 )
 const defaultTTL = 120
-
+const defaultService = "_bustlinker._udp"
 const (
 	udp4  = 0
 	udp6  = 1
@@ -201,11 +203,20 @@ func defaultConfig(cfg *config.Config) *OptionConfig {
 	//	IP:   net.ParseIP(mdnsIPv6Addr),
 	//	Port: mdnsPort,
 	//}
+	//crc32.NewIEEE().Sum(cfg.)
+	loadAccount, err := account.LoadAccount(cfg)
+	var name string
+	if err != nil {
+		logE("load account error", "error", err)
+		name = tool.GenerateRandomString(8)
+	} else {
+		name = interceptAccountName(loadAccount.Name)
+	}
 
 	hostName, _ := os.Hostname()
 	hostName = fmt.Sprintf("%s.", hostName)
-	service := "_http._udp"
-	instance := "accipfs"
+	service := defaultService
+	instance := name
 	domain := "local."
 
 	return &OptionConfig{
@@ -228,4 +239,11 @@ func defaultConfig(cfg *config.Config) *OptionConfig {
 		TXT:               []string{"accipfs local server"}, // TXT,
 		//IPs:               []net.IP{[]byte{192, 168, 0, 42}, net.ParseIP("2620:0:1000:1900:b0c2:d0b2:c411:18bc")},
 	}
+}
+
+func interceptAccountName(s string) string {
+	if len(s) == 42 {
+		return s[2:6] + s[38:]
+	}
+	return ""
 }

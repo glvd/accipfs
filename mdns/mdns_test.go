@@ -80,7 +80,7 @@ func TestMulticastDNS_Lookup(t *testing.T) {
 			if e.Name != "accipfs._foobar._tcp.local." {
 				log.Module("main").Fatalf("bad: %v", e)
 			}
-			log.Module("main").Infow("output detail", "name", e.Name, "host", e.Host, "fields", e.InfoFields, "ipv4", e.AddrV4.String(), "ipv6", e.AddrV6.String())
+			log.Module("main").Infow("output detail", "name", e.Name, "host", e.Host, "fields", e.InfoFields)
 			log.Module("main").Infow("output addr", "addr", e.Addr.String())
 			log.Module("main").Infow("output port", "port", e.Port, "want", 0)
 			log.Module("main").Infow("output info", "info", e.Info, "want", 0)
@@ -109,4 +109,7 @@ func TestMulticastDNS_Lookup(t *testing.T) {
 	if atomic.LoadInt32(&found) == 0 {
 		t.Fatalf("record not found")
 	}
+}
+func TestFoo(t *testing.T) {
+	t.Log(interceptAccountName("0x427a762a04b3c3ac26140125236167bd339f5a5c"))
 }

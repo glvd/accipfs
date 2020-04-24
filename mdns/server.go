@@ -245,7 +245,6 @@ func (s *server) sendResponse(resp *dns.Msg, from net.Addr, unicast bool) error 
 
 // Records ...
 func (s *server) Records(q dns.Question) []dns.RR {
-	var recs []dns.RR
 	list := map[string]func(question dns.Question) []dns.RR{
 		s.cfg.enumAddr:     s.enumRecords,
 		s.cfg.serviceAddr:  s.serviceRecords,
@@ -261,13 +260,13 @@ func (s *server) Records(q dns.Question) []dns.RR {
 			} else {
 				return nil
 			}
-			//TODO
-		} else if q.Name == "_services._dns-sd._udp."+s.cfg.Domain+"." {
-			recs = s.dnssdMetaQueryRecords(q)
 		}
-		if recs != nil {
-			return append(recs, f(q)...)
-		}
+		//else if q.Name == "_services._dns-sd._udp."+s.cfg.Domain+"." {
+		//	recs = s.dnssdMetaQueryRecords(q)
+		//}
+		//if recs != nil {
+		//	return append(recs, f(q)...)
+		//}
 		return f(q)
 	}
 	return nil

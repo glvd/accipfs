@@ -31,7 +31,7 @@ func newHTTPHandle(cfg *config.Config, eng interface{}) (*httpHandle, error) {
 
 // Handler ...
 func (s *httpHandle) Handler() (string, http.Handler) {
-	return "/api/*", s.eng
+	return "/api/*uri", s.eng
 }
 
 func (s *httpHandle) handleList() {

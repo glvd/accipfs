@@ -236,7 +236,7 @@ func defaultConfig(cfg *config.Config) *OptionConfig {
 		CustomPort:        mdnsPort,
 		Port:              80,
 		TTL:               defaultTTL,
-		TXT:               []string{"accipfs local server"}, // TXT,
+		TXT:               []string{}, // TXT,
 		//IPs:               []net.IP{[]byte{192, 168, 0, 42}, net.ParseIP("2620:0:1000:1900:b0c2:d0b2:c411:18bc")},
 	}
 }

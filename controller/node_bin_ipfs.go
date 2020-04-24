@@ -22,7 +22,7 @@ type nodeBinIPFS struct {
 // Start ...
 func (n *nodeBinIPFS) Start() error {
 	n.cmd = exec.CommandContext(n.ctx, n.name, "daemon", "--routing", "none")
-	fmt.Println("ipfs cmd: ", n.cmd.Args)
+	output("ipfs cmd: ", n.cmd.Args)
 	pipe, err2 := n.cmd.StderrPipe()
 	if err2 != nil {
 		return err2

@@ -2,7 +2,6 @@ package controller
 
 import (
 	"context"
-	"fmt"
 	"github.com/glvd/accipfs/config"
 	"github.com/glvd/accipfs/general"
 	"github.com/goextension/io"
@@ -42,7 +41,7 @@ func (n *nodeBinETH) Start() error {
 		"--mine", "--nodiscover",
 	)
 	//"--password", filepath.Join(n.cfg.Path, "password"))
-	fmt.Println("geth cmd: ", n.cmd.Args)
+	output("geth cmd: ", n.cmd.Args)
 	pipe, err2 := n.cmd.StderrPipe()
 	if err2 != nil {
 		return err2

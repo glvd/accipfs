@@ -55,6 +55,7 @@ func (s *server) Start() {
 			go s.recv(s.conn[i])
 		}
 	}
+	output("register mdns service", s.instanceAddr)
 	go s.probe()
 }
 

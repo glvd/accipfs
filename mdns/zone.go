@@ -61,11 +61,28 @@ func (cfg *OptionConfig) RegisterLocalIP(c *config.Config) {
 			if ipnet.IP.To4() != nil {
 				cidr, _, err := net.ParseCIDR(addrs[i].String())
 				if err == nil {
-					fmt.Println("register ip addr:", cidr.String())
-					cfg.IPs = append(cfg.IPs, cidr)
+					output("register ip addr:", cidr.String())
+					if isLocalIP(cidr) {
+						cfg.IPs = append(cfg.IPs, cidr)
+					}
 				}
+			} else if ipnet.IP.To16() != nil {
+				//TODO
 			}
 		}
 	}
 	cfg.Port = uint16(c.Port)
+}
+
+func isLocalIP(ip4 net.IP) bool {
+	switch {
+	case ip4[0] == 10:
+		return true
+	case ip4[0] == 172 && ip4[1] >= 16 && ip4[1] <= 31:
+		return true
+	case ip4[0] == 192 && ip4[1] == 168:
+		return true
+	default:
+		return false
+	}
 }

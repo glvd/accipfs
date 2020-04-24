@@ -65,12 +65,12 @@ func (cfg *OptionConfig) RegisterLocalIP(c *config.Config) {
 					cfg.IPs = append(cfg.IPs, ipv4)
 				}
 			}
-			if local {
-				if ipv6 := ipnet.IP.To16(); ipv6 != nil {
-					output("register mdns service ipv6 addr:", ipv6.String())
-					cfg.IPs = append(cfg.IPs, ipv6)
-				}
-			}
+			//if local {
+			//	if ipv6 := ipnet.IP.To16(); ipv6 != nil {
+			//		output("register mdns service ipv6 addr:", ipv6.String())
+			//		cfg.IPs = append(cfg.IPs, ipv6)
+			//	}
+			//}
 		}
 	}
 	cfg.Port = uint16(c.Port)

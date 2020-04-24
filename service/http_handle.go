@@ -1,7 +1,6 @@
 package service
 
 import (
-	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/glvd/accipfs/config"
 	"net/http"
@@ -13,14 +12,15 @@ type httpHandle struct {
 }
 
 func newHTTPHandle(cfg *config.Config, eng interface{}) (*httpHandle, error) {
+	g, b := eng.(*gin.Engine)
+	if !b {
+		g = gin.Default()
+	}
+
 	g.Use(func(context *gin.Context) {
 		logI("output url", "url", context.Request.URL.String())
 	})
 
-	g, b := eng.(*gin.Engine)
-	if !b {
-		return nil, fmt.Errorf("wrong gin type")
-	}
 	h := &httpHandle{
 		cfg: cfg,
 		eng: g,

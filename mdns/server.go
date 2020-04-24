@@ -55,7 +55,7 @@ func (s *server) Start() {
 			go s.recv(s.conn[i])
 		}
 	}
-	output("register mdns service", s.instanceAddr)
+
 	go s.probe()
 }
 
@@ -460,9 +460,8 @@ func (s *server) dnssdMetaQueryRecords(q dns.Question) []dns.RR {
 	}
 }
 func (s *server) probe() {
-	//defer s.wg.Done()
-
-	name := fmt.Sprintf("%s.%s.%s.", s.cfg.Instance, trimDot(s.cfg.Service), trimDot(s.cfg.Domain))
+	name := instanceAddr(s.cfg.Instance, trimDot(s.cfg.Service), trimDot(s.cfg.Domain))
+	output("register mdns service", name)
 
 	q := new(dns.Msg)
 	q.SetQuestion(name, dns.TypePTR)

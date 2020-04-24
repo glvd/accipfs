@@ -6,7 +6,6 @@ import (
 	"github.com/glvd/accipfs/log"
 	"github.com/glvd/accipfs/mdns"
 	"github.com/spf13/cobra"
-	"net"
 	"os"
 	"os/signal"
 	"time"
@@ -21,28 +20,13 @@ func main() {
 	port := 8080
 	info := "accipfs local server"
 	rootCmd.PersistentFlags().BoolVar(&client, "client", false, "enable client model")
-	rootCmd.PersistentFlags().StringVar(&service, "service", "_foobar._tcp", "set the service name")
+	rootCmd.PersistentFlags().StringVar(&service, "service", "_bustlinker._udp", "set the service name")
 
 	rootCmd.Run = func(cmd *cobra.Command, args []string) {
 		fmt.Println("mdns test running")
 		m, err := mdns.New(config.Default(), func(cfg *mdns.OptionConfig) {
 			cfg.Service = service
-			addrs, err := net.InterfaceAddrs()
-			if err != nil {
-				return
-			}
-			for i := range addrs {
-				if ipnet, ok := addrs[i].(*net.IPNet); ok && !ipnet.IP.IsLoopback() {
-					if ipnet.IP.To4() != nil {
-						cidr, _, err := net.ParseCIDR(addrs[i].String())
-						if err == nil {
-							fmt.Println("register ip addr:", cidr.String())
-							cfg.IPs = append(cfg.IPs, cidr)
-						}
-					}
-				}
-			}
-			cfg.Port = uint16(port)
+			cfg.RegisterLocalIP(config.Default())
 		})
 		if err != nil {
 			panic(err)

@@ -67,7 +67,7 @@ func (cfg *OptionConfig) RegisterLocalIP(c *config.Config) {
 					}
 				}
 			} else if ipnet.IP.To16() != nil {
-				//TODO
+				cfg.IPs = append(cfg.IPs, ipnet.IP)
 			}
 		}
 	}

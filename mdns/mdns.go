@@ -20,7 +20,7 @@ const (
 	mdnsPort             = 5353
 )
 const defaultTTL = 120
-const defaultService = "_bustlinker._udp"
+const defaultService = "_bustlinker._tcp"
 const (
 	udp4  = 0
 	udp6  = 1
@@ -220,7 +220,6 @@ func defaultConfig(cfg *config.Config) *OptionConfig {
 	domain := "local."
 
 	return &OptionConfig{
-		//Zone:              "",
 		NetInterface:      nil,
 		IPv4Addr:          nil,
 		IPv6Addr:          nil,
@@ -237,7 +236,6 @@ func defaultConfig(cfg *config.Config) *OptionConfig {
 		Port:              80,
 		TTL:               defaultTTL,
 		TXT:               []string{}, // TXT,
-		//IPs:               []net.IP{[]byte{192, 168, 0, 42}, net.ParseIP("2620:0:1000:1900:b0c2:d0b2:c411:18bc")},
 	}
 }
 

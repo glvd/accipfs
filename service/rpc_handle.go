@@ -1,8 +1,7 @@
 package service
 
 import (
-	"net/http"
-
+	"github.com/gin-gonic/gin"
 	"github.com/glvd/accipfs/config"
 
 	"github.com/gorilla/rpc/v2"
@@ -33,6 +32,11 @@ func newRPCHandle(cfg *config.Config, handle interface{}) (*rpcHandle, error) {
 }
 
 // Handler ...
-func (s *rpcHandle) Handler() (string, http.Handler) {
-	return "/rpc", s.rpcServer
+func (s *rpcHandle) ginHandler() (string, gin.HandlerFunc) {
+	return "/rpc", s.gin
+}
+
+// RPCHandle ...
+func (s *rpcHandle) gin(ctx *gin.Context) {
+	s.rpcServer.ServeHTTP(ctx.Writer, ctx.Request)
 }

@@ -13,7 +13,9 @@ type httpHandle struct {
 
 func newHTTPHandle(cfg *config.Config) (*httpHandle, error) {
 	g := gin.Default()
-
+	g.Use(func(context *gin.Context) {
+		logI("output url", "url", context.Request.URL.String())
+	})
 	h := &httpHandle{
 		cfg: cfg,
 		eng: g,
@@ -24,11 +26,12 @@ func newHTTPHandle(cfg *config.Config) (*httpHandle, error) {
 
 // Handler ...
 func (s *httpHandle) Handler() (string, http.Handler) {
-	return "/api", s.eng
+	return "/", s.eng
 }
 
 func (s *httpHandle) handleList() {
-	s.eng.GET("/ping", func(context *gin.Context) {
+	g := s.eng.Group("/api")
+	g.GET("/ping", func(context *gin.Context) {
 		context.JSON(http.StatusOK, gin.H{
 			"message": "pong",
 			"status":  "success",

@@ -3,21 +3,21 @@ package service
 import (
 	"context"
 	"fmt"
+	"github.com/gin-gonic/gin"
 	"github.com/glvd/accipfs/config"
-	"github.com/gorilla/mux"
 	"net/http"
 )
 
 type httpService struct {
 	cfg    *config.Config
 	server *http.Server
-	route  *mux.Router
+	route  *gin.Engine
 }
 
 func newHTTPService(cfg *config.Config) *httpService {
 	s := &httpService{
 		cfg:   cfg,
-		route: mux.NewRouter(),
+		route: gin.Default(),
 	}
 	port := fmt.Sprintf(":%d", s.cfg.Port)
 
@@ -27,7 +27,9 @@ func newHTTPService(cfg *config.Config) *httpService {
 
 // RegisterHandle ...
 func (s *httpService) Register(path string, handler http.Handler) error {
-	s.route.Handle(path, handler)
+	s.route.Any(path, func(c *gin.Context) {
+		handler.ServeHTTP(c.Writer, c.Request)
+	})
 	return nil
 }
 

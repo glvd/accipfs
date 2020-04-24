@@ -38,7 +38,7 @@ func (s *httpService) Register(path string, handler http.Handler) error {
 
 // Start ...
 func (s *httpService) Start() {
-	output("JSON RPC service listen and serving on port", s.cfg.Port)
+	output("service listen and serving on port", s.cfg.Port)
 
 	if s.cfg.UseTLS {
 		if err := s.server.ListenAndServeTLS(s.cfg.TLS.KeyFile, s.cfg.TLS.KeyPassFile); err != nil {

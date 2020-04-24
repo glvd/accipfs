@@ -61,8 +61,8 @@ func (cfg *OptionConfig) RegisterLocalIP(c *config.Config) {
 			if ipnet.IP.To4() != nil {
 				cidr, _, err := net.ParseCIDR(addrs[i].String())
 				if err == nil {
-					output("register ip addr:", cidr.String())
 					if isLocalIP(cidr) {
+						output("register mdns service ip addr:", cidr.String())
 						cfg.IPs = append(cfg.IPs, cidr)
 					}
 				}

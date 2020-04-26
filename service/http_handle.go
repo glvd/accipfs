@@ -30,15 +30,27 @@ func newHTTPHandle(cfg *config.Config, eng interface{}) (*httpHandle, error) {
 }
 func (s *httpHandle) handleList() {
 	g := s.eng.Group("/api")
-	g.GET("/ping", func(context *gin.Context) {
+	g.GET("/ping", s.Ping())
+	g.GET("/info", func(context *gin.Context) {
+
+	})
+}
+
+// Ping ...
+func (s *httpHandle) Ping() func(context *gin.Context) {
+	return func(context *gin.Context) {
 		context.JSON(http.StatusOK, gin.H{
 			"message": "pong",
 			"status":  "success",
 		})
-	})
-	g.GET("/medias", func(context *gin.Context) {
+	}
+}
 
-	})
+// Info ...
+func (s *httpHandle) Info() func(context *gin.Context) {
+	return func(context *gin.Context) {
+
+	}
 }
 
 // Handler ...

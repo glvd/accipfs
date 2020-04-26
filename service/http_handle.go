@@ -17,7 +17,7 @@ type httpHandle struct {
 func newHTTPHandle(cfg *config.Config, linker *BustLinker, eng interface{}) (*httpHandle, error) {
 	g, b := eng.(*gin.Engine)
 	if !b {
-		g = gin.Default()
+		g = gin.New()
 	}
 	//g.Use(cors.New(cors.Config{
 	//	AllowOrigins:     []string{"*"},
@@ -30,7 +30,7 @@ func newHTTPHandle(cfg *config.Config, linker *BustLinker, eng interface{}) (*ht
 	//	},
 	//	MaxAge: 12 * time.Hour,
 	//}))
-	g.Use(func(context *gin.Context) {
+	g.Use(gin.Recovery(), func(context *gin.Context) {
 		logI("output url", "url", context.Request.URL.String())
 	})
 
@@ -73,13 +73,13 @@ func (s *httpHandle) Info() func(context *gin.Context) {
 		}{}
 		err = context.BindJSON(&j)
 		if err != nil {
-			failedResult(context, err)
+			failedResult(context, fmt.Errorf("bind json failed(%w)", err))
 			return
 		}
 		var rs string
 		err = s.linker.tagInfo(strings.ToUpper(j.No), &rs)
 		if err != nil {
-			failedResult(context, fmt.Errorf("%s:%w", s.cfg.ETH.DTagAddr, err))
+			failedResult(context, fmt.Errorf("address(%s):%w", s.cfg.ETH.DTagAddr, err))
 			return
 		}
 		context.JSON(http.StatusOK, gin.H{

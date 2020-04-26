@@ -7,11 +7,12 @@ import (
 )
 
 type httpHandle struct {
-	cfg *config.Config
-	eng *gin.Engine
+	cfg    *config.Config
+	eng    *gin.Engine
+	linker *BustLinker
 }
 
-func newHTTPHandle(cfg *config.Config, eng interface{}) (*httpHandle, error) {
+func newHTTPHandle(cfg *config.Config, linker *BustLinker, eng interface{}) (*httpHandle, error) {
 	g, b := eng.(*gin.Engine)
 	if !b {
 		g = gin.Default()
@@ -22,8 +23,9 @@ func newHTTPHandle(cfg *config.Config, eng interface{}) (*httpHandle, error) {
 	})
 
 	h := &httpHandle{
-		cfg: cfg,
-		eng: g,
+		cfg:    cfg,
+		eng:    g,
+		linker: linker,
 	}
 	h.handleList()
 	return h, nil
@@ -31,9 +33,10 @@ func newHTTPHandle(cfg *config.Config, eng interface{}) (*httpHandle, error) {
 func (s *httpHandle) handleList() {
 	g := s.eng.Group("/api")
 	g.GET("/ping", s.Ping())
-	g.GET("/info", func(context *gin.Context) {
 
-	})
+	v0 := g.Group("v0")
+	v0.POST("/info", s.Info())
+	v0.GET("/get", s.Get())
 }
 
 // Ping ...
@@ -49,7 +52,24 @@ func (s *httpHandle) Ping() func(context *gin.Context) {
 // Info ...
 func (s *httpHandle) Info() func(context *gin.Context) {
 	return func(context *gin.Context) {
+		no := context.DefaultPostForm("no", "")
+		var rs string
+		err := s.linker.tagInfo(no, &rs)
+		if err != nil {
+			failedResult(context, err)
+			return
+		}
+		context.JSON(http.StatusOK, gin.H{
+			"message": rs,
+			"status":  "success",
+		})
+	}
+}
 
+// Get ...
+func (s *httpHandle) Get() func(context *gin.Context) {
+	return func(context *gin.Context) {
+		context.Redirect(http.StatusMovedPermanently, config.IPFSAddrHTTP())
 	}
 }
 
@@ -61,4 +81,12 @@ func (s *httpHandle) Handler() (string, http.Handler) {
 // ServeHTTP ...
 func (s *httpHandle) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	s.eng.ServeHTTP(w, r)
+}
+
+func failedResult(ctx *gin.Context, err error) (b bool) {
+	ctx.JSON(http.StatusOK, gin.H{
+		"status": "failed",
+		"error":  err.Error(),
+	})
+	return
 }

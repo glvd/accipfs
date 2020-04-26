@@ -15,6 +15,7 @@ type httpService struct {
 }
 
 func newHTTPService(cfg *config.Config) *httpService {
+	gin.SetMode(gin.ReleaseMode)
 	s := &httpService{
 		cfg:   cfg,
 		route: gin.Default(),

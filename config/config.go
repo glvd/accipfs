@@ -16,7 +16,7 @@ const _configExt = ".json"
 const _dataDirETH = ".eth"
 const _dataDirIPFS = ".ipfs"
 const _dataDirCache = ".cache"
-const _ethGateway = "http://127.0.0.1:%d"
+const _localGateway = "http://127.0.0.1:%d"
 const _ipfsGateway = "/ip4/127.0.0.1/tcp/%d"
 
 // DefaultNodeContractAddr ...
@@ -65,8 +65,14 @@ type TLSCertificate struct {
 	KeyPassFile string `json:"key_pass_file" mapstructure:"key_pass_file"`
 }
 
+// APIConfig ...
+type APIConfig struct {
+	Version string `json:"version" mapstructure:"version"`
+}
+
 // Config ...
 type Config struct {
+	API        APIConfig      `json:"api" mapstructure:"api"`
 	UseTLS     bool           `json:"use_tls" mapstructure:"use_tls"`
 	TLS        TLSCertificate `json:"tls" mapstructure:"tls"`
 	Port       int            `json:"port" mapstructure:"port"`
@@ -219,12 +225,17 @@ func KeyDir() string {
 
 // ETHAddr ...
 func ETHAddr() string {
-	return fmt.Sprintf(_ethGateway, Global().ETH.Port)
+	return fmt.Sprintf(_localGateway, Global().ETH.Port)
 }
 
 // IPFSAddr ...
 func IPFSAddr() string {
 	return fmt.Sprintf(_ipfsGateway, Global().IPFS.Port)
+}
+
+// IPFSAddr ...
+func IPFSAddrHTTP() string {
+	return fmt.Sprintf(_localGateway, Global().IPFS.Port)
 }
 
 // RPCAddr ...

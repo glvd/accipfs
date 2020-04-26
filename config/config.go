@@ -87,6 +87,7 @@ type Config struct {
 	Interval   int64          `json:"interval" mapstructure:"interval"`
 	NodeType   int            `json:"node_type" mapstructure:"node_type"`
 	Limit      int64          `json:"limit" mapstructure:"limit"`
+	Debug      bool           `json:"debug" mapstructure:"debug"`
 }
 
 // WorkDir ...

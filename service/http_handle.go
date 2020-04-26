@@ -1,6 +1,7 @@
 package service
 
 import (
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/glvd/accipfs/config"
 	"net/http"
@@ -33,6 +34,9 @@ func newHTTPHandle(cfg *config.Config, linker *BustLinker, eng interface{}) (*ht
 func (s *httpHandle) handleList() {
 	g := s.eng.Group("/api")
 	g.GET("/ping", s.Ping())
+	if s.cfg.Debug {
+		g.GET("/debug", s.Debug())
+	}
 
 	v0 := g.Group("v0")
 	v0.POST("/info", s.Info())
@@ -69,8 +73,20 @@ func (s *httpHandle) Info() func(context *gin.Context) {
 // Get ...
 func (s *httpHandle) Get() func(context *gin.Context) {
 	return func(context *gin.Context) {
-		context.Redirect(http.StatusMovedPermanently, config.IPFSAddrHTTP())
+		context.Redirect(http.StatusMovedPermanently, spliceGetUrl("api/v0/get"))
 	}
+}
+
+// Debug ...
+func (s *httpHandle) Debug() func(context *gin.Context) {
+	return func(context *gin.Context) {
+		uri := context.Query("uri")
+		context.Redirect(http.StatusMovedPermanently, spliceGetUrl(uri))
+	}
+}
+
+func spliceGetUrl(uri string) string {
+	return fmt.Sprintf("%s/%s", config.IPFSAddrHTTP(), uri)
 }
 
 // Handler ...

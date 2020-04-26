@@ -27,7 +27,8 @@ var DefaultTokenContractAddr = "0x9064322CfeE623A447ba5aF0dA6AD3341c073535"
 
 // IPFSConfig ...
 type IPFSConfig struct {
-	Name string `json:"name" mapstructure:"name"`
+	LogOutput bool   `json:"log_output" mapstructure:"log_output"` //output log to screen
+	Name      string `json:"name" mapstructure:"name"`
 	//Addr    string `json:"addr" mapstructure:"addr"`
 	Port    int `json:"port" mapstructure:"port"`
 	Timeout int `json:"timeout" mapstructure:"timeout"`
@@ -35,7 +36,8 @@ type IPFSConfig struct {
 
 // ETHConfig ...
 type ETHConfig struct {
-	Name string `json:"name" mapstructure:"name"` //bin name
+	LogOutput bool   `json:"log_output" mapstructure:"log_output"` //output log to screen
+	Name      string `json:"name" mapstructure:"name"`             //bin name
 	//Addr        string       `json:"addr" mapstructure:"addr"`                   //eth rpc address
 	Port int `json:"port" mapstructure:"port"`
 	//KeyHash     string                                    `json:"key_hash" mapstructure:"key_hash"`     //binary key hash
@@ -126,6 +128,7 @@ func LoadConfig() error {
 		return err
 	}
 	_config = &cfg
+	fmt.Printf("config loaded:(%+v)\n", *_config)
 	return nil
 }
 

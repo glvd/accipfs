@@ -32,7 +32,11 @@ func (n *nodeBinIPFS) Start() error {
 		return err2
 	}
 	m := io.MultiReader(pipe, stdoutPipe)
-	go general.PipeScreen(n.ctx, module, m)
+	if n.cfg.ETH.LogOutput {
+		go general.PipeScreen(n.ctx, module, m)
+	} else {
+		go general.PipeDummy(n.ctx, module, m)
+	}
 	err := n.cmd.Start()
 	if err != nil {
 		return err

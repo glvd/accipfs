@@ -109,3 +109,22 @@ END:
 
 	return nil
 }
+
+// PipeDummy ...
+func PipeDummy(ctx context.Context, module string, reader io.Reader) (e error) {
+	line := make([]byte, 2048)
+END:
+	for {
+		select {
+		case <-ctx.Done():
+			return
+		default:
+			_, e = reader.Read(line)
+			if e != nil || io.EOF == e {
+				break END
+			}
+		}
+	}
+
+	return nil
+}

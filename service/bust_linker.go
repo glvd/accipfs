@@ -142,15 +142,21 @@ func (l *BustLinker) WaitingForReady() {
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
-		if l.eth.IsReady() {
-			return
+		for {
+			if l.eth.IsReady() {
+				return
+			}
+			time.Sleep(5 * time.Second)
 		}
 	}()
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
-		if l.ipfs.IsReady() {
-			return
+		for {
+			if l.ipfs.IsReady() {
+				return
+			}
+			time.Sleep(5 * time.Second)
 		}
 	}()
 	wg.Wait()

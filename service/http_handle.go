@@ -5,6 +5,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/glvd/accipfs/config"
 	"net/http"
+	"strings"
 )
 
 type httpHandle struct {
@@ -76,9 +77,9 @@ func (s *httpHandle) Info() func(context *gin.Context) {
 			return
 		}
 		var rs string
-		err = s.linker.tagInfo(j.No, &rs)
+		err = s.linker.tagInfo(strings.ToUpper(j.No), &rs)
 		if err != nil {
-			failedResult(context, err)
+			failedResult(context, fmt.Errorf("%s:%w", s.cfg.ETH.DTagAddr, err))
 			return
 		}
 		context.JSON(http.StatusOK, gin.H{

@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	"github.com/glvd/accipfs/config"
 	"github.com/glvd/accipfs/contract/dtag"
@@ -83,7 +84,7 @@ func (n *ethNode) IsReady() bool {
 
 // DMessage ...
 func (n *ethNode) DTag() (*dtag.DTag, error) {
-	address := common.HexToAddress(n.cfg.ETH.MessageAddr)
+	address := common.HexToAddress(n.cfg.ETH.DTagAddr)
 	return dtag.NewDTag(address, n.client)
 }
 
@@ -155,6 +156,7 @@ func (n *ethNode) AddPeer(ctx context.Context, peer string) error {
 
 // FindNo ...
 func (n *ethNode) FindNo(ctx context.Context, no string) error {
+	no = strings.ToUpper(no)
 	t, err := n.DTag()
 	if err != nil {
 		return err

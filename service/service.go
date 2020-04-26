@@ -34,7 +34,7 @@ func New(cfg *config.Config) (s Service, e error) {
 	if e != nil {
 		return nil, e
 	}
-	http, e := newHTTPHandle(cfg, nil)
+	http, e := newHTTPHandle(cfg, linker, nil)
 	if e != nil {
 		return nil, e
 	}

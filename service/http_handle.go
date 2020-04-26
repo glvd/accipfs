@@ -18,7 +18,17 @@ func newHTTPHandle(cfg *config.Config, linker *BustLinker, eng interface{}) (*ht
 	if !b {
 		g = gin.Default()
 	}
-
+	//g.Use(cors.New(cors.Config{
+	//	AllowOrigins:     []string{"*"},
+	//	AllowMethods:     []string{"POST", "GET", "PUT", "PATCH"},
+	//	AllowHeaders:     []string{"Origin"},
+	//	ExposeHeaders:    []string{"Content-Length"},
+	//	AllowCredentials: true,
+	//	AllowOriginFunc: func(origin string) bool {
+	//		return origin == "*"
+	//	},
+	//	MaxAge: 12 * time.Hour,
+	//}))
 	g.Use(func(context *gin.Context) {
 		logI("output url", "url", context.Request.URL.String())
 	})
@@ -56,9 +66,17 @@ func (s *httpHandle) Ping() func(context *gin.Context) {
 // Info ...
 func (s *httpHandle) Info() func(context *gin.Context) {
 	return func(context *gin.Context) {
-		no := context.DefaultPostForm("no", "")
+		var err error
+		j := struct {
+			No string
+		}{}
+		err = context.BindJSON(&j)
+		if err != nil {
+			failedResult(context, err)
+			return
+		}
 		var rs string
-		err := s.linker.tagInfo(no, &rs)
+		err = s.linker.tagInfo(j.No, &rs)
 		if err != nil {
 			failedResult(context, err)
 			return

@@ -8,6 +8,7 @@ require (
 	github.com/elastic/gosigar v0.10.5 // indirect
 	github.com/ethereum/go-ethereum v1.9.11
 	github.com/fatih/color v1.7.0
+	github.com/gin-contrib/cors v1.3.1
 	github.com/gin-gonic/gin v1.6.2
 	github.com/gocacher/badger-cache/v2 v2.0.1
 	github.com/gocacher/cacher v1.0.5
@@ -15,7 +16,6 @@ require (
 	github.com/goextension/io v0.0.0-20191016080154-50dbafac3df3
 	github.com/goextension/log v0.0.2
 	github.com/goextension/tool v0.0.2
-	github.com/gorilla/mux v1.7.4
 	github.com/gorilla/rpc v1.2.0
 	github.com/ipfs/bbloom v0.0.4 // indirect
 	github.com/ipfs/go-cid v0.0.4 // indirect

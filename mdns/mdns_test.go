@@ -61,11 +61,8 @@ func TestMulticastDNS_Lookup(t *testing.T) {
 		select {
 		case e := <-entries:
 			t.Log("entries")
-			if e.Name != "accipfs._foobar._tcp.local." {
-				log.Module("main").Fatalf("bad: %v", e)
-			}
 			log.Module("main").Infow("output detail", "name", e.Name, "host", e.Host, "fields", e.InfoFields)
-			log.Module("main").Infow("output addr", "addr", e.Addr.String())
+			log.Module("main").Infow("output addr", "addr", e.AddrV4, "addrv6", e.AddrV6)
 			log.Module("main").Infow("output port", "port", e.Port, "want", 0)
 			log.Module("main").Infow("output info", "info", e.Info, "want", 0)
 
@@ -77,7 +74,7 @@ func TestMulticastDNS_Lookup(t *testing.T) {
 	}()
 
 	params := &QueryParam{
-		Service: "_foobar._tcp",
+		Service: "._bustlinker._udp",
 		Domain:  "local",
 		Timeout: 50 * time.Millisecond,
 		Entries: entries,

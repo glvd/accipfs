@@ -20,7 +20,7 @@ const (
 	mdnsPort             = 5353
 )
 const defaultTTL = 120
-const defaultService = "_bustlinker._tcp"
+const defaultService = "_bustlinker._udp"
 const (
 	udp4  = 0
 	udp6  = 1

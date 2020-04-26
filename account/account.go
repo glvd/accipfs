@@ -3,6 +3,7 @@ package account
 import (
 	"encoding/base64"
 	"encoding/json"
+	"fmt"
 	"github.com/ethereum/go-ethereum/accounts"
 	"github.com/ethereum/go-ethereum/accounts/keystore"
 	"github.com/glvd/accipfs/config"
@@ -52,6 +53,9 @@ func NewAccount(cfg *config.Config) (*Account, error) {
 
 // LoadAccount ...
 func LoadAccount(cfg *config.Config) (*Account, error) {
+	if cfg.Account == "" {
+		return nil, fmt.Errorf("nil account")
+	}
 	r := strings.NewReader(cfg.Account)
 	dec := base64.NewDecoder(base64.StdEncoding, r)
 	target, err := ioutil.ReadAll(dec)
@@ -76,7 +80,7 @@ func saveAccountToConfig(cfg *config.Config, account *Account) error {
 	return config.SaveConfig(cfg)
 }
 
-// Validate ...
+// Check ...
 func (acc *Account) Check() error {
 	path := filepath.Join(config.KeyStoreDirETH(), acc.Address)
 	_, e := os.Stat(path)

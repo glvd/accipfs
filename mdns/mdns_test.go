@@ -3,7 +3,6 @@ package mdns
 import (
 	"github.com/glvd/accipfs/config"
 	"github.com/glvd/accipfs/log"
-	"net"
 	"sync/atomic"
 	"testing"
 	"time"
@@ -28,38 +27,23 @@ func TestMulticastDNS_Server(t *testing.T) {
 }
 
 func TestMulticastDNS_Lookup(t *testing.T) {
-	mdns, err := New(config.Default(), func(cfg *OptionConfig) {
-		cfg.Service = "_foobar._tcp"
-		addrs, err := net.InterfaceAddrs()
-		if err != nil {
-			t.Log(err)
-			return
-		}
-		for i := range addrs {
-			if ipnet, ok := addrs[i].(*net.IPNet); ok && !ipnet.IP.IsLoopback() {
-				if ipnet.IP.To4() != nil {
-					cidr, _, err := net.ParseCIDR(addrs[i].String())
-					if err == nil {
-						cfg.IPs = append(cfg.IPs, cidr)
-					}
-					cfg.IPs = append(cfg.IPs, cidr)
-				}
-			}
-		}
-		//cfg.IPs = append(cfg.IPs, net.ParseIP("192.168.1.45"), net.ParseIP("192.168.1.13"))
+	c := config.Default()
+	mdns, err := New(c, func(cfg *OptionConfig) {
+		//cfg.Instance = "test"
+		//cfg.RegisterLocalIP(c)
 	})
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	s, err := mdns.Server()
-	if err != nil {
-		t.Fatal(err)
-	}
-	s.Start()
-	defer s.Stop()
+	//s, err := mdns.Server()
+	//if err != nil {
+	//	t.Fatal(err)
+	//}
+	//s.Start()
+	//defer s.Stop()
 
-	c, err := mdns.Client()
+	cli, err := mdns.Client()
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -98,7 +82,7 @@ func TestMulticastDNS_Lookup(t *testing.T) {
 		Timeout: 50 * time.Millisecond,
 		Entries: entries,
 	}
-	err = c.Query(params)
+	err = cli.Query(params)
 	if err != nil {
 		t.Fatalf("err: %v\n", err)
 	}

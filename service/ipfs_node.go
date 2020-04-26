@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"time"
 
 	"github.com/glvd/accipfs/config"
 	"github.com/glvd/accipfs/core"
@@ -111,5 +112,13 @@ func (n *ipfsNode) IsReady() bool {
 		return false
 	}
 	n.api = api
+
+	ctx, cancel := context.WithTimeout(context.TODO(), 3*time.Second)
+	defer cancel()
+	_, err = n.ID(ctx)
+	if err != nil {
+		return false
+	}
+
 	return true
 }

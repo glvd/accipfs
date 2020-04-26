@@ -3,6 +3,7 @@ package controller
 import (
 	"context"
 	"github.com/glvd/accipfs/config"
+	"github.com/glvd/accipfs/core"
 	"github.com/glvd/accipfs/general"
 	"github.com/goextension/io"
 	"os"
@@ -31,16 +32,27 @@ func (n *nodeBinETH) Stop() error {
 
 // Start ...
 func (n *nodeBinETH) Start() error {
-	n.cmd = exec.CommandContext(n.ctx, n.name,
-		"--datadir", config.DataDirETH(),
-		"--networkid", strconv.FormatInt(n.genesis.Config.ChainID, 10),
-		//"--allow-insecure-unlock",
-		"--rpccorsdomain", "*", "--rpc", "--rpcport", "8545", "--rpcaddr", "127.0.0.1",
-		"--rpcapi", "admin,eth,net,web3,personal,miner",
-		//"--unlock", "945d35cd4a6549213e8d37feb5d708ec98906902",
-		"--mine", "--nodiscover",
-	)
-	//"--password", filepath.Join(n.cfg.Path, "password"))
+	if core.NodeAccount.CompareInt(n.cfg.NodeType) {
+		n.cmd = exec.CommandContext(n.ctx, n.name,
+			"--datadir", config.DataDirETH(),
+			"--networkid", strconv.FormatInt(n.genesis.Config.ChainID, 10),
+			"--allow-insecure-unlock",
+			"--rpccorsdomain", "*", "--rpc", "--rpcport", "8545", "--rpcaddr", "127.0.0.1",
+			"--rpcapi", "admin,eth,net,web3,personal,miner",
+			"--unlock", "54c0fa4a3d982656c51fe7dfbdcc21923a7678cb",
+			"--password", filepath.Join(n.cfg.Path, "password"),
+			"--mine", "--nodiscover",
+		)
+	} else {
+		n.cmd = exec.CommandContext(n.ctx, n.name,
+			"--datadir", config.DataDirETH(),
+			"--networkid", strconv.FormatInt(n.genesis.Config.ChainID, 10),
+			"--rpccorsdomain", "*", "--rpc", "--rpcport", "8545", "--rpcaddr", "127.0.0.1",
+			"--rpcapi", "admin,eth,net,web3,personal,miner",
+			"--mine", "--nodiscover",
+		)
+	}
+
 	output("geth cmd: ", n.cmd.Args)
 	pipe, err2 := n.cmd.StderrPipe()
 	if err2 != nil {

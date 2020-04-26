@@ -154,6 +154,13 @@ func (l *BustLinker) WaitingForReady() {
 		}
 	}()
 	wg.Wait()
+
+	id, err := l.localID()
+	if err != nil {
+		logE("get local id", "error", err)
+		return
+	}
+	l.id = id
 }
 
 // Stop ...
@@ -190,11 +197,7 @@ func (l *BustLinker) localID() (*core.Node, error) {
 
 // ID ...
 func (l *BustLinker) ID(r *http.Request, req *core.IDReq, resp *core.IDResp) error {
-	id, err := l.localID()
-	if err != nil {
-		return err
-	}
-	resp.Node = *id
+	resp.Node = *l.id
 	return nil
 }
 

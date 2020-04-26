@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"github.com/glvd/accipfs/client"
 	"github.com/glvd/accipfs/config"
-	"github.com/goextension/log"
 	"github.com/spf13/cobra"
 )
 
@@ -21,12 +20,12 @@ func idCmd() *cobra.Command {
 			url := fmt.Sprintf("http://localhost:%d/rpc", cfg.Port)
 			id, err := client.ID(url)
 			if err != nil {
-				log.Errorw("local id", "error", err)
+				fmt.Printf("get local id failed error(%v)", err)
 				return
 			}
 			indent, err := json.MarshalIndent(id, "", " ")
 			if err != nil {
-				log.Errorw("json mashal", "error", err)
+				fmt.Printf("json marshal failed error(%v)", err)
 				return
 			}
 			//output your id info to screen

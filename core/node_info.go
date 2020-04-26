@@ -88,3 +88,8 @@ type NodeInfo struct {
 	DataStore DataStoreNode
 	//Version   string
 }
+
+// CompareInt ...
+func (t NodeType) CompareInt(i int) bool {
+	return int(t) == i
+}

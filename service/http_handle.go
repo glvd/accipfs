@@ -14,6 +14,9 @@ type httpHandle struct {
 	linker *BustLinker
 }
 
+// Success ...
+var Success = "success"
+
 func newHTTPHandle(cfg *config.Config, linker *BustLinker, eng interface{}) (*httpHandle, error) {
 	g, b := eng.(*gin.Engine)
 	if !b {
@@ -59,7 +62,7 @@ func (s *httpHandle) Ping() func(context *gin.Context) {
 	return func(context *gin.Context) {
 		context.JSON(http.StatusOK, gin.H{
 			"message": "pong",
-			"status":  "success",
+			"status":  Success,
 		})
 	}
 }
@@ -84,7 +87,7 @@ func (s *httpHandle) Info() func(context *gin.Context) {
 		}
 		context.JSON(http.StatusOK, gin.H{
 			"message": rs,
-			"status":  "success",
+			"status":  Success,
 		})
 	}
 }

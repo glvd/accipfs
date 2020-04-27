@@ -232,8 +232,7 @@ func (m *MemoryCache) AddOrUpdate(hash string, info *core.NodeInfo) error {
 func New(cfg *config.Config) *MemoryCache {
 	cache.DefaultCachePath = filepath.Join(cfg.Path, ".cache")
 	return &MemoryCache{
-		path:   cache.DefaultCachePath,
-		memory: make(map[string][]byte),
-		cache:  cache.New(),
+		path:  cache.DefaultCachePath,
+		cache: cache.New(),
 	}
 }

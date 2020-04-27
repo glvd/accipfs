@@ -27,7 +27,7 @@ type BustLinker struct {
 	id    *core.Node
 	tasks task.Task
 	cache *cache.MemoryCache
-	nodes NodeManager
+	nodes cache.NodeManager
 	lock  *atomic.Bool
 	self  *account.Account
 	cfg   *config.Config
@@ -44,7 +44,7 @@ var BootList = []string{
 // NewBustLinker ...
 func NewBustLinker(cfg *config.Config) (linker *BustLinker, err error) {
 	linker = &BustLinker{
-		nodes: NewNodeManager(cfg),
+		nodes: cache.NewNodeManager(cfg),
 		lock:  atomic.NewBool(false),
 		cfg:   cfg,
 	}
@@ -270,7 +270,7 @@ func (l *BustLinker) addPeer(ctx context.Context, node *core.Node, result *bool)
 	faultNode := l.nodes.IsFault(node.NodeInfo.Name)
 
 	if faultNode != nil {
-		if remain, b := faultTimeCheck(faultNode, 180); !b {
+		if remain, b := cache.faultTimeCheck(faultNode, 180); !b {
 			return fmt.Errorf("fault check error,waiting remain %d", remain)
 		}
 	}

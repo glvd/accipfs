@@ -73,10 +73,11 @@ func (l *BustLinker) Start() {
 	go l.cron.Run()
 }
 
-func (l *BustLinker) getPeers(node *core.Node) bool {
+func (l *BustLinker) getPeers(wg *sync.WaitGroup, node core.Node) bool {
 	output("bust linker", "get peers", node.Name)
+	defer wg.Done()
 	ctx := context.TODO()
-	remoteNodes, err := client.Peers(general.RPCAddress(node.NodeAddress), node)
+	remoteNodes, err := client.Peers(general.RPCAddress(node.NodeAddress), &node)
 	if err != nil {
 		logE("get peers failed", "account", node.Name, "error", err)
 		return true
@@ -100,15 +101,18 @@ func (l *BustLinker) getPeers(node *core.Node) bool {
 				continue
 			}
 			for _, p := range pins {
-				err := l.cache.AddOrUpdate(p, &rnode.NodeInfo)
-				if err != nil {
-					logE("cache add or update", "error", err)
-					continue
-				}
+				//err := l.cache.AddOrUpdate(p, &rnode.NodeInfo)
+				//if err != nil {
+				//	logE("cache add or update", "error", err)
+				//	continue
+				//}
+				//TODO
+				logI("pin hash", "hash", p)
 			}
 		}
 
 	}
+	return true
 }
 
 // Run ...
@@ -119,7 +123,7 @@ func (l *BustLinker) Run() {
 	}
 	l.lock.Store(true)
 	defer l.lock.Store(false)
-
+	wg := &sync.WaitGroup{}
 	l.nodes.Range(func(node *core.Node) bool {
 		output("bust linker", "syncing node", node.Name)
 		l.nodes.Validate(node.NodeInfo.Name, func(node *core.Node) bool {
@@ -128,46 +132,12 @@ func (l *BustLinker) Run() {
 				logE("ping failed", "account", node.Name, "error", err)
 				return false
 			}
-
+			go l.getPeers(wg, *node)
 			return true
 		})
-
-		output("bust linker", "get peers", node.Name)
-		remoteNodes, err := client.Peers(general.RPCAddress(node.NodeAddress), node)
-		if err != nil {
-			logE("get peers failed", "account", node.Name, "error", err)
-			return true
-		}
-
-		for _, rnode := range remoteNodes {
-			if l.nodes.Length() > l.cfg.Limit {
-				return false
-			}
-			result := new(bool)
-			output("bust linker", "add peer", rnode.Name)
-			if err := l.addPeer(ctx, rnode, result); err != nil {
-				logE("add peer failed", "account", rnode.Name, "error", err)
-				continue
-			}
-			if *result {
-				output("bust linker", "pin source ", rnode.Name)
-				pins, err := client.Pins(rnode.NodeAddress)
-				if err != nil {
-					logE("get pin list", "error", err)
-					continue
-				}
-				for _, p := range pins {
-					err := l.cache.AddOrUpdate(p, &rnode.NodeInfo)
-					if err != nil {
-						logE("cache add or update", "error", err)
-						continue
-					}
-				}
-			}
-
-		}
 		return true
 	})
+	wg.Wait()
 	output("bust linker", "syncing done")
 }
 
@@ -302,10 +272,10 @@ func (l *BustLinker) addPeer(ctx context.Context, node *core.Node, result *bool)
 		return nil
 	}
 
-	faultNode := l.nodes.IsFault(node.NodeInfo.Name)
+	faultNode, b := l.nodes.RecoveryFault(node.NodeInfo.Name)
 
-	if faultNode != nil {
-		if remain, b := cache.faultTimeCheck(faultNode, 180); !b {
+	if b {
+		if remain, fault := faultTimeCheck(faultNode, 180); !fault {
 			return fmt.Errorf("fault check error,waiting remain %d", remain)
 		}
 	}
@@ -536,31 +506,40 @@ func (l *BustLinker) TagInfo(_ *http.Request, tag *string, info *string) error {
 
 // Info ...
 func (l *BustLinker) Info(r *http.Request, hash *string, info *string) error {
-	bytes, e := l.cache.Get(*hash)
-	if e != nil {
-		return e
-	}
-	*info = string(bytes)
+	//bytes, e := l.cache.Get(*hash)
+	//if e != nil {
+	//	return e
+	//}
+	//*info = string(bytes)
 	return nil
 }
 
 func (l *BustLinker) nodeConnect(ctx context.Context, hash string) error {
-	hashInfo, err := l.cache.GetHashInfo(hash)
-	if err != nil {
-		return err
-	}
-	for info := range hashInfo {
-		nodeInfo, err := l.cache.GetNodeInfo(info)
-		if err != nil {
-			continue
-		}
-		var resultErr error
-		for _, addr := range nodeInfo.DataStore.Addresses {
-			resultErr = l.ipfs.SwarmConnect(ctx, addr)
-			if resultErr == nil {
-				break
-			}
-		}
-	}
+	//hashInfo, err := l.cache.GetHashInfo(hash)
+	//if err != nil {
+	//	return err
+	//}
+	//for info := range hashInfo {
+	//	nodeInfo, err := l.cache.GetNodeInfo(info)
+	//	if err != nil {
+	//		continue
+	//	}
+	//	var resultErr error
+	//	for _, addr := range nodeInfo.DataStore.Addresses {
+	//		resultErr = l.ipfs.SwarmConnect(ctx, addr)
+	//		if resultErr == nil {
+	//			break
+	//		}
+	//	}
+	//}
 	return nil
+}
+func faultTimeCheck(fault *core.Node, limit int64) (remain int64, fa bool) {
+	now := time.Now().Unix()
+	f := fault.LastTime.Unix() + limit
+	remain = -(now - f)
+	if remain < 0 {
+		remain = 0
+	}
+	return remain, remain <= 0
 }

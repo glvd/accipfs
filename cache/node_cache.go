@@ -157,16 +157,6 @@ func (s *nodeManager) Length() int64 {
 	return s.nodeSize.Load()
 }
 
-func faultTimeCheck(fault *core.Node, limit int64) (remain int64, fa bool) {
-	now := time.Now().Unix()
-	f := fault.LastTime.Unix() + limit
-	remain = -(now - f)
-	if remain < 0 {
-		remain = 0
-	}
-	return remain, remain <= 0
-}
-
 func marshalNode(node *core.Node) []byte {
 	marshal, err := json.Marshal(node)
 	if err != nil {

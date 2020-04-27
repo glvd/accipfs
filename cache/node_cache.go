@@ -47,11 +47,14 @@ func New(cfg *config.Config) NodeCache {
 
 func (s *nodeManager) poolRun() {
 	defer func() {
-		if s.stop.Load() {
-			if e := recover(); e != nil {
-				logE("error")
-			}
+		if e := recover(); e != nil {
+			logE("found error", "error", e)
 		}
+		if s.stop.Load() {
+
+			return
+		}
+		go s.poolRun()
 	}()
 	for {
 		if s.stop.Load() {
@@ -64,8 +67,8 @@ func (s *nodeManager) poolRun() {
 					panic(err)
 				}
 			}
-			s.nodeSize.Add(1)
 			s.nodes.Store(node.Name, node)
+			s.nodeSize.Add(1)
 			continue
 		}
 		time.Sleep(3 * time.Second)

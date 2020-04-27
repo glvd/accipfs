@@ -386,7 +386,7 @@ func (l *BustLinker) PinVideo(r *http.Request, no *string, result *bool) error {
 			return
 		}
 
-		err = l.nodeConnect(ctx, v.PosterHash)
+		err = l.connectNode(ctx, v.PosterHash)
 		if err != nil {
 			cancelFunc()
 			return
@@ -410,7 +410,7 @@ func (l *BustLinker) PinVideo(r *http.Request, no *string, result *bool) error {
 		if v.ThumbHash == "" {
 			return
 		}
-		err = l.nodeConnect(ctx, v.ThumbHash)
+		err = l.connectNode(ctx, v.ThumbHash)
 		if err != nil {
 			cancelFunc()
 			return
@@ -434,7 +434,7 @@ func (l *BustLinker) PinVideo(r *http.Request, no *string, result *bool) error {
 		if v.SourceHash == "" {
 			return
 		}
-		err = l.nodeConnect(ctx, v.SourceHash)
+		err = l.connectNode(ctx, v.SourceHash)
 		if err != nil {
 			cancelFunc()
 			return
@@ -460,7 +460,7 @@ func (l *BustLinker) PinVideo(r *http.Request, no *string, result *bool) error {
 			return
 		}
 
-		err = l.nodeConnect(ctx, v.M3U8Hash)
+		err = l.connectNode(ctx, v.M3U8Hash)
 		if err != nil {
 			cancelFunc()
 			return
@@ -514,7 +514,7 @@ func (l *BustLinker) Info(r *http.Request, hash *string, info *string) error {
 	return nil
 }
 
-func (l *BustLinker) nodeConnect(ctx context.Context, hash string) error {
+func (l *BustLinker) connectNode(ctx context.Context, hash string) error {
 	//hashInfo, err := l.cache.GetHashInfo(hash)
 	//if err != nil {
 	//	return err

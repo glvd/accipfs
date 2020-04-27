@@ -155,6 +155,16 @@ func (s *nodeManager) Range(f func(info *core.Node) bool) {
 	})
 }
 
+// NodeHash ...
+func (s *nodeManager) NodeHashs(node *core.Node) []string {
+	return nil
+}
+
+// HashNodes ...
+func (s *nodeManager) HashNodes(hash string) []*core.Node {
+	return nil
+}
+
 // Length ...
 func (s *nodeManager) Length() int64 {
 	return s.nodeSize.Load()

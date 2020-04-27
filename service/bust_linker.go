@@ -26,8 +26,7 @@ import (
 type BustLinker struct {
 	id    *core.Node
 	tasks task.Task
-	cache *cache.MemoryCache
-	nodes cache.NodeManager
+	nodes cache.NodeCache
 	lock  *atomic.Bool
 	self  *account.Account
 	cfg   *config.Config
@@ -44,7 +43,7 @@ var BootList = []string{
 // NewBustLinker ...
 func NewBustLinker(cfg *config.Config) (linker *BustLinker, err error) {
 	linker = &BustLinker{
-		nodes: cache.NewNodeManager(cfg),
+		nodes: cache.New(cfg),
 		lock:  atomic.NewBool(false),
 		cfg:   cfg,
 	}
@@ -52,7 +51,6 @@ func NewBustLinker(cfg *config.Config) (linker *BustLinker, err error) {
 	//linker.ipfsServer = newNodeServerIPFS(cfg)
 	linker.eth, _ = newNodeETH(cfg)
 	linker.ipfs, _ = newNodeIPFS(cfg)
-	linker.cache = cache.New(cfg)
 	linker.tasks = task.New()
 	linker.cron = cron.New(cron.WithSeconds())
 	selfAcc, err := account.LoadAccount(cfg)
@@ -75,6 +73,44 @@ func (l *BustLinker) Start() {
 	go l.cron.Run()
 }
 
+func (l *BustLinker) getPeers(node *core.Node) bool {
+	output("bust linker", "get peers", node.Name)
+	ctx := context.TODO()
+	remoteNodes, err := client.Peers(general.RPCAddress(node.NodeAddress), node)
+	if err != nil {
+		logE("get peers failed", "account", node.Name, "error", err)
+		return true
+	}
+
+	for _, rnode := range remoteNodes {
+		if l.nodes.Length() > l.cfg.Limit {
+			return false
+		}
+		result := new(bool)
+		output("bust linker", "add peer", rnode.Name)
+		if err := l.addPeer(ctx, rnode, result); err != nil {
+			logE("add peer failed", "account", rnode.Name, "error", err)
+			continue
+		}
+		if *result {
+			output("bust linker", "pin source ", rnode.Name)
+			pins, err := client.Pins(rnode.NodeAddress)
+			if err != nil {
+				logE("get pin list", "error", err)
+				continue
+			}
+			for _, p := range pins {
+				err := l.cache.AddOrUpdate(p, &rnode.NodeInfo)
+				if err != nil {
+					logE("cache add or update", "error", err)
+					continue
+				}
+			}
+		}
+
+	}
+}
+
 // Run ...
 func (l *BustLinker) Run() {
 	if l.lock.Load() {
@@ -83,53 +119,52 @@ func (l *BustLinker) Run() {
 	}
 	l.lock.Store(true)
 	defer l.lock.Store(false)
-	ctx := context.TODO()
+
 	l.nodes.Range(func(node *core.Node) bool {
 		output("bust linker", "syncing node", node.Name)
-		v := l.nodes.Validate(node.NodeInfo.Name, func(node *core.Node) bool {
+		l.nodes.Validate(node.NodeInfo.Name, func(node *core.Node) bool {
 			err := client.Ping(general.RPCAddress(node.NodeAddress))
 			if err != nil {
 				logE("ping failed", "account", node.Name, "error", err)
 				return false
 			}
+
 			return true
 		})
 
 		output("bust linker", "get peers", node.Name)
-		if v {
-			remoteNodes, err := client.Peers(general.RPCAddress(node.NodeAddress), node)
-			if err != nil {
-				logE("get peers failed", "account", node.Name, "error", err)
-				return true
-			}
+		remoteNodes, err := client.Peers(general.RPCAddress(node.NodeAddress), node)
+		if err != nil {
+			logE("get peers failed", "account", node.Name, "error", err)
+			return true
+		}
 
-			for _, rnode := range remoteNodes {
-				if l.nodes.Length() > l.cfg.Limit {
-					return false
-				}
-				result := new(bool)
-				output("bust linker", "add peer", rnode.Name)
-				if err := l.addPeer(ctx, rnode, result); err != nil {
-					logE("add peer failed", "account", rnode.Name, "error", err)
+		for _, rnode := range remoteNodes {
+			if l.nodes.Length() > l.cfg.Limit {
+				return false
+			}
+			result := new(bool)
+			output("bust linker", "add peer", rnode.Name)
+			if err := l.addPeer(ctx, rnode, result); err != nil {
+				logE("add peer failed", "account", rnode.Name, "error", err)
+				continue
+			}
+			if *result {
+				output("bust linker", "pin source ", rnode.Name)
+				pins, err := client.Pins(rnode.NodeAddress)
+				if err != nil {
+					logE("get pin list", "error", err)
 					continue
 				}
-				if *result {
-					output("bust linker", "pin source ", rnode.Name)
-					pins, err := client.Pins(rnode.NodeAddress)
+				for _, p := range pins {
+					err := l.cache.AddOrUpdate(p, &rnode.NodeInfo)
 					if err != nil {
-						logE("get pin list", "error", err)
+						logE("cache add or update", "error", err)
 						continue
 					}
-					for _, p := range pins {
-						err := l.cache.AddOrUpdate(p, &rnode.NodeInfo)
-						if err != nil {
-							logE("cache add or update", "error", err)
-							continue
-						}
-					}
 				}
-
 			}
+
 		}
 		return true
 	})

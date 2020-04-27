@@ -1,6 +1,7 @@
 package cache
 
 import (
+	"encoding/json"
 	"github.com/glvd/accipfs/config"
 	"github.com/gocacher/cacher"
 	"sync"
@@ -13,18 +14,17 @@ import (
 
 // nodeManager ...
 type nodeManager struct {
-	cfg          *config.Config
-	stop         *atomic.Bool
-	pool         sync.Pool
-	cache        cacher.Cacher
-	accountNodes sync.Map
-	nodes        sync.Map
-	faultNodes   sync.Map
-	nodeSize     *atomic.Int64
+	cfg        *config.Config
+	stop       *atomic.Bool
+	pool       sync.Pool
+	cache      cacher.Cacher
+	nodes      sync.Map
+	faultNodes sync.Map
+	nodeSize   *atomic.Int64
 }
 
-// NodeManager ...
-type NodeManager interface {
+// NodeCache ...
+type NodeCache interface {
 	Add(info *core.Node)
 	Validate(key string, fs ...func(node *core.Node) bool)
 	Get(key string) *core.Node
@@ -35,8 +35,8 @@ type NodeManager interface {
 	RecoveryFault(key string, fs ...func(info *core.Node)) (node *core.Node, ok bool)
 }
 
-// NewNodeManager ...
-func NewNodeManager(cfg *config.Config) NodeManager {
+// New ...
+func New(cfg *config.Config) NodeCache {
 	return &nodeManager{
 		cfg:      cfg,
 		stop:     atomic.NewBool(false),
@@ -46,6 +46,13 @@ func NewNodeManager(cfg *config.Config) NodeManager {
 }
 
 func (s *nodeManager) poolRun() {
+	defer func() {
+		if s.stop.Load() {
+			if e := recover(); e != nil {
+				logE("error")
+			}
+		}
+	}()
 	for {
 		if s.stop.Load() {
 			return
@@ -53,7 +60,9 @@ func (s *nodeManager) poolRun() {
 		if v := s.pool.Get(); v != nil {
 			node := v.(*core.Node)
 			if node.NodeType == core.NodeAccount {
-				s.accountNodes.Store(node.Name, node)
+				if err := cacher.Set(node.Name, marshalNode(node)); err != nil {
+					panic(err)
+				}
 			}
 			s.nodeSize.Add(1)
 			s.nodes.Store(node.Name, node)
@@ -129,10 +138,11 @@ func (s *nodeManager) Get(key string) *core.Node {
 
 // GetAccount ...
 func (s *nodeManager) GetAccount(key string) *core.Node {
-	if v, b := s.accountNodes.Load(key); b {
-		return v.(*core.Node)
+	get, err := s.cache.Get(key)
+	if err != nil {
+		return nil
 	}
-	return nil
+	return unmarshalNode(get)
 }
 
 // Range ...
@@ -155,4 +165,21 @@ func faultTimeCheck(fault *core.Node, limit int64) (remain int64, fa bool) {
 		remain = 0
 	}
 	return remain, remain <= 0
+}
+
+func marshalNode(node *core.Node) []byte {
+	marshal, err := json.Marshal(node)
+	if err != nil {
+		panic(err)
+	}
+	return marshal
+}
+
+func unmarshalNode(b []byte) *core.Node {
+	var node core.Node
+	err := json.Unmarshal(b, &node)
+	if err != nil {
+		panic(err)
+	}
+	return &node
 }

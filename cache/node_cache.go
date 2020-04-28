@@ -68,11 +68,11 @@ func (c *nodeCache) poolRun() {
 		if v := c.pool.Get(); v != nil {
 			node := v.(*core.Node)
 			key = prefixName(c.prefix, node.Name)
-			if node.NodeType == core.NodeAccount {
-				if err := c.cache.Set(key, marshalNode(node)); err != nil {
-					panic(err)
-				}
+			//if node.NodeType == core.NodeAccount {
+			if err := c.cache.Set(key, marshalNode(node)); err != nil {
+				panic(err)
 			}
+			//}
 			c.nodes.Store(key, node)
 			c.nodeSize.Add(1)
 			continue

@@ -514,25 +514,19 @@ func (l *BustLinker) Info(r *http.Request, hash *string, info *string) error {
 	return nil
 }
 
-func (l *BustLinker) connectNode(ctx context.Context, hash string) error {
-	l.hashes.Get(hash)
-	//hashInfo, err := l.cache.GetHashInfo(hash)
-	//if err != nil {
-	//	return err
-	//}
-	//for info := range hashInfo {
-	//	nodeInfo, err := l.cache.GetNodeInfo(info)
-	//	if err != nil {
-	//		continue
-	//	}
-	//	var resultErr error
-	//	for _, addr := range nodeInfo.DataStore.Addresses {
-	//		resultErr = l.ipfs.SwarmConnect(ctx, addr)
-	//		if resultErr == nil {
-	//			break
-	//		}
-	//	}
-	//}
+func (l *BustLinker) connectNode(ctx context.Context, hash string) (err error) {
+	hashes := l.hashes.Get(hash)
+	var node *core.Node
+	for v := range hashes {
+		node = l.nodes.Get(v)
+		var resultErr error
+		for _, addr := range node.DataStore.Addresses {
+			resultErr = l.ipfs.SwarmConnect(ctx, addr)
+			if resultErr == nil {
+				break
+			}
+		}
+	}
 	return nil
 }
 func faultTimeCheck(fault *core.Node, limit int64) (remain int64, fa bool) {

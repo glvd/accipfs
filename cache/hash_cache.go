@@ -84,12 +84,12 @@ func marshalMapNode(node map[string]bool) []byte {
 func unmarshalMapNode(b []byte, err error) map[string]bool {
 	node := map[string]bool{}
 	if err != nil {
-		logE("unmarshalMapNode data failed", "error", err)
+		logE("unmarshalMapNode failed", "error", err)
 		return node
 	}
 	err = json.Unmarshal(b, &node)
 	if err != nil {
-		logE("unmarshalMapNode failed", "error", err)
+		logE("unmarshalMapNode data failed", "error", err)
 		return node
 	}
 	return node

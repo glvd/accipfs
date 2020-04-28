@@ -12,8 +12,8 @@ import (
 	"go.uber.org/atomic"
 )
 
-// nodeManager ...
-type nodeManager struct {
+// nodeCache ...
+type nodeCache struct {
 	cfg        *config.Config
 	stop       *atomic.Bool
 	pool       sync.Pool
@@ -37,7 +37,7 @@ type NodeCache interface {
 
 // NewNodeCache ...
 func NewNodeCache(cfg *config.Config) NodeCache {
-	return &nodeManager{
+	return &nodeCache{
 		cfg:      cfg,
 		stop:     atomic.NewBool(false),
 		nodes:    sync.Map{},
@@ -46,7 +46,7 @@ func NewNodeCache(cfg *config.Config) NodeCache {
 	}
 }
 
-func (s *nodeManager) poolRun() {
+func (s *nodeCache) poolRun() {
 	defer func() {
 		if e := recover(); e != nil {
 			logE("found error", "error", e)
@@ -77,18 +77,18 @@ func (s *nodeManager) poolRun() {
 }
 
 // Remove ...
-func (s *nodeManager) Remove(key string) {
+func (s *nodeCache) Remove(key string) {
 	s.nodeSize.Add(-1)
 	s.nodes.Delete(key)
 }
 
 // Add ...
-func (s *nodeManager) Add(info *core.Node) {
+func (s *nodeCache) Add(info *core.Node) {
 	s.pool.Put(info)
 }
 
 // Validate ...
-func (s *nodeManager) Validate(key string, fs ...func(node *core.Node) bool) {
+func (s *nodeCache) Validate(key string, fs ...func(node *core.Node) bool) {
 	n, exist := s.nodes.Load(key)
 	if exist && fs != nil {
 		node := n.(*core.Node)
@@ -100,7 +100,7 @@ func (s *nodeManager) Validate(key string, fs ...func(node *core.Node) bool) {
 }
 
 // Fault ...
-func (s *nodeManager) Fault(node *core.Node, fs ...func(info *core.Node)) {
+func (s *nodeCache) Fault(node *core.Node, fs ...func(info *core.Node)) {
 	s.Remove(node.NodeInfo.Name)
 	if fs != nil {
 		fs[0](node)
@@ -110,7 +110,7 @@ func (s *nodeManager) Fault(node *core.Node, fs ...func(info *core.Node)) {
 }
 
 // RecoveryFault ...
-func (s *nodeManager) RecoveryFault(key string, fs ...func(info *core.Node)) (node *core.Node, ok bool) {
+func (s *nodeCache) RecoveryFault(key string, fs ...func(info *core.Node)) (node *core.Node, ok bool) {
 	load, ok := s.faultNodes.Load(key)
 	if !ok {
 		return
@@ -124,7 +124,7 @@ func (s *nodeManager) RecoveryFault(key string, fs ...func(info *core.Node)) (no
 }
 
 // IsFault ...
-func (s *nodeManager) LoadFault(key string) (*core.Node, bool) {
+func (s *nodeCache) LoadFault(key string) (*core.Node, bool) {
 	n, exist := s.faultNodes.Load(key)
 	if exist {
 		return n.(*core.Node), exist
@@ -133,7 +133,7 @@ func (s *nodeManager) LoadFault(key string) (*core.Node, bool) {
 }
 
 // Get ...
-func (s *nodeManager) Get(key string) *core.Node {
+func (s *nodeCache) Get(key string) *core.Node {
 	if v, b := s.nodes.Load(key); b {
 		return v.(*core.Node)
 	}
@@ -141,7 +141,7 @@ func (s *nodeManager) Get(key string) *core.Node {
 }
 
 // GetAccount ...
-func (s *nodeManager) GetAccount(key string) *core.Node {
+func (s *nodeCache) GetAccount(key string) *core.Node {
 	get, err := s.cache.Get(key)
 	if err != nil {
 		return nil
@@ -150,24 +150,24 @@ func (s *nodeManager) GetAccount(key string) *core.Node {
 }
 
 // Range ...
-func (s *nodeManager) Range(f func(info *core.Node) bool) {
+func (s *nodeCache) Range(f func(info *core.Node) bool) {
 	s.nodes.Range(func(key, value interface{}) bool {
 		return f(value.(*core.Node))
 	})
 }
 
 // NodeHashes ...
-func (s *nodeManager) NodeHashes(node *core.Node) []string {
+func (s *nodeCache) NodeHashes(node *core.Node) []string {
 	return nil
 }
 
 // HashNodes ...
-func (s *nodeManager) HashNodes(hash string) []*core.Node {
+func (s *nodeCache) HashNodes(hash string) []*core.Node {
 	return nil
 }
 
 // Length ...
-func (s *nodeManager) Length() int64 {
+func (s *nodeCache) Length() int64 {
 	return s.nodeSize.Load()
 }
 

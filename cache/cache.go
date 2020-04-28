@@ -13,13 +13,27 @@ type _cache struct {
 	path string
 }
 
+var _instance *_cache
+
+// InitCache ...
+func InitCache(cfg *config.Config) {
+	if _instance == nil {
+		cache.DefaultCachePath = filepath.Join(cfg.Path, ".cache")
+		cacher.Register(cache.New())
+		_instance = &_cache{
+			path:   cache.DefaultCachePath,
+			Cacher: cacher.Instance(),
+		}
+	}
+
+}
+
 // New ...
 func New(cfg *config.Config) cacher.Cacher {
-	cache.DefaultCachePath = filepath.Join(cfg.Path, ".cache")
-	return &_cache{
-		path:   cache.DefaultCachePath,
-		Cacher: cache.New(),
+	if _instance == nil {
+		InitCache(cfg)
 	}
+	return _instance
 }
 
 func prefixName(p string, n string) string {

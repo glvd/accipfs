@@ -132,6 +132,7 @@ func (l *BustLinker) Run() {
 				logE("ping failed", "account", node.Name, "error", err)
 				return false
 			}
+			wg.Add(1)
 			go l.getPeers(wg, *node)
 			return true
 		})

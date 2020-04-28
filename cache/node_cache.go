@@ -35,12 +35,13 @@ type NodeCache interface {
 	RecoveryFault(key string, fs ...func(info *core.Node)) (node *core.Node, ok bool)
 }
 
-// New ...
-func New(cfg *config.Config) NodeCache {
+// NewNodeCache ...
+func NewNodeCache(cfg *config.Config) NodeCache {
 	return &nodeManager{
 		cfg:      cfg,
 		stop:     atomic.NewBool(false),
 		nodes:    sync.Map{},
+		cache:    New(cfg),
 		nodeSize: atomic.NewInt64(0),
 	}
 }

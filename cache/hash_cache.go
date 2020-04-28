@@ -10,26 +10,34 @@ import (
 
 // HashCache ...
 type HashCache interface {
-	Add(p string, node *core.Node) (e error)
+	Add(p string, s ...string) (e error)
+	Get(p string) map[string]bool
+	Has(p string) bool
 }
 
 type hashCache struct {
 	prefix string
-	mut    sync.RWMutex
+	mut    *sync.RWMutex
 	cache  cacher.Cacher
 	cfg    *config.Config
 }
 
 // Add ...
-func (c *hashCache) Add(p string, node *core.Node) (e error) {
+func (c *hashCache) Add(p string, s ...string) (e error) {
 	hashes := c.Get(p)
-
-	if _, b := hashes[node.Name]; b {
-		return
+	changed := false
+	for _, name := range s {
+		if _, b := hashes[name]; b {
+			continue
+		}
+		changed = true
+		hashes[name] = true
 	}
-
-	hashes[node.Name] = true
-	return c.cache.Set(p, marshalMapNode(hashes))
+	if !changed {
+		return nil
+	}
+	err := c.cache.Set(p, marshalMapNode(hashes))
+	return err
 }
 
 // Get ...
@@ -51,6 +59,7 @@ func (c *hashCache) Has(p string) bool {
 func NewHashCache(cfg *config.Config) HashCache {
 	return &hashCache{
 		cfg:    cfg,
+		mut:    &sync.RWMutex{},
 		prefix: "hash",
 		cache:  New(cfg),
 	}

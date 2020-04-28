@@ -37,7 +37,7 @@ type BustLinker struct {
 
 // BootList ...
 var BootList = []string{
-	"gate.dhash.app",
+	"",
 }
 
 // NewBustLinker ...

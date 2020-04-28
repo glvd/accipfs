@@ -155,8 +155,8 @@ func (s *nodeManager) Range(f func(info *core.Node) bool) {
 	})
 }
 
-// NodeHash ...
-func (s *nodeManager) NodeHashs(node *core.Node) []string {
+// NodeHashes ...
+func (s *nodeManager) NodeHashes(node *core.Node) []string {
 	return nil
 }
 

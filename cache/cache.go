@@ -19,10 +19,10 @@ var _instance *_cache
 func InitCache(cfg *config.Config) {
 	if _instance == nil {
 		cache.DefaultCachePath = filepath.Join(cfg.Path, ".cache")
-		cacher.Register(cache.New())
+		//cacher.Register(cache.New())
 		_instance = &_cache{
 			path:   cache.DefaultCachePath,
-			Cacher: cacher.Instance(),
+			Cacher: cache.New(),
 		}
 	}
 

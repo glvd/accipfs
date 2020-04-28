@@ -21,6 +21,7 @@ type nodeCache struct {
 	nodes      sync.Map
 	faultNodes sync.Map
 	nodeSize   *atomic.Int64
+	prefix     string
 }
 
 // NodeCache ...
@@ -39,6 +40,7 @@ type NodeCache interface {
 func NewNodeCache(cfg *config.Config) NodeCache {
 	n := &nodeCache{
 		cfg:      cfg,
+		prefix:   "node",
 		stop:     atomic.NewBool(false),
 		nodes:    sync.Map{},
 		cache:    New(cfg),

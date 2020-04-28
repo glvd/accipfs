@@ -103,13 +103,10 @@ func (l *BustLinker) getPeers(wg *sync.WaitGroup, node core.Node) bool {
 				continue
 			}
 			for _, p := range pins {
-				l.hashes.Add(p, &rnode)
-				//err := l.cache.AddOrUpdate(p, &rnode.NodeInfo)
-				//if err != nil {
-				//	logE("cache add or update", "error", err)
-				//	continue
-				//}
-				//TODO
+				if err := l.hashes.Add(p, rnode); err != nil {
+					logE("cache failed", "error", err)
+					continue
+				}
 				logI("pin hash", "hash", p)
 			}
 		}

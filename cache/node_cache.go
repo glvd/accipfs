@@ -60,18 +60,20 @@ func (c *nodeCache) poolRun() {
 		}
 		go c.poolRun()
 	}()
+	var key string
 	for {
 		if c.stop.Load() {
 			return
 		}
 		if v := c.pool.Get(); v != nil {
 			node := v.(*core.Node)
+			key = prefixName(c.prefix, node.Name)
 			if node.NodeType == core.NodeAccount {
-				if err := cacher.Set(node.Name, marshalNode(node)); err != nil {
+				if err := c.cache.Set(key, marshalNode(node)); err != nil {
 					panic(err)
 				}
 			}
-			c.nodes.Store(node.Name, node)
+			c.nodes.Store(key, node)
 			c.nodeSize.Add(1)
 			continue
 		}
@@ -81,6 +83,7 @@ func (c *nodeCache) poolRun() {
 
 // Remove ...
 func (c *nodeCache) Remove(key string) {
+	key = prefixName(c.prefix, key)
 	c.nodeSize.Add(-1)
 	c.nodes.Delete(key)
 }
@@ -92,6 +95,7 @@ func (c *nodeCache) Add(info *core.Node) {
 
 // Validate ...
 func (c *nodeCache) Validate(key string, fs ...func(node *core.Node) bool) {
+	key = prefixName(c.prefix, key)
 	n, exist := c.nodes.Load(key)
 	if exist && fs != nil {
 		node := n.(*core.Node)
@@ -105,15 +109,17 @@ func (c *nodeCache) Validate(key string, fs ...func(node *core.Node) bool) {
 // Fault ...
 func (c *nodeCache) Fault(node *core.Node, fs ...func(info *core.Node)) {
 	c.Remove(node.NodeInfo.Name)
+	key := prefixName(c.prefix, node.NodeInfo.Name)
 	if fs != nil {
 		fs[0](node)
 	}
 	node.LastTime = time.Now()
-	c.faultNodes.Store(node.NodeInfo.Name, node)
+	c.faultNodes.Store(key, node)
 }
 
 // RecoveryFault ...
 func (c *nodeCache) RecoveryFault(key string, fs ...func(info *core.Node)) (node *core.Node, ok bool) {
+	key = prefixName(c.prefix, key)
 	load, ok := c.faultNodes.Load(key)
 	if !ok {
 		return
@@ -128,6 +134,7 @@ func (c *nodeCache) RecoveryFault(key string, fs ...func(info *core.Node)) (node
 
 // IsFault ...
 func (c *nodeCache) LoadFault(key string) (*core.Node, bool) {
+	key = prefixName(c.prefix, key)
 	n, exist := c.faultNodes.Load(key)
 	if exist {
 		return n.(*core.Node), exist

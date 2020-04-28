@@ -103,7 +103,7 @@ func (l *BustLinker) getPeers(wg *sync.WaitGroup, node core.Node) bool {
 				continue
 			}
 			for _, p := range pins {
-				if err := l.hashes.Add(p, rnode); err != nil {
+				if err := l.hashes.Add(p, rnode.Name); err != nil {
 					logE("cache failed", "error", err)
 					continue
 				}
@@ -515,6 +515,7 @@ func (l *BustLinker) Info(r *http.Request, hash *string, info *string) error {
 }
 
 func (l *BustLinker) connectNode(ctx context.Context, hash string) error {
+	l.hashes.Get(hash)
 	//hashInfo, err := l.cache.GetHashInfo(hash)
 	//if err != nil {
 	//	return err

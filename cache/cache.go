@@ -1,6 +1,7 @@
 package cache
 
 import (
+	"fmt"
 	"github.com/glvd/accipfs/config"
 	cache "github.com/gocacher/badger-cache/v2"
 	"github.com/gocacher/cacher"
@@ -19,4 +20,8 @@ func New(cfg *config.Config) cacher.Cacher {
 		path:   cache.DefaultCachePath,
 		Cacher: cache.New(),
 	}
+}
+
+func prefixName(p string, n string) string {
+	return fmt.Sprintf("%s_%s", p, n)
 }

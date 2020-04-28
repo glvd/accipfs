@@ -24,6 +24,7 @@ type hashCache struct {
 
 // Add ...
 func (c *hashCache) Add(p string, s ...string) (e error) {
+	p = prefixName(c.prefix, p)
 	hashes := c.Get(p)
 	changed := false
 	for _, name := range s {
@@ -42,11 +43,13 @@ func (c *hashCache) Add(p string, s ...string) (e error) {
 
 // Get ...
 func (c *hashCache) Get(p string) map[string]bool {
+	p = prefixName(c.prefix, p)
 	return unmarshalMapNode(c.cache.Get(p))
 }
 
 // Has ...
 func (c *hashCache) Has(p string) bool {
+	p = prefixName(c.prefix, p)
 	b, e := c.cache.Has(p)
 	if e != nil {
 		logE("has check failed", "error", e, "bool", b)

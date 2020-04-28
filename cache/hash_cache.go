@@ -2,6 +2,7 @@ package cache
 
 import (
 	"github.com/glvd/accipfs/config"
+	"github.com/glvd/accipfs/core"
 	"github.com/gocacher/cacher"
 )
 
@@ -18,4 +19,14 @@ func NewHashCache(cfg *config.Config) HashCache {
 	return hashCache{
 		cache: New(cfg),
 	}
+}
+
+// AddHashed ...
+func (c *hashCache) AddHashed() {
+
+}
+
+// HashNodes ...
+func (c *hashCache) HashNodes(hash string) []*core.Node {
+	return nil
 }

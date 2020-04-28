@@ -37,39 +37,40 @@ type NodeCache interface {
 
 // NewNodeCache ...
 func NewNodeCache(cfg *config.Config) NodeCache {
-	return &nodeCache{
+	n := &nodeCache{
 		cfg:      cfg,
 		stop:     atomic.NewBool(false),
 		nodes:    sync.Map{},
 		cache:    New(cfg),
 		nodeSize: atomic.NewInt64(0),
 	}
+	go n.poolRun()
+	return n
 }
 
-func (s *nodeCache) poolRun() {
+func (c *nodeCache) poolRun() {
 	defer func() {
 		if e := recover(); e != nil {
 			logE("found error", "error", e)
 		}
-		if s.stop.Load() {
-
+		if c.stop.Load() {
 			return
 		}
-		go s.poolRun()
+		go c.poolRun()
 	}()
 	for {
-		if s.stop.Load() {
+		if c.stop.Load() {
 			return
 		}
-		if v := s.pool.Get(); v != nil {
+		if v := c.pool.Get(); v != nil {
 			node := v.(*core.Node)
 			if node.NodeType == core.NodeAccount {
 				if err := cacher.Set(node.Name, marshalNode(node)); err != nil {
 					panic(err)
 				}
 			}
-			s.nodes.Store(node.Name, node)
-			s.nodeSize.Add(1)
+			c.nodes.Store(node.Name, node)
+			c.nodeSize.Add(1)
 			continue
 		}
 		time.Sleep(3 * time.Second)
@@ -77,41 +78,41 @@ func (s *nodeCache) poolRun() {
 }
 
 // Remove ...
-func (s *nodeCache) Remove(key string) {
-	s.nodeSize.Add(-1)
-	s.nodes.Delete(key)
+func (c *nodeCache) Remove(key string) {
+	c.nodeSize.Add(-1)
+	c.nodes.Delete(key)
 }
 
 // Add ...
-func (s *nodeCache) Add(info *core.Node) {
-	s.pool.Put(info)
+func (c *nodeCache) Add(info *core.Node) {
+	c.pool.Put(info)
 }
 
 // Validate ...
-func (s *nodeCache) Validate(key string, fs ...func(node *core.Node) bool) {
-	n, exist := s.nodes.Load(key)
+func (c *nodeCache) Validate(key string, fs ...func(node *core.Node) bool) {
+	n, exist := c.nodes.Load(key)
 	if exist && fs != nil {
 		node := n.(*core.Node)
 		if b := fs[0](node); !b {
-			s.Fault(node)
+			c.Fault(node)
 		}
 	}
 	return
 }
 
 // Fault ...
-func (s *nodeCache) Fault(node *core.Node, fs ...func(info *core.Node)) {
-	s.Remove(node.NodeInfo.Name)
+func (c *nodeCache) Fault(node *core.Node, fs ...func(info *core.Node)) {
+	c.Remove(node.NodeInfo.Name)
 	if fs != nil {
 		fs[0](node)
 	}
 	node.LastTime = time.Now()
-	s.faultNodes.Store(node.NodeInfo.Name, node)
+	c.faultNodes.Store(node.NodeInfo.Name, node)
 }
 
 // RecoveryFault ...
-func (s *nodeCache) RecoveryFault(key string, fs ...func(info *core.Node)) (node *core.Node, ok bool) {
-	load, ok := s.faultNodes.Load(key)
+func (c *nodeCache) RecoveryFault(key string, fs ...func(info *core.Node)) (node *core.Node, ok bool) {
+	load, ok := c.faultNodes.Load(key)
 	if !ok {
 		return
 	}
@@ -119,13 +120,13 @@ func (s *nodeCache) RecoveryFault(key string, fs ...func(info *core.Node)) (node
 	for _, f := range fs {
 		f(node)
 	}
-	s.Add(node)
+	c.Add(node)
 	return node, true
 }
 
 // IsFault ...
-func (s *nodeCache) LoadFault(key string) (*core.Node, bool) {
-	n, exist := s.faultNodes.Load(key)
+func (c *nodeCache) LoadFault(key string) (*core.Node, bool) {
+	n, exist := c.faultNodes.Load(key)
 	if exist {
 		return n.(*core.Node), exist
 	}
@@ -133,16 +134,16 @@ func (s *nodeCache) LoadFault(key string) (*core.Node, bool) {
 }
 
 // Get ...
-func (s *nodeCache) Get(key string) *core.Node {
-	if v, b := s.nodes.Load(key); b {
+func (c *nodeCache) Get(key string) *core.Node {
+	if v, b := c.nodes.Load(key); b {
 		return v.(*core.Node)
 	}
 	return nil
 }
 
 // GetAccount ...
-func (s *nodeCache) GetAccount(key string) *core.Node {
-	get, err := s.cache.Get(key)
+func (c *nodeCache) GetAccount(key string) *core.Node {
+	get, err := c.cache.Get(key)
 	if err != nil {
 		return nil
 	}
@@ -150,25 +151,25 @@ func (s *nodeCache) GetAccount(key string) *core.Node {
 }
 
 // Range ...
-func (s *nodeCache) Range(f func(info *core.Node) bool) {
-	s.nodes.Range(func(key, value interface{}) bool {
+func (c *nodeCache) Range(f func(info *core.Node) bool) {
+	c.nodes.Range(func(key, value interface{}) bool {
 		return f(value.(*core.Node))
 	})
 }
 
 // NodeHashes ...
-func (s *nodeCache) NodeHashes(node *core.Node) []string {
-	return nil
-}
-
-// HashNodes ...
-func (s *nodeCache) HashNodes(hash string) []*core.Node {
+func (c *nodeCache) NodeHashes(node *core.Node) []string {
 	return nil
 }
 
 // Length ...
-func (s *nodeCache) Length() int64 {
-	return s.nodeSize.Load()
+func (c *nodeCache) Length() int64 {
+	return c.nodeSize.Load()
+}
+
+// Cancel ...
+func (c *nodeCache) Cancel() {
+	c.stop.Store(true)
 }
 
 func marshalNode(node *core.Node) []byte {

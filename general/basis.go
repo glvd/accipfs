@@ -73,7 +73,6 @@ func RPCPost(url string, method string, input, output interface{}) error {
 	}
 	err = json2.DecodeClientResponse(buf, output)
 	if err != nil {
-		logE("decode failed", "data", buf.String())
 		return err
 	}
 	return nil

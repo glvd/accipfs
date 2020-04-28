@@ -81,7 +81,7 @@ func (l *BustLinker) getPeers(wg *sync.WaitGroup, node core.Node) bool {
 	ctx := context.TODO()
 	remoteNodes, err := client.Peers(general.RPCAddress(node.NodeAddress), &node)
 	if err != nil {
-		logE("get peers failed", "account", node.Name, "error", err)
+		//logE("get peers failed", "account", node.Name, "error", err)
 		return true
 	}
 

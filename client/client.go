@@ -73,9 +73,9 @@ func Peers(url string, info *core.Node) ([]*core.Node, error) {
 	if err := general.RPCPost(url, "BustLinker.Peers", info, result); err != nil {
 		return nil, err
 	}
-	if len(*result) == 0 {
-		return nil, fmt.Errorf("no data response")
-	}
+	//if len(*result) == 0 {
+	//	return nil, fmt.Errorf("no data response")
+	//}
 	return *result, nil
 }
 

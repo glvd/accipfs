@@ -24,15 +24,16 @@ import (
 
 // BustLinker ...
 type BustLinker struct {
-	id    *core.Node
-	tasks task.Task
-	nodes cache.NodeCache
-	lock  *atomic.Bool
-	self  *account.Account
-	cfg   *config.Config
-	eth   *ethNode
-	ipfs  *ipfsNode
-	cron  *cron.Cron
+	id     *core.Node
+	tasks  task.Task
+	hashes cache.HashCache
+	nodes  cache.NodeCache
+	lock   *atomic.Bool
+	self   *account.Account
+	cfg    *config.Config
+	eth    *ethNode
+	ipfs   *ipfsNode
+	cron   *cron.Cron
 }
 
 // BootList ...
@@ -43,9 +44,10 @@ var BootList = []string{
 // NewBustLinker ...
 func NewBustLinker(cfg *config.Config) (linker *BustLinker, err error) {
 	linker = &BustLinker{
-		nodes: cache.NewNodeCache(cfg),
-		lock:  atomic.NewBool(false),
-		cfg:   cfg,
+		hashes: cache.NewHashCache(cfg),
+		nodes:  cache.NewNodeCache(cfg),
+		lock:   atomic.NewBool(false),
+		cfg:    cfg,
 	}
 	//linker.ethServer = newNodeServerETH(cfg)
 	//linker.ipfsServer = newNodeServerIPFS(cfg)

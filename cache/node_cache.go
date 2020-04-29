@@ -28,7 +28,7 @@ type nodeCache struct {
 type NodeCache interface {
 	Add(info *core.Node)
 	Validate(key string, fs ...func(node *core.Node) bool)
-	Get(key string) *core.Node
+	Get(key string) (*core.Node, bool)
 	Remove(key string)
 	Length() int64
 	Range(func(info *core.Node) bool)
@@ -143,11 +143,11 @@ func (c *nodeCache) LoadFault(key string) (*core.Node, bool) {
 }
 
 // Get ...
-func (c *nodeCache) Get(key string) *core.Node {
+func (c *nodeCache) Get(key string) (*core.Node, bool) {
 	if v, b := c.nodes.Load(key); b {
-		return v.(*core.Node)
+		return v.(*core.Node), b
 	}
-	return nil
+	return nil, false
 }
 
 // GetAccount ...

@@ -96,7 +96,7 @@ func (l *BustLinker) getPeers(wg *sync.WaitGroup, node core.Node) bool {
 			continue
 		}
 		if *result {
-			output("bust linker", "pin source ", rnode.Name)
+			output("bust linker", "sync remote pins ", rnode.Name)
 			pins, err := client.Pins(rnode.NodeAddress)
 			if err != nil {
 				logE("get pin list", "error", err)
@@ -270,6 +270,11 @@ func (l *BustLinker) addPeer(ctx context.Context, node *core.Node, result *bool)
 
 	if node.Name == l.id.Name {
 		//ignore self add
+		return nil
+	}
+
+	_, b := l.nodes.Get(node.NodeInfo.Name)
+	if b {
 		return nil
 	}
 
@@ -518,9 +523,13 @@ func (l *BustLinker) Info(r *http.Request, hash *string, info *string) error {
 func (l *BustLinker) connectNode(ctx context.Context, hash string) (err error) {
 	hashes := l.hashes.Get(hash)
 	var node *core.Node
+	var b bool
 	for v := range hashes {
-		node = l.nodes.Get(v)
+		node, b = l.nodes.Get(v)
 		var resultErr error
+		if !b {
+			continue
+		}
 		for _, addr := range node.DataStore.Addresses {
 			resultErr = l.ipfs.SwarmConnect(ctx, addr)
 			if resultErr == nil {

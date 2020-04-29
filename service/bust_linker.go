@@ -129,7 +129,7 @@ func (l *BustLinker) Run() {
 		l.nodes.Validate(node.NodeInfo.Name, func(node *core.Node) bool {
 			err := client.Ping(general.RPCAddress(node.NodeAddress))
 			if err != nil {
-				logE("ping failed", "account", node.Name, "error", err)
+				//logE("ping failed", "account", node.Name, "error", err)
 				return false
 			}
 			wg.Add(1)

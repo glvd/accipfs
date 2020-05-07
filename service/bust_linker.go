@@ -167,9 +167,13 @@ func (l *BustLinker) WaitingForReady() {
 	}()
 	wg.Wait()
 
-	id := l.LocalID()
-	if id == nil {
-		logE("get local id", "error", "null id")
+	for {
+		id := l.LocalID()
+		if id == nil {
+			logE("get local id", "error", "null id")
+			time.Sleep(5 * time.Second)
+			continue
+		}
 		return
 	}
 }
@@ -189,7 +193,11 @@ func (l *BustLinker) Ping(r *http.Request, req *core.PingReq, resp *core.PingRes
 // LocalID ...
 func (l *BustLinker) LocalID() *core.Node {
 	if l.id == nil {
-		l.id, _ = l.localID()
+		id, err := l.localID()
+		if err != nil {
+			logE("get local id", "error", err)
+		}
+		l.id = id
 	}
 	return l.id
 }

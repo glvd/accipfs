@@ -170,7 +170,6 @@ func (l *BustLinker) WaitingForReady() {
 	for {
 		id := l.LocalID()
 		if id == nil {
-			logE("get local id", "error", "null id")
 			time.Sleep(5 * time.Second)
 			continue
 		}
@@ -195,7 +194,7 @@ func (l *BustLinker) LocalID() *core.Node {
 	if l.id == nil {
 		id, err := l.localID()
 		if err != nil {
-			logE("get local id", "error", err)
+			logD("get local id", "error", err)
 		}
 		l.id = id
 	}

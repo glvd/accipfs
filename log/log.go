@@ -53,7 +53,7 @@ func InitLog() {
 		panic(e)
 	}
 	_log = logger.Sugar()
-	_log.Infow("log init", "module", module, "level", Level, "output", Output)
+	_log.Debugw("log init", "module", module, "level", Level, "output", Output)
 }
 
 // Module ...

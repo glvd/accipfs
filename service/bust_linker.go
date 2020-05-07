@@ -167,12 +167,11 @@ func (l *BustLinker) WaitingForReady() {
 	}()
 	wg.Wait()
 
-	id, err := l.localID()
-	if err != nil {
-		logE("get local id", "error", err)
+	id := l.LocalID()
+	if id == nil {
+		logE("get local id", "error", "null id")
 		return
 	}
-	l.id = id
 }
 
 // Stop ...
@@ -185,6 +184,14 @@ func (l *BustLinker) Stop() {
 func (l *BustLinker) Ping(r *http.Request, req *core.PingReq, resp *core.PingResp) error {
 	resp.Resp = "pong"
 	return nil
+}
+
+// LocalID ...
+func (l *BustLinker) LocalID() *core.Node {
+	if l.id == nil {
+		l.id, _ = l.localID()
+	}
+	return l.id
 }
 
 func (l *BustLinker) localID() (*core.Node, error) {
@@ -227,12 +234,12 @@ func (l *BustLinker) connected(r *http.Request, node *core.Node, result *core.No
 
 	node.NodeAddress.Address, _ = general.SplitIP(r.RemoteAddr)
 
-	id, err := l.localID()
-	if err != nil {
-		return err
+	id := l.LocalID()
+	if id == nil {
+		return fmt.Errorf("null id")
 	}
 	*result = *id
-	err = client.Ping(general.RPCAddress(node.NodeAddress))
+	err := client.Ping(general.RPCAddress(node.NodeAddress))
 	if err != nil {
 		return err
 	}
@@ -248,14 +255,14 @@ func (l *BustLinker) ConnectTo(r *http.Request, req *core.ConnectToReq, resp *co
 
 // ConnectTo ...
 func (l *BustLinker) connectTo(r *http.Request, addr *string, respNode *core.Node) error {
-	id, err := l.localID()
-	if err != nil {
-		return err
+	id := l.LocalID()
+	if id == nil {
+		return fmt.Errorf("null id")
 	}
 	url := fmt.Sprintf("http://%s/rpc", *addr)
 	connReq := &core.ConnectedReq{Node: *id}
 	resp := new(core.ConnectedResp)
-	err = general.RPCPost(url, "BustLinker.Connected", connReq, resp)
+	err := general.RPCPost(url, "BustLinker.Connected", connReq, resp)
 	if err != nil {
 		return err
 	}

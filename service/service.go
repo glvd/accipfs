@@ -56,13 +56,12 @@ func (s *service) Start() error {
 	go s.linker.Start()
 	var idError error
 	for i := 0; i < 5; i++ {
-		id, err := s.linker.localID()
-		idError = err
-		if err != nil {
+		id := s.linker.LocalID()
+		if id == nil {
 			time.Sleep(3 * time.Second)
 			continue
 		}
-		s.linker.id = id
+		//s.linker.id = id
 		break
 	}
 

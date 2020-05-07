@@ -9,6 +9,8 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strconv"
+	"strings"
 )
 
 type nodeBinIPFS struct {
@@ -66,12 +68,16 @@ func (n *nodeBinIPFS) Init() error {
 	if err != nil {
 		return fmt.Errorf("init:%w", err)
 	}
-	logI("ipfs init", "log", string(out))
-	cmd = exec.Command(n.name, "config", "Swarm.EnableAutoNATService", "--bool", "true")
-	out, err = cmd.CombinedOutput()
-	if err != nil {
-		return fmt.Errorf("config(nat):%w", err)
+	version := n.getVersion()
+	logI("ipfs init", "log", string(out), "version", version)
+	if version[1] < 5 {
+		cmd = exec.Command(n.name, "config", "Swarm.EnableAutoNATService", "--bool", "true")
+		out, err = cmd.CombinedOutput()
+		if err != nil {
+			return fmt.Errorf("config(nat):%w", err)
+		}
 	}
+
 	logI("ipfs init config set", "log", string(out))
 	cmd = exec.Command(n.name, "config", "Swarm.EnableRelayHop", "--bool", "true")
 	out, err = cmd.CombinedOutput()
@@ -92,4 +98,25 @@ func newNodeBinIPFS(cfg *config.Config) *nodeBinIPFS {
 		cfg:    cfg,
 		name:   path,
 	}
+}
+
+func (n *nodeBinIPFS) getVersion() (ver [3]int) {
+	cmd := exec.Command(n.name, "version")
+	out, err := cmd.CombinedOutput()
+	if err != nil {
+		return
+	}
+	split := strings.Split(string(out), " ")
+	if len(split) < 3 {
+		return
+	}
+	verS := strings.Split(split[2], ".")
+	for i := range verS {
+		parseInt, err := strconv.ParseInt(verS[i], 32, 10)
+		if err != nil {
+			return
+		}
+		ver[i] = int(parseInt)
+	}
+	return
 }

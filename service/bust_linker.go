@@ -216,7 +216,7 @@ func (l *BustLinker) localID() (*core.Node, error) {
 
 // ID ...
 func (l *BustLinker) ID(r *http.Request, req *core.IDReq, resp *core.IDResp) error {
-	resp.Node = *l.id
+	resp.Node = *l.LocalID()
 	return nil
 }
 

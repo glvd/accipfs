@@ -128,7 +128,7 @@ func LoadConfig() error {
 		return err
 	}
 	_config = &cfg
-	fmt.Printf("config loaded:(%+v)\n", *_config)
+	fmt.Println("config loaded")
 	return nil
 }
 
@@ -237,7 +237,7 @@ func IPFSAddr() string {
 	return fmt.Sprintf(_ipfsGateway, Global().IPFS.Port)
 }
 
-// IPFSAddr ...
+// IPFSAddrHTTP ...
 func IPFSAddrHTTP() string {
 	return fmt.Sprintf(_localGateway, Global().IPFS.Port)
 }

@@ -36,11 +36,6 @@ type BustLinker struct {
 	cron   *cron.Cron
 }
 
-// BootList ...
-var BootList = []string{
-	"",
-}
-
 // NewBustLinker ...
 func NewBustLinker(cfg *config.Config) (linker *BustLinker, err error) {
 	linker = &BustLinker{

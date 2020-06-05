@@ -90,6 +90,7 @@ type Config struct {
 	NodeType   int            `json:"node_type" mapstructure:"node_type"`
 	Limit      int64          `json:"limit" mapstructure:"limit"`
 	Debug      bool           `json:"debug" mapstructure:"debug"`
+	BootNode   []string       `json:"boot_node" mapstructure:"boot_node"`
 }
 
 // WorkDir ...

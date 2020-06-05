@@ -47,6 +47,7 @@ func (s *httpService) Start() {
 		}
 		return
 	}
+
 	if err := s.server.ListenAndServe(); err != nil {
 		logE("ListenAndServe error", "error", err)
 		return

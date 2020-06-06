@@ -75,48 +75,58 @@ func (l *BustLinker) getPeers(wg *sync.WaitGroup, node core.Node) bool {
 	output("bust linker", "get peers", node.Name)
 	defer wg.Done()
 	ctx := context.TODO()
-	l.nodes.Range(func(node *core.Node) bool {
-		output("bust linker", "syncing node", node.Name)
-		v := l.nodes.Validate(node.NodeInfo.Name, func(node *core.Node) bool {
-			err := client.Ping(general.RPCAddress(node.NodeAddress))
-			if err != nil {
-				logE("ping failed", "account", node.Name, "error", err)
-				return false
-			}
-			return true
-		})
+	remoteNodes, err := client.Peers(general.RPCAddress(node.Addr), &node)
+	if err != nil {
+		//logE("get peers failed", "account", node.Name, "error", err)
+		return true
+	}
 
-		if v {
-			remoteNodes, err := client.Peers(general.RPCAddress(node.NodeAddress), node)
+	for _, rnode := range remoteNodes {
+		if l.nodes.Length() > l.cfg.Limit {
+			return false
+		}
+		result := new(bool)
+		output("bust linker", "add peer", rnode.Name)
+		if err := l.addPeer(ctx, rnode, result); err != nil {
+			logE("add peer failed", "account", rnode.Name, "error", err)
+			continue
+		}
+		if *result {
+			output("bust linker", "sync remote pins ", rnode.Name)
+			pins, err := client.Pins(rnode.Addr)
 			if err != nil {
-				logE("get peers failed", "account", node.Name, "error", err)
-				return true
+				logE("get pin list", "error", err)
+				continue
 			}
-
-			for _, rnode := range remoteNodes {
-				if l.nodes.Length() > l.cfg.Limit {
-					return false
-				}
-				result := new(bool)
-				if err := l.addPeer(ctx, rnode, result); err != nil {
-					logE("add peer failed", "account", rnode.Name, "error", err)
+			for _, p := range pins {
+				if err := l.hashes.Add(p, rnode.Name); err != nil {
+					logE("cache failed", "error", err)
 					continue
 				}
-				if *result {
-					pins, err := client.Pins(rnode.NodeAddress)
-					if err != nil {
-						logE("get pin list", "error", err)
-						continue
-					}
-					for _, p := range pins {
-						err := l.cache.AddOrUpdate(p, &rnode.NodeInfo)
-						if err != nil {
-							logE("cache add or update", "error", err)
-							continue
-						}
-					}
-				}
+				logI("pin hash", "hash", p)
+			}
+		}
 
+	}
+	return true
+}
+
+// Run ...
+func (l *BustLinker) Run() {
+	if l.lock.Load() {
+		output("bust linker", "the previous task has not been completed")
+		return
+	}
+	l.lock.Store(true)
+	defer l.lock.Store(false)
+	wg := &sync.WaitGroup{}
+	l.nodes.Range(func(node *core.Node) bool {
+		output("bust linker", "syncing node", node.Name)
+		l.nodes.Validate(node.NodeInfo.Name, func(node *core.Node) bool {
+			err := client.Ping(general.RPCAddress(node.Addr))
+			if err != nil {
+				//logE("ping failed", "account", node.Name, "error", err)
+				return false
 			}
 			wg.Add(1)
 			go l.getPeers(wg, *node)
@@ -235,7 +245,7 @@ func (l *BustLinker) connected(r *http.Request, node *core.Node, result *core.No
 		return fmt.Errorf("null id")
 	}
 	*result = *id
-	err = client.Ping(general.RPCAddress(node.NodeAddress))
+	err := client.Ping(general.RPCAddress(node.Addr))
 	if err != nil {
 		return err
 	}

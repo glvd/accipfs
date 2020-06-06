@@ -249,7 +249,6 @@ func (l *BustLinker) ConnectTo(r *http.Request, req *core.ConnectToReq, resp *co
 	return l.connectTo(r, &req.Addr, &resp.Node)
 }
 
-// ConnectTo ...
 func (l *BustLinker) connectTo(r *http.Request, addr *string, respNode *core.Node) error {
 	id := l.LocalID()
 	if id == nil {

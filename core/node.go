@@ -4,7 +4,7 @@ import "time"
 
 // Node ...
 type Node struct {
-	NodeAddress
+	Addr
 	NodeInfo
 	LastTime        time.Time
 	ProtocolVersion string

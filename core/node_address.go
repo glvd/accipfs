@@ -1,8 +1,10 @@
 package core
 
-// NodeAddress ...
-type NodeAddress struct {
-	Prefix  string
-	Address string
-	Port    int
+import "net"
+
+// Addr ...
+type Addr struct {
+	Protocol string
+	IP       net.IP
+	Port     int
 }

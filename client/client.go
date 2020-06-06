@@ -40,9 +40,9 @@ func ConnectTo(url string, req *core.ConnectToReq) (*core.ConnectToResp, error) 
 }
 
 // Pins ...
-func Pins(address core.NodeAddress) ([]string, error) {
-	logD("ping info", "addr", address.Address, "port", address.Port)
-	pingAddr := strings.Join([]string{address.Address, strconv.Itoa(address.Port)}, ":")
+func Pins(address core.Addr) ([]string, error) {
+	logD("ping info", "addr", address.IP, "port", address.Port)
+	pingAddr := strings.Join([]string{address.IP.String(), strconv.Itoa(address.Port)}, ":")
 	url := fmt.Sprintf("http://%s/rpc", pingAddr)
 	result := new([]string)
 	if err := general.RPCPost(url, "BustLinker.Pins", core.DummyEmpty(), result); err != nil {
@@ -88,7 +88,7 @@ func AddPeer(url string, info *core.Node) error {
 	}
 
 	if !(*status) {
-		return fmt.Errorf("connect failed: %s", general.RPCAddress(info.NodeAddress))
+		return fmt.Errorf("connect failed: %s", general.RPCAddress(info.Addr))
 	}
 	return nil
 }

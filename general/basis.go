@@ -9,6 +9,7 @@ import (
 	"github.com/glvd/accipfs/core"
 	"github.com/gorilla/rpc/v2/json2"
 	"io"
+	"net"
 	"net/http"
 	"os"
 	"strconv"
@@ -25,7 +26,7 @@ func CurrentDir() string {
 }
 
 // SplitIP ...
-func SplitIP(addr string) (ip string, port int) {
+func SplitIP(addr string) (ip net.IP, port int) {
 	if addr == "" {
 		return
 	}
@@ -33,7 +34,7 @@ func SplitIP(addr string) (ip string, port int) {
 	if len(s) < 2 {
 		return
 	}
-	ip = s[0]
+	ip = net.ParseIP(s[0])
 	port, _ = strconv.Atoi(s[1])
 	return
 }
@@ -79,11 +80,8 @@ func RPCPost(url string, method string, input, output interface{}) error {
 }
 
 // RPCAddress ...
-func RPCAddress(addr core.NodeAddress) string {
-	if addr.Prefix == "" {
-		addr.Prefix = "rpc"
-	}
-	return fmt.Sprintf("http://%s:%d/%s", addr.Address, addr.Port, addr.Prefix)
+func RPCAddress(addr core.Addr) string {
+	return fmt.Sprintf("http://%s:%d/rpc", addr.IP.String(), addr.Port)
 }
 
 // PipeScreen ...

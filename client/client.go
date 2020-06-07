@@ -88,7 +88,7 @@ func AddPeer(url string, info *core.Node) error {
 	}
 
 	if !(*status) {
-		return fmt.Errorf("connect failed: %s", general.RPCAddress(info.Addr))
+		return fmt.Errorf("connect failed: %s", general.RPCAddress(info.Addr[0]))
 	}
 	return nil
 }

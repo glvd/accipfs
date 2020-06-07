@@ -79,14 +79,10 @@ type Clique struct {
 
 // NodeInfo ...
 type NodeInfo struct {
-	Name string
-	//Schema     string
-	//RemoteAddr string
-	NodeType NodeType
-	//Port       int
+	Name      string
+	NodeType  NodeType
 	Contract  ContractNode
 	DataStore DataStoreNode
-	//Version   string
 }
 
 // CompareInt ...

@@ -17,7 +17,7 @@ type tcpListener struct {
 }
 
 // NewLinkListener ...
-func NewLinkListener(cfg config.Config) Listener {
+func NewLinkListener(cfg *config.Config) Listener {
 	l := &tcpListener{
 		protocol: "tcp",
 		bindPort: cfg.Node.BindPort,

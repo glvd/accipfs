@@ -24,16 +24,17 @@ import (
 
 // BustLinker ...
 type BustLinker struct {
-	id     *core.Node
-	tasks  task.Task
-	hashes cache.HashCache
-	nodes  cache.NodeCache
-	lock   *atomic.Bool
-	self   *account.Account
-	cfg    *config.Config
-	eth    *ethNode
-	ipfs   *ipfsNode
-	cron   *cron.Cron
+	id       *core.Node
+	tasks    task.Task
+	hashes   cache.HashCache
+	nodes    cache.NodeCache
+	lock     *atomic.Bool
+	self     *account.Account
+	cfg      *config.Config
+	eth      *ethNode
+	ipfs     *ipfsNode
+	cron     *cron.Cron
+	listener Listener
 }
 
 // NewBustLinker ...

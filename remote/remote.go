@@ -9,7 +9,7 @@ import (
 	"github.com/portmapping/go-reuse"
 )
 
-type remoteConnect struct {
+type remoteNode struct {
 	conn net.Conn
 }
 
@@ -27,4 +27,8 @@ func ConnectTo(addrs []core.Addr, bindPort int, timeout time.Duration) (net.Conn
 		return conn, nil
 	}
 	return nil, fmt.Errorf("all connect failed")
+}
+
+func () {
+
 }

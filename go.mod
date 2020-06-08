@@ -22,6 +22,7 @@ require (
 	github.com/libp2p/go-libp2p-core v0.2.3
 	github.com/miekg/dns v1.1.12
 	github.com/multiformats/go-multiaddr v0.1.1
+	github.com/panjf2000/ants/v2 v2.4.1
 	github.com/portmapping/go-reuse v0.0.3
 	github.com/prometheus/tsdb v0.7.1 // indirect
 	github.com/robfig/cron/v3 v3.0.1

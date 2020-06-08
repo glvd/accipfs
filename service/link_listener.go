@@ -1,8 +1,10 @@
 package service
 
 import (
-	"github.com/portmapping/go-reuse"
 	"net"
+
+	"github.com/panjf2000/ants/v2"
+	"github.com/portmapping/go-reuse"
 )
 
 type tcpListener struct {
@@ -10,15 +12,22 @@ type tcpListener struct {
 	bindPort int
 	port     int
 	connBack func(conn net.Conn)
+	pool     *ants.Pool
 }
 
 // NewLinkListener ...
 func NewLinkListener(protocol string, port int, bindPort int) Listener {
-	return &tcpListener{
+	l := &tcpListener{
 		protocol: protocol,
 		bindPort: bindPort,
 		port:     port,
 	}
+	pool, err := ants.NewPool(5000)
+	if err != nil {
+		return nil
+	}
+	l.pool = pool
+	return l
 }
 
 // Listen ...
@@ -37,7 +46,9 @@ func (h *tcpListener) Listen() error {
 			continue
 		}
 		if h.connBack != nil {
-			go h.connBack(conn)
+			h.pool.Submit(func() {
+				h.connBack(conn)
+			})
 			continue
 		}
 		//no callback closed

@@ -14,10 +14,10 @@ type remoteConnect struct {
 }
 
 // ConnectTo ...
-func ConnectTo(addrs []core.Addr, bind int, timeout time.Duration) (net.Conn, error) {
+func ConnectTo(addrs []core.Addr, bindPort int, timeout time.Duration) (net.Conn, error) {
 	local := net.TCPAddr{
 		IP:   net.IPv4zero,
-		Port: bind,
+		Port: bindPort,
 	}
 	for _, addr := range addrs {
 		conn, err := reuse.DialTimeOut("tcp", local.String(), addr.String(), timeout*time.Second)

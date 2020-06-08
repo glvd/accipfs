@@ -1,6 +1,7 @@
 package service
 
 import (
+	"github.com/glvd/accipfs/config"
 	"net"
 
 	"github.com/panjf2000/ants/v2"
@@ -16,11 +17,11 @@ type tcpListener struct {
 }
 
 // NewLinkListener ...
-func NewLinkListener(protocol string, port int, bindPort int) Listener {
+func NewLinkListener(cfg config.Config) Listener {
 	l := &tcpListener{
-		protocol: protocol,
-		bindPort: bindPort,
-		port:     port,
+		protocol: "tcp",
+		bindPort: cfg.Node.BindPort,
+		port:     cfg.Node.Port,
 	}
 	pool, err := ants.NewPool(5000)
 	if err != nil {

@@ -72,12 +72,18 @@ type APIConfig struct {
 	Version string `json:"version" mapstructure:"version"`
 }
 
+// NodeConfig ...
+type NodeConfig struct {
+	Port     int `json:"port" mapstructure:"port"`
+	BindPort int `json:"bind_port" mapstructure:"bind_port"`
+}
+
 // Config ...
 type Config struct {
+	Node       NodeConfig     `json:"node" mapstructure:"node"`
 	API        APIConfig      `json:"api" mapstructure:"api"`
 	UseTLS     bool           `json:"use_tls" mapstructure:"use_tls"`
 	TLS        TLSCertificate `json:"tls" mapstructure:"tls"`
-	Port       int            `json:"port" mapstructure:"port"`
 	Schema     string         `json:"schema" mapstructure:"schema"`
 	Path       string         `json:"path" mapstructure:"path" `
 	Account    string         `json:"account" mapstructure:"account"`
@@ -154,7 +160,6 @@ func Global() Config {
 // Default ...
 func Default() *Config {
 	def := &Config{
-		Port:       20304,
 		Schema:     "http",
 		Path:       WorkDir,
 		Account:    "",
@@ -192,7 +197,7 @@ func (c *Config) Init() error {
 }
 
 func (c Config) rpcAddr() string {
-	return fmt.Sprintf("http://127.0.0.1:%d/rpc", c.Port)
+	return fmt.Sprintf("http://127.0.0.1:%d/rpc", c.Node.Port)
 }
 
 func currentPath() string {

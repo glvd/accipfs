@@ -56,6 +56,7 @@ func NewBustLinker(cfg *config.Config) (linker *BustLinker, err error) {
 	}
 
 	linker.self = selfAcc
+	linker.listener = NewLinkListener(cfg)
 	return linker, nil
 }
 

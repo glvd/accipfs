@@ -69,6 +69,7 @@ func (l *BustLinker) Start() {
 		panic(err)
 	}
 	output("bust linker", "run id", jobAcc)
+	go l.listener.Listen()
 	go l.cron.Run()
 }
 

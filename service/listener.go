@@ -6,4 +6,5 @@ import "net"
 type Listener interface {
 	Listen() error
 	Accept(func(conn net.Conn))
+	Stop() error
 }

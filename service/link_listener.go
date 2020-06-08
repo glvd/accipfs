@@ -12,13 +12,6 @@ type tcpListener struct {
 	connBack func(conn net.Conn)
 }
 
-// Accept ...
-func (h *tcpListener) Accept(f func(conn net.Conn)) {
-	if f != nil {
-		h.connBack = f
-	}
-}
-
 // NewLinkListener ...
 func NewLinkListener(protocol string, port int, bindPort int) Listener {
 	return &tcpListener{
@@ -49,5 +42,12 @@ func (h *tcpListener) Listen() error {
 		}
 		//no callback closed
 		conn.Close()
+	}
+}
+
+// Accept ...
+func (h *tcpListener) Accept(f func(conn net.Conn)) {
+	if f != nil {
+		h.connBack = f
 	}
 }

@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"net"
 	"net/http"
 	"strings"
 	"sync"
@@ -201,9 +200,9 @@ func (l *BustLinker) localID() (*core.Node, error) {
 	var info core.Node
 	info.Name = l.self.Name
 	info.ProtocolVersion = core.Version
-	info.IP = net.ParseIP("127.0.0.1")
-	info.Port = l.cfg.Port
-	logD("print remote ip", "ip", info.IP, "port", info.Port)
+	//info.IP = net.ParseIP("127.0.0.1")
+	//info.Port = l.cfg.Port
+	//logD("print remote ip", "ip", info.IP, "port", info.Port)
 	ds, err := l.ipfs.ID(context.Background())
 	if err != nil {
 		return nil, fmt.Errorf("datastore error:%w", err)

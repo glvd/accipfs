@@ -10,7 +10,8 @@ import (
 )
 
 type remoteNode struct {
-	conn net.Conn
+	conn  net.Conn
+	addrs []core.Addr
 }
 
 // Addrs ...
@@ -28,8 +29,7 @@ func (r *remoteNode) Protocol() string {
 	panic("implement me")
 }
 
-// ConnectTo ...
-func ConnectTo(addrs []core.Addr, bindPort int, timeout time.Duration) (net.Conn, error) {
+func connectTo(addrs []core.Addr, bindPort int, timeout time.Duration) (net.Conn, error) {
 	local := net.TCPAddr{
 		IP:   net.IPv4zero,
 		Port: bindPort,
@@ -44,7 +44,15 @@ func ConnectTo(addrs []core.Addr, bindPort int, timeout time.Duration) (net.Conn
 	return nil, fmt.Errorf("all connect failed")
 }
 
-func node(conn net.Conn) core.Node {
+func node(conn net.Conn, addrs []core.Addr) core.Node {
 	//get info from remote
-	return &remoteNode{conn: conn}
+	return &remoteNode{
+		conn:  conn,
+		addrs: addrs,
+	}
+}
+
+// Connect ...
+func (r *remoteNode) Connect() (net.Conn, error) {
+	connectTo(r.addrs)
 }

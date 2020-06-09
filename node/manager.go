@@ -40,7 +40,10 @@ func New(cfg *config.Config) core.NodeManager {
 // Load ...
 func (m *manager) Load() error {
 	stat, err := os.Stat(m.path)
-	if err != nil || !os.IsNotExist(err) {
+	if err != nil {
+		if os.IsNotExist(err) {
+			return nil
+		}
 		return err
 	}
 

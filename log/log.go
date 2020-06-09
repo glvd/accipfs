@@ -58,5 +58,8 @@ func InitLog() {
 
 // Module ...
 func Module(m string) *zap.SugaredLogger {
+	if _log == nil {
+		InitLog()
+	}
 	return _log.With("module", m)
 }

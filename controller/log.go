@@ -7,6 +7,8 @@ import (
 
 const module = "controller"
 
+var log = alog.Module(module)
+
 func logI(msg string, v ...interface{}) {
 	alog.Module(module).Infow(msg, v...)
 }

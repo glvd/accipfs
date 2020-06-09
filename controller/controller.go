@@ -19,17 +19,18 @@ const (
 // Controller ...
 type Controller struct {
 	wg       *sync.WaitGroup
-	services map[ServiceIndex]core.ControllerService
+	services []core.ControllerService
 }
 
 // New ...
 func New(cfg *config.Config) *Controller {
 	c := &Controller{
-		services: map[ServiceIndex]core.ControllerService{},
+		services: []core.ControllerService{
+			IndexETH:  newNodeBinETH(cfg),
+			IndexIPFS: newNodeBinIPFS(cfg),
+		},
 	}
 	c.wg = &sync.WaitGroup{}
-	c.services[IndexETH] = newNodeBinETH(cfg)
-	c.services[IndexIPFS] = newNodeBinIPFS(cfg)
 	return c
 }
 

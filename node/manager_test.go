@@ -38,5 +38,8 @@ func TestNew(t *testing.T) {
 			conn: nil,
 		})
 	}
-	m.Store()
+	err = m.Store()
+	if err != nil {
+		t.Log(err)
+	}
 }

@@ -1,6 +1,10 @@
 package node
 
-import "github.com/glvd/accipfs/core"
+import (
+	"fmt"
+	"github.com/glvd/accipfs/core"
+	"net"
+)
 
 type jsonNode struct {
 	Addrs []core.Addr `json:"addrs"`
@@ -9,6 +13,17 @@ type jsonNode struct {
 type node struct {
 	id    string
 	addrs []core.Addr
+	conn  net.Conn
+}
+
+var _ core.Node = &node{}
+
+// Connect ...
+func (n *node) Connect() (net.Conn, error) {
+	if n.conn != nil {
+		return n.conn, nil
+	}
+	return nil, fmt.Errorf("filed to connect")
 }
 
 // Addrs ...

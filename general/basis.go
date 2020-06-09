@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/glvd/accipfs/core"
+	"github.com/google/uuid"
 	"github.com/gorilla/rpc/v2/json2"
 	"io"
 	"net"
@@ -149,4 +150,9 @@ END:
 	}
 
 	return nil
+}
+
+// UUID ...
+func UUID() string {
+	return uuid.Must(uuid.NewUUID()).String()
 }

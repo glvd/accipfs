@@ -13,6 +13,7 @@ require (
 	github.com/goextension/extmap v0.0.1
 	github.com/goextension/io v0.0.0-20191016080154-50dbafac3df3
 	github.com/goextension/tool v0.0.2
+	github.com/google/uuid v1.1.1
 	github.com/gorilla/rpc v1.2.0
 	github.com/ipfs/bbloom v0.0.4 // indirect
 	github.com/ipfs/go-cid v0.0.4 // indirect

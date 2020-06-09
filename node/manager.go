@@ -13,9 +13,6 @@ import (
 	"time"
 )
 
-var _nodes = "bl.nodes"
-var _expNodes = "exp.nodes"
-
 type manager struct {
 	cfg      *config.Config
 	t        *time.Ticker
@@ -26,6 +23,10 @@ type manager struct {
 	expPath  string
 }
 
+var _nodes = "bl.nodes"
+var _expNodes = "exp.nodes"
+var _ core.NodeManager = &manager{}
+
 // New ...
 func New(cfg *config.Config) core.NodeManager {
 	m := &manager{
@@ -35,6 +36,35 @@ func New(cfg *config.Config) core.NodeManager {
 		t:       time.NewTicker(cfg.Node.BackupSeconds),
 	}
 	return m
+}
+
+// Store ...
+func (m *manager) Store() error {
+	err := os.Remove(m.path)
+	if err != nil && !os.IsNotExist(err) {
+		return err
+	}
+	file, err := os.OpenFile(m.path, os.O_CREATE|os.O_RDWR|os.O_SYNC, 0755)
+	if err != nil {
+		return err
+	}
+	writer := bufio.NewWriter(file)
+	m.nodes.Range(func(key, value interface{}) bool {
+		n, b := value.(core.Node)
+		if !b {
+			return true
+		}
+		nodeData, err := encodeNode(n)
+		if err != nil {
+			return false
+		}
+		_, err = writer.Write(nodeData)
+		if err != nil {
+			return false
+		}
+		return true
+	})
+	return nil
 }
 
 // Load ...
@@ -54,7 +84,7 @@ func (m *manager) Load() error {
 	if err != nil {
 		return err
 	}
-
+	defer open.Close()
 	reader := bufio.NewReader(open)
 	for {
 		n, prefix, err := reader.ReadLine()
@@ -114,4 +144,11 @@ func decodeNode(m core.NodeManager, b []byte) error {
 		})
 	}
 	return nil
+}
+
+func encodeNode(node core.Node) ([]byte, error) {
+	n := map[string]jsonNode{
+		node.ID(): {Addrs: node.Addrs()},
+	}
+	return json.Marshal(n)
 }

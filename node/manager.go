@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github.com/glvd/accipfs/config"
 	"github.com/glvd/accipfs/core"
+	"github.com/glvd/accipfs/general"
 	"io"
 	"os"
 	"path/filepath"
@@ -60,6 +61,10 @@ func (m *manager) Store() error {
 			return false
 		}
 		_, err = writer.Write(nodeData)
+		if err != nil {
+			return false
+		}
+		_, err = writer.WriteString(general.NewLine)
 		if err != nil {
 			return false
 		}

@@ -48,6 +48,7 @@ func (m *manager) Store() error {
 	if err != nil {
 		return err
 	}
+	defer file.Close()
 	writer := bufio.NewWriter(file)
 	m.nodes.Range(func(key, value interface{}) bool {
 		n, b := value.(core.Node)

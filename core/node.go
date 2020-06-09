@@ -4,5 +4,4 @@ package core
 type Node interface {
 	Addrs() []Addr
 	ID() string
-	Protocol() string
 }

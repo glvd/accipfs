@@ -2,6 +2,7 @@ package node
 
 import (
 	"bufio"
+	"encoding/json"
 	"fmt"
 	"github.com/glvd/accipfs/config"
 	"github.com/glvd/accipfs/core"
@@ -17,19 +18,18 @@ var _name = "bl.nodes"
 type manager struct {
 	cfg      *config.Config
 	t        *time.Ticker
+	ts       int64
 	nodes    sync.Map
 	expNodes sync.Map
 }
 
 // New ...
 func New(cfg *config.Config) core.NodeManager {
-	m := manager{
-		cfg:      cfg,
-		t:        time.NewTicker(cfg.Node.BackupSeconds),
-		nodes:    sync.Map{},
-		expNodes: sync.Map{},
+	m := &manager{
+		cfg: cfg,
+		t:   time.NewTicker(cfg.Node.BackupSeconds),
 	}
-	return &m
+	return m
 }
 
 // Load ...
@@ -50,18 +50,39 @@ func (m *manager) Load() error {
 
 	reader := bufio.NewReader(open)
 	for {
-		line, prefix, err := reader.ReadLine()
-		log.Debugw("load nodes", "line", string(line), "prefix", prefix)
+		n, prefix, err := reader.ReadLine()
+		log.Debugw("load nodes", "line", string(n), "prefix", prefix)
 		if err != nil {
 			if err == io.EOF {
 				return nil
 			}
 			return err
 		}
-
+		err = decodeNode(m, n)
+		if err != nil {
+			log.Errorw("decode failed", "error", err, "data", string(n))
+			continue
+		}
 	}
 }
 
-func decodeNode(b []byte, node core.Node) error {
+// Push ...
+func (m *manager) Push(node core.Node) {
+	m.ts = time.Now().Unix()
+	m.nodes.Store(node.ID(), node)
+}
 
+func decodeNode(m core.NodeManager, b []byte) error {
+	nodes := map[string]jsonNode{}
+	err := json.Unmarshal(b, &nodes)
+	if err != nil {
+		return err
+	}
+	for id, nodes := range nodes {
+		m.Push(&node{
+			id:    id,
+			addrs: nodes.Addrs,
+		})
+	}
+	return nil
 }

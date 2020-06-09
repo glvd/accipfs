@@ -1,8 +1,9 @@
 package core
 
-// Service ...
-type Service interface {
+// ControllerService ...
+type ControllerService interface {
 	Start() error
 	Stop() error
 	Init() error
+	MessageHandle(func(s string))
 }

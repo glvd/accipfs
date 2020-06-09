@@ -19,13 +19,13 @@ const (
 // Controller ...
 type Controller struct {
 	wg       *sync.WaitGroup
-	services map[ServiceIndex]core.Service
+	services map[ServiceIndex]core.ControllerService
 }
 
 // New ...
 func New(cfg *config.Config) *Controller {
 	c := &Controller{
-		services: map[ServiceIndex]core.Service{},
+		services: map[ServiceIndex]core.ControllerService{},
 	}
 	c.wg = &sync.WaitGroup{}
 	c.services[IndexETH] = newNodeBinETH(cfg)
@@ -48,7 +48,7 @@ func (c *Controller) Init() (e error) {
 func (c *Controller) Run() {
 	for idx := range c.services {
 		c.wg.Add(1)
-		go func(service core.Service) {
+		go func(service core.ControllerService) {
 			defer c.wg.Done()
 			if err := service.Start(); err != nil {
 				return

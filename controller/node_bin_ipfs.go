@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/glvd/accipfs/config"
+	"github.com/glvd/accipfs/core"
 	"github.com/glvd/accipfs/general"
 	"github.com/goextension/io"
 	"os"
@@ -13,12 +14,20 @@ import (
 	"strings"
 )
 
+var _ core.ControllerService = &nodeBinIPFS{}
+
 type nodeBinIPFS struct {
 	ctx    context.Context
 	cancel context.CancelFunc
 	cfg    *config.Config
 	name   string
 	cmd    *exec.Cmd
+	msg    func(string)
+}
+
+// MessageHandle ...
+func (n *nodeBinIPFS) MessageHandle(f func(s string)) {
+	n.msg = f
 }
 
 // Start ...
@@ -35,7 +44,7 @@ func (n *nodeBinIPFS) Start() error {
 	}
 	m := io.MultiReader(pipe, stdoutPipe)
 	if n.cfg.ETH.LogOutput {
-		go general.PipeScreen(n.ctx, module, m)
+		go general.PipeReader(n.ctx, m, n.msg)
 	} else {
 		go general.PipeDummy(n.ctx, module, m)
 	}
@@ -70,6 +79,7 @@ func (n *nodeBinIPFS) Init() error {
 	}
 	version := n.getVersion()
 	logI("ipfs init", "log", string(out), "version", version)
+	n.msg(string(out))
 	if version[1] < 5 {
 		cmd = exec.Command(n.name, "config", "Swarm.EnableAutoNATService", "--bool", "true")
 		out, err = cmd.CombinedOutput()
@@ -77,13 +87,14 @@ func (n *nodeBinIPFS) Init() error {
 			return fmt.Errorf("config(nat):%w", err)
 		}
 	}
-
+	n.msg(string(out))
 	logI("ipfs init config set", "log", string(out))
 	cmd = exec.Command(n.name, "config", "Swarm.EnableRelayHop", "--bool", "true")
 	out, err = cmd.CombinedOutput()
 	if err != nil {
 		return fmt.Errorf("config(relay):%w", err)
 	}
+	n.msg(string(out))
 	logI("ipfs init config set", "log", string(out))
 	logI("ipfs init end")
 	return nil

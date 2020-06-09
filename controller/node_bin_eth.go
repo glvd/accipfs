@@ -2,6 +2,7 @@ package controller
 
 import (
 	"context"
+	"fmt"
 	"github.com/glvd/accipfs/config"
 	"github.com/glvd/accipfs/core"
 	"github.com/glvd/accipfs/general"
@@ -12,6 +13,8 @@ import (
 	"strconv"
 )
 
+var _ core.ControllerService = &nodeBinETH{}
+
 type nodeBinETH struct {
 	ctx     context.Context
 	cancel  context.CancelFunc
@@ -19,6 +22,14 @@ type nodeBinETH struct {
 	genesis *config.Genesis
 	name    string
 	cmd     *exec.Cmd
+	msg     func(s string)
+}
+
+// MessageHandle ...
+func (n *nodeBinETH) MessageHandle(f func(s string)) {
+	if f != nil {
+		n.msg = f
+	}
 }
 
 // Stop ...
@@ -63,8 +74,8 @@ func (n *nodeBinETH) Start() error {
 		return err2
 	}
 	m := io.MultiReader(pipe, stdoutPipe)
-	if n.cfg.ETH.LogOutput {
-		go general.PipeScreen(n.ctx, module, m)
+	if n.cfg.ETH.LogOutput && n.msg != nil {
+		go general.PipeReader(n.ctx, m, n.msg)
 	} else {
 		go general.PipeDummy(n.ctx, module, m)
 	}
@@ -84,11 +95,11 @@ func (n *nodeBinETH) Init() error {
 		_ = os.MkdirAll(config.DataDirETH(), 0755)
 	}
 	cmd := exec.Command(n.name, "--datadir", config.DataDirETH(), "init", filepath.Join(n.cfg.Path, "genesis.json"))
-	err = cmd.Run()
+	out, err := cmd.CombinedOutput()
 	if err != nil {
-		return err
+		return fmt.Errorf("eth init:%w", err)
 	}
-
+	n.msg(string(out))
 	return nil
 }
 

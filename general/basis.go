@@ -107,6 +107,31 @@ END:
 	return nil
 }
 
+// PipeReader ...
+func PipeReader(ctx context.Context, reader io.Reader, f func(string)) (e error) {
+	r := bufio.NewReader(reader)
+	var lines []byte
+END:
+	for {
+		select {
+		case <-ctx.Done():
+			return
+		default:
+			lines, _, e = r.ReadLine()
+			if e != nil || io.EOF == e {
+				break END
+			}
+			if s := strings.TrimSpace(string(lines)); s != "" {
+				if f != nil {
+					f(s)
+				}
+			}
+		}
+	}
+
+	return nil
+}
+
 // PipeDummy ...
 func PipeDummy(ctx context.Context, module string, reader io.Reader) (e error) {
 	line := make([]byte, 2048)

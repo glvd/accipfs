@@ -66,6 +66,28 @@ func (m *manager) Load() error {
 	}
 }
 
+// StateExamination ...
+func (m *manager) StateExamination(id string, f func(node core.Node) bool) {
+	if f == nil {
+		return
+	}
+	node, ok := m.nodes.Load(id)
+	if ok {
+		if f(node.(core.Node)) {
+			m.nodes.Delete(id)
+			m.expNodes.Store(id, node)
+		}
+	}
+
+	exp, ok := m.expNodes.Load(id)
+	if ok {
+		if f(exp.(core.Node)) {
+			m.expNodes.Delete(id)
+			m.nodes.Store(id, exp)
+		}
+	}
+}
+
 // Push ...
 func (m *manager) Push(node core.Node) {
 	m.ts = time.Now().Unix()

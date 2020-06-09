@@ -25,17 +25,18 @@ func TestNew(t *testing.T) {
 		t.Log(err)
 	}
 
-	m.Push(&node{
-		id: general.UUID(),
-		addrs: []core.Addr{
-			{
-				Protocol: "tcp",
-				IP:       net.IPv4zero,
-				Port:     16005,
+	for i := 0; i < 100; i++ {
+		m.Push(&node{
+			id: general.UUID(),
+			addrs: []core.Addr{
+				{
+					Protocol: "tcp",
+					IP:       net.IPv4zero,
+					Port:     16005,
+				},
 			},
-		},
-		conn: nil,
-	})
-
+			conn: nil,
+		})
+	}
 	m.Store()
 }

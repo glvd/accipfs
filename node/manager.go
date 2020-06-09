@@ -5,30 +5,30 @@ import (
 	"fmt"
 	"github.com/glvd/accipfs/config"
 	"github.com/glvd/accipfs/core"
-	"github.com/robfig/cron/v3"
 	"io"
 	"os"
 	"path/filepath"
 	"sync"
+	"time"
 )
 
 var _name = "bl.nodes"
 
 type manager struct {
-	nodes sync.Map
-	cfg   *config.Config
-	c     *cron.Cron
-}
-
-// LoadNodesFromFile ...
-func LoadNodesFromFile(path string) {
-
+	cfg      *config.Config
+	t        *time.Ticker
+	nodes    sync.Map
+	expNodes sync.Map
 }
 
 // New ...
 func New(cfg *config.Config) core.NodeManager {
-	var m manager
-	m.c = cron.New(cron.WithSeconds())
+	m := manager{
+		cfg:      cfg,
+		t:        time.NewTicker(cfg.Node.BackupSeconds),
+		nodes:    sync.Map{},
+		expNodes: sync.Map{},
+	}
 	return &m
 }
 
@@ -63,4 +63,5 @@ func (m *manager) Load() error {
 }
 
 func decodeNode(b []byte, node core.Node) error {
+
 }

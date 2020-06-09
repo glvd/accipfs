@@ -65,8 +65,7 @@ func (m *manager) Store() error {
 		}
 		return true
 	})
-	writer.Flush()
-	return nil
+	return writer.Flush()
 }
 
 // Load ...

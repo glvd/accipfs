@@ -187,7 +187,7 @@ func Default() *Config {
 	return def
 }
 
-// Init ...
+// Initialize ...
 func (c *Config) Init() error {
 	err := os.Setenv("IPFS_PATH", filepath.Join(c.Path, _dataDirIPFS))
 	if err != nil {

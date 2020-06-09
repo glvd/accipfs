@@ -34,10 +34,10 @@ func New(cfg *config.Config) *Controller {
 	return c
 }
 
-// Init ...
-func (c *Controller) Init() (e error) {
+// Initialize ...
+func (c *Controller) Initialize() (e error) {
 	for _, service := range c.services {
-		e = service.Init()
+		e = service.Initialize()
 		if e != nil {
 			return e
 		}

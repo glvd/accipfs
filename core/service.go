@@ -4,6 +4,6 @@ package core
 type ControllerService interface {
 	Start() error
 	Stop() error
-	Init() error
+	Initialize() error
 	MessageHandle(func(s string))
 }

@@ -28,7 +28,7 @@ func initCmd() *cobra.Command {
 				panic(err)
 			}
 			c := controller.New(cfg)
-			if err := c.Init(); err != nil {
+			if err := c.Initialize(); err != nil {
 				panic(err)
 			}
 

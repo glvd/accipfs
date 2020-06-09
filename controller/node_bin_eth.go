@@ -76,9 +76,10 @@ func (n *nodeBinETH) Start() error {
 	m := io.MultiReader(pipe, stdoutPipe)
 	if n.cfg.ETH.LogOutput && n.msg != nil {
 		go general.PipeReader(n.ctx, m, n.msg)
-	} else {
-		go general.PipeDummy(n.ctx, module, m)
 	}
+	//else {
+	//	go general.PipeDummy(n.ctx, module, m)
+	//}
 
 	err := n.cmd.Start()
 	if err != nil {
@@ -88,8 +89,8 @@ func (n *nodeBinETH) Start() error {
 	return nil
 }
 
-// Init ...
-func (n *nodeBinETH) Init() error {
+// Initialize ...
+func (n *nodeBinETH) Initialize() error {
 	_, err := os.Stat(config.DataDirETH())
 	if err != nil && os.IsNotExist(err) {
 		_ = os.MkdirAll(config.DataDirETH(), 0755)

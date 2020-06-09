@@ -45,9 +45,10 @@ func (n *nodeBinIPFS) Start() error {
 	m := io.MultiReader(pipe, stdoutPipe)
 	if n.cfg.ETH.LogOutput {
 		go general.PipeReader(n.ctx, m, n.msg)
-	} else {
-		go general.PipeDummy(n.ctx, module, m)
 	}
+	//else {
+	//	go general.PipeDummy(n.ctx, module, m)
+	//}
 	err := n.cmd.Start()
 	if err != nil {
 		return err
@@ -65,8 +66,8 @@ func (n *nodeBinIPFS) Stop() error {
 	return nil
 }
 
-// Init ...
-func (n *nodeBinIPFS) Init() error {
+// Initialize ...
+func (n *nodeBinIPFS) Initialize() error {
 	_, err := os.Stat(config.DataDirIPFS())
 	if err != nil && os.IsNotExist(err) {
 		_ = os.MkdirAll(config.DataDirIPFS(), 0755)

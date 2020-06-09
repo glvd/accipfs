@@ -18,6 +18,15 @@ type node struct {
 
 var _ core.Node = &node{}
 
+// Close ...
+func (n *node) Close() (err error) {
+	if n.conn != nil {
+		err = n.conn.Close()
+		n.conn = nil
+	}
+	return
+}
+
 // Connect ...
 func (n *node) Connect() (net.Conn, error) {
 	if n.conn != nil {

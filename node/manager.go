@@ -13,7 +13,8 @@ import (
 	"time"
 )
 
-var _name = "bl.nodes"
+var _nodes = "bl.nodes"
+var _expNodes = "exp.nodes"
 
 type manager struct {
 	cfg      *config.Config
@@ -21,21 +22,24 @@ type manager struct {
 	ts       int64
 	nodes    sync.Map
 	expNodes sync.Map
+	path     string
+	expPath  string
 }
 
 // New ...
 func New(cfg *config.Config) core.NodeManager {
 	m := &manager{
-		cfg: cfg,
-		t:   time.NewTicker(cfg.Node.BackupSeconds),
+		cfg:     cfg,
+		path:    filepath.Join(cfg.Path, _nodes),
+		expPath: filepath.Join(cfg.Path, _expNodes),
+		t:       time.NewTicker(cfg.Node.BackupSeconds),
 	}
 	return m
 }
 
 // Load ...
 func (m *manager) Load() error {
-	file := filepath.Join(m.cfg.Path, _name)
-	stat, err := os.Stat(file)
+	stat, err := os.Stat(m.path)
 	if err != nil || !os.IsNotExist(err) {
 		return err
 	}
@@ -43,7 +47,7 @@ func (m *manager) Load() error {
 	if stat.IsDir() {
 		return fmt.Errorf("found file but is directory")
 	}
-	open, err := os.Open(file)
+	open, err := os.Open(m.path)
 	if err != nil {
 		return err
 	}

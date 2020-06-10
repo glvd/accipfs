@@ -16,6 +16,11 @@ type node struct {
 	conn  net.Conn
 }
 
+// Verify ...
+func (n *node) Verify() bool {
+	return true
+}
+
 var _ core.Node = &node{}
 
 // Close ...

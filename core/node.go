@@ -8,4 +8,5 @@ type Node interface {
 	ID() string
 	Connect() (net.Conn, error)
 	Close() error
+	Verify() bool
 }

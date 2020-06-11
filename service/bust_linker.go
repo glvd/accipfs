@@ -27,10 +27,10 @@ type BustLinker struct {
 	id       *core.Node
 	tasks    task.Task
 	hashes   cache.HashCache
-	nodes    cache.NodeCache
 	lock     *atomic.Bool
 	self     *account.Account
 	cfg      *config.Config
+	nodes    core.NodeManager
 	eth      *ethNode
 	ipfs     *ipfsNode
 	cron     *cron.Cron
@@ -41,7 +41,6 @@ type BustLinker struct {
 func NewBustLinker(cfg *config.Config) (linker *BustLinker, err error) {
 	linker = &BustLinker{
 		hashes: cache.NewHashCache(cfg),
-		nodes:  cache.NewNodeCache(cfg),
 		lock:   atomic.NewBool(false),
 		cfg:    cfg,
 	}

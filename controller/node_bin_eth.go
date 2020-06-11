@@ -3,7 +3,14 @@ package controller
 import (
 	"context"
 	"fmt"
+	"github.com/ethereum/go-ethereum/accounts/abi/bind"
+	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/ethclient"
+	"github.com/ethereum/go-ethereum/rpc"
 	"github.com/glvd/accipfs/config"
+	"github.com/glvd/accipfs/contract/dtag"
+	"github.com/glvd/accipfs/contract/node"
+	"github.com/glvd/accipfs/contract/token"
 	"github.com/glvd/accipfs/core"
 	"github.com/glvd/accipfs/general"
 	"github.com/goextension/io"
@@ -11,6 +18,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"strconv"
+	"strings"
 )
 
 var _ core.ControllerService = &nodeBinETH{}
@@ -23,6 +31,7 @@ type nodeBinETH struct {
 	name    string
 	cmd     *exec.Cmd
 	msg     func(s string)
+	client  *ethclient.Client
 }
 
 // MessageHandle ...
@@ -118,4 +127,106 @@ func newNodeBinETH(cfg *config.Config) *nodeBinETH {
 		genesis: genesis,
 		name:    path,
 	}
+}
+
+// IsReady ...
+func (n *nodeBinETH) IsReady() bool {
+	client, err := ethclient.Dial(config.ETHAddr())
+	if err != nil {
+		log.Errorw("new serviceNode eth", "error", err)
+		return false
+	}
+	n.client = client
+	return true
+}
+
+// DMessage ...
+func (n *nodeBinETH) DTag() (*dtag.DTag, error) {
+	address := common.HexToAddress(n.cfg.ETH.DTagAddr)
+	return dtag.NewDTag(address, n.client)
+}
+
+// NodeClient ...
+func (n *nodeBinETH) Node() (*node.AccelerateNode, error) {
+	address := common.HexToAddress(n.cfg.ETH.NodeAddr)
+	return node.NewAccelerateNode(address, n.client)
+}
+
+// Token ...
+func (n *nodeBinETH) Token() (*token.DhToken, error) {
+	address := common.HexToAddress(n.cfg.ETH.TokenAddr)
+	return token.NewDhToken(address, n.client)
+}
+
+// Peers ...
+func (n *nodeBinETH) AllPeers(ctx context.Context) ([]ETHPeer, error) {
+	var peers []ETHPeer
+	cancelCtx, cancel := context.WithCancel(ctx)
+	defer cancel()
+	client, err := rpc.DialContext(cancelCtx, config.ETHAddr())
+	if err != nil {
+		return nil, err
+	}
+	defer client.Close()
+	err = client.Call(&peers, "admin_peers")
+	if err != nil {
+		return nil, err
+	}
+
+	return peers, nil
+}
+
+// NewAccount ...
+func (n *nodeBinETH) NodeInfo(ctx context.Context) (*core.ContractNode, error) {
+	var node core.ContractNode
+	cancelCtx, cancel := context.WithCancel(ctx)
+	defer cancel()
+	client, err := rpc.DialContext(cancelCtx, config.ETHAddr())
+	if err != nil {
+		return nil, err
+	}
+	defer client.Close()
+	err = client.Call(&node, "admin_nodeInfo")
+	if err != nil {
+		return nil, err
+	}
+
+	return &node, nil
+}
+
+// AddPeer ...
+func (n *nodeBinETH) AddPeer(ctx context.Context, peer string) error {
+	var b bool
+	cancelCtx, cancel := context.WithCancel(ctx)
+	defer cancel()
+	client, err := rpc.DialContext(cancelCtx, config.ETHAddr())
+	if err != nil {
+		return err
+	}
+	defer client.Close()
+	err = client.Call(&b, "admin_addPeer", peer)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// FindNo ...
+func (n *nodeBinETH) FindNo(ctx context.Context, no string) error {
+	no = strings.ToUpper(no)
+	t, err := n.DTag()
+	if err != nil {
+		return err
+	}
+	message, err := t.GetTagMessage(&bind.CallOpts{
+		Pending: true,
+		Context: ctx,
+	}, "video", no)
+	if err != nil {
+		return err
+	}
+	fmt.Println("message", message.Value)
+
+	return nil
 }

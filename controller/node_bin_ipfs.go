@@ -7,11 +7,17 @@ import (
 	"github.com/glvd/accipfs/core"
 	"github.com/glvd/accipfs/general"
 	"github.com/goextension/io"
+	httpapi "github.com/ipfs/go-ipfs-http-client"
+	iface "github.com/ipfs/interface-go-ipfs-core"
+	"github.com/ipfs/interface-go-ipfs-core/options"
+	"github.com/ipfs/interface-go-ipfs-core/path"
+	"github.com/multiformats/go-multiaddr"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"strconv"
 	"strings"
+	"time"
 )
 
 var _ core.ControllerService = &nodeBinIPFS{}
@@ -23,6 +29,7 @@ type nodeBinIPFS struct {
 	name   string
 	cmd    *exec.Cmd
 	msg    func(string)
+	api    *httpapi.HttpApi
 }
 
 // MessageHandle ...
@@ -131,4 +138,59 @@ func (n *nodeBinIPFS) getVersion() (ver [3]int) {
 		ver[i] = int(parseInt)
 	}
 	return
+}
+
+// IsReady ...
+func (n *nodeBinIPFS) IsReady() bool {
+	ma, err := multiaddr.NewMultiaddr(config.IPFSAddr())
+	if err != nil {
+		return false
+	}
+	api, e := httpapi.NewApi(ma)
+	if e != nil {
+		log.Errorw("new serviceNode ipfs", "error", e)
+		return false
+	}
+	n.api = api
+
+	ctx, cancel := context.WithTimeout(context.TODO(), 3*time.Second)
+	defer cancel()
+	_, err = n.ID(ctx)
+	if err != nil {
+		return false
+	}
+
+	return true
+}
+
+// ID get self serviceNode info
+func (n *nodeBinIPFS) ID(ctx context.Context) (pid *core.DataStoreNode, e error) {
+	pid = &core.DataStoreNode{}
+	e = n.api.Request("id").Exec(ctx, pid)
+	if e != nil {
+		return nil, e
+	}
+	return pid, nil
+}
+
+// PinAdd ...
+func (n *nodeBinIPFS) PinAdd(ctx context.Context, hash string) (e error) {
+	p := path.New(hash)
+	return n.api.Pin().Add(ctx, p, options.Pin.Recursive(true))
+}
+
+// PinLS ...
+func (n *nodeBinIPFS) PinLS(ctx context.Context) (pins []iface.Pin, e error) {
+	return n.api.Pin().Ls(ctx, options.Pin.Type.Recursive())
+}
+
+// PinRm ...
+func (n *nodeBinIPFS) PinRm(ctx context.Context, hash string) (e error) {
+	p := path.New(hash)
+	return n.api.Pin().Rm(ctx, p)
+}
+
+// SwarmPeers ...
+func (n *nodeBinIPFS) SwarmPeers(ctx context.Context) ([]iface.ConnectionInfo, error) {
+	return n.api.Swarm().Peers(ctx)
 }

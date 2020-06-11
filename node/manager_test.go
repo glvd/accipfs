@@ -15,7 +15,7 @@ var testConfig = config.Default()
 func init() {
 	alog.InitLog()
 	testConfig.Path = ""
-	testConfig.Node.BackupSeconds = 5 * 60 * time.Second
+	testConfig.Node.BackupSeconds = 3 * time.Second
 }
 
 func TestNew(t *testing.T) {
@@ -38,8 +38,5 @@ func TestNew(t *testing.T) {
 			conn: nil,
 		})
 	}
-	err = m.Store()
-	if err != nil {
-		t.Log(err)
-	}
+	time.Sleep(5 * time.Second)
 }

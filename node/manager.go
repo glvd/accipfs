@@ -15,13 +15,14 @@ import (
 )
 
 type manager struct {
-	cfg      *config.Config
-	t        *time.Ticker
-	ts       int64
-	nodes    sync.Map
-	expNodes sync.Map
-	path     string
-	expPath  string
+	cfg       *config.Config
+	t         *time.Ticker
+	currentTS int64
+	ts        int64
+	nodes     sync.Map
+	expNodes  sync.Map
+	path      string
+	expPath   string
 }
 
 var _nodes = "bl.nodes"
@@ -36,6 +37,9 @@ func New(cfg *config.Config) core.NodeManager {
 		expPath: filepath.Join(cfg.Path, _expNodes),
 		t:       time.NewTicker(cfg.Node.BackupSeconds),
 	}
+
+	go m.loop()
+
 	return m
 }
 
@@ -135,6 +139,19 @@ func (m *manager) StateExamination(id string, f func(node core.Node) bool) {
 func (m *manager) Push(node core.Node) {
 	m.ts = time.Now().Unix()
 	m.nodes.Store(node.ID(), node)
+}
+
+// save nodes
+func (m *manager) loop() {
+	for {
+		<-m.t.C
+		if m.ts != m.currentTS {
+			if err := m.Store(); err != nil {
+				continue
+			}
+			m.currentTS = m.ts
+		}
+	}
 }
 
 func decodeNode(m core.NodeManager, b []byte) error {

@@ -1,4 +1,4 @@
-package service
+package controller
 
 import (
 	"context"
@@ -107,7 +107,7 @@ func (n *ipfsNode) IsReady() bool {
 	}
 	api, e := httpapi.NewApi(ma)
 	if e != nil {
-		logE("new serviceNode ipfs", "error", e)
+		log.Errorw("new serviceNode ipfs", "error", e)
 		return false
 	}
 	n.api = api

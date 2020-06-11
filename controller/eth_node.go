@@ -1,4 +1,4 @@
-package service
+package controller
 
 import (
 	"context"
@@ -75,7 +75,7 @@ func newNodeETH(cfg *config.Config) (*ethNode, error) {
 func (n *ethNode) IsReady() bool {
 	client, err := ethclient.Dial(config.ETHAddr())
 	if err != nil {
-		logE("new serviceNode eth", "error", err)
+		log.Errorw("new serviceNode eth", "error", err)
 		return false
 	}
 	n.client = client

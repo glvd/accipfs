@@ -23,6 +23,43 @@ import (
 
 var _ core.ControllerService = &nodeBinETH{}
 
+// Network ...
+type Network struct {
+	Inbound       bool
+	LocalAddress  string
+	RemoteAddress string
+	Static        bool
+	Trusted       bool
+}
+
+// ETHPeer ...
+type ETHPeer struct {
+	Caps      []string
+	ID        string
+	Name      string
+	Enode     string
+	Network   Network
+	Protocols interface{}
+}
+
+// Result ...
+type Result struct {
+	ID      string
+	Jsonrpc string
+	Result  []ETHPeer
+}
+
+// ETHProtocolInfo ...
+type ETHProtocolInfo struct {
+	Difficulty int    `json:"difficulty"`
+	Head       string `json:"head"`
+	Version    int    `json:"version"`
+}
+
+// ETHProtocol ...
+type ETHProtocol struct {
+	Eth ETHProtocolInfo `json:"eth"`
+}
 type nodeBinETH struct {
 	ctx     context.Context
 	cancel  context.CancelFunc

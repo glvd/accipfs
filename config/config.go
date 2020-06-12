@@ -75,10 +75,10 @@ type APIConfig struct {
 
 // NodeConfig ...
 type NodeConfig struct {
-	Port     int `json:"port" mapstructure:"port"`
-	BindPort int `json:"bind_port" mapstructure:"bind_port"`
-	//NodeFile      string `json:"node_file" mapstructure:"bind_port"`
+	Port          int           `json:"port" mapstructure:"port"`
+	BindPort      int           `json:"bind_port" mapstructure:"bind_port"`
 	BackupSeconds time.Duration `json:"backup_seconds" mapstructure:"backup_seconds"`
+	PoolMax       int
 }
 
 // Config ...

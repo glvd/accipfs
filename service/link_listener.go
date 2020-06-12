@@ -24,7 +24,7 @@ func NewLinkListener(cfg *config.Config) Listener {
 		bindPort: cfg.Node.BindPort,
 		port:     cfg.Node.Port,
 	}
-	pool, err := ants.NewPool(5000)
+	pool, err := ants.NewPool(cfg.Node.PoolMax)
 	if err != nil {
 		return nil
 	}

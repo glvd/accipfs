@@ -17,8 +17,8 @@ const Version = "0.0.1"
 // NodeType ...
 type NodeType int
 
-// DataStoreNode ...
-type DataStoreNode struct {
+// DataStoreInfo ...
+type DataStoreInfo struct {
 	ID              string   `json:"ID"`
 	PublicKey       string   `json:"PublicKey"`
 	Addresses       []string `json:"Addresses"`
@@ -26,8 +26,8 @@ type DataStoreNode struct {
 	ProtocolVersion string   `json:"ProtocolVersion"`
 }
 
-// ContractNode ...
-type ContractNode struct {
+// ContractInfo ...
+type ContractInfo struct {
 	Enode      string    `json:"enode"`
 	Enr        string    `json:"enr"`
 	ID         string    `json:"id"`
@@ -79,10 +79,10 @@ type Clique struct {
 
 // NodeInfo ...
 type NodeInfo struct {
-	Name      string
-	NodeType  NodeType
-	Contract  ContractNode
-	DataStore DataStoreNode
+	ID        string
+	Type      NodeType
+	Contract  ContractInfo
+	DataStore DataStoreInfo
 }
 
 // CompareInt ...

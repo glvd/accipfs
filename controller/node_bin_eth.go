@@ -214,8 +214,8 @@ func (n *nodeBinETH) AllPeers(ctx context.Context) ([]ETHPeer, error) {
 }
 
 // NewAccount ...
-func (n *nodeBinETH) NodeInfo(ctx context.Context) (*core.ContractNode, error) {
-	var node core.ContractNode
+func (n *nodeBinETH) NodeInfo(ctx context.Context) (*core.ContractInfo, error) {
+	var node core.ContractInfo
 	cancelCtx, cancel := context.WithCancel(ctx)
 	defer cancel()
 	client, err := rpc.DialContext(cancelCtx, config.ETHAddr())

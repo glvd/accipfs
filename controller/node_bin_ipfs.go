@@ -164,8 +164,8 @@ func (n *nodeBinIPFS) IsReady() bool {
 }
 
 // ID get self serviceNode info
-func (n *nodeBinIPFS) ID(ctx context.Context) (pid *core.DataStoreNode, e error) {
-	pid = &core.DataStoreNode{}
+func (n *nodeBinIPFS) ID(ctx context.Context) (pid *core.DataStoreInfo, e error) {
+	pid = &core.DataStoreInfo{}
 	e = n.api.Request("id").Exec(ctx, pid)
 	if e != nil {
 		return nil, e

@@ -1,6 +1,7 @@
 package config
 
 import (
+	"crypto/tls"
 	"encoding/json"
 	"fmt"
 	"github.com/goextension/extmap"
@@ -70,11 +71,12 @@ type TLSCertificate struct {
 
 // APIConfig ...
 type APIConfig struct {
-	Port    int            `json:"port" mapstructure:"port"`
-	Version string         `json:"version" mapstructure:"version"`
-	UseTLS  bool           `json:"use_tls" mapstructure:"use_tls"`
-	TLS     TLSCertificate `json:"tls" mapstructure:"tls"`
-	Timeout time.Duration  `json:"timeout" mapstructure:"timeout"`
+	Port        int               `json:"port" mapstructure:"port"`
+	Version     string            `json:"version" mapstructure:"version"`
+	UseTLS      bool              `json:"use_tls" mapstructure:"use_tls"`
+	TLS         TLSCertificate    `json:"tls" mapstructure:"tls"`
+	Certificate []tls.Certificate `json:"certificate" mapstructure:"certificate"`
+	Timeout     time.Duration     `json:"timeout" mapstructure:"timeout"`
 }
 
 // NodeConfig ...

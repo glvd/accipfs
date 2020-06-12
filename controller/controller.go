@@ -45,6 +45,11 @@ func (c *Controller) Initialize() (e error) {
 	return
 }
 
+// API ...
+func (c *Controller) API() core.API {
+	return c
+}
+
 // Run ...
 func (c *Controller) Run() {
 	for idx := range c.services {

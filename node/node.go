@@ -33,12 +33,17 @@ func (n *node) Verify() bool {
 }
 
 // Connect ...
-func (n *node) Connect() (net.Conn, error) {
+func (n *node) ConnectTo() (net.Conn, error) {
 	if n.conn != nil {
 		return n.conn, nil
 	}
 	//todo
 	return nil, fmt.Errorf("filed to connect")
+}
+
+// ConnectBy ...
+func (n *node) ConnectBy() {
+
 }
 
 // Addrs ...

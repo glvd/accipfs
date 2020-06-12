@@ -74,6 +74,7 @@ type APIConfig struct {
 	Version string         `json:"version" mapstructure:"version"`
 	UseTLS  bool           `json:"use_tls" mapstructure:"use_tls"`
 	TLS     TLSCertificate `json:"tls" mapstructure:"tls"`
+	Timeout time.Duration  `json:"timeout" mapstructure:"timeout"`
 }
 
 // NodeConfig ...

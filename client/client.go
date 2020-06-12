@@ -1,22 +1,83 @@
 package client
 
 import (
+	"bytes"
+	"encoding/json"
 	"fmt"
-	"github.com/glvd/accipfs/core"
-	"github.com/glvd/accipfs/general"
+	"github.com/glvd/accipfs/config"
+	"io"
+	"net/http"
 	"strconv"
 	"strings"
+
+	"github.com/glvd/accipfs/core"
+	"github.com/glvd/accipfs/general"
 )
 
 // DefaultClient ...
 var DefaultClient = ""
 
 type client struct {
+	cfg *config.Config
+	cli *http.Client
+}
+
+func requestReader(req interface{}) (io.Reader, error) {
+	marshal, err := json.Marshal(req)
+	if err != nil {
+		return nil, err
+	}
+	return bytes.NewReader(marshal), nil
+}
+
+func responseDecoder(rc io.ReadCloser, resp interface{}) error {
+	decoder := json.NewDecoder(rc)
+	return decoder.Decode(resp)
+}
+
+// New ...
+func New(cfg *config.Config) core.API {
+	c := &http.Client{}
+	c.Timeout = cfg.API.Timeout
+	return &client{
+		cli: c,
+		cfg: cfg,
+	}
+}
+
+func (c *client) host() string {
+	prefix := "http://"
+	if c.cfg.UseTLS {
+		prefix = "https://"
+	}
+	return strings.Join([]string{prefix, "127.0.0.1:", strconv.Itoa(c.cfg.API.Port), "/api/", c.cfg.API.Version}, "")
+}
+
+// RequestURL ...
+func (c *client) RequestURL(uri string) string {
+	if uri[0] == '/' {
+		uri = uri[1:]
+	}
+	return strings.Join([]string{c.host(), uri}, "/")
 }
 
 // Ping ...
 func (c *client) Ping(req *core.PingReq) (*core.PingResp, error) {
-	panic("ping")
+	reader, err := requestReader(req)
+	if err != nil {
+		return nil, err
+	}
+	request, err := http.NewRequest(http.MethodPost, c.RequestURL("ping"), reader)
+	if err != nil {
+		return nil, err
+	}
+	resp, err := c.cli.Do(request)
+	if err != nil {
+		return nil, err
+	}
+	result := new(core.PingResp)
+	err = responseDecoder(resp.Body, result)
+	return result, err
 }
 
 // ID ...

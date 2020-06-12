@@ -8,6 +8,17 @@ import (
 	"strings"
 )
 
+// DefaultClient ...
+var DefaultClient = ""
+
+type client struct {
+}
+
+// Ping ...
+func (c *client) Ping(req *core.PingReq) (*core.PingResp, error) {
+	panic("ping")
+}
+
 // ID ...
 func ID(url string) (*core.Node, error) {
 	reply := new(core.Node)

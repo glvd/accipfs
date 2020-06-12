@@ -75,12 +75,10 @@ type GetReq struct {
 type GetResp struct {
 }
 
-// Linker ...
-type Linker interface {
+// LinkerRPC ...
+type LinkerRPC interface {
 	Ping(r *http.Request, req *PingReq, resp *PingResp) error
 	ID(r *http.Request, req *IDReq, resp *IDResp) error
-	Connected(r *http.Request, req *ConnectedReq, resp *ConnectedResp) error
-	ConnectTo(r *http.Request, req *ConnectToReq, resp *ConnectToResp) error
 	Add(r *http.Request, req *AddReq, resp *AddResp) error
 	Get(r *http.Request, req *GetReq, resp *GetResp) error
 	Pay(r *http.Request, req *PayReq, resp *PayResp) error

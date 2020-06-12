@@ -4,16 +4,18 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/glvd/accipfs/controller"
+
 	"net/http"
 	"strings"
 	"sync"
 	"time"
 
 	"github.com/glvd/accipfs/account"
+	"github.com/glvd/accipfs/api"
 	"github.com/glvd/accipfs/cache"
 	"github.com/glvd/accipfs/client"
 	"github.com/glvd/accipfs/config"
+	"github.com/glvd/accipfs/controller"
 	"github.com/glvd/accipfs/core"
 	"github.com/glvd/accipfs/general"
 	"github.com/glvd/accipfs/task"
@@ -35,6 +37,7 @@ type BustLinker struct {
 	cron       *cron.Cron
 	listener   core.Listener
 	controller *controller.Controller
+	api        core.API
 }
 
 // NewBustLinker ...
@@ -52,6 +55,7 @@ func NewBustLinker(cfg *config.Config) (linker *BustLinker, err error) {
 	linker.self = selfAcc
 	linker.listener = NewLinkListener(cfg)
 	linker.controller = controller.New(cfg)
+	linker.api = api.New(cfg)
 	return linker, nil
 }
 

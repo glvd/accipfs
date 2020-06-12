@@ -70,7 +70,10 @@ type TLSCertificate struct {
 
 // APIConfig ...
 type APIConfig struct {
-	Version string `json:"version" mapstructure:"version"`
+	Port    int            `json:"port" mapstructure:"port"`
+	Version string         `json:"version" mapstructure:"version"`
+	UseTLS  bool           `json:"use_tls" mapstructure:"use_tls"`
+	TLS     TLSCertificate `json:"tls" mapstructure:"tls"`
 }
 
 // NodeConfig ...

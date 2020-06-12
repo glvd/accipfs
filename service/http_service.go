@@ -20,7 +20,7 @@ func newHTTPService(cfg *config.Config) *httpService {
 		cfg:   cfg,
 		route: gin.Default(),
 	}
-	port := fmt.Sprintf(":%d", s.cfg.Port)
+	port := fmt.Sprintf(":%d", s.cfg.API.Port)
 
 	s.server = &http.Server{Addr: port, Handler: s.route}
 	s.route.Any("/", func(c *gin.Context) {
@@ -39,7 +39,7 @@ func (s *httpService) Register(path string, handler http.Handler) error {
 
 // Start ...
 func (s *httpService) Start() {
-	output("service listen and serving on port", s.cfg.Port)
+	output("service listen and serving on port", s.cfg.API.Port)
 
 	if s.cfg.UseTLS {
 		if err := s.server.ListenAndServeTLS(s.cfg.TLS.KeyFile, s.cfg.TLS.KeyPassFile); err != nil {

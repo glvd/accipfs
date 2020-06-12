@@ -8,3 +8,8 @@ type Node interface {
 	//Connect() (net.Conn, error)
 	//Close() error
 }
+
+// LocalNode ...
+type LocalNode interface {
+	Addr() Addr
+}

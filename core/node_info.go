@@ -79,10 +79,10 @@ type Clique struct {
 
 // NodeInfo ...
 type NodeInfo struct {
-	ID        string
-	Type      NodeType
-	Contract  ContractInfo
-	DataStore DataStoreInfo
+	ID   string
+	Type NodeType
+	//Contract  ContractInfo
+	//DataStore DataStoreInfo
 }
 
 // CompareInt ...

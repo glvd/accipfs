@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/glvd/accipfs/controller"
 	"net/http"
 	"strings"
 	"sync"
@@ -24,15 +25,16 @@ import (
 
 // BustLinker ...
 type BustLinker struct {
-	id       core.Node
-	nodes    core.NodeManager
-	tasks    task.Task
-	hashes   cache.HashCache
-	lock     *atomic.Bool
-	self     *account.Account
-	cfg      *config.Config
-	cron     *cron.Cron
-	listener Listener
+	id         core.Node
+	nodes      core.NodeManager
+	tasks      task.Task
+	hashes     cache.HashCache
+	lock       *atomic.Bool
+	self       *account.Account
+	cfg        *config.Config
+	cron       *cron.Cron
+	listener   core.Listener
+	controller *controller.Controller
 }
 
 // NewBustLinker ...
@@ -43,27 +45,26 @@ func NewBustLinker(cfg *config.Config) (linker *BustLinker, err error) {
 		cfg:    cfg,
 	}
 
-	linker.tasks = task.New()
-	linker.cron = cron.New(cron.WithSeconds())
 	selfAcc, err := account.LoadAccount(cfg)
 	if err != nil {
 		return nil, err
 	}
 	linker.self = selfAcc
 	linker.listener = NewLinkListener(cfg)
+	linker.controller = controller.New(cfg)
 	return linker, nil
 }
 
 // Start ...
 func (l *BustLinker) Start() {
 	//jobAcc, err := l.cron.AddJob("0 1/3 * * * *", l)
-	jobAcc, err := l.cron.AddJob("0/5 * * * * *", l)
-	if err != nil {
-		panic(err)
-	}
-	output("bust linker", "run id", jobAcc)
+	//jobAcc, err := l.cron.AddJob("0/5 * * * * *", l)
+	//if err != nil {
+	//	panic(err)
+	//}
+	//output("bust linker", "run id", jobAcc)
 	go l.listener.Listen()
-	go l.cron.Run()
+	//go l.cron.Run()
 }
 
 func (l *BustLinker) getPeers(wg *sync.WaitGroup, node core.Node) bool {
@@ -135,29 +136,7 @@ func (l *BustLinker) Run() {
 
 // WaitingForReady ...
 func (l *BustLinker) WaitingForReady() {
-	wg := &sync.WaitGroup{}
-	wg.Add(1)
-	go func() {
-		defer wg.Done()
-		for {
-			if l.eth.IsReady() {
-				return
-			}
-			time.Sleep(5 * time.Second)
-		}
-	}()
-	wg.Add(1)
-	go func() {
-		defer wg.Done()
-		for {
-			if l.ipfs.IsReady() {
-				return
-			}
-			time.Sleep(5 * time.Second)
-		}
-	}()
-	wg.Wait()
-
+	l.controller.Run()
 	for {
 		id := l.LocalID()
 		if id == nil {

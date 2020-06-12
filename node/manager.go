@@ -135,6 +135,21 @@ func (m *manager) StateExamination(id string, f func(node core.Node) bool) {
 	}
 }
 
+// Range ...
+func (m *manager) Range(f func(key string, node core.Node) bool) {
+	m.nodes.Range(func(key, value interface{}) bool {
+		k, b1 := key.(string)
+		n, b2 := value.(core.Node)
+		if !b1 || !b2 {
+			return true
+		}
+		if f != nil {
+			return f(k, n)
+		}
+		return false
+	})
+}
+
 // Push ...
 func (m *manager) Push(node core.Node) {
 	m.ts = time.Now().Unix()

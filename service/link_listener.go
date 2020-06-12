@@ -2,6 +2,7 @@ package service
 
 import (
 	"github.com/glvd/accipfs/config"
+	"github.com/glvd/accipfs/core"
 	"net"
 
 	"github.com/panjf2000/ants/v2"
@@ -18,7 +19,7 @@ type tcpListener struct {
 }
 
 // NewLinkListener ...
-func NewLinkListener(cfg *config.Config) Listener {
+func NewLinkListener(cfg *config.Config) core.Listener {
 	l := &tcpListener{
 		protocol: "tcp",
 		bindPort: cfg.Node.BindPort,

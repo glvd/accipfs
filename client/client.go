@@ -15,7 +15,7 @@ import (
 )
 
 // DefaultClient ...
-var DefaultClient = ""
+var DefaultClient core.API
 
 type client struct {
 	cfg *config.APIConfig
@@ -33,6 +33,11 @@ func requestReader(req interface{}) (io.Reader, error) {
 func responseDecoder(rc io.ReadCloser, resp interface{}) error {
 	decoder := json.NewDecoder(rc)
 	return decoder.Decode(resp)
+}
+
+// InitGlobalClient ...
+func InitGlobalClient(cfg *config.Config) {
+	DefaultClient = New(&cfg.API)
 }
 
 // New ...
@@ -61,45 +66,44 @@ func (c *client) RequestURL(uri string) string {
 	return strings.Join([]string{c.host(), uri}, "/")
 }
 
-// Ping ...
-func (c *client) Ping(req *core.PingReq) (*core.PingResp, error) {
+func (c *client) do(uri string, req, resp interface{}) error {
 	reader, err := requestReader(req)
 	if err != nil {
-		return nil, err
+		return err
 	}
-	request, err := http.NewRequest(http.MethodPost, c.RequestURL("ping"), reader)
+	request, err := http.NewRequest(http.MethodPost, c.RequestURL(uri), reader)
 	if err != nil {
-		return nil, err
+		return err
 	}
-	resp, err := c.cli.Do(request)
+	response, err := c.cli.Do(request)
 	if err != nil {
-		return nil, err
+		return err
 	}
-	result := new(core.PingResp)
-	err = responseDecoder(resp.Body, result)
-	return result, err
+	return responseDecoder(response.Body, resp)
+}
+
+// Ping ...
+func Ping(req *core.PingReq) (resp *core.PingResp, err error) {
+	return DefaultClient.Ping(req)
+}
+
+// Ping ...
+func (c *client) Ping(req *core.PingReq) (resp *core.PingResp, err error) {
+	resp = new(core.PingResp)
+	err = c.do("ping", req, resp)
+	return
 }
 
 // ID ...
-func ID(url string) (*core.Node, error) {
-	reply := new(core.Node)
-	if err := general.RPCPost(url, "BustLinker.ID", core.DummyEmpty(), reply); err != nil {
-		return nil, err
-	}
-	return reply, nil
+func ID(req *core.IDReq) (resp *core.IDResp, err error) {
+	return DefaultClient.ID(req)
 }
 
-// Ping ...
-func Ping(url string) error {
-	logD("ping info", "url", url)
-	result := new(core.PingResp)
-	if err := general.RPCPost(url, "BustLinker.Ping", &core.PingReq{}, result); err != nil {
-		return err
-	}
-	if result.Resp != "pong" {
-		return fmt.Errorf("get wrong response data:%+v", *result)
-	}
-	return nil
+// ID ...
+func (c *client) ID(req *core.IDReq) (resp *core.IDResp, err error) {
+	resp = new(core.IDResp)
+	err = c.do("ping", req, resp)
+	return
 }
 
 // ConnectTo ...

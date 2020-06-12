@@ -18,7 +18,7 @@ import (
 var DefaultClient = ""
 
 type client struct {
-	cfg *config.Config
+	cfg *config.APIConfig
 	cli *http.Client
 }
 
@@ -36,9 +36,9 @@ func responseDecoder(rc io.ReadCloser, resp interface{}) error {
 }
 
 // New ...
-func New(cfg *config.Config) core.API {
+func New(cfg *config.APIConfig) core.API {
 	c := &http.Client{}
-	c.Timeout = cfg.API.Timeout
+	c.Timeout = cfg.Timeout
 	return &client{
 		cli: c,
 		cfg: cfg,
@@ -50,7 +50,7 @@ func (c *client) host() string {
 	if c.cfg.UseTLS {
 		prefix = "https://"
 	}
-	return strings.Join([]string{prefix, "127.0.0.1:", strconv.Itoa(c.cfg.API.Port), "/api/", c.cfg.API.Version}, "")
+	return strings.Join([]string{prefix, "127.0.0.1:", strconv.Itoa(c.cfg.Port), "/api/", c.cfg.Version}, "")
 }
 
 // RequestURL ...

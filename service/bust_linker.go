@@ -163,18 +163,6 @@ func (l *BustLinker) Ping(r *http.Request, req *core.PingReq, resp *core.PingRes
 	return nil
 }
 
-// LocalID ...
-func (l *BustLinker) LocalID() *core.Node {
-	if l.id == nil {
-		id, err := l.localID()
-		if err != nil {
-			logD("get local id", "error", err)
-		}
-		l.id = id
-	}
-	return l.id
-}
-
 func (l *BustLinker) localID() (*core.Node, error) {
 	var info core.Node
 	info.Name = l.self.Name

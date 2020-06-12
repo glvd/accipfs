@@ -41,9 +41,8 @@ func New(cfg *config.Config) (s Service, e error) {
 	e = server.Register(rpc.Handler())
 	e = server.Register(http.Handler())
 	s = &service{
-		controller: controller.New(cfg),
-		linker:     linker,
-		server:     server,
+		linker: linker,
+		server: server,
 	}
 	return s, nil
 }

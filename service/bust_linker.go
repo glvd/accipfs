@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/glvd/accipfs/controller"
 	"net/http"
 	"strings"
 	"sync"
@@ -25,15 +24,13 @@ import (
 
 // BustLinker ...
 type BustLinker struct {
-	id       *core.Node
+	id       core.Node
+	nodes    core.NodeManager
 	tasks    task.Task
 	hashes   cache.HashCache
 	lock     *atomic.Bool
 	self     *account.Account
 	cfg      *config.Config
-	nodes    core.NodeManager
-	eth      *controller.ethNode
-	ipfs     *controller.ipfsNode
 	cron     *cron.Cron
 	listener Listener
 }
@@ -45,10 +42,7 @@ func NewBustLinker(cfg *config.Config) (linker *BustLinker, err error) {
 		lock:   atomic.NewBool(false),
 		cfg:    cfg,
 	}
-	//linker.ethServer = newNodeServerETH(cfg)
-	//linker.ipfsServer = newNodeServerIPFS(cfg)
-	linker.eth, _ = controller.newNodeETH(cfg)
-	linker.ipfs, _ = controller.newNodeIPFS(cfg)
+
 	linker.tasks = task.New()
 	linker.cron = cron.New(cron.WithSeconds())
 	selfAcc, err := account.LoadAccount(cfg)

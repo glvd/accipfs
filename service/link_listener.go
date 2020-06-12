@@ -9,6 +9,7 @@ import (
 )
 
 type tcpListener struct {
+	listener *net.TCPListener
 	protocol string
 	bindPort int
 	port     int
@@ -31,18 +32,26 @@ func NewLinkListener(cfg *config.Config) Listener {
 	return l
 }
 
+// Stop ...
+func (h *tcpListener) Stop() error {
+	if h.listener != nil {
+		return h.listener.Close()
+	}
+	return nil
+}
+
 // Listen ...
-func (h *tcpListener) Listen() error {
+func (h *tcpListener) Listen() (err error) {
 	local := &net.TCPAddr{
 		IP:   net.IPv4zero,
 		Port: h.port,
 	}
-	tcp, err := reuse.ListenTCP(h.protocol, local)
+	h.listener, err = reuse.ListenTCP(h.protocol, local)
 	if err != nil {
 		return err
 	}
 	for {
-		conn, err := tcp.Accept()
+		conn, err := h.listener.Accept()
 		if err != nil {
 			continue
 		}

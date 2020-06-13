@@ -33,7 +33,11 @@ func (a *API) Start() error {
 	if err != nil {
 		return err
 	}
-	go a.serv.ServeTLS(l, a.cfg.API.TLS.KeyFile, a.cfg.API.TLS.KeyPassFile)
+	if a.cfg.API.UseTLS {
+		go a.serv.ServeTLS(l, a.cfg.API.TLS.KeyFile, a.cfg.API.TLS.KeyPassFile)
+		return nil
+	}
+	go a.serv.Serve(l)
 	return nil
 }
 

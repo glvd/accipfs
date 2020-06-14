@@ -61,14 +61,8 @@ func NewBustLinker(cfg *config.Config) (linker *BustLinker, err error) {
 
 // Start ...
 func (l *BustLinker) Start() {
-	//jobAcc, err := l.cron.AddJob("0 1/3 * * * *", l)
-	//jobAcc, err := l.cron.AddJob("0/5 * * * * *", l)
-	//if err != nil {
-	//	panic(err)
-	//}
-	//output("bust linker", "run id", jobAcc)
 	go l.listener.Listen()
-	//go l.cron.Run()
+	l.controller.Run()
 }
 
 func (l *BustLinker) getPeers(wg *sync.WaitGroup, node core.Node) bool {

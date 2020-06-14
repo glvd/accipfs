@@ -4,4 +4,6 @@ package core
 type Node interface {
 	Addrs() []Addr
 	Info() NodeInfo
+	Ping() error
+	Request()
 }

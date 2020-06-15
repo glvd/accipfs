@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-
 	"net/http"
 	"strings"
 	"sync"
@@ -66,42 +65,7 @@ func (l *BustLinker) Start() {
 }
 
 func (l *BustLinker) getPeers(wg *sync.WaitGroup, node core.Node) bool {
-	output("bust linker", "get peers", node.Name)
-	defer wg.Done()
-	ctx := context.TODO()
-	remoteNodes, err := client.Peers(general.RPCAddress(node.Addr), &node)
-	if err != nil {
-		//logE("get peers failed", "account", node.Name, "error", err)
-		return true
-	}
 
-	for _, rnode := range remoteNodes {
-		if l.nodes.Length() > l.cfg.Limit {
-			return false
-		}
-		result := new(bool)
-		output("bust linker", "add peer", rnode.Name)
-		if err := l.addPeer(ctx, rnode, result); err != nil {
-			logE("add peer failed", "account", rnode.Name, "error", err)
-			continue
-		}
-		if *result {
-			output("bust linker", "sync remote pins ", rnode.Name)
-			pins, err := client.Pins(rnode.Addr)
-			if err != nil {
-				logE("get pin list", "error", err)
-				continue
-			}
-			for _, p := range pins {
-				if err := l.hashes.Add(p, rnode.Name); err != nil {
-					logE("cache failed", "error", err)
-					continue
-				}
-				logI("pin hash", "hash", p)
-			}
-		}
-
-	}
 	return true
 }
 
@@ -114,18 +78,7 @@ func (l *BustLinker) Run() {
 	l.lock.Store(true)
 	defer l.lock.Store(false)
 	wg := &sync.WaitGroup{}
-	l.nodes.Range(func(node *core.Node) bool {
-		output("bust linker", "syncing node", node.Name)
-		l.nodes.Validate(node.NodeInfo.Name, func(node *core.Node) bool {
-			err := client.Ping(general.RPCAddress(node.Addr))
-			if err != nil {
-				//logE("ping failed", "account", node.Name, "error", err)
-				return false
-			}
-			wg.Add(1)
-			go l.getPeers(wg, *node)
-			return true
-		})
+	l.nodes.Range(func(key string, node core.Node) bool {
 		return true
 	})
 	wg.Wait()
@@ -134,15 +87,7 @@ func (l *BustLinker) Run() {
 
 // WaitingForReady ...
 func (l *BustLinker) WaitingForReady() {
-	l.controller.Run()
-	for {
-		id := l.LocalID()
-		if id == nil {
-			time.Sleep(5 * time.Second)
-			continue
-		}
-		return
-	}
+
 }
 
 // Stop ...

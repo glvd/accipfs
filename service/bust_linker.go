@@ -96,12 +96,6 @@ func (l *BustLinker) Stop() {
 	<-ctx.Done()
 }
 
-// Ping ...
-func (l *BustLinker) Ping(r *http.Request, req *core.PingReq, resp *core.PingResp) error {
-	resp.Resp = "pong"
-	return nil
-}
-
 func (l *BustLinker) localID() (*core.Node, error) {
 	var info core.Node
 	info.Name = l.self.Name

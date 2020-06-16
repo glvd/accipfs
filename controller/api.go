@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"context"
 	"github.com/gin-gonic/gin"
 	"github.com/glvd/accipfs/config"
 	"github.com/glvd/accipfs/core"
@@ -26,7 +27,20 @@ func (a *API) Ping(req *core.PingReq) (*core.PingResp, error) {
 
 // ID ...
 func (a *API) ID(req *core.IDReq) (*core.IDResp, error) {
-
+	ctx := context.Background()
+	id, err := a.ipfsNode.ID(ctx)
+	if err != nil {
+		return nil, err
+	}
+	info, err := a.ethNode.NodeInfo(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return &core.IDResp{
+		Name:      "",
+		DataStore: id,
+		Contract:  info,
+	}, nil
 }
 
 // New ...

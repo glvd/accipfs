@@ -23,7 +23,9 @@ type IDReq struct {
 
 // IDResp ...
 type IDResp struct {
-	Node
+	Name      string
+	DataStore *DataStoreInfo
+	Contract  *ContractInfo
 }
 
 // ConnectedReq ...

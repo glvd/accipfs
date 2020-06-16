@@ -7,6 +7,7 @@ import (
 	"github.com/glvd/accipfs/controller"
 	"github.com/glvd/accipfs/core"
 	"github.com/glvd/accipfs/task"
+	"net"
 	"sync"
 
 	"github.com/robfig/cron/v3"
@@ -41,7 +42,7 @@ func NewBustLinker(cfg *config.Config) (linker *BustLinker, err error) {
 		return nil, err
 	}
 	linker.self = selfAcc
-	linker.listener = NewLinkListener(cfg)
+	linker.listener = NewLinkListener(cfg, linker.cb)
 	linker.controller = controller.New(cfg)
 	return linker, nil
 }
@@ -82,4 +83,8 @@ func (l *BustLinker) WaitingForReady() {
 func (l *BustLinker) Stop() {
 	ctx := l.cron.Stop()
 	<-ctx.Done()
+}
+
+func (l *BustLinker) cb(conn net.Conn) {
+	//todo:new node
 }

@@ -1,26 +1,39 @@
-package api
+package controller
 
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/glvd/accipfs/config"
+	"github.com/glvd/accipfs/core"
 	"net"
 	"net/http"
 )
 
 // API ...
 type API struct {
-	cfg      *config.Config
-	eng      *gin.Engine
-	listener net.Listener
-	serv     *http.Server
+	cfg        *config.Config
+	eng        *gin.Engine
+	listener   net.Listener
+	serv       *http.Server
+	controller *Controller
+}
+
+// Ping ...
+func (a *API) Ping(req *core.PingReq) (*core.PingResp, error) {
+	panic("implement me")
+}
+
+// ID ...
+func (a *API) ID(req *core.IDReq) (*core.IDResp, error) {
+	panic("implement me")
 }
 
 // New ...
-func New(cfg *config.Config) *API {
+func newAPI(cfg *config.Config, controller *Controller) core.API {
 	return &API{
-		cfg:  cfg,
-		eng:  gin.Default(),
-		serv: &http.Server{},
+		cfg:        cfg,
+		controller: controller,
+		eng:        gin.Default(),
+		serv:       &http.Server{},
 	}
 }
 

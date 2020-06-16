@@ -20,6 +20,7 @@ const (
 type Controller struct {
 	wg       *sync.WaitGroup
 	services []core.ControllerService
+	api      core.API
 }
 
 // New ...
@@ -30,6 +31,7 @@ func New(cfg *config.Config) *Controller {
 			IndexIPFS: newNodeBinIPFS(cfg),
 		},
 	}
+	c.api = newAPI(cfg, c)
 	c.wg = &sync.WaitGroup{}
 	return c
 }
@@ -69,4 +71,9 @@ func (c *Controller) StopRun() (e error) {
 		}
 	}
 	return
+}
+
+// API ...
+func (c *Controller) API() core.API {
+	return c.api
 }

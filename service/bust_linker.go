@@ -10,7 +10,6 @@ import (
 	"time"
 
 	"github.com/glvd/accipfs/account"
-	"github.com/glvd/accipfs/api"
 	"github.com/glvd/accipfs/cache"
 	"github.com/glvd/accipfs/client"
 	"github.com/glvd/accipfs/config"
@@ -36,7 +35,7 @@ type BustLinker struct {
 	cron       *cron.Cron
 	listener   core.Listener
 	controller *controller.Controller
-	api        *api.API
+	api        *controller.API
 }
 
 // NewBustLinker ...
@@ -54,7 +53,7 @@ func NewBustLinker(cfg *config.Config) (linker *BustLinker, err error) {
 	linker.self = selfAcc
 	linker.listener = NewLinkListener(cfg)
 	linker.controller = controller.New(cfg)
-	linker.api = api.New(cfg)
+	linker.api = controller.New(cfg)
 	return linker, nil
 }
 

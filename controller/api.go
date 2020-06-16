@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/gin-gonic/gin"
 	"github.com/glvd/accipfs/config"
 	"github.com/glvd/accipfs/core"
@@ -88,6 +89,7 @@ func (a *API) routeList() {
 
 	v0 := g.Group("v0")
 	v0.GET("/get", a.get)
+	v0.GET("/query", a.query)
 }
 
 // Stop ...
@@ -119,6 +121,34 @@ func (a *API) ping(c *gin.Context) {
 func (a *API) debug(c *gin.Context) {
 	uri := c.Query("uri")
 	c.Redirect(http.StatusMovedPermanently, ipfsGetURL(uri))
+}
+
+func (a *API) query(c *gin.Context) {
+	var err error
+	j := struct {
+		No string
+	}{}
+	err = c.BindJSON(&j)
+	if err != nil {
+		JSON(c, "", fmt.Errorf("query failed(%w)", err))
+		return
+	}
+	dTag, e := a.ethNode.DTag()
+	if e != nil {
+		JSON(c, "", fmt.Errorf("query failed(%w)", e))
+		return
+	}
+	message, e := dTag.GetTagMessage(&bind.CallOpts{Pending: true}, "video", j.No)
+	if e != nil {
+		JSON(c, "", fmt.Errorf("query failed(%w)", e))
+		return
+	}
+
+	if message.Size.Int64() > 0 {
+		JSON(c, message.Value[0], nil)
+		return
+	}
+	JSON(c, "", nil)
 }
 
 // JSON ...

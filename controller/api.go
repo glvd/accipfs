@@ -80,16 +80,14 @@ func (a *API) routeList() {
 	api := a.eng.Group("/api")
 	api.GET("/ping", a.ping)
 	g := api.Group(a.cfg.API.Version)
-	g.Handle(http.MethodGet, "/get", a.get)
 	g.Handle(http.MethodGet, "/id", a.id)
 
 	if a.cfg.Debug {
-		g.GET("/debug", s.Debug())
+		g.GET("/debug", a.debug)
 	}
 
 	v0 := g.Group("v0")
-	v0.POST("/info", s.Info())
-	v0.GET("/get", s.Get())
+	v0.GET("/get", a.get)
 }
 
 // Stop ...
@@ -116,6 +114,11 @@ func ipfsGetURL(uri string) string {
 func (a *API) ping(c *gin.Context) {
 	ping, err := a.Ping(&core.PingReq{})
 	JSON(c, ping, err)
+}
+
+func (a *API) debug(c *gin.Context) {
+	uri := c.Query("uri")
+	c.Redirect(http.StatusMovedPermanently, ipfsGetURL(uri))
 }
 
 // JSON ...

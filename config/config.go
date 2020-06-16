@@ -19,6 +19,7 @@ const _dataDirETH = ".eth"
 const _dataDirIPFS = ".ipfs"
 const _dataDirCache = ".cache"
 const _localGateway = "http://127.0.0.1:%d"
+
 const _ipfsGateway = "/ip4/127.0.0.1/tcp/%d"
 
 // DefaultNodeContractAddr ...

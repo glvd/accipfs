@@ -45,12 +45,15 @@ func (a *API) ID(req *core.IDReq) (*core.IDResp, error) {
 
 // New ...
 func newAPI(cfg *config.Config, controller *Controller) core.API {
+	eng := gin.Default()
 	return &API{
 		cfg:      cfg,
 		ethNode:  controller.services[IndexETH].(*nodeBinETH),
 		ipfsNode: controller.services[IndexIPFS].(*nodeBinIPFS),
-		eng:      gin.Default(),
-		serv:     &http.Server{},
+		eng:      eng,
+		serv: &http.Server{
+			Handler: eng,
+		},
 	}
 }
 
@@ -69,6 +72,10 @@ func (a *API) Start() error {
 	}
 	go a.serv.Serve(l)
 	return nil
+}
+
+func (a *API) routeList() {
+
 }
 
 // Stop ...

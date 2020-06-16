@@ -8,6 +8,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/glvd/accipfs/config"
 	"github.com/glvd/accipfs/core"
+	"go.uber.org/atomic"
 	"net"
 	"net/http"
 )
@@ -18,9 +19,11 @@ type API struct {
 	eng        *gin.Engine
 	listener   net.Listener
 	serv       *http.Server
+	ready      *atomic.Bool
 	controller *Controller
 	ethNode    *nodeBinETH
 	ipfsNode   *nodeBinIPFS
+	msg        func(s string)
 }
 
 // Ping ...
@@ -47,13 +50,14 @@ func (a *API) ID(req *core.IDReq) (*core.IDResp, error) {
 }
 
 // New ...
-func newAPI(cfg *config.Config, controller *Controller) core.API {
+func newAPI(cfg *config.Config, controller *Controller) *API {
 	eng := gin.Default()
 	return &API{
 		cfg:      cfg,
 		ethNode:  controller.services[IndexETH].(*nodeBinETH),
 		ipfsNode: controller.services[IndexIPFS].(*nodeBinIPFS),
 		eng:      eng,
+		ready:    atomic.NewBool(false),
 		serv: &http.Server{
 			Handler: eng,
 		},
@@ -74,6 +78,7 @@ func (a *API) Start() error {
 		return nil
 	}
 	go a.serv.Serve(l)
+	a.ready.Store(true)
 	return nil
 }
 
@@ -98,6 +103,24 @@ func (a *API) Stop() error {
 		return a.serv.Close()
 	}
 	return nil
+}
+
+// Initialize ...
+func (a *API) Initialize() error {
+	//nothing
+	return nil
+}
+
+// IsReady ...
+func (a *API) IsReady() bool {
+	return a.ready.Load()
+}
+
+// MessageHandle ...
+func (a *API) MessageHandle(f func(s string)) {
+	if f != nil {
+		a.msg = f
+	}
 }
 
 func (a *API) id(c *gin.Context) {

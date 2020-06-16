@@ -14,6 +14,8 @@ const (
 	IndexETH ServiceIndex = iota
 	// IndexIPFS ...
 	IndexIPFS
+	// IndexAPI ...
+	IndexAPI
 )
 
 // Controller ...
@@ -29,9 +31,13 @@ func New(cfg *config.Config) *Controller {
 		services: []core.ControllerService{
 			IndexETH:  newNodeBinETH(cfg),
 			IndexIPFS: newNodeBinIPFS(cfg),
+			IndexAPI:  nil,
 		},
 	}
-	c.api = newAPI(cfg, c)
+
+	api := newAPI(cfg, c)
+	c.services[IndexAPI] = api
+	c.api = api
 	c.wg = &sync.WaitGroup{}
 	return c
 }
@@ -74,6 +80,6 @@ func (c *Controller) StopRun() (e error) {
 }
 
 // API ...
-func (c *Controller) API() core.API {
+func (c *Controller) LocalAPI() core.API {
 	return c.api
 }

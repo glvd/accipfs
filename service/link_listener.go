@@ -14,16 +14,17 @@ type tcpListener struct {
 	protocol string
 	bindPort int
 	port     int
-	connBack func(conn net.Conn)
+	cb       func(conn net.Conn)
 	pool     *ants.Pool
 }
 
 // NewLinkListener ...
-func NewLinkListener(cfg *config.Config) core.Listener {
+func NewLinkListener(cfg *config.Config, cb func(conn net.Conn)) core.Listener {
 	l := &tcpListener{
 		protocol: "tcp",
 		bindPort: cfg.Node.BindPort,
 		port:     cfg.Node.Port,
+		cb:       cb,
 	}
 	pool, err := ants.NewPool(cfg.Node.PoolMax)
 	if err != nil {
@@ -56,20 +57,13 @@ func (h *tcpListener) Listen() (err error) {
 		if err != nil {
 			continue
 		}
-		if h.connBack != nil {
+		if h.cb != nil {
 			h.pool.Submit(func() {
-				h.connBack(conn)
+				h.cb(conn)
 			})
 			continue
 		}
 		//no callback closed
 		conn.Close()
-	}
-}
-
-// Accept ...
-func (h *tcpListener) Accept(f func(conn net.Conn)) {
-	if f != nil {
-		h.connBack = f
 	}
 }

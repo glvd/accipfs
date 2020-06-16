@@ -15,6 +15,8 @@ type API struct {
 	listener   net.Listener
 	serv       *http.Server
 	controller *Controller
+	ethNode    *nodeBinETH
+	ipfsNode   *nodeBinIPFS
 }
 
 // Ping ...
@@ -24,16 +26,17 @@ func (a *API) Ping(req *core.PingReq) (*core.PingResp, error) {
 
 // ID ...
 func (a *API) ID(req *core.IDReq) (*core.IDResp, error) {
-	panic("implement me")
+
 }
 
 // New ...
 func newAPI(cfg *config.Config, controller *Controller) core.API {
 	return &API{
-		cfg:        cfg,
-		controller: controller,
-		eng:        gin.Default(),
-		serv:       &http.Server{},
+		cfg:      cfg,
+		ethNode:  controller.services[IndexETH].(*nodeBinETH),
+		ipfsNode: controller.services[IndexIPFS].(*nodeBinIPFS),
+		eng:      gin.Default(),
+		serv:     &http.Server{},
 	}
 }
 

@@ -5,6 +5,15 @@ import (
 	"net/http"
 )
 
+// LinkerRPC ...
+type LinkerRPC interface {
+	Ping(r *http.Request, req *core.PingReq, resp *core.PingResp) error
+	ID(r *http.Request, req *core.IDReq, resp *core.IDResp) error
+	Add(r *http.Request, req *core.AddReq, resp *core.AddResp) error
+	Get(r *http.Request, req *core.GetReq, resp *core.GetResp) error
+	Pay(r *http.Request, req *core.PayReq, resp *core.PayResp) error
+}
+
 type adapter struct {
 	api        core.API
 	controller *Controller
@@ -35,7 +44,7 @@ func (a adapter) Pay(r *http.Request, req *core.PayReq, resp *core.PayResp) erro
 	panic("implement me")
 }
 
-func newAdapter(api core.API) core.LinkerRPC {
+func newAdapter(api core.API) LinkerRPC {
 	return &adapter{
 		api: api,
 	}

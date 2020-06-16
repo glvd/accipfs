@@ -2,6 +2,7 @@ package controller
 
 import (
 	"context"
+	"encoding/json"
 	"github.com/gin-gonic/gin"
 	"github.com/glvd/accipfs/config"
 	"github.com/glvd/accipfs/core"
@@ -75,7 +76,9 @@ func (a *API) Start() error {
 }
 
 func (a *API) routeList() {
-
+	g := a.eng.Group("api/" + a.cfg.API.Version)
+	g.Handle(http.MethodGet, "/get", a.get)
+	g.Handle(http.MethodGet, "/id", a.id)
 }
 
 // Stop ...
@@ -84,4 +87,37 @@ func (a *API) Stop() error {
 		return a.serv.Close()
 	}
 	return nil
+}
+
+func (a *API) id(c *gin.Context) {
+	id, err := a.ID(&core.IDReq{})
+	JSON(c, id, err)
+}
+
+func (a *API) get(c *gin.Context) {
+	c.Redirect(http.StatusMovedPermanently, "")
+}
+
+// JSON ...
+func JSON(c *gin.Context, v interface{}, e error) {
+	if e != nil {
+		c.JSON(http.StatusOK, gin.H{
+			"status": "failed",
+			"error":  e.Error(),
+		})
+		return
+	}
+	marshal, e := json.Marshal(v)
+	if e != nil {
+		c.JSON(http.StatusOK, gin.H{
+			"status": "failed",
+			"error":  e.Error(),
+		})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{
+		"status":  "success",
+		"message": marshal,
+	})
+
 }

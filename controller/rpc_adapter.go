@@ -7,7 +7,6 @@ import (
 
 // JSONRPCAdapter ...
 type JSONRPCAdapter interface {
-	//Ping(r *http.Request, req *core.PingReq, resp *core.PingResp) error
 	ID(r *http.Request, req *core.IDReq, resp *core.IDResp) error
 	Add(r *http.Request, req *core.AddReq, resp *core.AddResp) error
 	Get(r *http.Request, req *core.GetReq, resp *core.GetResp) error

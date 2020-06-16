@@ -160,7 +160,7 @@ func JSON(c *gin.Context, v interface{}, e error) {
 		})
 		return
 	}
-	marshal, e := json.Marshal(v)
+	m, e := json.Marshal(v)
 	if e != nil {
 		c.JSON(http.StatusOK, gin.H{
 			"status": "failed",
@@ -170,7 +170,7 @@ func JSON(c *gin.Context, v interface{}, e error) {
 	}
 	c.JSON(http.StatusOK, gin.H{
 		"status":  "success",
-		"message": marshal,
+		"message": m,
 	})
 
 }

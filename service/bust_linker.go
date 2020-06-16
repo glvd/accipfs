@@ -53,11 +53,6 @@ func (l *BustLinker) Start() {
 	l.controller.Run()
 }
 
-func (l *BustLinker) getPeers(wg *sync.WaitGroup, node core.Node) bool {
-
-	return true
-}
-
 // Run ...
 func (l *BustLinker) Run() {
 	if l.lock.Load() {

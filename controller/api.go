@@ -3,6 +3,7 @@ package controller
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/glvd/accipfs/config"
 	"github.com/glvd/accipfs/core"
@@ -76,9 +77,19 @@ func (a *API) Start() error {
 }
 
 func (a *API) routeList() {
-	g := a.eng.Group("api/" + a.cfg.API.Version)
+	api := a.eng.Group("/api")
+	api.GET("/ping", a.ping)
+	g := api.Group(a.cfg.API.Version)
 	g.Handle(http.MethodGet, "/get", a.get)
 	g.Handle(http.MethodGet, "/id", a.id)
+
+	if a.cfg.Debug {
+		g.GET("/debug", s.Debug())
+	}
+
+	v0 := g.Group("v0")
+	v0.POST("/info", s.Info())
+	v0.GET("/get", s.Get())
 }
 
 // Stop ...
@@ -95,7 +106,16 @@ func (a *API) id(c *gin.Context) {
 }
 
 func (a *API) get(c *gin.Context) {
-	c.Redirect(http.StatusMovedPermanently, "")
+	c.Redirect(http.StatusMovedPermanently, ipfsGetURL("api/v0/get"))
+}
+
+func ipfsGetURL(uri string) string {
+	return fmt.Sprintf("%s/%s", config.IPFSAddrHTTP(), uri)
+}
+
+func (a *API) ping(c *gin.Context) {
+	ping, err := a.Ping(&core.PingReq{})
+	JSON(c, ping, err)
 }
 
 // JSON ...

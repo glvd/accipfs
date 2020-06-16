@@ -98,6 +98,9 @@ func (s *httpHandle) Get() func(context *gin.Context) {
 		context.Redirect(http.StatusMovedPermanently, spliceGetURL("api/v0/get"))
 	}
 }
+func spliceGetURL(uri string) string {
+	return fmt.Sprintf("%s/%s", config.IPFSAddrHTTP(), uri)
+}
 
 // Debug ...
 func (s *httpHandle) Debug() func(context *gin.Context) {
@@ -105,10 +108,6 @@ func (s *httpHandle) Debug() func(context *gin.Context) {
 		uri := context.Query("uri")
 		context.Redirect(http.StatusMovedPermanently, spliceGetURL(uri))
 	}
-}
-
-func spliceGetURL(uri string) string {
-	return fmt.Sprintf("%s/%s", config.IPFSAddrHTTP(), uri)
 }
 
 // Handler ...

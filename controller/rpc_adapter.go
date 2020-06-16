@@ -5,9 +5,9 @@ import (
 	"net/http"
 )
 
-// LinkerRPC ...
-type LinkerRPC interface {
-	Ping(r *http.Request, req *core.PingReq, resp *core.PingResp) error
+// JSONRPCAdapter ...
+type JSONRPCAdapter interface {
+	//Ping(r *http.Request, req *core.PingReq, resp *core.PingResp) error
 	ID(r *http.Request, req *core.IDReq, resp *core.IDResp) error
 	Add(r *http.Request, req *core.AddReq, resp *core.AddResp) error
 	Get(r *http.Request, req *core.GetReq, resp *core.GetResp) error
@@ -19,14 +19,14 @@ type adapter struct {
 	controller *Controller
 }
 
-// Ping ...
-func (a adapter) Ping(r *http.Request, req *core.PingReq, resp *core.PingResp) error {
-	panic("implement me")
-}
-
 // ID ...
 func (a adapter) ID(r *http.Request, req *core.IDReq, resp *core.IDResp) error {
-	panic("implement me")
+	id, err := a.api.ID(req)
+	if err != nil {
+		return err
+	}
+	resp = id
+	return nil
 }
 
 // Add ...
@@ -44,7 +44,7 @@ func (a adapter) Pay(r *http.Request, req *core.PayReq, resp *core.PayResp) erro
 	panic("implement me")
 }
 
-func newAdapter(api core.API) LinkerRPC {
+func newAdapter(api core.API) JSONRPCAdapter {
 	return &adapter{
 		api: api,
 	}

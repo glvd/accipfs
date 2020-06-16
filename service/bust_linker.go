@@ -1,6 +1,7 @@
 package service
 
 import (
+	"fmt"
 	"github.com/glvd/accipfs/account"
 	"github.com/glvd/accipfs/cache"
 	"github.com/glvd/accipfs/config"
@@ -56,7 +57,7 @@ func (l *BustLinker) Start() {
 // Run ...
 func (l *BustLinker) Run() {
 	if l.lock.Load() {
-		output("bust linker", "the previous task has not been completed")
+		fmt.Println(module, "the previous task has not been completed")
 		return
 	}
 	l.lock.Store(true)
@@ -66,7 +67,7 @@ func (l *BustLinker) Run() {
 		return true
 	})
 	wg.Wait()
-	output("bust linker", "syncing done")
+	fmt.Println(module, "syncing done")
 }
 
 // WaitingForReady ...

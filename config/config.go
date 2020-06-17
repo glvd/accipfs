@@ -170,6 +170,22 @@ func Global() Config {
 // Default ...
 func Default() *Config {
 	def := &Config{
+		Node: NodeConfig{
+			Port:          10606,
+			BindPort:      0,
+			BackupSeconds: 300,
+			PoolMax:       5000,
+		},
+		API: APIConfig{
+			Port:        10808,
+			Version:     "v0",
+			UseTLS:      false,
+			TLS:         TLSCertificate{},
+			Certificate: nil,
+			Timeout:     30,
+		},
+		UseTLS:     false,
+		TLS:        TLSCertificate{},
 		Schema:     "http",
 		Path:       WorkDir,
 		Account:    "",
@@ -190,6 +206,8 @@ func Default() *Config {
 		Interval: 30,
 		NodeType: 0x01,
 		Limit:    500,
+		Debug:    false,
+		BootNode: nil,
 	}
 	if _config == nil {
 		_config = def

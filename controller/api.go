@@ -74,6 +74,7 @@ func (a *API) Start() error {
 	if err != nil {
 		return err
 	}
+	a.registerRoutes()
 	if a.cfg.API.UseTLS {
 		go a.serv.ServeTLS(l, a.cfg.API.TLS.KeyFile, a.cfg.API.TLS.KeyPassFile)
 		return nil
@@ -83,7 +84,7 @@ func (a *API) Start() error {
 	return nil
 }
 
-func (a *API) routeList() {
+func (a *API) registerRoutes() {
 	api := a.eng.Group("/api")
 	api.GET("/ping", a.ping)
 	if a.cfg.Debug {

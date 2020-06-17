@@ -92,10 +92,6 @@ func (a *API) routeList() {
 
 	v0 := api.Group(a.cfg.API.Version)
 	v0.GET("/id", a.id)
-
-	if a.cfg.Debug {
-		api.GET("/debug", a.debug)
-	}
 	v0.GET("/get", a.get)
 	v0.GET("/query", a.query)
 }

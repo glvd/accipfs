@@ -15,9 +15,9 @@ func daemonCmd() *cobra.Command {
 		Run: func(cmd *cobra.Command, args []string) {
 			config.Initialize()
 			cfg := config.Global()
-			s, e := service.New(&cfg)
-			if e != nil {
-				panic(e)
+			linker, err := service.NewBustLinker(&cfg)
+			if err != nil {
+				panic(err)
 			}
 			dns, e := mdns.New(&cfg, func(c *mdns.OptionConfig) {
 				c.Service = "_bustlinker._udp"
@@ -35,13 +35,10 @@ func daemonCmd() *cobra.Command {
 			}()
 			server.Start()
 			defer func() {
-				if err := s.Stop(); err != nil {
-					panic(err)
-				}
+				linker.Stop()
 			}()
-			if err := s.Start(); err != nil {
-				panic(err)
-			}
+			linker.Start()
+
 		},
 	}
 }

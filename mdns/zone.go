@@ -9,7 +9,6 @@ import (
 
 // OptionConfig ...
 type OptionConfig struct {
-	//Zone              string
 	NetInterface      *net.Interface
 	IPv4Addr          *net.UDPAddr
 	IPv6Addr          *net.UDPAddr
@@ -17,9 +16,6 @@ type OptionConfig struct {
 	WildcardAddrIPv6  *net.UDPAddr
 	LogEmptyResponses bool
 	HostName          string
-	instanceAddr      string
-	serviceAddr       string
-	enumAddr          string
 	CustomPort        int
 	Port              uint16
 	TTL               uint32
@@ -29,6 +25,9 @@ type OptionConfig struct {
 	Service           string
 	Enum              string
 	Domain            string
+	instanceAddr      string
+	serviceAddr       string
+	enumAddr          string
 }
 
 // OptionConfigFunc ...

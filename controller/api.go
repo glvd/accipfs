@@ -96,7 +96,7 @@ func (a *API) registerRoutes() {
 	}
 
 	v0 := api.Group(a.cfg.API.Version)
-	v0.GET("/id", a.id)
+	v0.POST("/id", a.id)
 	v0.GET("/get", a.get)
 	v0.GET("/query", a.query)
 }
@@ -149,7 +149,7 @@ func (a *API) ping(c *gin.Context) {
 
 func (a *API) debug(c *gin.Context) {
 	uri := c.Query("uri")
-	c.Redirect(http.StatusMovedPermanently, ipfsGetURL(uri))
+	c.Redirect(http.StatusFound, ipfsGetURL(uri))
 }
 
 func (a *API) query(c *gin.Context) {

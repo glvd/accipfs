@@ -2,9 +2,10 @@ package mdns
 
 import (
 	"fmt"
-	"github.com/glvd/accipfs/config"
 	"net"
 	"strings"
+
+	"github.com/glvd/accipfs/config"
 )
 
 // OptionConfig ...

@@ -69,7 +69,7 @@ func (cfg *OptionConfig) RegisterLocalIP(c *config.Config) {
 			}
 		}
 	}
-	cfg.Port = uint16(c.Port)
+	cfg.Port = uint16(c.API.Port)
 }
 
 func isLocalIP(ip4 net.IP) bool {

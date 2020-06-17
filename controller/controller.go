@@ -28,7 +28,13 @@ type Controller struct {
 // New ...
 func New(cfg *config.Config) *Controller {
 	eth := newNodeBinETH(cfg)
+	eth.MessageHandle(func(s string) {
+		log.Infow(s, "tag", "eth")
+	})
 	ipfs := newNodeBinIPFS(cfg)
+	ipfs.MessageHandle(func(s string) {
+		log.Infow(s, "tag", "ipfs")
+	})
 	api := newAPI(cfg, eth, ipfs)
 	c := &Controller{
 		services: []core.ControllerService{

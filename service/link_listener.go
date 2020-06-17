@@ -18,7 +18,7 @@ type tcpListener struct {
 	pool     *ants.Pool
 }
 
-// NewLinkListener ...
+// NewLinkListener listen other client connections
 func NewLinkListener(cfg *config.Config, cb func(conn net.Conn)) core.Listener {
 	l := &tcpListener{
 		protocol: "tcp",

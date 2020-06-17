@@ -3,7 +3,6 @@ package service
 import (
 	"fmt"
 	"github.com/glvd/accipfs/account"
-	"github.com/glvd/accipfs/cache"
 	"github.com/glvd/accipfs/config"
 	"github.com/glvd/accipfs/controller"
 	"github.com/glvd/accipfs/core"
@@ -20,7 +19,6 @@ type BustLinker struct {
 	id         core.Node
 	nodes      core.NodeManager
 	tasks      task.Task
-	hashes     cache.HashCache
 	lock       *atomic.Bool
 	self       *account.Account
 	cfg        *config.Config
@@ -33,9 +31,8 @@ type BustLinker struct {
 // NewBustLinker ...
 func NewBustLinker(cfg *config.Config) (linker *BustLinker, err error) {
 	linker = &BustLinker{
-		hashes: cache.NewHashCache(cfg),
-		lock:   atomic.NewBool(false),
-		cfg:    cfg,
+		lock: atomic.NewBool(false),
+		cfg:  cfg,
 	}
 
 	selfAcc, err := account.LoadAccount(cfg)
@@ -50,8 +47,8 @@ func NewBustLinker(cfg *config.Config) (linker *BustLinker, err error) {
 
 // Start ...
 func (l *BustLinker) Start() {
-	go l.listener.Listen()
 	l.controller.Run()
+	go l.listener.Listen()
 }
 
 // Run ...

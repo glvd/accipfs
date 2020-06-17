@@ -96,7 +96,8 @@ func (n *nodeBinETH) Stop() error {
 
 // Start ...
 func (n *nodeBinETH) Start() error {
-	if core.NodeAccount.CompareInt(n.cfg.NodeType) {
+	_, err := os.Stat(filepath.Join(n.cfg.Path, "password"))
+	if core.NodeAccount.CompareInt(n.cfg.NodeType) && err == nil {
 		n.cmd = exec.CommandContext(n.ctx, n.name,
 			"--datadir", config.DataDirETH(),
 			"--networkid", strconv.FormatInt(n.genesis.Config.ChainID, 10),
@@ -134,7 +135,7 @@ func (n *nodeBinETH) Start() error {
 	//	go general.PipeDummy(n.ctx, module, m)
 	//}
 
-	err := n.cmd.Start()
+	err = n.cmd.Start()
 	if err != nil {
 		return err
 	}

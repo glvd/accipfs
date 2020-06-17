@@ -67,12 +67,12 @@ func (c *client) RequestURL(uri string) string {
 	return strings.Join([]string{c.host(), uri}, "/")
 }
 
-func (c *client) do(uri string, req, resp interface{}) error {
+func (c *client) do(uri string, method string, req, resp interface{}) error {
 	reader, err := requestReader(req)
 	if err != nil {
 		return err
 	}
-	request, err := http.NewRequest(http.MethodPost, c.RequestURL(uri), reader)
+	request, err := http.NewRequest(method, c.RequestURL(uri), reader)
 	if err != nil {
 		return err
 	}
@@ -91,7 +91,7 @@ func Ping(req *core.PingReq) (resp *core.PingResp, err error) {
 // Ping ...
 func (c *client) Ping(req *core.PingReq) (resp *core.PingResp, err error) {
 	resp = new(core.PingResp)
-	err = c.do("ping", req, resp)
+	err = c.do("ping", http.MethodGet, req, resp)
 	return
 }
 
@@ -103,7 +103,7 @@ func ID(req *core.IDReq) (resp *core.IDResp, err error) {
 // ID ...
 func (c *client) ID(req *core.IDReq) (resp *core.IDResp, err error) {
 	resp = new(core.IDResp)
-	err = c.do("id", req, resp)
+	err = c.do("id", http.MethodGet, req, resp)
 	return
 }
 

@@ -27,16 +27,16 @@ type Controller struct {
 
 // New ...
 func New(cfg *config.Config) *Controller {
+	eth := newNodeBinETH(cfg)
+	ipfs := newNodeBinIPFS(cfg)
+	api := newAPI(cfg, eth, ipfs)
 	c := &Controller{
 		services: []core.ControllerService{
-			IndexETH:  newNodeBinETH(cfg),
-			IndexIPFS: newNodeBinIPFS(cfg),
-			IndexAPI:  nil,
+			IndexETH:  eth,
+			IndexIPFS: ipfs,
+			IndexAPI:  api,
 		},
 	}
-
-	api := newAPI(cfg, c)
-	c.services[IndexAPI] = api
 	c.api = api
 	c.wg = &sync.WaitGroup{}
 	return c

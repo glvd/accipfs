@@ -55,7 +55,6 @@ func responseDecoder(rc io.ReadCloser, resp interface{}) error {
 	if r.Error != "" {
 		return errors.New(r.Error)
 	}
-	fmt.Println("message:", r.Message)
 	return json.Unmarshal([]byte(r.Message), resp)
 }
 

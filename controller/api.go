@@ -199,7 +199,7 @@ func JSON(c *gin.Context, v interface{}, e error) {
 	}
 	c.JSON(http.StatusOK, gin.H{
 		"status":  "success",
-		"message": m,
+		"message": string(m),
 	})
 
 }

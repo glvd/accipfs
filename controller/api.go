@@ -28,7 +28,9 @@ type API struct {
 
 // Ping ...
 func (a *API) Ping(req *core.PingReq) (*core.PingResp, error) {
-	panic("implement me")
+	return &core.PingResp{
+		Resp: "pong",
+	}, nil
 }
 
 // ID ...

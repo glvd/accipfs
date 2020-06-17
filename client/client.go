@@ -25,6 +25,9 @@ type client struct {
 }
 
 func requestQuery(url string, req url.Values) string {
+	if req == nil {
+		return url
+	}
 	return url + "?" + req.Encode()
 }
 func requestReader(req interface{}) (io.Reader, error) {
@@ -105,7 +108,7 @@ func Ping(req *core.PingReq) (resp *core.PingResp, err error) {
 // Ping ...
 func (c *client) Ping(req *core.PingReq) (resp *core.PingResp, err error) {
 	resp = new(core.PingResp)
-	err = c.doPost("ping", req, resp)
+	err = c.doGet("ping", nil, resp)
 	return
 }
 

@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/glvd/accipfs/core"
 	"github.com/glvd/accipfs/general"
@@ -43,7 +44,7 @@ func InitGlobalClient(cfg *config.Config) {
 // New ...
 func New(cfg *config.APIConfig) core.API {
 	c := &http.Client{}
-	c.Timeout = cfg.Timeout
+	c.Timeout = cfg.Timeout * time.Minute
 	return &client{
 		cli: c,
 		cfg: cfg,

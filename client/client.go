@@ -3,6 +3,7 @@ package client
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"github.com/glvd/accipfs/config"
 	"io"
@@ -24,6 +25,12 @@ type client struct {
 	cli *http.Client
 }
 
+type jsonResp struct {
+	Status  string `json:"status"`
+	Error   string `json:"error"`
+	Message string `json:"message"`
+}
+
 func requestQuery(url string, req url.Values) string {
 	if req == nil {
 		return url
@@ -40,7 +47,15 @@ func requestReader(req interface{}) (io.Reader, error) {
 
 func responseDecoder(rc io.ReadCloser, resp interface{}) error {
 	decoder := json.NewDecoder(rc)
-	return decoder.Decode(resp)
+	r := &jsonResp{}
+	err := decoder.Decode(r)
+	if err != nil {
+		return err
+	}
+	if r.Error != "" {
+		return errors.New(r.Error)
+	}
+	return json.Unmarshal([]byte(r.Message), resp)
 }
 
 // InitGlobalClient ...

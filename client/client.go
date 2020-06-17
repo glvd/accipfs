@@ -7,6 +7,7 @@ import (
 	"github.com/glvd/accipfs/config"
 	"io"
 	"net/http"
+	"net/url"
 	"strconv"
 	"strings"
 	"time"
@@ -23,6 +24,9 @@ type client struct {
 	cli *http.Client
 }
 
+func requestQuery(url string, req url.Values) string {
+	return url + "?" + req.Encode()
+}
 func requestReader(req interface{}) (io.Reader, error) {
 	marshal, err := json.Marshal(req)
 	if err != nil {
@@ -66,13 +70,23 @@ func (c *client) RequestURL(uri string) string {
 	}
 	return strings.Join([]string{c.host(), uri}, "/")
 }
-
-func (c *client) do(uri string, method string, req, resp interface{}) error {
+func (c *client) doGet(uri string, req url.Values, resp interface{}) error {
+	request, err := http.NewRequest(http.MethodGet, requestQuery(c.RequestURL(uri), req), nil)
+	if err != nil {
+		return err
+	}
+	response, err := c.cli.Do(request)
+	if err != nil {
+		return err
+	}
+	return responseDecoder(response.Body, resp)
+}
+func (c *client) doPost(uri string, req, resp interface{}) error {
 	reader, err := requestReader(req)
 	if err != nil {
 		return err
 	}
-	request, err := http.NewRequest(method, c.RequestURL(uri), reader)
+	request, err := http.NewRequest(http.MethodPost, c.RequestURL(uri), reader)
 	if err != nil {
 		return err
 	}
@@ -91,7 +105,7 @@ func Ping(req *core.PingReq) (resp *core.PingResp, err error) {
 // Ping ...
 func (c *client) Ping(req *core.PingReq) (resp *core.PingResp, err error) {
 	resp = new(core.PingResp)
-	err = c.do("ping", http.MethodGet, req, resp)
+	err = c.doPost("ping", req, resp)
 	return
 }
 
@@ -103,7 +117,7 @@ func ID(req *core.IDReq) (resp *core.IDResp, err error) {
 // ID ...
 func (c *client) ID(req *core.IDReq) (resp *core.IDResp, err error) {
 	resp = new(core.IDResp)
-	err = c.do("id", http.MethodGet, req, resp)
+	err = c.doPost("id", req, resp)
 	return
 }
 

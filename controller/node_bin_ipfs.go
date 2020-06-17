@@ -37,6 +37,13 @@ func (n *nodeBinIPFS) MessageHandle(f func(s string)) {
 	n.msg = f
 }
 
+// Msg ...
+func (n *nodeBinIPFS) Msg(s string) {
+	if n.msg != nil {
+		n.msg(s)
+	}
+}
+
 // Start ...
 func (n *nodeBinIPFS) Start() error {
 	n.cmd = exec.CommandContext(n.ctx, n.name, "daemon", "--routing", "none")
@@ -87,7 +94,7 @@ func (n *nodeBinIPFS) Initialize() error {
 	}
 	version := n.getVersion()
 	logI("ipfs init", "log", string(out), "version", version)
-	n.msg(string(out))
+	n.Msg(string(out))
 	if version[1] < 5 {
 		cmd = exec.Command(n.name, "config", "Swarm.EnableAutoNATService", "--bool", "true")
 		out, err = cmd.CombinedOutput()
@@ -95,14 +102,14 @@ func (n *nodeBinIPFS) Initialize() error {
 			return fmt.Errorf("config(nat):%w", err)
 		}
 	}
-	n.msg(string(out))
+	n.Msg(string(out))
 	logI("ipfs init config set", "log", string(out))
 	cmd = exec.Command(n.name, "config", "Swarm.EnableRelayHop", "--bool", "true")
 	out, err = cmd.CombinedOutput()
 	if err != nil {
 		return fmt.Errorf("config(relay):%w", err)
 	}
-	n.msg(string(out))
+	n.Msg(string(out))
 	logI("ipfs init config set", "log", string(out))
 	logI("ipfs init end")
 	return nil

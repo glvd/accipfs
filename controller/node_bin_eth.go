@@ -78,6 +78,13 @@ func (n *nodeBinETH) MessageHandle(f func(s string)) {
 	}
 }
 
+// Msg ...
+func (n *nodeBinETH) Msg(s string) {
+	if n.msg != nil {
+		n.msg(s)
+	}
+}
+
 // Stop ...
 func (n *nodeBinETH) Stop() error {
 	if n.cmd != nil {
@@ -146,7 +153,7 @@ func (n *nodeBinETH) Initialize() error {
 	if err != nil {
 		return fmt.Errorf("eth init:%w", err)
 	}
-	n.msg(string(out))
+	n.Msg(string(out))
 	return nil
 }
 

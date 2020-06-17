@@ -103,7 +103,7 @@ func ID(req *core.IDReq) (resp *core.IDResp, err error) {
 // ID ...
 func (c *client) ID(req *core.IDReq) (resp *core.IDResp, err error) {
 	resp = new(core.IDResp)
-	err = c.do("ping", req, resp)
+	err = c.do("id", req, resp)
 	return
 }
 

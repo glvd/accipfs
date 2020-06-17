@@ -85,14 +85,16 @@ func (a *API) Start() error {
 func (a *API) routeList() {
 	api := a.eng.Group("/api")
 	api.GET("/ping", a.ping)
-	g := api.Group(a.cfg.API.Version)
-	g.Handle(http.MethodGet, "/id", a.id)
-
 	if a.cfg.Debug {
-		g.GET("/debug", a.debug)
+		api.GET("/debug", a.debug)
 	}
 
-	v0 := g.Group("v0")
+	v0 := api.Group(a.cfg.API.Version)
+	v0.Handle(http.MethodGet, "/id", a.id)
+
+	if a.cfg.Debug {
+		api.GET("/debug", a.debug)
+	}
 	v0.GET("/get", a.get)
 	v0.GET("/query", a.query)
 }

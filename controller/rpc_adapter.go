@@ -5,7 +5,7 @@ import (
 	"net/http"
 )
 
-// JSONRPCAdapter ...
+// JSONRPCAdapter //todo
 type JSONRPCAdapter interface {
 	ID(r *http.Request, req *core.IDReq, resp *core.IDResp) error
 	Add(r *http.Request, req *core.AddReq, resp *core.AddResp) error

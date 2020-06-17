@@ -149,20 +149,9 @@ func (n *nodeBinIPFS) getVersion() (ver [3]int) {
 
 // IsReady ...
 func (n *nodeBinIPFS) IsReady() bool {
-	ma, err := multiaddr.NewMultiaddr(config.IPFSAddr())
-	if err != nil {
-		return false
-	}
-	api, e := httpapi.NewApi(ma)
-	if e != nil {
-		log.Errorw("new serviceNode ipfs", "error", e)
-		return false
-	}
-	n.api = api
-
 	ctx, cancel := context.WithTimeout(context.TODO(), 3*time.Second)
 	defer cancel()
-	_, err = n.ID(ctx)
+	_, err := n.ID(ctx)
 	if err != nil {
 		return false
 	}
@@ -170,10 +159,26 @@ func (n *nodeBinIPFS) IsReady() bool {
 	return true
 }
 
+// API ...
+func (n *nodeBinIPFS) API() *httpapi.HttpApi {
+	if n.api == nil {
+		ma, err := multiaddr.NewMultiaddr(config.IPFSAddr())
+		if err != nil {
+			panic(err)
+		}
+		api, e := httpapi.NewApi(ma)
+		if e != nil {
+			panic(e)
+		}
+		n.api = api
+	}
+	return n.api
+}
+
 // ID get self serviceNode info
 func (n *nodeBinIPFS) ID(ctx context.Context) (pid *core.DataStoreInfo, e error) {
 	pid = &core.DataStoreInfo{}
-	e = n.api.Request("id").Exec(ctx, pid)
+	e = n.API().Request("id").Exec(ctx, pid)
 	if e != nil {
 		return nil, e
 	}
@@ -183,21 +188,21 @@ func (n *nodeBinIPFS) ID(ctx context.Context) (pid *core.DataStoreInfo, e error)
 // PinAdd ...
 func (n *nodeBinIPFS) PinAdd(ctx context.Context, hash string) (e error) {
 	p := path.New(hash)
-	return n.api.Pin().Add(ctx, p, options.Pin.Recursive(true))
+	return n.API().Pin().Add(ctx, p, options.Pin.Recursive(true))
 }
 
 // PinLS ...
 func (n *nodeBinIPFS) PinLS(ctx context.Context) (pins []iface.Pin, e error) {
-	return n.api.Pin().Ls(ctx, options.Pin.Type.Recursive())
+	return n.API().Pin().Ls(ctx, options.Pin.Type.Recursive())
 }
 
 // PinRm ...
 func (n *nodeBinIPFS) PinRm(ctx context.Context, hash string) (e error) {
 	p := path.New(hash)
-	return n.api.Pin().Rm(ctx, p)
+	return n.API().Pin().Rm(ctx, p)
 }
 
 // SwarmPeers ...
 func (n *nodeBinIPFS) SwarmPeers(ctx context.Context) ([]iface.ConnectionInfo, error) {
-	return n.api.Swarm().Peers(ctx)
+	return n.API().Swarm().Peers(ctx)
 }

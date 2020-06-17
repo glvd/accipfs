@@ -6,7 +6,7 @@ type PingReq struct {
 
 // PingResp ...
 type PingResp struct {
-	Resp string
+	Data string
 }
 
 // PayReq ...

@@ -29,7 +29,7 @@ type API struct {
 // Ping ...
 func (a *API) Ping(req *core.PingReq) (*core.PingResp, error) {
 	return &core.PingResp{
-		Resp: "pong",
+		Data: "pong",
 	}, nil
 }
 

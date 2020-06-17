@@ -38,7 +38,7 @@ func nodeConnectCmd() *cobra.Command {
 					return
 				}
 
-				if err := client.AddPeer(url, &remote.Node); err != nil {
+				if err := client.AddPeer(url, remote.Node); err != nil {
 					fmt.Printf("add peer error: %v\n", err)
 					return
 				}
@@ -58,14 +58,14 @@ func nodePeerCmd() *cobra.Command {
 		Run: func(cmd *cobra.Command, args []string) {
 			config.Initialize()
 			cfg := config.Global()
-			url := fmt.Sprintf("http://localhost:%d/rpc", cfg.Port)
+			url := fmt.Sprintf("http://localhost:%d/rpc", cfg.API.Port)
 			reply := new([]*core.Node)
 			node := new(core.Node)
 			if err := general.RPCPost(url, "BustLinker.Peers", node, reply); err != nil {
 				fmt.Println("peers error:", err.Error())
 			}
 			for _, info := range *reply {
-				fmt.Println("Peer:", info.Name)
+				fmt.Println("Peer:", info)
 			}
 			return
 		},

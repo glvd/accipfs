@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/glvd/accipfs/client"
 	"github.com/glvd/accipfs/config"
+	"github.com/glvd/accipfs/core"
 	"github.com/spf13/cobra"
 )
 
@@ -17,8 +18,9 @@ func idCmd() *cobra.Command {
 		Run: func(cmd *cobra.Command, args []string) {
 			config.Initialize()
 			cfg := config.Global()
-			url := fmt.Sprintf("http://localhost:%d/rpc", cfg.Port)
-			id, err := client.ID(url)
+			client.InitGlobalClient(&cfg)
+			//url := fmt.Sprintf("http://localhost:%d/rpc", cfg.API.Port)
+			id, err := client.ID(&core.IDReq{})
 			if err != nil {
 				fmt.Printf("get local id failed error(%v)", err)
 				return

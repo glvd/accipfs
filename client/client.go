@@ -156,15 +156,15 @@ func Peers(url string, info *core.Node) ([]*core.Node, error) {
 }
 
 // AddPeer ...
-func AddPeer(url string, info *core.Node) error {
+func AddPeer(url string, node core.Node) error {
 	status := new(bool)
-	if err := general.RPCPost(url, "BustLinker.AddPeer", info, status); err != nil {
+	if err := general.RPCPost(url, "BustLinker.AddPeer", node, status); err != nil {
 		logE("remote id error", "error", err.Error())
 		return fmt.Errorf("remote id error: %w", err)
 	}
 
 	if !(*status) {
-		return fmt.Errorf("connect failed: %s", general.RPCAddress(info.Addr[0]))
+		return fmt.Errorf("connect failed: %s", general.RPCAddress(node.Addrs()[0]))
 	}
 	return nil
 }

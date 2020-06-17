@@ -51,6 +51,7 @@ func (a *API) ID(req *core.IDReq) (*core.IDResp, error) {
 
 // New ...
 func newAPI(cfg *config.Config, controller *Controller) *API {
+	gin.SetMode(gin.ReleaseMode)
 	eng := gin.Default()
 	return &API{
 		cfg:      cfg,
@@ -102,7 +103,9 @@ func (a *API) routeList() {
 // Stop ...
 func (a *API) Stop() error {
 	if a.serv != nil {
-		return a.serv.Close()
+		if err := a.serv.Shutdown(context.TODO()); err != nil {
+			return err
+		}
 	}
 	return nil
 }

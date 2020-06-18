@@ -7,6 +7,7 @@ import (
 	"github.com/glvd/accipfs/config"
 	"github.com/glvd/accipfs/core"
 	"github.com/glvd/accipfs/general"
+	"github.com/panjf2000/ants/v2"
 	"io"
 	"os"
 	"path/filepath"
@@ -15,14 +16,15 @@ import (
 )
 
 type manager struct {
-	cfg       *config.Config
-	t         *time.Ticker
-	currentTS int64
-	ts        int64
-	nodes     sync.Map
-	expNodes  sync.Map
-	path      string
-	expPath   string
+	cfg          *config.Config
+	exchangePool *ants.PoolWithFunc
+	t            *time.Ticker
+	currentTS    int64
+	ts           int64
+	nodes        sync.Map
+	expNodes     sync.Map
+	path         string
+	expPath      string
 }
 
 var _nodes = "bl.nodes"
@@ -37,7 +39,7 @@ func New(cfg *config.Config) core.NodeManager {
 		expPath: filepath.Join(cfg.Path, _expNodes),
 		t:       time.NewTicker(cfg.Node.BackupSeconds),
 	}
-
+	m.exchangePool = mustPool(ants.DefaultAntsPoolSize, m.handleConn)
 	go m.loop()
 
 	return m
@@ -169,6 +171,10 @@ func (m *manager) loop() {
 	}
 }
 
+func (m *manager) handleConn(i interface{}) {
+
+}
+
 func decodeNode(m core.NodeManager, b []byte) error {
 	nodes := map[string]jsonNode{}
 	err := json.Unmarshal(b, &nodes)
@@ -189,4 +195,12 @@ func encodeNode(node core.Node) ([]byte, error) {
 		node.ID(): {Addrs: node.Addrs()},
 	}
 	return json.Marshal(n)
+}
+
+func mustPool(size int, f func(interface{})) *ants.PoolWithFunc {
+	pf, err := ants.NewPoolWithFunc(size, f, ants.WithNonblocking(false))
+	if err != nil {
+		panic(err)
+	}
+	return pf
 }

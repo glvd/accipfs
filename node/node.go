@@ -55,3 +55,13 @@ func (n node) Addrs() []core.Addr {
 func (n node) ID() string {
 	return n.id
 }
+
+// Info ...
+func (n *node) Info() core.NodeInfo {
+	panic("implement me")
+}
+
+// Ping ...
+func (n *node) Ping() error {
+	panic("implement me")
+}

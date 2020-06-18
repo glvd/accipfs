@@ -9,8 +9,8 @@ import (
 	"github.com/portmapping/go-reuse"
 )
 
-type tcpListener struct {
-	listener *net.TCPListener
+type linkListener struct {
+	listener net.Listener
 	protocol string
 	bindPort int
 	port     int
@@ -20,7 +20,7 @@ type tcpListener struct {
 
 // NewLinkListener listen other client connections
 func NewLinkListener(cfg *config.Config, cb func(conn net.Conn)) core.Listener {
-	l := &tcpListener{
+	l := &linkListener{
 		protocol: "tcp",
 		bindPort: cfg.Node.BindPort,
 		port:     cfg.Node.Port,
@@ -35,7 +35,7 @@ func NewLinkListener(cfg *config.Config, cb func(conn net.Conn)) core.Listener {
 }
 
 // Stop ...
-func (h *tcpListener) Stop() error {
+func (h *linkListener) Stop() error {
 	if h.listener != nil {
 		return h.listener.Close()
 	}
@@ -43,7 +43,7 @@ func (h *tcpListener) Stop() error {
 }
 
 // Listen ...
-func (h *tcpListener) Listen() (err error) {
+func (h *linkListener) Listen() (err error) {
 	local := &net.TCPAddr{
 		IP:   net.IPv4zero,
 		Port: h.port,

@@ -46,12 +46,19 @@ func ConnectToNode(addr core.Addr, bind int) (core.Node, error) {
 		addrs: []core.Addr{addr},
 		conn:  tcp,
 	}, nil
-	//return nil, fmt.Errorf("filed to connect")
 }
 
 // AcceptNode ...
-func AcceptNode() {
+func AcceptNode(conn net.Conn) (core.Node, error) {
+	addr := conn.RemoteAddr()
 
+	return &node{
+		id: "",
+		addrs: []core.Addr{
+			{addr.Network()},
+		},
+		conn: tcp,
+	}, nil
 }
 
 // Addrs ...

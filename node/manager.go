@@ -8,6 +8,7 @@ import (
 	"github.com/glvd/accipfs/core"
 	"github.com/glvd/accipfs/general"
 	"github.com/panjf2000/ants/v2"
+	"go.uber.org/atomic"
 	"io"
 	"os"
 	"path/filepath"
@@ -21,6 +22,7 @@ type manager struct {
 	t            *time.Ticker
 	currentTS    int64
 	ts           int64
+	currentNodes *atomic.Uint64
 	nodes        sync.Map
 	expNodes     sync.Map
 	path         string

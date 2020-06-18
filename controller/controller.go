@@ -85,7 +85,7 @@ func (c *Controller) StopRun() (e error) {
 	return
 }
 
-// API ...
+// LocalAPI ...
 func (c *Controller) LocalAPI() core.API {
 	return c.api
 }

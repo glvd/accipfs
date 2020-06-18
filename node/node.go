@@ -1,8 +1,8 @@
 package node
 
 import (
-	"fmt"
 	"github.com/glvd/accipfs/core"
+	"github.com/portmapping/go-reuse"
 	"net"
 )
 
@@ -32,17 +32,25 @@ func (n *node) Verify() bool {
 	return true
 }
 
-// Connect ...
-func (n *node) ConnectTo() (net.Conn, error) {
-	if n.conn != nil {
-		return n.conn, nil
+// ConnectToNode ...
+func ConnectToNode(addr core.Addr, bind int) (core.Node, error) {
+	tcp, err := reuse.DialTCP(addr.Protocol, &net.TCPAddr{
+		IP:   net.IPv4zero,
+		Port: bind,
+	}, addr.TCP())
+	if err != nil {
+		return nil, err
 	}
-	//todo
-	return nil, fmt.Errorf("filed to connect")
+	return &node{
+		id:    "",
+		addrs: []core.Addr{addr},
+		conn:  tcp,
+	}, nil
+	//return nil, fmt.Errorf("filed to connect")
 }
 
-// ConnectBy ...
-func (n *node) ConnectBy() {
+// AcceptNode ...
+func AcceptNode() {
 
 }
 

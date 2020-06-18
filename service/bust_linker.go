@@ -79,6 +79,4 @@ func (l *BustLinker) Stop() {
 }
 
 func (l *BustLinker) cb(conn net.Conn) {
-
-	l.nodes.Push()
 }

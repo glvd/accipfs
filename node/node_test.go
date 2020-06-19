@@ -10,6 +10,7 @@ import (
 )
 
 type dummyAPI struct {
+	id string
 }
 
 func (d dummyAPI) Ping(req *core.PingReq) (*core.PingResp, error) {
@@ -18,7 +19,7 @@ func (d dummyAPI) Ping(req *core.PingReq) (*core.PingResp, error) {
 
 func (d dummyAPI) ID(req *core.IDReq) (*core.IDResp, error) {
 	return &core.IDResp{
-		Name:      "abc",
+		Name:      d.id,
 		DataStore: nil,
 		Contract:  nil,
 	}, nil
@@ -39,7 +40,9 @@ func TestAcceptNode(t *testing.T) {
 			continue
 		}
 		fmt.Println("new connector")
-		node, err := AcceptNode(conn, &dummyAPI{})
+		node, err := AcceptNode(conn, &dummyAPI{
+			id: "server",
+		})
 		if err != nil {
 			continue
 		}
@@ -54,7 +57,9 @@ func TestConnectNode(t *testing.T) {
 		Protocol: "tcp",
 		IP:       net.IPv4zero,
 		Port:     16004,
-	}, 0, &dummyAPI{})
+	}, 0, &dummyAPI{
+		id: "abc",
+	})
 	if err != nil {
 		return
 	}

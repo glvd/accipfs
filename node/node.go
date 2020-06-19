@@ -149,15 +149,15 @@ func (n *node) ID() string {
 		return n.id
 	}
 
-	if n.isAccept {
-		fmt.Println("accept id")
-		id, err := n.api.ID(&core.IDReq{})
-		if err != nil {
-			return ""
-		}
-		n.id = id.Name
-		return n.id
-	}
+	//if n.isAccept {
+	//	fmt.Println("accept id")
+	//	id, err := n.api.ID(&core.IDReq{})
+	//	if err != nil {
+	//		return ""
+	//	}
+	//	n.id = id.Name
+	//	return n.id
+	//}
 	return n.idRequest()
 }
 

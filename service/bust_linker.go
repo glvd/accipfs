@@ -6,6 +6,7 @@ import (
 	"github.com/glvd/accipfs/config"
 	"github.com/glvd/accipfs/controller"
 	"github.com/glvd/accipfs/core"
+	"github.com/glvd/accipfs/node"
 	"github.com/glvd/accipfs/task"
 	"sync"
 
@@ -39,8 +40,10 @@ func NewBustLinker(cfg *config.Config) (linker *BustLinker, err error) {
 		return nil, err
 	}
 	linker.self = selfAcc
-	linker.listener = NewLinkListener(cfg, linker.nodes.HandleConn)
 	linker.controller = controller.New(cfg)
+	linker.nodes = node.New(cfg, linker.controller)
+	linker.listener = NewLinkListener(cfg, linker.nodes.HandleConn)
+
 	return linker, nil
 }
 

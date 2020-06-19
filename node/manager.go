@@ -36,7 +36,7 @@ var _expNodes = "exp.nodes"
 var _ core.NodeManager = &manager{}
 
 // New ...
-func New(cfg *config.Config) core.NodeManager {
+func New(cfg *config.Config, c *controller.Controller) core.NodeManager {
 	m := &manager{
 		cfg:     cfg,
 		path:    filepath.Join(cfg.Path, _nodes),

@@ -27,6 +27,11 @@ type node struct {
 	isClosed  bool
 }
 
+// IsClosed ...
+func (n *node) IsClosed() bool {
+	return n.isClosed
+}
+
 // Closed ...
 func (n *node) Closed(f func(core.Node) bool) {
 	if f != nil {

@@ -64,7 +64,7 @@ func TestConnectNode(t *testing.T) {
 		return
 	}
 	wg := sync.WaitGroup{}
-	for i := 0; i < 100; i++ {
+	for i := 0; i < 10; i++ {
 		wg.Add(1)
 		go func() {
 			fmt.Println("get id", toNode.ID())

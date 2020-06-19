@@ -215,10 +215,13 @@ func (n *node) doRecv(r []byte) {
 	}
 	switch ed.Type {
 	case RequestID:
-		id := n.ID()
+		id, err := n.api.ID(&core.IDReq{})
+		if err != nil {
+			//ignore
+		}
 		ex := &Exchange{
 			Type: ResponseID,
-			Data: []byte(id),
+			Data: []byte(id.Name),
 		}
 		n.sendData <- ex.JSON()
 	default:

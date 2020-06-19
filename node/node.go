@@ -221,14 +221,11 @@ func (n *node) doRecv(r []byte) {
 }
 
 func (n *node) cb(ed *Exchange) {
-	switch ed.Type {
-	case ResponseID:
-		v, b := n.callback.Load(ed.Type)
+	v, b := n.callback.Load(ed.Type)
+	if b {
+		cb, b := v.(chan []byte)
 		if b {
-			cb, b := v.(chan []byte)
-			if b {
-				cb <- ed.Data
-			}
+			cb <- ed.Data
 		}
 	}
 }

@@ -14,19 +14,19 @@ type linkListener struct {
 	protocol string
 	bindPort int
 	port     int
-	cb       func(conn net.Conn)
-	pool     *ants.Pool
+	cb       func(interface{})
+	pool     *ants.PoolWithFunc
 }
 
 // NewLinkListener listen other client connections
-func NewLinkListener(cfg *config.Config, cb func(conn net.Conn)) core.Listener {
+func NewLinkListener(cfg *config.Config, cb func(interface{})) core.Listener {
 	l := &linkListener{
 		protocol: "tcp",
 		bindPort: cfg.Node.BindPort,
 		port:     cfg.Node.Port,
 		cb:       cb,
 	}
-	pool, err := ants.NewPool(cfg.Node.PoolMax)
+	pool, err := ants.NewPoolWithFunc(cfg.Node.PoolMax, cb, ants.WithNonblocking(false))
 	if err != nil {
 		return nil
 	}
@@ -58,9 +58,7 @@ func (h *linkListener) Listen() (err error) {
 			continue
 		}
 		if h.cb != nil {
-			h.pool.Submit(func() {
-				h.cb(conn)
-			})
+			h.pool.Invoke(conn)
 			continue
 		}
 		//no callback closed

@@ -3,6 +3,7 @@ package node
 import (
 	"bytes"
 	"github.com/glvd/accipfs/basis"
+	"github.com/glvd/accipfs/controller"
 	"github.com/glvd/accipfs/core"
 	"github.com/portmapping/go-reuse"
 	"go.uber.org/atomic"
@@ -17,6 +18,7 @@ type jsonNode struct {
 }
 
 type node struct {
+	c         *controller.Controller
 	id        string
 	addrs     []core.Addr
 	isRunning *atomic.Bool
@@ -26,7 +28,7 @@ type node struct {
 
 // IsConnecting ...
 func (n *node) IsConnecting() bool {
-	panic("implement me")
+	return true
 }
 
 var _ core.Node = &node{}
@@ -46,7 +48,7 @@ func (n *node) Verify() bool {
 }
 
 // ConnectToNode ...
-func ConnectToNode(addr core.Addr, bind int) (core.Node, error) {
+func ConnectToNode(addr core.Addr, bind int, ctrl *controller.Controller) (core.Node, error) {
 	tcp, err := reuse.DialTCP(addr.Protocol, &net.TCPAddr{
 		IP:   net.IPv4zero,
 		Port: bind,
@@ -56,6 +58,7 @@ func ConnectToNode(addr core.Addr, bind int) (core.Node, error) {
 	}
 	return &node{
 		id:    "",
+		c:     ctrl,
 		addrs: []core.Addr{addr},
 		conn:  tcp,
 	}, nil
@@ -94,11 +97,13 @@ func nodeRun(node *node) (core.Node, error) {
 }
 
 // AcceptNode ...
-func AcceptNode(conn net.Conn) (core.Node, error) {
+func AcceptNode(conn net.Conn, ctrl *controller.Controller) (core.Node, error) {
 	addr := conn.RemoteAddr()
 	ip, port := basis.SplitIP(addr.String())
+
 	return nodeRun(&node{
 		id:        "", //todo
+		c:         ctrl,
 		isRunning: atomic.NewBool(false),
 		isAccept:  true,
 		addrs: []core.Addr{
@@ -118,8 +123,18 @@ func (n node) Addrs() []core.Addr {
 }
 
 // ID ...
-func (n node) ID() string {
-	return n.id
+func (n *node) ID() string {
+	if n.id != "" {
+		return n.id
+	}
+	if n.isAccept {
+		id, err := n.c.LocalAPI().ID(&core.IDReq{})
+		if err != nil {
+			return ""
+		}
+		n.id = id.Name
+	}
+
 }
 
 // Info ...

@@ -191,7 +191,9 @@ func (m *manager) HandleConn(i interface{}) {
 		return true
 	})
 
-	m.Push(acceptNode)
+	if !acceptNode.IsClosed() {
+		m.Push(acceptNode)
+	}
 }
 
 func decodeNode(m core.NodeManager, b []byte) error {

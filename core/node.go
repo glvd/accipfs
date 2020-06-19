@@ -8,4 +8,5 @@ type Node interface {
 	Ping() error
 	IsConnecting() bool
 	Closed(f func(Node) bool)
+	IsClosed() bool
 }

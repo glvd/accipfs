@@ -32,6 +32,8 @@ type node struct {
 	info      *core.NodeInfo
 }
 
+var _ core.Node = &node{}
+
 // IsClosed ...
 func (n *node) IsClosed() bool {
 	return n.isClosed
@@ -48,8 +50,6 @@ func (n *node) Closed(f func(core.Node) bool) {
 func (n *node) IsConnecting() bool {
 	return true
 }
-
-var _ core.Node = &node{}
 
 // Close ...
 func (n *node) Close() (err error) {

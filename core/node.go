@@ -6,4 +6,5 @@ type Node interface {
 	Addrs() []Addr
 	Info() NodeInfo
 	Ping() error
+	IsConnecting() bool
 }

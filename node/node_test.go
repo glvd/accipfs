@@ -39,37 +39,41 @@ func TestAcceptNode(t *testing.T) {
 		if err != nil {
 			continue
 		}
-		fmt.Println("new connector")
 		node, err := AcceptNode(conn, &dummyAPI{
 			id: "server",
 		})
 		if err != nil {
+			fmt.Println("err", err)
 			continue
 		}
-		fmt.Println(node.ID())
+		go func() {
+			fmt.Println(node.ID())
+		}()
+
 		//no callback closed
 	}
 
 }
 
 func TestConnectNode(t *testing.T) {
-	toNode, err := ConnectNode(core.Addr{
-		Protocol: "tcp",
-		IP:       net.IPv4zero,
-		Port:     16004,
-	}, 0, &dummyAPI{
-		id: "abc",
-	})
-	if err != nil {
-		return
-	}
+
 	wg := sync.WaitGroup{}
 	for i := 0; i < 10; i++ {
 		wg.Add(1)
-		go func() {
-			fmt.Println("get id", toNode.ID())
+		go func(i int) {
+			toNode, err := ConnectNode(core.Addr{
+				Protocol: "tcp",
+				IP:       net.IPv4zero,
+				Port:     16004,
+			}, 0, &dummyAPI{
+				id: fmt.Sprintf("id(%v),client request", i),
+			})
+			if err != nil {
+				t.Fatal(err)
+			}
+			fmt.Println("get id", i, toNode.ID())
 			wg.Done()
-		}()
+		}(i)
 	}
 	wg.Wait()
 }

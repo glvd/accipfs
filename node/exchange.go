@@ -13,10 +13,21 @@ const (
 	ResponseID Type = 0x02
 )
 
+// Status ...
+type Status int
+
+const (
+	// StatusOK ...
+	StatusOK = 0x00
+	// StatusFailed ...
+	StatusFailed = 0x01
+)
+
 // Exchange ...
 type Exchange struct {
-	Type Type
-	Data []byte
+	Type   Type
+	Status Status
+	Data   []byte
 }
 
 // JSON ...

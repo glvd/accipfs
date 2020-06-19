@@ -109,11 +109,10 @@ func (n *node) recv(wg *sync.WaitGroup) {
 	defer wg.Done()
 	for {
 		tmp := make([]byte, maxByteSize)
-		read, err := n.conn.Read(tmp)
+		_, err := n.conn.Read(tmp)
 		if err != nil {
 			return
 		}
-		fmt.Println("recv", string(tmp), read)
 		indexByte := bytes.IndexByte(tmp, 0)
 		n.doRecv(tmp[:indexByte])
 	}
@@ -121,10 +120,9 @@ func (n *node) recv(wg *sync.WaitGroup) {
 
 func (n *node) send(wg *sync.WaitGroup) {
 	defer wg.Done()
-	tmp := make([]byte, maxByteSize)
 	for {
+		tmp := make([]byte, maxByteSize)
 		copy(tmp, <-n.sendData)
-		fmt.Println("send data", string(tmp))
 		write, err := n.conn.Write(tmp)
 		if err != nil {
 			return
@@ -215,13 +213,13 @@ func (n *node) doRecv(r []byte) {
 	}
 	switch ed.Type {
 	case RequestID:
+		ex := &Exchange{Type: ResponseID}
 		id, err := n.api.ID(&core.IDReq{})
 		if err != nil {
-			//ignore
-		}
-		ex := &Exchange{
-			Type: ResponseID,
-			Data: []byte(id.Name),
+			ex.Status = StatusFailed
+			ex.Data = []byte(err.Error())
+		} else {
+			ex.Data = []byte(id.Name)
 		}
 		n.sendData <- ex.JSON()
 	default:

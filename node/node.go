@@ -24,6 +24,14 @@ type node struct {
 	isRunning *atomic.Bool
 	isAccept  bool
 	conn      net.Conn
+	isClosed  bool
+}
+
+// Closed ...
+func (n *node) Closed(f func(core.Node) bool) {
+	if f != nil {
+		n.isClosed = f(n)
+	}
 }
 
 // IsConnecting ...

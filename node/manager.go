@@ -39,6 +39,7 @@ var _ core.NodeManager = &manager{}
 func New(cfg *config.Config, c *controller.Controller) core.NodeManager {
 	m := &manager{
 		cfg:     cfg,
+		c:       c,
 		path:    filepath.Join(cfg.Path, _nodes),
 		expPath: filepath.Join(cfg.Path, _expNodes),
 		t:       time.NewTicker(cfg.Node.BackupSeconds),
@@ -181,7 +182,16 @@ func (m *manager) HandleConn(i interface{}) {
 	if !b {
 		return
 	}
-	AcceptNode(v, m.c)
+	acceptNode, err := AcceptNode(v, m.c)
+	if err != nil {
+		return
+	}
+	acceptNode.Closed(func(n core.Node) bool {
+		m.nodes.Delete(n.ID())
+		return true
+	})
+
+	m.Push(acceptNode)
 }
 
 func decodeNode(m core.NodeManager, b []byte) error {

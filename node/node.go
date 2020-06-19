@@ -1,7 +1,8 @@
 package node
 
 import (
-	"bytes"
+	"encoding/json"
+	"fmt"
 	"github.com/glvd/accipfs/basis"
 	"github.com/glvd/accipfs/controller"
 	"github.com/glvd/accipfs/core"
@@ -18,14 +19,14 @@ type jsonNode struct {
 }
 
 type node struct {
-	c           *controller.Controller
-	id          string
-	addrs       []core.Addr
-	isRunning   *atomic.Bool
-	isAccept    bool
-	conn        net.Conn
-	isClosed    bool
-	requestData chan []byte
+	c         *controller.Controller
+	id        string
+	addrs     []core.Addr
+	isRunning *atomic.Bool
+	isAccept  bool
+	conn      net.Conn
+	isClosed  bool
+	sendData  chan []byte
 }
 
 // IsClosed ...
@@ -67,11 +68,11 @@ func AcceptNode(conn net.Conn, ctrl *controller.Controller) (core.Node, error) {
 	ip, port := basis.SplitIP(addr.String())
 
 	return nodeRun(&node{
-		id:          "", //id will get on running
-		c:           ctrl,
-		requestData: make(chan []byte),
-		isRunning:   atomic.NewBool(false),
-		isAccept:    true,
+		id:        "", //id will get on running
+		c:         ctrl,
+		sendData:  make(chan []byte),
+		isRunning: atomic.NewBool(false),
+		isAccept:  true,
 		addrs: []core.Addr{
 			{
 				Protocol: addr.Network(),
@@ -93,16 +94,16 @@ func ConnectToNode(addr core.Addr, bind int, ctrl *controller.Controller) (core.
 		return nil, err
 	}
 	return nodeRun(&node{
-		id:          "", //id will get on running
-		c:           ctrl,
-		isRunning:   atomic.NewBool(false),
-		requestData: make(chan []byte),
-		addrs:       []core.Addr{addr},
-		conn:        conn,
+		id:        "", //id will get on running
+		c:         ctrl,
+		isRunning: atomic.NewBool(false),
+		sendData:  make(chan []byte),
+		addrs:     []core.Addr{addr},
+		conn:      conn,
 	})
 }
 
-func (n *node) recv(wg *sync.WaitGroup, b chan<- []byte) {
+func (n *node) recv(wg *sync.WaitGroup) {
 	defer wg.Done()
 	for {
 		tmp := make([]byte, maxByteSize)
@@ -111,16 +112,15 @@ func (n *node) recv(wg *sync.WaitGroup, b chan<- []byte) {
 			return
 		}
 		log.Debugw("recv", "read", read)
-		b <- tmp
-
+		go n.doRecv(tmp)
 	}
 }
 
-func (n *node) send(wg *sync.WaitGroup, b <-chan []byte) {
+func (n *node) send(wg *sync.WaitGroup) {
 	defer wg.Done()
 	tmp := make([]byte, maxByteSize)
 	for {
-		copy(tmp, <-b)
+		copy(tmp, <-n.sendData)
 		write, err := n.conn.Write(tmp)
 		if err != nil {
 			return
@@ -152,6 +152,7 @@ func (n *node) ID() string {
 		}
 		n.id = id.Name
 	}
+	n.idRequest()
 }
 
 // Info ...
@@ -176,19 +177,37 @@ func (n *node) running() {
 	}()
 	wg := &sync.WaitGroup{}
 	wg.Add(2)
-	cache := make(map[int]bytes.Buffer)
-	recvData := make(chan []byte)
-	sendData := make(chan []byte)
-	go n.recv(wg, recvData)
-	go n.send(wg, sendData)
-	for {
-
-		select {
-		case snd <- buf:
-		case buf1 := <-rec:
-			fmt.Println("rec", string(buf1))
-		}
-	}
-
+	//recvData := make(chan []byte)
+	go n.recv(wg)
+	go n.send(wg)
 	wg.Wait()
+}
+
+func (n *node) idRequest() {
+	ex := &Exchange{
+		Type: RequestID,
+		Data: nil,
+	}
+	n.sendData <- ex.JSON()
+}
+
+func (n *node) doRecv(r []byte) {
+	var ed Exchange
+	err := json.Unmarshal(r, &ed)
+	if err != nil {
+		return
+	}
+	switch ed.Type {
+	case RequestID:
+		id := n.ID()
+		ex := &Exchange{
+			Type: ResponseID,
+			Data: []byte(id),
+		}
+		n.sendData <- ex.JSON()
+	case ResponseID:
+		n.id = string(ed.Data)
+	default:
+		fmt.Println("wrong type")
+	}
 }

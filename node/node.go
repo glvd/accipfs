@@ -29,6 +29,7 @@ type node struct {
 
 	sendData chan []byte
 	callback sync.Map
+	info     *core.NodeInfo
 }
 
 // IsClosed ...
@@ -150,8 +151,11 @@ func (n *node) ID() string {
 }
 
 // Info ...
-func (n *node) Info() core.NodeInfo {
-	panic("implement me")
+func (n *node) Info() *core.NodeInfo {
+	if n.info != nil {
+		return n.info
+	}
+	return n.infoRequest()
 }
 
 // Ping ...
@@ -228,4 +232,8 @@ func (n *node) cb(ed *Exchange) {
 			}
 		}
 	}
+}
+
+func (n *node) infoRequest() *core.NodeInfo {
+	return nil
 }

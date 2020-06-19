@@ -26,10 +26,9 @@ type node struct {
 	isAccept  bool
 	conn      net.Conn
 	isClosed  bool
-
-	sendData chan []byte
-	callback sync.Map
-	info     *core.NodeInfo
+	sendData  chan []byte
+	callback  sync.Map
+	info      *core.NodeInfo
 }
 
 // IsClosed ...
@@ -151,9 +150,9 @@ func (n *node) ID() string {
 }
 
 // Info ...
-func (n *node) Info() *core.NodeInfo {
+func (n *node) Info() core.NodeInfo {
 	if n.info != nil {
-		return n.info
+		return *n.info
 	}
 	return n.infoRequest()
 }
@@ -234,6 +233,6 @@ func (n *node) cb(ed *Exchange) {
 	}
 }
 
-func (n *node) infoRequest() *core.NodeInfo {
-	return nil
+func (n *node) infoRequest() core.NodeInfo {
+	return core.NodeInfo{}
 }

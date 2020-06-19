@@ -5,6 +5,7 @@ import (
 	"github.com/glvd/accipfs/core"
 	"github.com/portmapping/go-reuse"
 	"net"
+	"sync"
 	"testing"
 )
 
@@ -37,6 +38,7 @@ func TestAcceptNode(t *testing.T) {
 		if err != nil {
 			continue
 		}
+		fmt.Println("new connector")
 		node, err := AcceptNode(conn, &dummyAPI{})
 		if err != nil {
 			continue
@@ -47,8 +49,8 @@ func TestAcceptNode(t *testing.T) {
 
 }
 
-func TestConnectToNode(t *testing.T) {
-	toNode, err := ConnectToNode(core.Addr{
+func TestConnectNode(t *testing.T) {
+	toNode, err := ConnectNode(core.Addr{
 		Protocol: "tcp",
 		IP:       net.IPv4zero,
 		Port:     16004,
@@ -56,5 +58,13 @@ func TestConnectToNode(t *testing.T) {
 	if err != nil {
 		return
 	}
-	toNode.ID()
+	wg := sync.WaitGroup{}
+	for i := 0; i < 100; i++ {
+		wg.Add(1)
+		go func() {
+			fmt.Println("get id", toNode.ID())
+			wg.Done()
+		}()
+	}
+	wg.Wait()
 }

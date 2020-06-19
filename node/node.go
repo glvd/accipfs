@@ -1,7 +1,9 @@
 package node
 
 import (
+	"bytes"
 	"encoding/json"
+	"fmt"
 	"github.com/glvd/accipfs/basis"
 	"github.com/glvd/accipfs/core"
 	"github.com/portmapping/go-reuse"
@@ -26,7 +28,7 @@ type node struct {
 	isClosed  bool
 
 	sendData chan []byte
-	callback map[Type]chan []byte
+	callback sync.Map
 }
 
 // IsClosed ...
@@ -84,8 +86,8 @@ func AcceptNode(conn net.Conn, api core.API) (core.Node, error) {
 	})
 }
 
-// ConnectToNode ...
-func ConnectToNode(addr core.Addr, bind int, api core.API) (core.Node, error) {
+// ConnectNode ...
+func ConnectNode(addr core.Addr, bind int, api core.API) (core.Node, error) {
 	conn, err := reuse.DialTCP(addr.Protocol, &net.TCPAddr{
 		IP:   net.IPv4zero,
 		Port: bind,
@@ -111,8 +113,9 @@ func (n *node) recv(wg *sync.WaitGroup) {
 		if err != nil {
 			return
 		}
-		log.Debugw("recv", "read", read)
-		go n.doRecv(tmp)
+		fmt.Println("recv", string(tmp), read)
+		indexByte := bytes.IndexByte(tmp, 0)
+		n.doRecv(tmp[:indexByte])
 	}
 }
 
@@ -121,6 +124,7 @@ func (n *node) send(wg *sync.WaitGroup) {
 	tmp := make([]byte, maxByteSize)
 	for {
 		copy(tmp, <-n.sendData)
+		fmt.Println("send data", string(tmp))
 		write, err := n.conn.Write(tmp)
 		if err != nil {
 			return
@@ -144,12 +148,15 @@ func (n *node) ID() string {
 	if n.id != "" {
 		return n.id
 	}
+
 	if n.isAccept {
+		fmt.Println("accept id")
 		id, err := n.api.ID(&core.IDReq{})
 		if err != nil {
 			return ""
 		}
 		n.id = id.Name
+		return n.id
 	}
 	return n.idRequest()
 }
@@ -187,11 +194,15 @@ func (n *node) idRequest() string {
 		Type: RequestID,
 		Data: nil,
 	}
+	load, ok := n.callback.Load(ResponseID)
+	if !ok {
+		load = make(chan []byte)
+		n.callback.Store(ResponseID, load)
+	}
 	resp := make(chan []byte)
-	n.callback[ResponseID] = resp
 	n.sendData <- ex.JSON()
+	resp = load.(chan []byte)
 	n.id = string(<-resp)
-	delete(n.callback, ResponseID)
 	return n.id
 }
 
@@ -199,6 +210,7 @@ func (n *node) doRecv(r []byte) {
 	var ed Exchange
 	err := json.Unmarshal(r, &ed)
 	if err != nil {
+		fmt.Println("failed", err)
 		return
 	}
 	switch ed.Type {
@@ -217,9 +229,12 @@ func (n *node) doRecv(r []byte) {
 func (n *node) cb(ed *Exchange) {
 	switch ed.Type {
 	case ResponseID:
-		v, b := n.callback[ResponseID]
+		v, b := n.callback.Load(ed.Type)
 		if b {
-			v <- ed.Data
+			cb, b := v.(chan []byte)
+			if b {
+				cb <- ed.Data
+			}
 		}
 	}
 }

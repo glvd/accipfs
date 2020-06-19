@@ -18,13 +18,14 @@ type jsonNode struct {
 }
 
 type node struct {
-	c         *controller.Controller
-	id        string
-	addrs     []core.Addr
-	isRunning *atomic.Bool
-	isAccept  bool
-	conn      net.Conn
-	isClosed  bool
+	c           *controller.Controller
+	id          string
+	addrs       []core.Addr
+	isRunning   *atomic.Bool
+	isAccept    bool
+	conn        net.Conn
+	isClosed    bool
+	requestData chan []byte
 }
 
 // IsClosed ...
@@ -60,21 +61,45 @@ func (n *node) Verify() bool {
 	return true
 }
 
+// AcceptNode ...
+func AcceptNode(conn net.Conn, ctrl *controller.Controller) (core.Node, error) {
+	addr := conn.RemoteAddr()
+	ip, port := basis.SplitIP(addr.String())
+
+	return nodeRun(&node{
+		id:          "", //id will get on running
+		c:           ctrl,
+		requestData: make(chan []byte),
+		isRunning:   atomic.NewBool(false),
+		isAccept:    true,
+		addrs: []core.Addr{
+			{
+				Protocol: addr.Network(),
+				IP:       ip,
+				Port:     port,
+			},
+		},
+		conn: conn,
+	})
+}
+
 // ConnectToNode ...
 func ConnectToNode(addr core.Addr, bind int, ctrl *controller.Controller) (core.Node, error) {
-	tcp, err := reuse.DialTCP(addr.Protocol, &net.TCPAddr{
+	conn, err := reuse.DialTCP(addr.Protocol, &net.TCPAddr{
 		IP:   net.IPv4zero,
 		Port: bind,
 	}, addr.TCP())
 	if err != nil {
 		return nil, err
 	}
-	return &node{
-		id:    "",
-		c:     ctrl,
-		addrs: []core.Addr{addr},
-		conn:  tcp,
-	}, nil
+	return nodeRun(&node{
+		id:          "", //id will get on running
+		c:           ctrl,
+		isRunning:   atomic.NewBool(false),
+		requestData: make(chan []byte),
+		addrs:       []core.Addr{addr},
+		conn:        conn,
+	})
 }
 
 func (n *node) recv(wg *sync.WaitGroup, b chan<- []byte) {
@@ -105,29 +130,9 @@ func (n *node) send(wg *sync.WaitGroup, b <-chan []byte) {
 }
 
 func nodeRun(node *node) (core.Node, error) {
+
 	go node.running()
 	return node, nil
-}
-
-// AcceptNode ...
-func AcceptNode(conn net.Conn, ctrl *controller.Controller) (core.Node, error) {
-	addr := conn.RemoteAddr()
-	ip, port := basis.SplitIP(addr.String())
-
-	return nodeRun(&node{
-		id:        "", //todo
-		c:         ctrl,
-		isRunning: atomic.NewBool(false),
-		isAccept:  true,
-		addrs: []core.Addr{
-			{
-				Protocol: addr.Network(),
-				IP:       ip,
-				Port:     port,
-			},
-		},
-		conn: conn,
-	})
 }
 
 // Addrs ...
@@ -147,7 +152,6 @@ func (n *node) ID() string {
 		}
 		n.id = id.Name
 	}
-
 }
 
 // Info ...
@@ -173,7 +177,6 @@ func (n *node) running() {
 	wg := &sync.WaitGroup{}
 	wg.Add(2)
 	cache := make(map[int]bytes.Buffer)
-
 	recvData := make(chan []byte)
 	sendData := make(chan []byte)
 	go n.recv(wg, recvData)

@@ -26,11 +26,7 @@ func NewLinkListener(cfg *config.Config, cb func(interface{})) core.Listener {
 		port:     cfg.Node.Port,
 		cb:       cb,
 	}
-	pool, err := ants.NewPoolWithFunc(cfg.Node.PoolMax, cb, ants.WithNonblocking(false))
-	if err != nil {
-		return nil
-	}
-	l.pool = pool
+	l.pool = mustPool(cfg.Node.PoolMax, cb)
 	return l
 }
 
@@ -64,4 +60,11 @@ func (h *linkListener) Listen() (err error) {
 		//no callback closed
 		conn.Close()
 	}
+}
+func mustPool(size int, f func(interface{})) *ants.PoolWithFunc {
+	pf, err := ants.NewPoolWithFunc(size, f, ants.WithNonblocking(false))
+	if err != nil {
+		panic(err)
+	}
+	return pf
 }

@@ -6,10 +6,11 @@ import (
 	"fmt"
 	"github.com/glvd/accipfs/basis"
 	"github.com/glvd/accipfs/config"
+	"github.com/glvd/accipfs/controller"
 	"github.com/glvd/accipfs/core"
-	"github.com/panjf2000/ants/v2"
 	"go.uber.org/atomic"
 	"io"
+	"net"
 	"os"
 	"path/filepath"
 	"sync"
@@ -17,8 +18,8 @@ import (
 )
 
 type manager struct {
-	cfg          *config.Config
-	exchangePool *ants.PoolWithFunc
+	cfg *config.Config
+	//exchangePool *ants.PoolWithFunc
 	t            *time.Ticker
 	currentTS    int64
 	ts           int64
@@ -27,6 +28,7 @@ type manager struct {
 	expNodes     sync.Map
 	path         string
 	expPath      string
+	c            *controller.Controller
 }
 
 var _nodes = "bl.nodes"
@@ -41,7 +43,7 @@ func New(cfg *config.Config) core.NodeManager {
 		expPath: filepath.Join(cfg.Path, _expNodes),
 		t:       time.NewTicker(cfg.Node.BackupSeconds),
 	}
-	m.exchangePool = mustPool(ants.DefaultAntsPoolSize, m.handleConn)
+	//m.exchangePool = mustPool(ants.DefaultAntsPoolSize, m.HandleConn)
 	go m.loop()
 
 	return m
@@ -175,7 +177,11 @@ func (m *manager) loop() {
 
 // HandleConn ...
 func (m *manager) HandleConn(i interface{}) {
-
+	v, b := i.(net.Conn)
+	if !b {
+		return
+	}
+	AcceptNode(v, m.c)
 }
 
 func decodeNode(m core.NodeManager, b []byte) error {
@@ -198,12 +204,4 @@ func encodeNode(node core.Node) ([]byte, error) {
 		node.ID(): {Addrs: node.Addrs()},
 	}
 	return json.Marshal(n)
-}
-
-func mustPool(size int, f func(interface{})) *ants.PoolWithFunc {
-	pf, err := ants.NewPoolWithFunc(size, f, ants.WithNonblocking(false))
-	if err != nil {
-		panic(err)
-	}
-	return pf
 }

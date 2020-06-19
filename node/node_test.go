@@ -56,21 +56,20 @@ func TestAcceptNode(t *testing.T) {
 }
 
 func TestConnectNode(t *testing.T) {
-
+	toNode, err := ConnectNode(core.Addr{
+		Protocol: "tcp",
+		IP:       net.IPv4zero,
+		Port:     16004,
+	}, 0, &dummyAPI{
+		id: fmt.Sprintf("id(%v),client request", 0),
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
 	wg := sync.WaitGroup{}
 	for i := 0; i < 10; i++ {
 		wg.Add(1)
 		go func(i int) {
-			toNode, err := ConnectNode(core.Addr{
-				Protocol: "tcp",
-				IP:       net.IPv4zero,
-				Port:     16004,
-			}, 0, &dummyAPI{
-				id: fmt.Sprintf("id(%v),client request", i),
-			})
-			if err != nil {
-				t.Fatal(err)
-			}
 			fmt.Println("get id", i, toNode.ID())
 			wg.Done()
 		}(i)

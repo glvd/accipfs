@@ -10,6 +10,7 @@ import (
 	"go.uber.org/atomic"
 	"net"
 	"sync"
+	"time"
 )
 
 const maxByteSize = 65520
@@ -113,6 +114,7 @@ func (n *node) recv(wg *sync.WaitGroup) {
 		if err != nil {
 			return
 		}
+		fmt.Println("recv", string(tmp))
 		indexByte := bytes.IndexByte(tmp, 0)
 		n.doRecv(tmp[:indexByte])
 	}
@@ -193,7 +195,13 @@ func (n *node) idRequest() string {
 	resp := make(chan []byte)
 	n.sendData <- ex.JSON()
 	resp = load.(chan []byte)
-	n.id = string(<-resp)
+	t := time.NewTimer(5 * time.Second)
+	select {
+	case id := <-resp:
+		n.id = string(id)
+	case <-t.C:
+		return n.id
+	}
 	return n.id
 }
 

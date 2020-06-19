@@ -2,8 +2,9 @@ package core
 
 // NodeManager ...
 type NodeManager interface {
-	Push(node Node)
-	Range(f func(key string, node Node) bool)
+	Push(n Node)
+	Range(f func(key string, n Node) bool)
+	HandleConn(c interface{})
 	Store() error
 	Load() error
 }

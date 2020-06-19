@@ -173,7 +173,8 @@ func (m *manager) loop() {
 	}
 }
 
-func (m *manager) handleConn(i interface{}) {
+// HandleConn ...
+func (m *manager) HandleConn(i interface{}) {
 
 }
 

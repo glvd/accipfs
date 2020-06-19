@@ -152,7 +152,7 @@ func (n *node) ID() string {
 		n.id = id.Name
 	}
 	n.idRequest()
-
+	return ""
 }
 
 // Info ...

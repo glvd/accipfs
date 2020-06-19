@@ -2,10 +2,10 @@ package main
 
 import (
 	"fmt"
+	"github.com/glvd/accipfs/basis"
 	"github.com/glvd/accipfs/client"
 	"github.com/glvd/accipfs/config"
 	"github.com/glvd/accipfs/core"
-	"github.com/glvd/accipfs/general"
 	"github.com/spf13/cobra"
 )
 
@@ -61,7 +61,7 @@ func nodePeerCmd() *cobra.Command {
 			url := fmt.Sprintf("http://localhost:%d/rpc", cfg.API.Port)
 			reply := new([]*core.Node)
 			node := new(core.Node)
-			if err := general.RPCPost(url, "BustLinker.Peers", node, reply); err != nil {
+			if err := basis.RPCPost(url, "BustLinker.Peers", node, reply); err != nil {
 				fmt.Println("peers error:", err.Error())
 			}
 			for _, info := range *reply {

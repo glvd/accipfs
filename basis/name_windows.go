@@ -1,6 +1,6 @@
 //+build windows
 
-package general
+package basis
 
 // BinName ...
 func BinName(name string) string {

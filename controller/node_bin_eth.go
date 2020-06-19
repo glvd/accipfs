@@ -7,12 +7,12 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/ethereum/go-ethereum/rpc"
+	"github.com/glvd/accipfs/basis"
 	"github.com/glvd/accipfs/config"
 	"github.com/glvd/accipfs/contract/dtag"
 	"github.com/glvd/accipfs/contract/node"
 	"github.com/glvd/accipfs/contract/token"
 	"github.com/glvd/accipfs/core"
-	"github.com/glvd/accipfs/general"
 	"github.com/goextension/io"
 	"os"
 	"os/exec"
@@ -129,10 +129,10 @@ func (n *nodeBinETH) Start() error {
 	}
 	m := io.MultiReader(pipe, stdoutPipe)
 	if n.cfg.ETH.LogOutput && n.msg != nil {
-		go general.PipeReader(n.ctx, m, n.msg)
+		go basis.PipeReader(n.ctx, m, n.msg)
 	}
 	//else {
-	//	go general.PipeDummy(n.ctx, module, m)
+	//	go basis.PipeDummy(n.ctx, module, m)
 	//}
 
 	err = n.cmd.Start()
@@ -159,7 +159,7 @@ func (n *nodeBinETH) Initialize() error {
 }
 
 func newNodeBinETH(cfg *config.Config) *nodeBinETH {
-	path := filepath.Join(cfg.Path, "bin", general.BinName(cfg.ETH.Name))
+	path := filepath.Join(cfg.Path, "bin", basis.BinName(cfg.ETH.Name))
 	genesis, err := config.LoadGenesis(cfg)
 	if err != nil {
 		panic(err)

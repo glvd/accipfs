@@ -3,9 +3,9 @@ package controller
 import (
 	"context"
 	"fmt"
+	"github.com/glvd/accipfs/basis"
 	"github.com/glvd/accipfs/config"
 	"github.com/glvd/accipfs/core"
-	"github.com/glvd/accipfs/general"
 	"github.com/goextension/io"
 	httpapi "github.com/ipfs/go-ipfs-http-client"
 	iface "github.com/ipfs/interface-go-ipfs-core"
@@ -58,10 +58,10 @@ func (n *nodeBinIPFS) Start() error {
 	}
 	m := io.MultiReader(pipe, stdoutPipe)
 	if n.cfg.ETH.LogOutput {
-		go general.PipeReader(n.ctx, m, n.msg)
+		go basis.PipeReader(n.ctx, m, n.msg)
 	}
 	//else {
-	//	go general.PipeDummy(n.ctx, module, m)
+	//	go basis.PipeDummy(n.ctx, module, m)
 	//}
 	err := n.cmd.Start()
 	if err != nil {
@@ -116,7 +116,7 @@ func (n *nodeBinIPFS) Initialize() error {
 }
 
 func newNodeBinIPFS(cfg *config.Config) *nodeBinIPFS {
-	path := filepath.Join(cfg.Path, "bin", general.BinName(cfg.IPFS.Name))
+	path := filepath.Join(cfg.Path, "bin", basis.BinName(cfg.IPFS.Name))
 	ctx, cancelFunc := context.WithCancel(context.Background())
 	return &nodeBinIPFS{
 		ctx:    ctx,

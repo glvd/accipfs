@@ -4,8 +4,8 @@ package main
 import (
 	"fmt"
 	"github.com/glvd/accipfs"
+	"github.com/glvd/accipfs/basis"
 	"github.com/glvd/accipfs/config"
-	"github.com/glvd/accipfs/general"
 	"github.com/glvd/accipfs/log"
 	"github.com/spf13/cobra"
 	"path/filepath"
@@ -28,7 +28,7 @@ var rootCmd = &cobra.Command{
 func main() {
 	path, err := filepath.Abs(accipfs.DefaultPath)
 	if err != nil {
-		path = general.CurrentDir()
+		path = basis.CurrentDir()
 	}
 	config.WorkDir = path
 

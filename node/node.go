@@ -2,8 +2,8 @@ package node
 
 import (
 	"bytes"
+	"github.com/glvd/accipfs/basis"
 	"github.com/glvd/accipfs/core"
-	"github.com/glvd/accipfs/general"
 	"github.com/portmapping/go-reuse"
 	"go.uber.org/atomic"
 	"net"
@@ -96,7 +96,7 @@ func nodeRun(node *node) (core.Node, error) {
 // AcceptNode ...
 func AcceptNode(conn net.Conn) (core.Node, error) {
 	addr := conn.RemoteAddr()
-	ip, port := general.SplitIP(addr.String())
+	ip, port := basis.SplitIP(addr.String())
 	return nodeRun(&node{
 		id:        "", //todo
 		isRunning: atomic.NewBool(false),

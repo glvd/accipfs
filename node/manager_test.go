@@ -1,9 +1,9 @@
 package node
 
 import (
+	"github.com/glvd/accipfs/basis"
 	"github.com/glvd/accipfs/config"
 	"github.com/glvd/accipfs/core"
-	"github.com/glvd/accipfs/general"
 	alog "github.com/glvd/accipfs/log"
 	"net"
 	"testing"
@@ -27,7 +27,7 @@ func TestNew(t *testing.T) {
 
 	for i := 0; i < 100; i++ {
 		m.Push(&node{
-			id: general.UUID(),
+			id: basis.UUID(),
 			addrs: []core.Addr{
 				{
 					Protocol: "tcp",

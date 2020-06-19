@@ -4,9 +4,9 @@ import (
 	"bufio"
 	"encoding/json"
 	"fmt"
+	"github.com/glvd/accipfs/basis"
 	"github.com/glvd/accipfs/config"
 	"github.com/glvd/accipfs/core"
-	"github.com/glvd/accipfs/general"
 	"github.com/panjf2000/ants/v2"
 	"go.uber.org/atomic"
 	"io"
@@ -72,7 +72,7 @@ func (m *manager) Store() error {
 		if err != nil {
 			return false
 		}
-		_, err = writer.WriteString(general.NewLine)
+		_, err = writer.WriteString(basis.NewLine)
 		if err != nil {
 			return false
 		}

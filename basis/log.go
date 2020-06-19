@@ -1,11 +1,11 @@
-package general
+package basis
 
 import (
 	"fmt"
 	alog "github.com/glvd/accipfs/log"
 )
 
-const module = "general"
+const module = "basis"
 
 func logI(msg string, v ...interface{}) {
 	alog.Module(module).Infow(msg, v...)

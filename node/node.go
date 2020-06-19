@@ -2,9 +2,7 @@ package node
 
 import (
 	"encoding/json"
-	"fmt"
 	"github.com/glvd/accipfs/basis"
-	"github.com/glvd/accipfs/controller"
 	"github.com/glvd/accipfs/core"
 	"github.com/portmapping/go-reuse"
 	"go.uber.org/atomic"
@@ -19,7 +17,7 @@ type jsonNode struct {
 }
 
 type node struct {
-	c         *controller.Controller
+	api       core.API
 	id        string
 	addrs     []core.Addr
 	isRunning *atomic.Bool
@@ -27,6 +25,7 @@ type node struct {
 	conn      net.Conn
 	isClosed  bool
 	sendData  chan []byte
+	callback  map[string]*Exchange
 }
 
 // IsClosed ...
@@ -63,13 +62,13 @@ func (n *node) Verify() bool {
 }
 
 // AcceptNode ...
-func AcceptNode(conn net.Conn, ctrl *controller.Controller) (core.Node, error) {
+func AcceptNode(conn net.Conn, api core.API) (core.Node, error) {
 	addr := conn.RemoteAddr()
 	ip, port := basis.SplitIP(addr.String())
 
 	return nodeRun(&node{
 		id:        "", //id will get on running
-		c:         ctrl,
+		api:       api,
 		sendData:  make(chan []byte),
 		isRunning: atomic.NewBool(false),
 		isAccept:  true,
@@ -85,7 +84,7 @@ func AcceptNode(conn net.Conn, ctrl *controller.Controller) (core.Node, error) {
 }
 
 // ConnectToNode ...
-func ConnectToNode(addr core.Addr, bind int, ctrl *controller.Controller) (core.Node, error) {
+func ConnectToNode(addr core.Addr, bind int, api core.API) (core.Node, error) {
 	conn, err := reuse.DialTCP(addr.Protocol, &net.TCPAddr{
 		IP:   net.IPv4zero,
 		Port: bind,
@@ -95,7 +94,7 @@ func ConnectToNode(addr core.Addr, bind int, ctrl *controller.Controller) (core.
 	}
 	return nodeRun(&node{
 		id:        "", //id will get on running
-		c:         ctrl,
+		api:       api,
 		isRunning: atomic.NewBool(false),
 		sendData:  make(chan []byte),
 		addrs:     []core.Addr{addr},
@@ -146,13 +145,14 @@ func (n *node) ID() string {
 		return n.id
 	}
 	if n.isAccept {
-		id, err := n.c.LocalAPI().ID(&core.IDReq{})
+		id, err := n.api.ID(&core.IDReq{})
 		if err != nil {
 			return ""
 		}
 		n.id = id.Name
 	}
 	n.idRequest()
+
 }
 
 // Info ...
@@ -205,9 +205,14 @@ func (n *node) doRecv(r []byte) {
 			Data: []byte(id),
 		}
 		n.sendData <- ex.JSON()
-	case ResponseID:
-		n.id = string(ed.Data)
 	default:
-		fmt.Println("wrong type")
+		n.cb(&ed)
+	}
+}
+
+func (n *node) cb(ed *Exchange) {
+	switch ed.Type {
+	case ResponseID:
+
 	}
 }

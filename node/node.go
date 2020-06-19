@@ -2,6 +2,7 @@ package node
 
 import (
 	"github.com/glvd/accipfs/core"
+	"github.com/glvd/accipfs/general"
 	"github.com/portmapping/go-reuse"
 	"net"
 )
@@ -48,17 +49,34 @@ func ConnectToNode(addr core.Addr, bind int) (core.Node, error) {
 	}, nil
 }
 
+func (n *node) recv() {
+
+}
+
+func (n *node) send() {
+
+}
+
+func nodeRun(node *node) (core.Node, error) {
+	go node.running()
+	return node, nil
+}
+
 // AcceptNode ...
 func AcceptNode(conn net.Conn) (core.Node, error) {
 	addr := conn.RemoteAddr()
-
-	return &node{
-		id: "",
+	ip, port := general.SplitIP(addr.String())
+	return nodeRun(&node{
+		id: "", //todo
 		addrs: []core.Addr{
-			{addr.Network()},
+			{
+				Protocol: addr.Network(),
+				IP:       ip,
+				Port:     port,
+			},
 		},
-		conn: tcp,
-	}, nil
+		conn: conn,
+	})
 }
 
 // Addrs ...
@@ -79,4 +97,8 @@ func (n *node) Info() core.NodeInfo {
 // Ping ...
 func (n *node) Ping() error {
 	panic("implement me")
+}
+
+func (n *node) running() {
+
 }

@@ -24,8 +24,9 @@ type node struct {
 	isAccept  bool
 	conn      net.Conn
 	isClosed  bool
-	sendData  chan []byte
-	callback  map[string]*Exchange
+
+	sendData chan []byte
+	callback map[Type]chan []byte
 }
 
 // IsClosed ...
@@ -129,7 +130,6 @@ func (n *node) send(wg *sync.WaitGroup) {
 }
 
 func nodeRun(node *node) (core.Node, error) {
-
 	go node.running()
 	return node, nil
 }
@@ -151,8 +151,7 @@ func (n *node) ID() string {
 		}
 		n.id = id.Name
 	}
-	n.idRequest()
-	return ""
+	return n.idRequest()
 }
 
 // Info ...
@@ -183,12 +182,17 @@ func (n *node) running() {
 	wg.Wait()
 }
 
-func (n *node) idRequest() {
+func (n *node) idRequest() string {
 	ex := &Exchange{
 		Type: RequestID,
 		Data: nil,
 	}
+	resp := make(chan []byte)
+	n.callback[ResponseID] = resp
 	n.sendData <- ex.JSON()
+	n.id = string(<-resp)
+	delete(n.callback, ResponseID)
+	return n.id
 }
 
 func (n *node) doRecv(r []byte) {
@@ -213,6 +217,9 @@ func (n *node) doRecv(r []byte) {
 func (n *node) cb(ed *Exchange) {
 	switch ed.Type {
 	case ResponseID:
-
+		v, b := n.callback[ResponseID]
+		if b {
+			v <- ed.Data
+		}
 	}
 }

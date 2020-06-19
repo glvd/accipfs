@@ -182,7 +182,7 @@ func (m *manager) HandleConn(i interface{}) {
 	if !b {
 		return
 	}
-	acceptNode, err := AcceptNode(v, m.c)
+	acceptNode, err := AcceptNode(v, m.c.LocalAPI())
 	if err != nil {
 		return
 	}

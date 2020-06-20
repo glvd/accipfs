@@ -18,7 +18,7 @@ type Type uint16
 type TypeDetail uint16
 
 // Status ...
-type Status int
+type Status int32
 
 // Exchange ...
 type Exchange struct {
@@ -27,9 +27,8 @@ type Exchange struct {
 	Session    uint32
 	Type       Type
 	TypeDetail TypeDetail
-
-	Status Status
-	Data   []byte
+	Status     Status
+	Data       []byte
 }
 
 // Queue ...
@@ -43,9 +42,9 @@ type Queue struct {
 const (
 	// ErrorType ...
 	ErrorType Type = 0x00
-	// RequestID ...
+	// Request ...
 	Request Type = 0x01
-	// ResponseID ...
+	// Response ...
 	Response Type = 0x02
 )
 
@@ -103,15 +102,17 @@ func (e Exchange) Unpack(reader io.Reader) (err error) {
 			return err
 		}
 	}
-	e.Data = make([]byte, e.Length)
-	return binary.Read(reader, binary.BigEndian, &e.Data)
+	if e.Length != 0 {
+		e.Data = make([]byte, e.Length)
+		return binary.Read(reader, binary.BigEndian, &e.Data)
+	}
+	return nil
 }
 
 // ScanExchange ...
-func ScanExchange(conn net.Conn) (*Exchange, error) {
+func ScanExchange(scanner *bufio.Scanner) (*Exchange, error) {
 	var ex Exchange
-	scan := dataScan(conn)
-	r := bytes.NewReader(scan.Bytes())
+	r := bytes.NewReader(scanner.Bytes())
 	err := ex.Unpack(r)
 	if err != nil {
 		return nil, err
@@ -122,6 +123,7 @@ func ScanExchange(conn net.Conn) (*Exchange, error) {
 func dataScan(conn net.Conn) *bufio.Scanner {
 	scanner := bufio.NewScanner(conn)
 	scanner.Split(func(data []byte, atEOF bool) (advance int, token []byte, err error) {
+		fmt.Println("split")
 		if !atEOF && data[0] == 'v' {
 			if len(data) > 12 {
 				length := uint64(0)
@@ -129,7 +131,8 @@ func dataScan(conn net.Conn) *bufio.Scanner {
 				if err != nil {
 					return 0, nil, err
 				}
-				length += 12
+				fmt.Println("recv size:", length)
+				length += 24
 				if int(length) <= len(data) {
 					return int(length), data[:int(length)], nil
 				}
@@ -191,7 +194,6 @@ func (q *Queue) WaitCallback() *Exchange {
 		case cb := <-q.callback:
 			return cb
 		}
-
 	}
 	return nil
 }

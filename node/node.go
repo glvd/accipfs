@@ -127,8 +127,9 @@ func (n *node) SetAPI(api core.API) {
 
 func (n *node) recv(wg *sync.WaitGroup) {
 	defer wg.Done()
+	scan := dataScan(n.conn)
 	for {
-		exchange, err := ScanExchange(n.conn)
+		exchange, err := ScanExchange(scan)
 		if err != nil {
 			fmt.Println("error:", err)
 			continue
@@ -145,9 +146,10 @@ func (n *node) send(wg *sync.WaitGroup) {
 		if q.HasCallback() {
 			s := n.session.Load()
 			q.SetSession(s)
-			n.callback.Store(n.session.Load(), q.Callback)
+			n.callback.Store(s, q.Callback)
 			n.session.Add(1)
 		}
+		fmt.Printf("send:%+v\n", q.exchange)
 		err := q.Exchange().Pack(n.conn)
 		if err != nil {
 			continue

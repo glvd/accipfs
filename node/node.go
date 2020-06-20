@@ -69,22 +69,15 @@ func (n *node) Verify() bool {
 func AcceptNode(conn net.Conn, api core.API) (core.Node, error) {
 	addr := conn.RemoteAddr()
 	ip, port := basis.SplitIP(addr.String())
-
-	return nodeRun(&node{
-		id:        "", //id will get on running
-		api:       api,
-		sendQueue: make(chan *Queue),
-		isRunning: atomic.NewBool(false),
-		isAccept:  true,
-		addrs: []core.Addr{
-			{
-				Protocol: addr.Network(),
-				IP:       ip,
-				Port:     port,
-			},
-		},
-		conn: conn,
+	n := defaultNode(conn)
+	n.SetAPI(api)
+	n.AppendAddr(core.Addr{
+		Protocol: "tcp",
+		IP:       ip,
+		Port:     port,
 	})
+	return nodeRun(n)
+
 }
 
 // ConnectNode ...
@@ -96,14 +89,10 @@ func ConnectNode(addr core.Addr, bind int, api core.API) (core.Node, error) {
 	if err != nil {
 		return nil, err
 	}
-	return nodeRun(&node{
-		id:        "", //id will get on running
-		api:       api,
-		isRunning: atomic.NewBool(false),
-		sendQueue: make(chan *Queue),
-		addrs:     []core.Addr{addr},
-		conn:      conn,
-	})
+	n := defaultNode(conn)
+	n.SetAPI(api)
+	n.AppendAddr(addr)
+	return nodeRun(n)
 }
 
 func defaultNode(conn net.Conn) *node {
@@ -123,6 +112,11 @@ func defaultNode(conn net.Conn) *node {
 		callback:  sync.Map{},
 		info:      nil,
 	}
+}
+
+// AppendAddr ...
+func (n *node) AppendAddr(addr core.Addr) {
+	n.addrs = append(n.addrs, addr)
 }
 
 // SetAPI ...

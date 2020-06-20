@@ -6,6 +6,7 @@ import (
 	"github.com/glvd/accipfs/core"
 	"github.com/portmapping/go-reuse"
 	"go.uber.org/atomic"
+	"math"
 	"net"
 	"sync"
 )
@@ -145,7 +146,11 @@ func (n *node) send(wg *sync.WaitGroup) {
 			s := n.session.Load()
 			q.SetSession(s)
 			n.callback.Store(s, q.Callback)
-			n.session.Add(1)
+			if s != math.MaxUint32 {
+				n.session.Inc()
+			} else {
+				n.session.Store(0)
+			}
 		}
 		err := q.Exchange().Pack(n.conn)
 		if err != nil {
@@ -208,6 +213,7 @@ func (n *node) idRequest() string {
 	q := NewQueue(ex, true)
 	n.sendQueue <- q
 	callback := q.WaitCallback()
+	n.callback.Delete(callback.Session)
 	return string(callback.Data)
 }
 
@@ -236,16 +242,6 @@ func (n *node) doRecv(exchange *Exchange) {
 		}
 	default:
 		return
-	}
-}
-
-func (n *node) cb(ed *Exchange) {
-	v, b := n.callback.Load(ed.Type)
-	if b {
-		cb, b := v.(chan []byte)
-		if b {
-			cb <- ed.Data
-		}
 	}
 }
 

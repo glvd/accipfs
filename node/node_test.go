@@ -5,12 +5,17 @@ import (
 	"github.com/glvd/accipfs/core"
 	"github.com/portmapping/go-reuse"
 	"net"
+	"runtime"
 	"sync"
 	"testing"
 )
 
 type dummyAPI struct {
 	id string
+}
+
+func init() {
+	runtime.GOMAXPROCS(4)
 }
 
 func (d dummyAPI) Ping(req *core.PingReq) (*core.PingResp, error) {

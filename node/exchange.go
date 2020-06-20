@@ -56,9 +56,3 @@ func (e Exchange) Pack(writer io.Writer) (err error) {
 	}
 	return nil
 }
-
-func checkErr(err error) {
-	if err != nil {
-		panic(err)
-	}
-}

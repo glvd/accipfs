@@ -12,7 +12,7 @@ import (
 )
 
 // Type ...
-type Type uint8
+type Type uint16
 
 // TypeDetail ...
 type TypeDetail uint16
@@ -22,10 +22,11 @@ type Status int
 
 // Exchange ...
 type Exchange struct {
-	Version Version
-	Type    Type
-	Session uint32
-	Length  uint64
+	Version    Version
+	Length     uint64
+	Session    uint32
+	Type       Type
+	TypeDetail TypeDetail
 
 	Status Status
 	Data   []byte
@@ -82,7 +83,7 @@ func (e Exchange) JSON() []byte {
 // Pack ...
 func (e Exchange) Pack(writer io.Writer) (err error) {
 	var v []interface{}
-	v = append(v, &e.Version, &e.Type, &e.Session, &e.Length, &e.Data)
+	v = append(v, &e.Version, &e.Length, &e.Session, &e.Type, &e.TypeDetail, &e.Status, &e.Data)
 	for i := range v {
 		err = binary.Write(writer, binary.BigEndian, v[i])
 		if err != nil {
@@ -95,7 +96,7 @@ func (e Exchange) Pack(writer io.Writer) (err error) {
 // Unpack ...
 func (e Exchange) Unpack(reader io.Reader) (err error) {
 	var v []interface{}
-	v = append(v, &e.Version, &e.Type, &e.Session, &e.Length)
+	v = append(v, &e.Version, &e.Length, &e.Session, &e.Type, &e.TypeDetail, &e.Status)
 	for i := range v {
 		err = binary.Read(reader, binary.BigEndian, v[i])
 		if err != nil {
@@ -122,13 +123,13 @@ func dataScan(conn net.Conn) *bufio.Scanner {
 	scanner := bufio.NewScanner(conn)
 	scanner.Split(func(data []byte, atEOF bool) (advance int, token []byte, err error) {
 		if !atEOF && data[0] == 'v' {
-			if len(data) > 16 {
-				length := int64(0)
-				err := binary.Read(bytes.NewReader(data[8:8]), binary.BigEndian, &length)
+			if len(data) > 12 {
+				length := uint64(0)
+				err := binary.Read(bytes.NewReader(data[4:12]), binary.BigEndian, &length)
 				if err != nil {
 					return 0, nil, err
 				}
-				length += 16
+				length += 12
 				if int(length) <= len(data) {
 					return int(length), data[:int(length)], nil
 				}

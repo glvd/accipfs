@@ -130,9 +130,10 @@ func (n *node) recv(wg *sync.WaitGroup) {
 	for {
 		exchange, err := ScanExchange(n.conn)
 		if err != nil {
+			fmt.Println("error:", err)
 			continue
 		}
-		fmt.Printf("%+v\n", exchange)
+		fmt.Printf("recv:%+v\n", exchange)
 		go n.doRecv(exchange)
 	}
 }
@@ -223,6 +224,7 @@ func (n *node) doRecv(exchange *Exchange) {
 			ex.Session = exchange.Session
 			ex.SetData([]byte(id.Name))
 		}
+		fmt.Printf("resp:%+v\n", ex)
 		q := NewQueue(ex, false)
 		n.sendQueue <- q
 	case Response:

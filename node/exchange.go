@@ -5,7 +5,6 @@ import (
 	"bytes"
 	"encoding/binary"
 	"encoding/json"
-	"fmt"
 	"io"
 	"net"
 	"time"
@@ -93,7 +92,7 @@ func (e Exchange) Pack(writer io.Writer) (err error) {
 }
 
 // Unpack ...
-func (e Exchange) Unpack(reader io.Reader) (err error) {
+func (e *Exchange) Unpack(reader io.Reader) (err error) {
 	var v []interface{}
 	v = append(v, &e.Version, &e.Length, &e.Session, &e.Type, &e.TypeDetail, &e.Status)
 	for i := range v {
@@ -123,7 +122,6 @@ func ScanExchange(scanner *bufio.Scanner) (*Exchange, error) {
 func dataScan(conn net.Conn) *bufio.Scanner {
 	scanner := bufio.NewScanner(conn)
 	scanner.Split(func(data []byte, atEOF bool) (advance int, token []byte, err error) {
-		fmt.Println("split")
 		if !atEOF && data[0] == 'v' {
 			if len(data) > 12 {
 				length := uint64(0)
@@ -131,7 +129,6 @@ func dataScan(conn net.Conn) *bufio.Scanner {
 				if err != nil {
 					return 0, nil, err
 				}
-				fmt.Println("recv size:", length)
 				length += 24
 				if int(length) <= len(data) {
 					return int(length), data[:int(length)], nil
@@ -163,7 +160,6 @@ func (q *Queue) HasCallback() bool {
 
 // Exchange ...
 func (q *Queue) Exchange() *Exchange {
-	fmt.Printf("ex:%+v\n", q.exchange)
 	return q.exchange
 }
 

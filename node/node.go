@@ -2,7 +2,6 @@ package node
 
 import (
 	"context"
-	"fmt"
 	"github.com/glvd/accipfs/basis"
 	"github.com/glvd/accipfs/core"
 	"github.com/portmapping/go-reuse"
@@ -128,15 +127,14 @@ func (n *node) SetAPI(api core.API) {
 func (n *node) recv(wg *sync.WaitGroup) {
 	defer wg.Done()
 	scan := dataScan(n.conn)
-	for {
+	for scan.Scan() {
 		exchange, err := ScanExchange(scan)
 		if err != nil {
-			fmt.Println("error:", err)
 			continue
 		}
-		fmt.Printf("recv:%+v\n", exchange)
 		go n.doRecv(exchange)
 	}
+	log.Errorw("recv", "error", scan.Err())
 }
 
 func (n *node) send(wg *sync.WaitGroup) {
@@ -149,7 +147,6 @@ func (n *node) send(wg *sync.WaitGroup) {
 			n.callback.Store(s, q.Callback)
 			n.session.Add(1)
 		}
-		fmt.Printf("send:%+v\n", q.exchange)
 		err := q.Exchange().Pack(n.conn)
 		if err != nil {
 			continue
@@ -207,6 +204,7 @@ func (n *node) running() {
 
 func (n *node) idRequest() string {
 	ex := NewExchange(Request)
+	ex.SetData([]byte("test"))
 	q := NewQueue(ex, true)
 	n.sendQueue <- q
 	callback := q.WaitCallback()
@@ -226,7 +224,6 @@ func (n *node) doRecv(exchange *Exchange) {
 			ex.Session = exchange.Session
 			ex.SetData([]byte(id.Name))
 		}
-		fmt.Printf("resp:%+v\n", ex)
 		q := NewQueue(ex, false)
 		n.sendQueue <- q
 	case Response:
@@ -234,7 +231,6 @@ func (n *node) doRecv(exchange *Exchange) {
 		if ok {
 			v, b := load.(func(exchange *Exchange))
 			if b {
-				fmt.Println("callback")
 				v(exchange)
 			}
 		}

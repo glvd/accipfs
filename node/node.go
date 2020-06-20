@@ -1,9 +1,7 @@
 package node
 
 import (
-	"bufio"
 	"bytes"
-	"encoding/binary"
 	"encoding/json"
 	"fmt"
 	"github.com/glvd/accipfs/basis"
@@ -106,27 +104,6 @@ func ConnectNode(addr core.Addr, bind int, api core.API) (core.Node, error) {
 		addrs:     []core.Addr{addr},
 		conn:      conn,
 	})
-}
-
-func dataScan(conn net.Conn) *bufio.Scanner {
-	scanner := bufio.NewScanner(conn)
-	scanner.Split(func(data []byte, atEOF bool) (advance int, token []byte, err error) {
-		if !atEOF && data[0] == 'v' {
-			if len(data) > 16 {
-				length := int64(0)
-				err := binary.Read(bytes.NewReader(data[8:8]), binary.BigEndian, &length)
-				if err != nil {
-					return 0, nil, err
-				}
-				length += 16
-				if int(length) <= len(data) {
-					return int(length), data[:int(length)], nil
-				}
-			}
-		}
-		return
-	})
-	return scanner
 }
 
 func (n *node) recv(wg *sync.WaitGroup) {

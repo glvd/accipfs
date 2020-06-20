@@ -1,9 +1,12 @@
 package node
 
 import (
+	"bufio"
+	"bytes"
 	"encoding/binary"
 	"encoding/json"
 	"io"
+	"net"
 )
 
 // Type ...
@@ -55,4 +58,38 @@ func (e Exchange) Pack(writer io.Writer) (err error) {
 		}
 	}
 	return nil
+}
+
+// Unpack ...
+func (e Exchange) Unpack(reader io.Reader) (err error) {
+	var v []interface{}
+	v = append(v, &e.Version, &e.Type, &e.Session, &e.Length, &e.Data)
+	for i := range v {
+		err = binary.Read(reader, binary.BigEndian, v[i])
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func dataScan(conn net.Conn) *bufio.Scanner {
+	scanner := bufio.NewScanner(conn)
+	scanner.Split(func(data []byte, atEOF bool) (advance int, token []byte, err error) {
+		if !atEOF && data[0] == 'v' {
+			if len(data) > 16 {
+				length := int64(0)
+				err := binary.Read(bytes.NewReader(data[8:8]), binary.BigEndian, &length)
+				if err != nil {
+					return 0, nil, err
+				}
+				length += 16
+				if int(length) <= len(data) {
+					return int(length), data[:int(length)], nil
+				}
+			}
+		}
+		return
+	})
+	return scanner
 }

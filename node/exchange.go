@@ -10,15 +10,19 @@ import (
 )
 
 // Type ...
-type Type int16
+type Type uint8
 
-// RequestTypeID ...
 const (
+	// ErrorType ...
+	ErrorType Type = 0x00
 	// RequestID ...
-	RequestID Type = 0x01
+	Request Type = 0x01
 	// ResponseID ...
-	ResponseID Type = 0x02
+	Response Type = 0x02
 )
+
+// TypeDetail ...
+type TypeDetail uint16
 
 // Status ...
 type Status int

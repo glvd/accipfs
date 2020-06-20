@@ -24,6 +24,7 @@ type node struct {
 	id        string
 	addrs     []core.Addr
 	isRunning *atomic.Bool
+	session   *atomic.Uint64
 	isAccept  bool
 	conn      net.Conn
 	isClosed  bool
@@ -106,6 +107,27 @@ func ConnectNode(addr core.Addr, bind int, api core.API) (core.Node, error) {
 	})
 }
 
+func defaultNode(conn net.Conn) *node {
+	return &node{
+		api:       nil,
+		id:        "", //id will get on running
+		addrs:     nil,
+		isRunning: atomic.NewBool(false),
+		session:   atomic.NewUint64(0),
+		isAccept:  false,
+		conn:      conn,
+		isClosed:  false,
+		sendData:  make(chan []byte),
+		callback:  sync.Map{},
+		info:      nil,
+	}
+}
+
+// SetAPI ...
+func (n *node) SetAPI(api core.API) {
+	n.api = api
+}
+
 func (n *node) recv(wg *sync.WaitGroup) {
 	defer wg.Done()
 	for {
@@ -183,17 +205,12 @@ func (n *node) running() {
 
 func (n *node) idRequest() string {
 	ex := &Exchange{
-		Type: RequestID,
+		Type: Request,
 		Data: nil,
 	}
-	load, ok := n.callback.Load(ResponseID)
-	if !ok {
-		load = make(chan []byte)
-		n.callback.Store(ResponseID, load)
-	}
+
 	resp := make(chan []byte)
 	n.sendData <- ex.JSON()
-	resp = load.(chan []byte)
 	t := time.NewTimer(5 * time.Second)
 	select {
 	case id := <-resp:
@@ -212,8 +229,8 @@ func (n *node) doRecv(r []byte) {
 		return
 	}
 	switch ed.Type {
-	case RequestID:
-		ex := &Exchange{Type: ResponseID}
+	case Request:
+		ex := &Exchange{Type: Response}
 		id, err := n.api.ID(&core.IDReq{})
 		if err != nil {
 			ex.Status = StatusFailed

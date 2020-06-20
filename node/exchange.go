@@ -3,7 +3,7 @@ package node
 import "encoding/json"
 
 // Type ...
-type Type int
+type Type int16
 
 // RequestTypeID ...
 const (
@@ -26,11 +26,12 @@ const (
 // Exchange ...
 type Exchange struct {
 	Version Version
-	Session int32
-	Length  int64
 	Type    Type
-	Status  Status
-	Data    []byte
+	Session int16
+	Length  int64
+
+	Status Status
+	Data   []byte
 }
 
 // JSON ...

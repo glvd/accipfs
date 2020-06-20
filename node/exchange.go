@@ -25,9 +25,12 @@ const (
 
 // Exchange ...
 type Exchange struct {
-	Type   Type
-	Status Status
-	Data   []byte
+	Version Version
+	Session int32
+	Length  int64
+	Type    Type
+	Status  Status
+	Data    []byte
 }
 
 // JSON ...

@@ -111,15 +111,16 @@ func ConnectNode(addr core.Addr, bind int, api core.API) (core.Node, error) {
 func dataScan(conn net.Conn) *bufio.Scanner {
 	scanner := bufio.NewScanner(conn)
 	scanner.Split(func(data []byte, atEOF bool) (advance int, token []byte, err error) {
-		if !atEOF && data[0] == 'v' { // 由于我们定义的数据包头最开始为两个字节的版本号，所以只有以V开头的数据包才处理
-			if len(data) > 16 { // 如果收到的数据>4个字节(2字节版本号+2字节数据包长度)
-				length := int16(0)
-				err := binary.Read(bytes.NewReader(data[2:4]), binary.BigEndian, &length) // 读取数据包第3-4字节(int16)=>数据部分长度
+		if !atEOF && data[0] == 'v' {
+			if len(data) > 16 {
+				length := int64(0)
+				err := binary.Read(bytes.NewReader(data[8:8]), binary.BigEndian, &length)
 				if err != nil {
 					return 0, nil, err
 				}
-				if int(length)+4 <= len(data) { // 如果读取到的数据正文长度+2字节版本号+2字节数据长度不超过读到的数据(实际上就是成功完整的解析出了一个包)
-					return int(length) + 4, data[:int(length)+4], nil
+				length += 16
+				if int(length) <= len(data) {
+					return int(length), data[:int(length)], nil
 				}
 			}
 		}

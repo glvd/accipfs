@@ -73,6 +73,18 @@ func (e Exchange) Unpack(reader io.Reader) (err error) {
 	return nil
 }
 
+// ScanExchange ...
+func ScanExchange(conn net.Conn) (*Exchange, error) {
+	var ex Exchange
+	scan := dataScan(conn)
+	r := bytes.NewReader(scan.Bytes())
+	err := ex.Unpack(r)
+	if err != nil {
+		return nil, err
+	}
+	return &ex, nil
+}
+
 func dataScan(conn net.Conn) *bufio.Scanner {
 	scanner := bufio.NewScanner(conn)
 	scanner.Split(func(data []byte, atEOF bool) (advance int, token []byte, err error) {

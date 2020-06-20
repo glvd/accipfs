@@ -222,8 +222,10 @@ func (n *node) doRecv(exchange *Exchange) {
 		if err != nil {
 			ex.Status = StatusFailed
 			ex.Data = []byte(err.Error())
+			ex.Length = int64(len(ex.Data))
 		} else {
 			ex.Data = []byte(id.Name)
+			ex.Length = int64(len(ex.Data))
 		}
 		q := NewQueue(ex, false)
 		n.sendQueue <- q

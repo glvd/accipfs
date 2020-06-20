@@ -1,6 +1,10 @@
 package node
 
-import "encoding/json"
+import (
+	"encoding/binary"
+	"encoding/json"
+	"io"
+)
 
 // Type ...
 type Type int16
@@ -38,4 +42,23 @@ type Exchange struct {
 func (e Exchange) JSON() []byte {
 	marshal, _ := json.Marshal(e)
 	return marshal
+}
+
+// Pack ...
+func (e Exchange) Pack(writer io.Writer) (err error) {
+	var v []interface{}
+	v = append(v, &e.Version, &e.Type, &e.Session, &e.Length, &e.Data)
+	for i := range v {
+		err = binary.Write(writer, binary.BigEndian, v[i])
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func checkErr(err error) {
+	if err != nil {
+		panic(err)
+	}
 }

@@ -31,7 +31,6 @@ type Exchange struct {
 	Length  int64
 
 	Status Status
-	Data   []byte
 }
 
 // JSON ...

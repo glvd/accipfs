@@ -1,6 +1,7 @@
 package node
 
 import (
+	"context"
 	"github.com/glvd/accipfs/basis"
 	"github.com/glvd/accipfs/core"
 	"github.com/portmapping/go-reuse"
@@ -17,16 +18,18 @@ type jsonNode struct {
 }
 
 type node struct {
+	ctx       context.Context
+	cancel    context.CancelFunc
 	api       core.API
 	id        string
+	callback  sync.Map
+	session   *atomic.Uint64
 	addrs     []core.Addr
 	isRunning *atomic.Bool
-	session   *atomic.Uint64
 	isAccept  bool
 	conn      net.Conn
 	isClosed  bool
 	sendData  chan []byte
-	callback  sync.Map
 	info      *core.NodeInfo
 }
 
@@ -105,8 +108,11 @@ func ConnectNode(addr core.Addr, bind int, api core.API) (core.Node, error) {
 }
 
 func defaultNode(conn net.Conn) *node {
+	ctx, fn := context.WithCancel(context.TODO())
 	return &node{
 		api:       nil,
+		ctx:       ctx,
+		cancel:    fn,
 		id:        "", //id will get on running
 		addrs:     nil,
 		isRunning: atomic.NewBool(false),
@@ -217,7 +223,7 @@ func (n *node) idRequest() string {
 	return n.id
 }
 
-func doSend(exchange *Exchange) {
+func (n *node) doSend(exchange *Exchange) {
 
 }
 

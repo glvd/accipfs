@@ -135,7 +135,10 @@ func (n *node) recv(wg *sync.WaitGroup) {
 		}
 		go n.doRecv(exchange)
 	}
-	log.Errorw("recv", "error", scan.Err())
+	if scan.Err() != nil {
+		log.Errorw("recv", "error", scan.Err())
+		n.cancel()
+	}
 }
 
 func (n *node) send(wg *sync.WaitGroup) {

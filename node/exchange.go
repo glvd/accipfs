@@ -55,6 +55,24 @@ const (
 	StatusFailed = 0x01
 )
 
+// NewExchange ...
+func NewExchange(t Type) *Exchange {
+	return &Exchange{
+		Version: Version{'v', 0, 0, 1},
+		Type:    t,
+		Session: 0,
+		Length:  0,
+		Status:  0,
+		Data:    nil,
+	}
+}
+
+// SetData ...
+func (e *Exchange) SetData(data []byte) {
+	e.Data = data
+	e.Length = uint64(len(data))
+}
+
 // JSON ...
 func (e Exchange) JSON() []byte {
 	marshal, _ := json.Marshal(e)

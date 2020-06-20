@@ -203,10 +203,7 @@ func (n *node) running() {
 }
 
 func (n *node) idRequest() string {
-	ex := &Exchange{
-		Type: Request,
-		Data: nil,
-	}
+	ex := NewExchange(Request)
 	q := NewQueue(ex, true)
 	n.sendQueue <- q
 	callback := q.WaitCallback()
@@ -216,16 +213,15 @@ func (n *node) idRequest() string {
 func (n *node) doRecv(exchange *Exchange) {
 	switch exchange.Type {
 	case Request:
-		ex := &Exchange{Type: Response}
+		ex := NewExchange(Response)
 		id, err := n.api.ID(&core.IDReq{})
 		if err != nil {
 			ex.Status = StatusFailed
 			ex.Session = exchange.Session
-			ex.Data = []byte(err.Error())
-			ex.Length = uint64(len(ex.Data))
+			ex.SetData([]byte(err.Error()))
 		} else {
-			ex.Data = []byte(id.Name)
-			ex.Length = uint64(len(ex.Data))
+			ex.Session = exchange.Session
+			ex.SetData([]byte(id.Name))
 		}
 		q := NewQueue(ex, false)
 		n.sendQueue <- q

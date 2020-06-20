@@ -23,8 +23,8 @@ type Status int
 type Exchange struct {
 	Version Version
 	Type    Type
-	Session int16
-	Length  int64
+	Session uint32
+	Length  uint64
 
 	Status Status
 	Data   []byte
@@ -32,7 +32,7 @@ type Exchange struct {
 
 // Queue ...
 type Queue struct {
-	Exchange    *Exchange
+	exchange    *Exchange
 	callback    chan *Exchange
 	timeout     time.Duration
 	hasCallback bool
@@ -123,7 +123,7 @@ func dataScan(conn net.Conn) *bufio.Scanner {
 // NewQueue ...
 func NewQueue(exchange *Exchange, callback bool) *Queue {
 	q := &Queue{
-		Exchange:    exchange,
+		exchange:    exchange,
 		timeout:     time.Duration(5),
 		hasCallback: callback,
 	}
@@ -136,6 +136,16 @@ func NewQueue(exchange *Exchange, callback bool) *Queue {
 // HasCallback ...
 func (q *Queue) HasCallback() bool {
 	return q.hasCallback
+}
+
+// Exchange ...
+func (q *Queue) Exchange() *Exchange {
+	return q.exchange
+}
+
+// SetSession ...
+func (q *Queue) SetSession(s uint32) {
+	q.exchange.Session = s
 }
 
 // Callback ...

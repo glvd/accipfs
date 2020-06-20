@@ -22,7 +22,7 @@ type node struct {
 	api       core.API
 	id        string
 	callback  sync.Map
-	session   *atomic.Uint64
+	session   *atomic.Uint32
 	addrs     []core.Addr
 	isRunning *atomic.Bool
 	isAccept  bool
@@ -104,7 +104,7 @@ func defaultNode(conn net.Conn) *node {
 		id:        "", //id will get on running
 		addrs:     nil,
 		isRunning: atomic.NewBool(false),
-		session:   atomic.NewUint64(0),
+		session:   atomic.NewUint32(0),
 		isAccept:  false,
 		conn:      conn,
 		isClosed:  false,
@@ -141,10 +141,12 @@ func (n *node) send(wg *sync.WaitGroup) {
 	for {
 		q := <-n.sendQueue
 		if q.HasCallback() {
+			s := n.session.Load()
+			q.SetSession(s)
 			n.callback.Store(n.session.Load(), q.Callback)
 			n.session.Add(1)
 		}
-		err := q.Exchange.Pack(n.conn)
+		err := q.Exchange().Pack(n.conn)
 		if err != nil {
 			continue
 		}
@@ -210,10 +212,6 @@ func (n *node) idRequest() string {
 	return string(callback.Data)
 }
 
-func (n *node) doSend(exchange *Exchange) {
-
-}
-
 func (n *node) doRecv(exchange *Exchange) {
 	switch exchange.Type {
 	case Request:
@@ -221,11 +219,12 @@ func (n *node) doRecv(exchange *Exchange) {
 		id, err := n.api.ID(&core.IDReq{})
 		if err != nil {
 			ex.Status = StatusFailed
+			ex.Session = exchange.Session
 			ex.Data = []byte(err.Error())
-			ex.Length = int64(len(ex.Data))
+			ex.Length = uint64(len(ex.Data))
 		} else {
 			ex.Data = []byte(id.Name)
-			ex.Length = int64(len(ex.Data))
+			ex.Length = uint64(len(ex.Data))
 		}
 		q := NewQueue(ex, false)
 		n.sendQueue <- q

@@ -67,14 +67,15 @@ func (e Exchange) Pack(writer io.Writer) (err error) {
 // Unpack ...
 func (e Exchange) Unpack(reader io.Reader) (err error) {
 	var v []interface{}
-	v = append(v, &e.Version, &e.Type, &e.Session, &e.Length, &e.Data)
+	v = append(v, &e.Version, &e.Type, &e.Session, &e.Length)
 	for i := range v {
 		err = binary.Read(reader, binary.BigEndian, v[i])
 		if err != nil {
 			return err
 		}
 	}
-	return nil
+	e.Data = make([]byte, e.Length)
+	return binary.Read(reader, binary.BigEndian, &e.Data)
 }
 
 // ScanExchange ...

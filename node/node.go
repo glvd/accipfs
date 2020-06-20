@@ -1,9 +1,6 @@
 package node
 
 import (
-	"bytes"
-	"encoding/json"
-	"fmt"
 	"github.com/glvd/accipfs/basis"
 	"github.com/glvd/accipfs/core"
 	"github.com/portmapping/go-reuse"
@@ -131,14 +128,13 @@ func (n *node) SetAPI(api core.API) {
 func (n *node) recv(wg *sync.WaitGroup) {
 	defer wg.Done()
 	for {
-		tmp := make([]byte, maxByteSize)
-		_, err := n.conn.Read(tmp)
+		var ex Exchange
+		err := ex.Unpack(n.conn)
 		if err != nil {
-			return
+			continue
 		}
-		fmt.Println("recv", string(tmp))
-		indexByte := bytes.IndexByte(tmp, 0)
-		go n.doRecv(tmp[:indexByte])
+
+		go n.doRecv(&ex)
 	}
 }
 
@@ -221,14 +217,12 @@ func (n *node) idRequest() string {
 	return n.id
 }
 
-func (n *node) doRecv(r []byte) {
-	var ed Exchange
-	err := json.Unmarshal(r, &ed)
-	if err != nil {
-		fmt.Println("failed", err)
-		return
-	}
-	switch ed.Type {
+func doSend(exchange *Exchange) {
+
+}
+
+func (n *node) doRecv(exchange *Exchange) {
+	switch exchange.Type {
 	case Request:
 		ex := &Exchange{Type: Response}
 		id, err := n.api.ID(&core.IDReq{})
@@ -239,8 +233,10 @@ func (n *node) doRecv(r []byte) {
 			ex.Data = []byte(id.Name)
 		}
 		n.sendData <- ex.JSON()
+	case Response:
+
 	default:
-		n.cb(&ed)
+		return
 	}
 }
 

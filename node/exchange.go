@@ -7,32 +7,17 @@ import (
 	"encoding/json"
 	"io"
 	"net"
+	"time"
 )
 
 // Type ...
 type Type uint8
-
-const (
-	// ErrorType ...
-	ErrorType Type = 0x00
-	// RequestID ...
-	Request Type = 0x01
-	// ResponseID ...
-	Response Type = 0x02
-)
 
 // TypeDetail ...
 type TypeDetail uint16
 
 // Status ...
 type Status int
-
-const (
-	// StatusOK ...
-	StatusOK = 0x00
-	// StatusFailed ...
-	StatusFailed = 0x01
-)
 
 // Exchange ...
 type Exchange struct {
@@ -44,6 +29,30 @@ type Exchange struct {
 	Status Status
 	Data   []byte
 }
+
+// Queue ...
+type Queue struct {
+	Exchange    *Exchange
+	callback    chan *Exchange
+	timeout     time.Duration
+	hasCallback bool
+}
+
+const (
+	// ErrorType ...
+	ErrorType Type = 0x00
+	// RequestID ...
+	Request Type = 0x01
+	// ResponseID ...
+	Response Type = 0x02
+)
+
+const (
+	// StatusOK ...
+	StatusOK = 0x00
+	// StatusFailed ...
+	StatusFailed = 0x01
+)
 
 // JSON ...
 func (e Exchange) JSON() []byte {
@@ -109,4 +118,49 @@ func dataScan(conn net.Conn) *bufio.Scanner {
 		return
 	})
 	return scanner
+}
+
+// NewQueue ...
+func NewQueue(exchange *Exchange, callback bool) *Queue {
+	q := &Queue{
+		Exchange:    exchange,
+		timeout:     time.Duration(5),
+		hasCallback: callback,
+	}
+	if callback {
+		q.callback = make(chan *Exchange)
+	}
+	return q
+}
+
+// HasCallback ...
+func (q *Queue) HasCallback() bool {
+	return q.hasCallback
+}
+
+// Callback ...
+func (q *Queue) Callback(exchange *Exchange) {
+	if q.callback != nil {
+		q.callback <- exchange
+	}
+}
+
+// SetTimeOut ...
+func (q *Queue) SetTimeOut(t time.Duration) {
+	q.timeout = t
+}
+
+// WaitCallback ...
+func (q *Queue) WaitCallback() *Exchange {
+	if q.callback != nil {
+		t := time.NewTimer(q.timeout * time.Second)
+		select {
+		case <-t.C:
+			return nil
+		case cb := <-q.callback:
+			return cb
+		}
+
+	}
+	return nil
 }

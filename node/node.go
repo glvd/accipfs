@@ -8,7 +8,6 @@ import (
 	"go.uber.org/atomic"
 	"net"
 	"sync"
-	"time"
 )
 
 const maxByteSize = 65520
@@ -29,7 +28,7 @@ type node struct {
 	isAccept  bool
 	conn      net.Conn
 	isClosed  bool
-	sendData  chan []byte
+	sendQueue chan *Queue
 	info      *core.NodeInfo
 }
 
@@ -74,7 +73,7 @@ func AcceptNode(conn net.Conn, api core.API) (core.Node, error) {
 	return nodeRun(&node{
 		id:        "", //id will get on running
 		api:       api,
-		sendData:  make(chan []byte),
+		sendQueue: make(chan *Queue),
 		isRunning: atomic.NewBool(false),
 		isAccept:  true,
 		addrs: []core.Addr{
@@ -101,7 +100,7 @@ func ConnectNode(addr core.Addr, bind int, api core.API) (core.Node, error) {
 		id:        "", //id will get on running
 		api:       api,
 		isRunning: atomic.NewBool(false),
-		sendData:  make(chan []byte),
+		sendQueue: make(chan *Queue),
 		addrs:     []core.Addr{addr},
 		conn:      conn,
 	})
@@ -120,7 +119,7 @@ func defaultNode(conn net.Conn) *node {
 		isAccept:  false,
 		conn:      conn,
 		isClosed:  false,
-		sendData:  make(chan []byte),
+		sendQueue: make(chan *Queue),
 		callback:  sync.Map{},
 		info:      nil,
 	}
@@ -134,26 +133,27 @@ func (n *node) SetAPI(api core.API) {
 func (n *node) recv(wg *sync.WaitGroup) {
 	defer wg.Done()
 	for {
-		var ex Exchange
-		err := ex.Unpack(n.conn)
+		exchange, err := ScanExchange(n.conn)
 		if err != nil {
 			continue
 		}
 
-		go n.doRecv(&ex)
+		go n.doRecv(exchange)
 	}
 }
 
 func (n *node) send(wg *sync.WaitGroup) {
 	defer wg.Done()
 	for {
-		tmp := make([]byte, maxByteSize)
-		copy(tmp, <-n.sendData)
-		write, err := n.conn.Write(tmp)
-		if err != nil {
-			return
+		q := <-n.sendQueue
+		if q.HasCallback() {
+			n.callback.Store(n.session.Load(), q.Callback)
+			n.session.Add(1)
 		}
-		log.Debugw("send", "write", write)
+		err := q.Exchange.Pack(n.conn)
+		if err != nil {
+			continue
+		}
 	}
 }
 
@@ -210,17 +210,10 @@ func (n *node) idRequest() string {
 		Type: Request,
 		Data: nil,
 	}
-
-	resp := make(chan []byte)
-	n.sendData <- ex.JSON()
-	t := time.NewTimer(5 * time.Second)
-	select {
-	case id := <-resp:
-		n.id = string(id)
-	case <-t.C:
-		return n.id
-	}
-	return n.id
+	q := NewQueue(ex, true)
+	n.sendQueue <- q
+	callback := q.WaitCallback()
+	return string(callback.Data)
 }
 
 func (n *node) doSend(exchange *Exchange) {
@@ -238,7 +231,8 @@ func (n *node) doRecv(exchange *Exchange) {
 		} else {
 			ex.Data = []byte(id.Name)
 		}
-		n.sendData <- ex.JSON()
+		q := NewQueue(ex, false)
+		n.sendQueue <- q
 	case Response:
 
 	default:

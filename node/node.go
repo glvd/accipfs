@@ -2,6 +2,7 @@ package node
 
 import (
 	"context"
+	"fmt"
 	"github.com/glvd/accipfs/basis"
 	"github.com/glvd/accipfs/core"
 	"github.com/portmapping/go-reuse"
@@ -131,7 +132,7 @@ func (n *node) recv(wg *sync.WaitGroup) {
 		if err != nil {
 			continue
 		}
-
+		fmt.Printf("%+v\n", exchange)
 		go n.doRecv(exchange)
 	}
 }
@@ -229,7 +230,14 @@ func (n *node) doRecv(exchange *Exchange) {
 		q := NewQueue(ex, false)
 		n.sendQueue <- q
 	case Response:
-
+		load, ok := n.callback.Load(exchange.Session)
+		if ok {
+			v, b := load.(func(exchange *Exchange))
+			if b {
+				fmt.Println("callback")
+				v(exchange)
+			}
+		}
 	default:
 		return
 	}

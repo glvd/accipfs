@@ -5,6 +5,7 @@ import (
 	"bytes"
 	"encoding/binary"
 	"encoding/json"
+	"fmt"
 	"io"
 	"net"
 	"time"
@@ -124,7 +125,7 @@ func dataScan(conn net.Conn) *bufio.Scanner {
 func NewQueue(exchange *Exchange, callback bool) *Queue {
 	q := &Queue{
 		exchange:    exchange,
-		timeout:     time.Duration(5),
+		timeout:     time.Duration(30),
 		hasCallback: callback,
 	}
 	if callback {
@@ -140,6 +141,7 @@ func (q *Queue) HasCallback() bool {
 
 // Exchange ...
 func (q *Queue) Exchange() *Exchange {
+	fmt.Printf("ex:%+v\n", q.exchange)
 	return q.exchange
 }
 

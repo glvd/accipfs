@@ -242,8 +242,20 @@ func (n *node) idRequest() string {
 	if callback == nil {
 		return ""
 	}
-	n.callback.Delete(callback.Session)
+
 	return string(callback.Data)
+}
+
+// CallbackTrigger ...
+func (n *node) CallbackTrigger(exchange *Exchange) {
+	load, ok := n.callback.Load(exchange.Session)
+	if ok {
+		v, b := load.(func(exchange *Exchange))
+		if b {
+			v(exchange)
+		}
+		n.callback.Delete(exchange.Session)
+	}
 }
 
 func (n *node) doRecv(exchange *Exchange) {
@@ -262,13 +274,7 @@ func (n *node) doRecv(exchange *Exchange) {
 		q := NewQueue(ex, false)
 		n.sendQueue <- q
 	case Response:
-		load, ok := n.callback.Load(exchange.Session)
-		if ok {
-			v, b := load.(func(exchange *Exchange))
-			if b {
-				v(exchange)
-			}
-		}
+		n.CallbackTrigger(exchange)
 	default:
 		return
 	}

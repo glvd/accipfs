@@ -54,15 +54,26 @@ const (
 	StatusFailed = 0x01
 )
 
-// NewExchange ...
-func NewExchange(t Type) *Exchange {
+// NewRequestExchange ...
+func NewRequestExchange(detail TypeDetail) *Exchange {
+	return newExchange(Request, detail)
+}
+
+// NewResponseExchange ...
+func NewResponseExchange(detail TypeDetail) *Exchange {
+	return newExchange(Response, detail)
+}
+
+// newExchange ...
+func newExchange(t Type, detail TypeDetail) *Exchange {
 	return &Exchange{
-		Version: Version{'v', 0, 0, 1},
-		Type:    t,
-		Session: 0,
-		Length:  0,
-		Status:  0,
-		Data:    nil,
+		Version:    Version{'v', 0, 0, 1},
+		Length:     0,
+		Session:    0,
+		Type:       t,
+		TypeDetail: detail,
+		Status:     0,
+		Data:       nil,
 	}
 }
 

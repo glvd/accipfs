@@ -10,6 +10,7 @@ import (
 	"math"
 	"net"
 	"sync"
+	"time"
 )
 
 const maxByteSize = 65520
@@ -55,6 +56,11 @@ func (n *node) IsConnecting() bool {
 
 // Close ...
 func (n *node) Close() (err error) {
+	if n.cancel != nil {
+		n.cancel()
+		n.cancel = nil
+	}
+
 	if n.conn != nil {
 		err = n.conn.Close()
 		n.conn = nil
@@ -226,6 +232,7 @@ func (n *node) running() {
 			n.conn.Close()
 		}
 	}()
+	go n.heartBeat()
 	wg := &sync.WaitGroup{}
 	wg.Add(2)
 	go n.recv(wg)
@@ -236,7 +243,7 @@ func (n *node) running() {
 }
 
 func (n *node) idRequest() string {
-	ex := NewExchange(Request)
+	ex := newExchange(Request)
 	q := NewQueue(ex, true)
 	n.sendQueue <- q
 	callback := q.WaitCallback()
@@ -261,7 +268,7 @@ func (n *node) CallbackTrigger(exchange *Exchange) {
 func (n *node) doRecv(exchange *Exchange) {
 	switch exchange.Type {
 	case Request:
-		ex := NewExchange(Response)
+		ex := newExchange(Response)
 		id, err := n.api.ID(&core.IDReq{})
 		if err != nil {
 			ex.Status = StatusFailed
@@ -282,4 +289,27 @@ func (n *node) doRecv(exchange *Exchange) {
 
 func (n *node) infoRequest() core.NodeInfo {
 	return core.NodeInfo{}
+}
+
+func (n *node) pingRequest() bool {
+	ex := newExchange(Request)
+	q := NewQueue(ex, true)
+	n.sendQueue <- q
+	callback := q.WaitCallback()
+	if callback == nil {
+		return false
+	}
+	return true
+}
+
+func (n *node) heartBeat() {
+	tm := time.NewTicker(30 * time.Second)
+	for {
+		select {
+		case <-tm.C:
+			if !n.pingRequest() {
+				n.Close()
+			}
+		}
+	}
 }

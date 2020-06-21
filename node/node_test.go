@@ -15,7 +15,7 @@ type dummyAPI struct {
 }
 
 func init() {
-	runtime.GOMAXPROCS(4)
+	runtime.GOMAXPROCS(16)
 }
 
 func (d dummyAPI) Ping(req *core.PingReq) (*core.PingResp, error) {
@@ -44,16 +44,17 @@ func TestAcceptNode(t *testing.T) {
 		if err != nil {
 			continue
 		}
-		node, err := AcceptNode(conn, &dummyAPI{
-			id: "server",
-		})
-		if err != nil {
-			fmt.Println("err", err)
-			continue
-		}
-		go func() {
+
+		go func(conn net.Conn) {
+			node, err := AcceptNode(conn, &dummyAPI{
+				id: "server",
+			})
+			if err != nil {
+				fmt.Println("err", err)
+				return
+			}
 			fmt.Println(node.ID())
-		}()
+		}(conn)
 
 		//no callback closed
 	}
@@ -62,7 +63,7 @@ func TestAcceptNode(t *testing.T) {
 
 func TestConnectNode(t *testing.T) {
 	wg := sync.WaitGroup{}
-	for i := 0; i < 10; i++ {
+	for i := 0; i < 10000; i++ {
 		wg.Add(1)
 		go func(i int) {
 			toNode, err := ConnectNode(core.Addr{
@@ -77,7 +78,7 @@ func TestConnectNode(t *testing.T) {
 			}
 			j := 0
 			//for ; j < 100; j++ {
-				fmt.Println("get id", i, "index", j, toNode.ID())
+			fmt.Println("get id", i, "index", j, toNode.ID())
 			//}
 			wg.Done()
 		}(i)

@@ -243,7 +243,7 @@ func (n *node) running() {
 }
 
 func (n *node) idRequest() string {
-	ex := newExchange(Request)
+	ex := newExchange(TypeRequest)
 	q := NewQueue(ex, true)
 	n.sendQueue <- q
 	callback := q.WaitCallback()
@@ -267,8 +267,8 @@ func (n *node) CallbackTrigger(exchange *Exchange) {
 
 func (n *node) doRecv(exchange *Exchange) {
 	switch exchange.Type {
-	case Request:
-		ex := newExchange(Response)
+	case TypeRequest:
+		ex := newExchange(TypeResponse)
 		id, err := n.api.ID(&core.IDReq{})
 		if err != nil {
 			ex.Status = StatusFailed
@@ -280,7 +280,7 @@ func (n *node) doRecv(exchange *Exchange) {
 		}
 		q := NewQueue(ex, false)
 		n.sendQueue <- q
-	case Response:
+	case TypeResponse:
 		n.CallbackTrigger(exchange)
 	default:
 		return
@@ -292,7 +292,8 @@ func (n *node) infoRequest() core.NodeInfo {
 }
 
 func (n *node) pingRequest() bool {
-	ex := newExchange(Request)
+
+	ex := newExchange(TypeRequest, TypeDetailPing)
 	q := NewQueue(ex, true)
 	n.sendQueue <- q
 	callback := q.WaitCallback()

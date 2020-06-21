@@ -39,14 +39,19 @@ type Queue struct {
 }
 
 const (
-	// ErrorType ...
-	ErrorType Type = 0x00
-	// Request ...
-	Request Type = 0x01
-	// Response ...
-	Response Type = 0x02
+	// TypeError ...
+	TypeError Type = 0x00
+	// TypeRequest ...
+	TypeRequest Type = 0x01
+	// TypeResponse ...
+	TypeResponse Type = 0x02
 )
-
+const (
+	// TypeDetailPing ...
+	TypeDetailPing TypeDetail = 0x00
+	// TypeDetailID ...
+	TypeDetailID TypeDetail = 0x00
+)
 const (
 	// StatusOK ...
 	StatusOK = 0x00
@@ -56,12 +61,12 @@ const (
 
 // NewRequestExchange ...
 func NewRequestExchange(detail TypeDetail) *Exchange {
-	return newExchange(Request, detail)
+	return newExchange(TypeRequest, detail)
 }
 
 // NewResponseExchange ...
 func NewResponseExchange(detail TypeDetail) *Exchange {
-	return newExchange(Response, detail)
+	return newExchange(TypeResponse, detail)
 }
 
 // newExchange ...

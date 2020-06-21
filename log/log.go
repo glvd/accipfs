@@ -47,7 +47,7 @@ func InitLog() {
 	cfg.ErrorOutputPaths = []string{Output}
 	logger, e := cfg.Build(
 		zap.AddCaller(),
-		zap.AddCallerSkip(1),
+		//zap.AddCallerSkip(1),
 	)
 	if e != nil {
 		panic(e)

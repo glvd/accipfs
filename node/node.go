@@ -233,7 +233,6 @@ func (n *node) running() {
 
 func (n *node) idRequest() string {
 	ex := NewExchange(Request)
-	ex.SetData([]byte("test"))
 	q := NewQueue(ex, true)
 	n.sendQueue <- q
 	callback := q.WaitCallback()

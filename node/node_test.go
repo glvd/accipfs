@@ -8,6 +8,7 @@ import (
 	"runtime"
 	"sync"
 	"testing"
+	"time"
 )
 
 type dummyAPI struct {
@@ -39,7 +40,14 @@ func TestAcceptNode(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	tm := time.NewTimer(30 * time.Second)
 	for {
+		select {
+		case <-tm.C:
+			break
+		default:
+
+		}
 		conn, err := listener.Accept()
 		if err != nil {
 			continue
@@ -61,21 +69,23 @@ func TestAcceptNode(t *testing.T) {
 }
 
 func TestConnectNode(t *testing.T) {
-	toNode, err := ConnectNode(core.Addr{
-		Protocol: "tcp",
-		IP:       net.IPv4zero,
-		Port:     16004,
-	}, 0, &dummyAPI{
-		id: fmt.Sprintf("id(%v),client request", 0),
-	})
-	if err != nil {
-		t.Fatal(err)
-	}
 	wg := sync.WaitGroup{}
-	for i := 0; i < 10; i++ {
+	for i := 0; i < 10000; i++ {
 		wg.Add(1)
 		go func(i int) {
-			fmt.Println("get id", i, toNode.ID())
+			toNode, err := ConnectNode(core.Addr{
+				Protocol: "tcp",
+				IP:       net.IPv4zero,
+				Port:     16004,
+			}, 0, &dummyAPI{
+				id: fmt.Sprintf("id(%v),client request", 0),
+			})
+			if err != nil {
+				t.Fatal(err)
+			}
+			for j := 0; j < 100; j++ {
+				fmt.Println("get id", i, "index", j, toNode.ID())
+			}
 			wg.Done()
 		}(i)
 	}

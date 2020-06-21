@@ -62,7 +62,7 @@ func TestAcceptNode(t *testing.T) {
 
 func TestConnectNode(t *testing.T) {
 	wg := sync.WaitGroup{}
-	for i := 0; i < 10000; i++ {
+	for i := 0; i < 10; i++ {
 		wg.Add(1)
 		go func(i int) {
 			toNode, err := ConnectNode(core.Addr{

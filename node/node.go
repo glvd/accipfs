@@ -2,6 +2,7 @@ package node
 
 import (
 	"context"
+	"fmt"
 	"github.com/glvd/accipfs/basis"
 	"github.com/glvd/accipfs/core"
 	"github.com/portmapping/go-reuse"
@@ -170,8 +171,7 @@ func (n *node) send(wg *sync.WaitGroup) {
 		select {
 		case <-n.ctx.Done():
 			return
-		default:
-			q := <-n.sendQueue
+		case q := <-n.sendQueue:
 			if q.HasCallback() {
 				n.RegisterCallback(q)
 			}
@@ -231,6 +231,7 @@ func (n *node) running() {
 	go n.recv(wg)
 	go n.send(wg)
 	wg.Wait()
+	fmt.Println("node exit")
 	n.isRunning.Store(false)
 }
 
@@ -242,7 +243,6 @@ func (n *node) idRequest() string {
 	if callback == nil {
 		return ""
 	}
-
 	return string(callback.Data)
 }
 

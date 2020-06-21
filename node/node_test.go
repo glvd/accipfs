@@ -8,7 +8,6 @@ import (
 	"runtime"
 	"sync"
 	"testing"
-	"time"
 )
 
 type dummyAPI struct {
@@ -40,14 +39,7 @@ func TestAcceptNode(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	tm := time.NewTimer(30 * time.Second)
 	for {
-		select {
-		case <-tm.C:
-			break
-		default:
-
-		}
 		conn, err := listener.Accept()
 		if err != nil {
 			continue

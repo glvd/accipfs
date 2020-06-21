@@ -177,7 +177,9 @@ func (n *node) send(wg *sync.WaitGroup) {
 			}
 			err := q.Exchange().Pack(n.conn)
 			if err != nil {
-				continue
+				log.Errorw("recv", "error", err)
+				n.cancel()
+				return
 			}
 		}
 	}
@@ -229,6 +231,7 @@ func (n *node) running() {
 	go n.recv(wg)
 	go n.send(wg)
 	wg.Wait()
+	n.isRunning.Store(false)
 }
 
 func (n *node) idRequest() string {

@@ -129,11 +129,16 @@ func (n *node) recv(wg *sync.WaitGroup) {
 	defer wg.Done()
 	scan := dataScan(n.conn)
 	for scan.Scan() {
-		exchange, err := ScanExchange(scan)
-		if err != nil {
-			continue
+		select {
+		case <-n.ctx.Done():
+			return
+		default:
+			exchange, err := ScanExchange(scan)
+			if err != nil {
+				continue
+			}
+			go n.doRecv(exchange)
 		}
-		go n.doRecv(exchange)
 	}
 	if scan.Err() != nil {
 		log.Errorw("recv", "error", scan.Err())
@@ -144,20 +149,25 @@ func (n *node) recv(wg *sync.WaitGroup) {
 func (n *node) send(wg *sync.WaitGroup) {
 	defer wg.Done()
 	for {
-		q := <-n.sendQueue
-		if q.HasCallback() {
-			s := n.session.Load()
-			q.SetSession(s)
-			n.callback.Store(s, q.Callback)
-			if s != math.MaxUint32 {
-				n.session.Inc()
-			} else {
-				n.session.Store(0)
+		select {
+		case <-n.ctx.Done():
+			return
+		default:
+			q := <-n.sendQueue
+			if q.HasCallback() {
+				s := n.session.Load()
+				q.SetSession(s)
+				n.callback.Store(s, q.Callback)
+				if s != math.MaxUint32 {
+					n.session.Inc()
+				} else {
+					n.session.Store(0)
+				}
 			}
-		}
-		err := q.Exchange().Pack(n.conn)
-		if err != nil {
-			continue
+			err := q.Exchange().Pack(n.conn)
+			if err != nil {
+				continue
+			}
 		}
 	}
 }

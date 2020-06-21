@@ -75,9 +75,10 @@ func TestConnectNode(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
-			for j := 0; j < 100; j++ {
+			j := 0
+			//for ; j < 100; j++ {
 				fmt.Println("get id", i, "index", j, toNode.ID())
-			}
+			//}
 			wg.Done()
 		}(i)
 	}

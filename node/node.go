@@ -239,6 +239,9 @@ func (n *node) idRequest() string {
 	q := NewQueue(ex, true)
 	n.sendQueue <- q
 	callback := q.WaitCallback()
+	if callback == nil {
+		return ""
+	}
 	n.callback.Delete(callback.Session)
 	return string(callback.Data)
 }

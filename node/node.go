@@ -146,6 +146,24 @@ func (n *node) recv(wg *sync.WaitGroup) {
 	}
 }
 
+// Session ...
+func (n *node) Session() uint32 {
+	s := n.session.Load()
+	if s != math.MaxUint32 {
+		n.session.Inc()
+	} else {
+		n.session.Store(0)
+	}
+	return s
+}
+
+// RegisterCallback ...
+func (n *node) RegisterCallback(queue *Queue) {
+	s := n.Session()
+	queue.SetSession(s)
+	n.callback.Store(s, queue.Callback)
+}
+
 func (n *node) send(wg *sync.WaitGroup) {
 	defer wg.Done()
 	for {
@@ -155,14 +173,7 @@ func (n *node) send(wg *sync.WaitGroup) {
 		default:
 			q := <-n.sendQueue
 			if q.HasCallback() {
-				s := n.session.Load()
-				q.SetSession(s)
-				n.callback.Store(s, q.Callback)
-				if s != math.MaxUint32 {
-					n.session.Inc()
-				} else {
-					n.session.Store(0)
-				}
+				n.RegisterCallback(q)
 			}
 			err := q.Exchange().Pack(n.conn)
 			if err != nil {

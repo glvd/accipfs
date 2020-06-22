@@ -11,6 +11,7 @@ import (
 	"runtime"
 	"sync"
 	"testing"
+	"time"
 )
 
 type dummyAPI struct {
@@ -89,10 +90,11 @@ func TestConnectNode(t *testing.T) {
 				t.Fatal(err)
 			}
 			j := 0
-			for ; j < 100000; j++ {
+			for ; j < 10; j++ {
 				toNode.ID()
 			}
 			fmt.Println("get id", i, "index", j, toNode.ID())
+			time.Sleep(30 * time.Minute)
 			err = toNode.Close()
 			if err != nil {
 				fmt.Println("err", err)

@@ -2,7 +2,6 @@ package node
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"github.com/glvd/accipfs/basis"
 	"github.com/glvd/accipfs/core"
@@ -127,7 +126,7 @@ func defaultNode(conn net.Conn) *node {
 		local:     &nodeLocal{},
 		addrs:     nil,
 		isRunning: atomic.NewBool(false),
-		session:   atomic.NewUint32(1),
+		session:   atomic.NewUint32(math.MaxUint32 - 5),
 		isAccept:  false,
 		conn:      conn,
 		isClosed:  false,
@@ -360,10 +359,19 @@ func (n *node) SendQueue(queue *Queue) bool {
 func (n *node) Timeout() bool {
 	select {
 	case <-n.heartBeat.C:
-		if !n.pingRequest() {
-			panic(errors.New("ticker time out"))
+		ex := NewRequestExchange(TypeDetailPing)
+		q := NewQueue(ex, func(option *QueueOption) {
+			option.Callback = true
+			option.Timeout = 15 * time.Minute
+		})
+		if q.Send(n.sendQueue) {
+			callback := q.WaitCallback()
+			if callback != nil {
+				return false
+			}
 		}
+		return true
+	default:
+		return false
 	}
-
-	return false
 }

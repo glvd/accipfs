@@ -307,6 +307,10 @@ func (n *node) doRequest(exchange *Exchange) {
 	}
 }
 
+func (n *node) doResponse(exchange *Exchange) {
+	n.CallbackTrigger(exchange)
+}
+
 func (n *node) doRecv(exchange *Exchange) {
 	switch exchange.Type {
 	case TypeRequest:
@@ -359,8 +363,4 @@ func (n *node) Timeout() bool {
 	}
 
 	return false
-}
-
-func (n *node) doResponse(exchange *Exchange) {
-	n.CallbackTrigger(exchange)
 }

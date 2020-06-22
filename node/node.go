@@ -2,7 +2,6 @@ package node
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"github.com/glvd/accipfs/basis"
 	"github.com/glvd/accipfs/core"
@@ -215,10 +214,7 @@ func (n *node) send(wg *sync.WaitGroup) {
 			if !n.connector {
 				continue
 			}
-			if n.isTimeout.Load() {
-				panic(errors.New("time out"))
-			}
-			n.timeout.Reset(30 * time.Second)
+			n.timeout.Reset(heartBeatTimer)
 			err := NewRequestExchange(TypeDetailPing).Pack(n.conn)
 			if err != nil {
 				panic(err)
@@ -307,29 +303,39 @@ func (n *node) CallbackTrigger(exchange *Exchange) {
 	}
 }
 
-func (n *node) doRequest(exchange *Exchange) {
-	var response *Exchange
-	switch exchange.TypeDetail {
-	case TypeDetailID:
-		response = NewResponseExchange(exchange.TypeDetail)
-		id, err := n.api.ID(&core.IDReq{})
-		if err != nil {
-			response.Status = StatusFailed
-			response.Session = exchange.Session
-			response.SetData([]byte(err.Error()))
-		} else {
-			response.Session = exchange.Session
-			response.SetData([]byte(id.Name))
-		}
-	case TypeDetailPing:
-		log.Infow("ping request")
-		response = NewResponseExchange(exchange.TypeDetail)
+var recvReqFunc = map[TypeDetail]func(api core.API) (exchange *Exchange, err error){
+	TypeDetailID:   recvRequestID,
+	TypeDetailPing: recvRequestPing,
+}
+
+func recvRequestID(api core.API) (exchange *Exchange, err error) {
+	exchange = NewResponseExchange(TypeDetailID)
+	var idResp *core.IDResp
+	idResp, err = api.ID(&core.IDReq{})
+	if err != nil {
+		exchange.Status = StatusFailed
+		exchange.SetData([]byte(err.Error()))
+	} else {
+		exchange.SetData([]byte(idResp.Name))
 	}
+	return exchange, nil
+}
+func recvRequestPing(api core.API) (exchange *Exchange, err error) {
+	exchange = NewResponseExchange(TypeDetailPing)
+	return exchange, nil
+}
+func (n *node) recvRequest(exchange *Exchange) {
+	var response *Exchange
+	f, b := recvReqFunc[exchange.TypeDetail]
+	if !b {
+		return
+	}
+	ex, _ := f(n.api)
+	ex.Session = exchange.Session
 	NewQueue(response).Send(n.sendQueue)
 }
 
-func (n *node) doResponse(exchange *Exchange) {
-	log.Infow("do reponse", "exchange", exchange)
+func (n *node) recvResponse(exchange *Exchange) {
 	if exchange.TypeDetail == TypeDetailPing {
 		if !n.isTimeout.Load() {
 			n.timeout.Stop()
@@ -345,11 +351,9 @@ func (n *node) doResponse(exchange *Exchange) {
 func (n *node) doRecv(exchange *Exchange) {
 	switch exchange.Type {
 	case TypeRequest:
-		n.doRequest(exchange)
+		n.recvRequest(exchange)
 	case TypeResponse:
-
-		n.doResponse(exchange)
-
+		n.recvResponse(exchange)
 	default:
 		return
 	}
@@ -386,22 +390,14 @@ func (n *node) SendQueue(queue *Queue) bool {
 
 // Beat ...
 func (n *node) beatChecker() {
-
+	defer func() {
+		n.Close()
+		if e := recover(); e != nil {
+			log.Errorw("beatChecker timeout", "error", e)
+		}
+	}()
 	select {
 	case <-n.timeout.C:
-		//		log.Infow("hearBeat")
-		//		ex := NewRequestExchange(TypeDetailPing)
-		//		q := NewQueue(ex, func(option *QueueOption) {
-		//			option.Callback = true
-		//			option.Timeout = 15 * time.Minute
-		//		})
-		//		if q.Send(n.sendQueue) {
-		//			callback := q.WaitCallback()
-		//			if callback == nil {
 		panic("heart beat timeout")
-		//			}
-		//		}
-		//	}
-
 	}
 }

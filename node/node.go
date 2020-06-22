@@ -2,6 +2,7 @@ package node
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"github.com/glvd/accipfs/basis"
 	"github.com/glvd/accipfs/core"
@@ -25,20 +26,21 @@ type nodeLocal struct {
 }
 
 type node struct {
-	ctx       context.Context
-	cancel    context.CancelFunc
-	closeCB   func(node core.Node)
-	local     *nodeLocal
-	api       core.API
-	callback  sync.Map
-	session   *atomic.Uint32
-	addrs     []core.Addr
-	isRunning *atomic.Bool
-	isAccept  bool
-	conn      net.Conn
-	isClosed  bool
-	sendQueue chan *Queue
-	info      *core.NodeInfo
+	ctx         context.Context
+	cancel      context.CancelFunc
+	closeCB     func(node core.Node)
+	local       *nodeLocal
+	api         core.API
+	callback    sync.Map
+	session     *atomic.Uint32
+	addrs       []core.Addr
+	isRunning   *atomic.Bool
+	isAccept    bool
+	conn        net.Conn
+	isClosed    bool
+	sendQueue   chan *Queue
+	info        *core.NodeInfo
+	heartTicker *time.Ticker
 }
 
 var _ core.Node = &node{}
@@ -118,19 +120,20 @@ func ConnectNode(addr core.Addr, bind int, api core.API) (core.Node, error) {
 func defaultNode(conn net.Conn) *node {
 	ctx, fn := context.WithCancel(context.TODO())
 	return &node{
-		api:       nil,
-		ctx:       ctx,
-		cancel:    fn,
-		local:     &nodeLocal{},
-		addrs:     nil,
-		isRunning: atomic.NewBool(false),
-		session:   atomic.NewUint32(1),
-		isAccept:  false,
-		conn:      conn,
-		isClosed:  false,
-		sendQueue: make(chan *Queue),
-		callback:  sync.Map{},
-		info:      nil,
+		api:         nil,
+		ctx:         ctx,
+		cancel:      fn,
+		heartTicker: time.NewTicker(15 * time.Second),
+		local:       &nodeLocal{},
+		addrs:       nil,
+		isRunning:   atomic.NewBool(false),
+		session:     atomic.NewUint32(1),
+		isAccept:    false,
+		conn:        conn,
+		isClosed:    false,
+		sendQueue:   make(chan *Queue),
+		callback:    sync.Map{},
+		info:        nil,
 	}
 }
 
@@ -201,6 +204,10 @@ func (n *node) send(wg *sync.WaitGroup) {
 		select {
 		case <-n.ctx.Done():
 			return
+		case <-n.heartTicker.C:
+			if !n.pingRequest() {
+				panic(errors.New("ticker time out"))
+			}
 		case q := <-n.sendQueue:
 			if q.HasCallback() {
 				n.RegisterCallback(q)
@@ -338,10 +345,9 @@ func (n *node) SendQueue(queue *Queue) bool {
 }
 
 func (n *node) heartBeat() {
-	tm := time.NewTicker(15 * time.Second)
 	for {
 		select {
-		case <-tm.C:
+		case <-n.heartTicker.C:
 			if !n.pingRequest() {
 				log.Debugw("heartbeat timeout")
 				n.Close()

@@ -40,10 +40,11 @@ type node struct {
 	isClosed  bool
 	sendQueue chan *Queue
 	info      *core.NodeInfo
-	heartBeat *time.Ticker
+	heartBeat *time.Timer
 }
 
 var _ core.Node = &node{}
+var heartBeatTimer = 15 * time.Second
 
 // IsClosed ...
 func (n *node) IsClosed() bool {
@@ -123,7 +124,7 @@ func defaultNode(conn net.Conn) *node {
 		api:       nil,
 		ctx:       ctx,
 		cancel:    fn,
-		heartBeat: time.NewTicker(15 * time.Second),
+		heartBeat: time.NewTimer(heartBeatTimer),
 		local:     &nodeLocal{},
 		addrs:     nil,
 		isRunning: atomic.NewBool(false),
@@ -208,6 +209,7 @@ func (n *node) send(wg *sync.WaitGroup) {
 			if !n.pingRequest() {
 				panic(errors.New("ticker time out"))
 			}
+			n.heartBeat.Reset(heartBeatTimer)
 		case q := <-n.sendQueue:
 			if q.HasCallback() {
 				n.RegisterCallback(q)
@@ -271,12 +273,13 @@ func (n *node) running() {
 func (n *node) idRequest() string {
 	ex := NewRequestExchange(TypeDetailID)
 	q := NewQueue(*ex, true)
-	n.sendQueue <- q
-	callback := q.WaitCallback()
-	if callback == nil {
-		return ""
+	if n.SendQueue(q) {
+		callback := q.WaitCallback()
+		if callback != nil {
+			return string(callback.Data)
+		}
 	}
-	return string(callback.Data)
+	return ""
 }
 
 // CallbackTrigger ...
@@ -306,6 +309,7 @@ func (n *node) doRecv(exchange *Exchange) {
 		}
 		q := NewQueue(*ex, false)
 		n.SendQueue(q)
+		n.heartBeat.Reset(heartBeatTimer)
 	case TypeResponse:
 		if exchange.Session == 0 {
 			return

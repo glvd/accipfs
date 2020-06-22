@@ -185,7 +185,12 @@ func (n *node) RegisterCallback(queue *Queue) {
 }
 
 func (n *node) send(wg *sync.WaitGroup) {
-	defer wg.Done()
+	defer func() {
+		wg.Done()
+		if e := recover(); e != nil {
+			log.Errorw("panic", "error", e)
+		}
+	}()
 	for {
 		select {
 		case <-n.ctx.Done():
@@ -242,9 +247,7 @@ func (n *node) running() {
 	n.isRunning.Store(true)
 	defer func() {
 		_ = n.Close()
-		if e := recover(); e != nil {
-			log.Errorw("panic", "error", e)
-		}
+
 	}()
 	go n.heartBeat()
 	wg := &sync.WaitGroup{}

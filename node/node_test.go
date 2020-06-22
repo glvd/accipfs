@@ -77,6 +77,7 @@ func TestConnectNode(t *testing.T) {
 				id: fmt.Sprintf("id(%v),client request", 0),
 			})
 			if err != nil {
+				wg.Done()
 				t.Fatal(err)
 			}
 			j := 0

@@ -268,7 +268,7 @@ func (n *node) CallbackTrigger(exchange *Exchange) {
 func (n *node) doRecv(exchange *Exchange) {
 	switch exchange.Type {
 	case TypeRequest:
-		ex := newExchange(TypeResponse)
+		ex := NewResponseExchange(TypeDetailID)
 		id, err := n.api.ID(&core.IDReq{})
 		if err != nil {
 			ex.Status = StatusFailed

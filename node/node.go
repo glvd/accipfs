@@ -241,7 +241,7 @@ func (n *node) running() {
 	}
 	n.isRunning.Store(true)
 	defer func() {
-		n.Close()
+		_ = n.Close()
 		if e := recover(); e != nil {
 			log.Errorw("panic", "error", e)
 		}

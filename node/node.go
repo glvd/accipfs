@@ -40,7 +40,7 @@ type node struct {
 	isClosed  bool
 	sendQueue chan *Queue
 	info      *core.NodeInfo
-	heartBeat *time.Timer
+	heartBeat *time.Ticker
 }
 
 var _ core.Node = &node{}
@@ -80,7 +80,6 @@ func (n *node) Close() (err error) {
 		err = n.conn.Close()
 		n.conn = nil
 	}
-
 	return
 }
 
@@ -124,7 +123,7 @@ func defaultNode(conn net.Conn) *node {
 		api:       nil,
 		ctx:       ctx,
 		cancel:    fn,
-		heartBeat: time.NewTimer(heartBeatTimer),
+		heartBeat: time.NewTicker(heartBeatTimer),
 		local:     &nodeLocal{},
 		addrs:     nil,
 		isRunning: atomic.NewBool(false),
@@ -201,15 +200,11 @@ func (n *node) send(wg *sync.WaitGroup) {
 			log.Errorw("panic", "error", e)
 		}
 	}()
+
 	for {
 		select {
 		case <-n.ctx.Done():
 			return
-		case <-n.heartBeat.C:
-			if !n.pingRequest() {
-				panic(errors.New("ticker time out"))
-			}
-			n.heartBeat.Reset(heartBeatTimer)
 		case q := <-n.sendQueue:
 			if q.HasCallback() {
 				n.RegisterCallback(q)
@@ -309,7 +304,6 @@ func (n *node) doRecv(exchange *Exchange) {
 		}
 		q := NewQueue(*ex, false)
 		n.SendQueue(q)
-		n.heartBeat.Reset(heartBeatTimer)
 	case TypeResponse:
 		if exchange.Session == 0 {
 			return
@@ -345,4 +339,17 @@ func (n *node) SendQueue(queue *Queue) bool {
 	case n.sendQueue <- queue:
 		return true
 	}
+}
+
+// Beat ...
+func (n *node) Timeout() bool {
+	select {
+	case <-n.heartBeat.C:
+		if !n.pingRequest() {
+			panic(errors.New("ticker time out"))
+		}
+		n.heartBeat.Reset(heartBeatTimer)
+	}
+
+	return false
 }

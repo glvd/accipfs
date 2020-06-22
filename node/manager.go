@@ -112,7 +112,7 @@ func (m *manager) Load() error {
 			}
 			return err
 		}
-		err = decodeNode(m, n)
+		err = decodeNode(m, n, m.c.LocalAPI())
 		if err != nil {
 			log.Errorw("decode failed", "error", err, "data", string(n))
 			continue
@@ -196,17 +196,22 @@ func (m *manager) HandleConn(i interface{}) {
 	}
 }
 
-func decodeNode(m core.NodeManager, b []byte) error {
+func decodeNode(m core.NodeManager, b []byte, api core.API) error {
 	nodes := map[string]jsonNode{}
 	err := json.Unmarshal(b, &nodes)
 	if err != nil {
 		return err
 	}
-	for id, nodes := range nodes {
-		m.Push(&node{
-			id:    id,
-			addrs: nodes.Addrs,
-		})
+	for _, nodes := range nodes {
+		for _, addr := range nodes.Addrs {
+			connectNode, err := ConnectNode(addr, 0, api)
+			if err != nil {
+				continue
+			}
+			m.Push(connectNode)
+			break
+		}
+
 	}
 	return nil
 }

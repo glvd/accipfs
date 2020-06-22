@@ -315,7 +315,8 @@ func (n *node) doRecv(exchange *Exchange) {
 		if exchange.Session == 0 {
 			return
 		}
-		n.CallbackTrigger(exchange)
+		n.doResponse(exchange)
+
 	default:
 		return
 	}
@@ -355,8 +356,11 @@ func (n *node) Timeout() bool {
 		if !n.pingRequest() {
 			panic(errors.New("ticker time out"))
 		}
-		n.heartBeat.Reset(heartBeatTimer)
 	}
 
 	return false
+}
+
+func (n *node) doResponse(exchange *Exchange) {
+	n.CallbackTrigger(exchange)
 }

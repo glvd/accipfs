@@ -3,14 +3,15 @@ package node
 import (
 	"context"
 	"fmt"
-	"github.com/glvd/accipfs/basis"
-	"github.com/glvd/accipfs/core"
-	"github.com/portmapping/go-reuse"
-	"go.uber.org/atomic"
 	"math"
 	"net"
 	"sync"
 	"time"
+
+	"github.com/glvd/accipfs/basis"
+	"github.com/glvd/accipfs/core"
+	"github.com/portmapping/go-reuse"
+	"go.uber.org/atomic"
 )
 
 const maxByteSize = 65520

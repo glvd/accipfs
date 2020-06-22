@@ -19,11 +19,16 @@ type jsonNode struct {
 	Addrs []core.Addr `json:"addrs"`
 }
 
+//temp data
+type nodeLocal struct {
+	id *string
+}
+
 type node struct {
 	ctx       context.Context
 	cancel    context.CancelFunc
+	local     *nodeLocal
 	api       core.API
-	id        string
 	callback  sync.Map
 	session   *atomic.Uint32
 	addrs     []core.Addr
@@ -292,7 +297,6 @@ func (n *node) infoRequest() core.NodeInfo {
 }
 
 func (n *node) pingRequest() bool {
-
 	ex := newExchange(TypeRequest, TypeDetailPing)
 	q := NewQueue(ex, true)
 	n.sendQueue <- q
@@ -304,11 +308,12 @@ func (n *node) pingRequest() bool {
 }
 
 func (n *node) heartBeat() {
-	tm := time.NewTicker(30 * time.Second)
+	tm := time.NewTicker(5 * time.Second)
 	for {
 		select {
 		case <-tm.C:
 			if !n.pingRequest() {
+				log.Debugw("heartbeat timeout")
 				n.Close()
 			}
 		}

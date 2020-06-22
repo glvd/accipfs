@@ -389,7 +389,6 @@ func (n *node) SendQueue(queue *Queue) bool {
 	return queue.Send(n.sendQueue)
 }
 
-// Beat ...
 func (n *node) beatChecker() {
 	defer func() {
 		n.Close()

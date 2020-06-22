@@ -289,9 +289,9 @@ func (n *node) CallbackTrigger(exchange *Exchange) {
 	}
 }
 
-func (n *node) doRecv(exchange *Exchange) {
-	switch exchange.Type {
-	case TypeRequest:
+func (n *node) doRequest(exchange *Exchange) {
+	switch exchange.TypeDetail {
+	case TypeDetailID:
 		ex := NewResponseExchange(TypeDetailID)
 		id, err := n.api.ID(&core.IDReq{})
 		if err != nil {
@@ -304,6 +304,13 @@ func (n *node) doRecv(exchange *Exchange) {
 		}
 		q := NewQueue(*ex, false)
 		n.SendQueue(q)
+	}
+}
+
+func (n *node) doRecv(exchange *Exchange) {
+	switch exchange.Type {
+	case TypeRequest:
+		n.doRequest(exchange)
 	case TypeResponse:
 		if exchange.Session == 0 {
 			return

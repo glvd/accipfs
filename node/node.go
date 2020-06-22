@@ -114,7 +114,7 @@ func defaultNode(conn net.Conn) *node {
 		api:       nil,
 		ctx:       ctx,
 		cancel:    fn,
-		id:        "", //id will get on running
+		local:     &nodeLocal{},
 		addrs:     nil,
 		isRunning: atomic.NewBool(false),
 		session:   atomic.NewUint32(0),
@@ -208,8 +208,8 @@ func (n node) Addrs() []core.Addr {
 
 // ID ...
 func (n *node) ID() string {
-	if n.id != "" {
-		return n.id
+	if n.local.id != nil {
+		return *n.local.id
 	}
 	return n.idRequest()
 }

@@ -186,9 +186,9 @@ func (m *manager) HandleConn(i interface{}) {
 	if err != nil {
 		return
 	}
-	acceptNode.Closed(func(n core.Node) bool {
+
+	acceptNode.Closed(func(n core.Node) {
 		m.nodes.Delete(n.ID())
-		return true
 	})
 
 	if !acceptNode.IsClosed() {

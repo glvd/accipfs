@@ -27,6 +27,7 @@ type nodeLocal struct {
 type node struct {
 	ctx       context.Context
 	cancel    context.CancelFunc
+	closeCB   func(node core.Node)
 	local     *nodeLocal
 	api       core.API
 	callback  sync.Map
@@ -48,9 +49,9 @@ func (n *node) IsClosed() bool {
 }
 
 // Closed ...
-func (n *node) Closed(f func(core.Node) bool) {
+func (n *node) Closed(f func(core.Node)) {
 	if f != nil {
-		n.isClosed = f(n)
+		n.closeCB = f
 	}
 }
 
@@ -61,6 +62,12 @@ func (n *node) IsConnecting() bool {
 
 // Close ...
 func (n *node) Close() (err error) {
+	defer func() {
+		n.isClosed = true
+		if n.closeCB != nil {
+			n.closeCB(n)
+		}
+	}()
 	if n.cancel != nil {
 		n.cancel()
 		n.cancel = nil
@@ -70,6 +77,7 @@ func (n *node) Close() (err error) {
 		err = n.conn.Close()
 		n.conn = nil
 	}
+
 	return
 }
 

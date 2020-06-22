@@ -15,7 +15,7 @@ type dummyAPI struct {
 }
 
 func init() {
-	runtime.GOMAXPROCS(12)
+	runtime.GOMAXPROCS(2)
 }
 
 func (d dummyAPI) Ping(req *core.PingReq) (*core.PingResp, error) {
@@ -54,6 +54,9 @@ func TestAcceptNode(t *testing.T) {
 				return
 			}
 			fmt.Println(node.ID())
+			node.Closed(func(n core.Node) {
+				node = nil
+			})
 		}(conn)
 
 		//no callback closed
@@ -63,7 +66,7 @@ func TestAcceptNode(t *testing.T) {
 
 func TestConnectNode(t *testing.T) {
 	wg := sync.WaitGroup{}
-	for i := 0; i < 10; i++ {
+	for i := 0; i < 10000; i++ {
 		wg.Add(1)
 		go func(i int) {
 			toNode, err := ConnectNode(core.Addr{
@@ -80,9 +83,10 @@ func TestConnectNode(t *testing.T) {
 			//for ; j < 100; j++ {
 			fmt.Println("get id", i, "index", j, toNode.ID())
 			//}
-			toNode.Closed(func(n core.Node) bool {
-				return true
-			})
+			err = toNode.Close()
+			if err != nil {
+				fmt.Println("err", err)
+			}
 			wg.Done()
 		}(i)
 	}

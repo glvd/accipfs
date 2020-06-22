@@ -7,6 +7,7 @@ type Node interface {
 	Info() NodeInfo
 	Ping() error
 	IsConnecting() bool
-	Closed(f func(Node) bool)
+	Closed(f func(Node))
+	Close() (err error)
 	IsClosed() bool
 }

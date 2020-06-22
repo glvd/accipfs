@@ -399,6 +399,7 @@ func (n *node) beatChecker() {
 	}()
 	select {
 	case <-n.timeout.C:
+		n.isTimeout.Store(true)
 		panic("heart beat timeout")
 	}
 }

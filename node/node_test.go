@@ -90,7 +90,7 @@ func TestConnectNode(t *testing.T) {
 				t.Fatal(err)
 			}
 			j := 0
-			for ; j < 10; j++ {
+			for ; j < 100000; j++ {
 				toNode.ID()
 			}
 			fmt.Println("get id", i, "index", j, toNode.ID())

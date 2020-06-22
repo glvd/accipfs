@@ -2,6 +2,7 @@ package node
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"github.com/glvd/accipfs/basis"
 	"github.com/glvd/accipfs/core"
@@ -31,6 +32,9 @@ type node struct {
 	local     *nodeLocal
 	api       core.API
 	callback  sync.Map
+	connector bool
+	isTimeout *atomic.Bool
+	timeout   *time.Timer
 	session   *atomic.Uint32
 	addrs     []core.Addr
 	isRunning *atomic.Bool
@@ -111,6 +115,7 @@ func ConnectNode(addr core.Addr, bind int, api core.API) (core.Node, error) {
 		return nil, err
 	}
 	n := defaultNode(conn)
+	n.connector = true
 	n.SetAPI(api)
 	n.AppendAddr(addr)
 	return nodeRun(n)
@@ -124,6 +129,8 @@ func defaultNode(conn net.Conn) *node {
 		cancel:    fn,
 		heartBeat: time.NewTicker(heartBeatTimer),
 		local:     &nodeLocal{},
+		isTimeout: atomic.NewBool(false),
+		timeout:   time.NewTimer(30 * time.Minute),
 		addrs:     nil,
 		isRunning: atomic.NewBool(false),
 		session:   atomic.NewUint32(math.MaxUint32 - 5),
@@ -134,6 +141,25 @@ func defaultNode(conn net.Conn) *node {
 		callback:  sync.Map{},
 		info:      nil,
 	}
+}
+
+// Session ...
+func (n *node) Session() uint32 {
+	s := n.session.Load()
+	log.Infow("session", "num", s)
+	if s != math.MaxUint32 {
+		n.session.Inc()
+	} else {
+		n.session.Store(1)
+	}
+	return s
+}
+
+// RegisterCallback ...
+func (n *node) RegisterCallback(queue *Queue) {
+	s := n.Session()
+	queue.SetSession(s)
+	n.callback.Store(s, queue.Callback)
 }
 
 // AppendAddr ...
@@ -172,25 +198,6 @@ func (n *node) recv(wg *sync.WaitGroup) {
 	}
 }
 
-// Session ...
-func (n *node) Session() uint32 {
-	s := n.session.Load()
-	log.Infow("session", "num", s)
-	if s != math.MaxUint32 {
-		n.session.Inc()
-	} else {
-		n.session.Store(1)
-	}
-	return s
-}
-
-// RegisterCallback ...
-func (n *node) RegisterCallback(queue *Queue) {
-	s := n.Session()
-	queue.SetSession(s)
-	n.callback.Store(s, queue.Callback)
-}
-
 func (n *node) send(wg *sync.WaitGroup) {
 	defer func() {
 		wg.Done()
@@ -204,6 +211,18 @@ func (n *node) send(wg *sync.WaitGroup) {
 		select {
 		case <-n.ctx.Done():
 			return
+		case <-n.heartBeat.C:
+			if !n.connector {
+				continue
+			}
+			if n.isTimeout.Load() {
+				panic(errors.New("time out"))
+			}
+			n.timeout.Reset(30 * time.Second)
+			err := NewRequestExchange(TypeDetailPing).Pack(n.conn)
+			if err != nil {
+				panic(err)
+			}
 		case q := <-n.sendQueue:
 			if q.HasCallback() {
 				n.RegisterCallback(q)
@@ -255,6 +274,7 @@ func (n *node) running() {
 	defer func() {
 		_ = n.Close()
 	}()
+	go n.beatChecker()
 	wg := &sync.WaitGroup{}
 	wg.Add(2)
 	go n.recv(wg)
@@ -302,12 +322,23 @@ func (n *node) doRequest(exchange *Exchange) {
 			response.SetData([]byte(id.Name))
 		}
 	case TypeDetailPing:
+		log.Infow("ping request")
 		response = NewResponseExchange(exchange.TypeDetail)
 	}
 	NewQueue(response).Send(n.sendQueue)
 }
 
 func (n *node) doResponse(exchange *Exchange) {
+	log.Infow("do reponse", "exchange", exchange)
+	if exchange.TypeDetail == TypeDetailPing {
+		if !n.isTimeout.Load() {
+			n.timeout.Stop()
+		}
+		return
+	}
+	if exchange.Session == 0 {
+		return
+	}
 	n.CallbackTrigger(exchange)
 }
 
@@ -316,9 +347,7 @@ func (n *node) doRecv(exchange *Exchange) {
 	case TypeRequest:
 		n.doRequest(exchange)
 	case TypeResponse:
-		if exchange.Session == 0 {
-			return
-		}
+
 		n.doResponse(exchange)
 
 	default:
@@ -356,22 +385,24 @@ func (n *node) SendQueue(queue *Queue) bool {
 }
 
 // Beat ...
-func (n *node) Timeout() bool {
+func (n *node) beatChecker() {
+
 	select {
-	case <-n.heartBeat.C:
-		ex := NewRequestExchange(TypeDetailPing)
-		q := NewQueue(ex, func(option *QueueOption) {
-			option.Callback = true
-			option.Timeout = 15 * time.Minute
-		})
-		if q.Send(n.sendQueue) {
-			callback := q.WaitCallback()
-			if callback != nil {
-				return false
-			}
-		}
-		return true
-	default:
-		return false
+	case <-n.timeout.C:
+		n.isTimeout.Store(true)
+		//		log.Infow("hearBeat")
+		//		ex := NewRequestExchange(TypeDetailPing)
+		//		q := NewQueue(ex, func(option *QueueOption) {
+		//			option.Callback = true
+		//			option.Timeout = 15 * time.Minute
+		//		})
+		//		if q.Send(n.sendQueue) {
+		//			callback := q.WaitCallback()
+		//			if callback == nil {
+		//				panic("heart beat timeout")
+		//			}
+		//		}
+		//	}
+
 	}
 }

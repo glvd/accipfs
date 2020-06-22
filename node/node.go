@@ -20,7 +20,7 @@ type jsonNode struct {
 	Addrs []core.Addr `json:"addrs"`
 }
 
-//temp data
+//temp Data
 type nodeLocal struct {
 	id *string
 }
@@ -267,9 +267,8 @@ func (n *node) running() {
 
 func (n *node) idRequest() string {
 	ex := NewRequestExchange(TypeDetailID)
-	q := NewQueue(*ex, true)
-	if n.SendQueue(q) {
-		callback := q.WaitCallback()
+	if cb, b := n.SendExchange(ex); b {
+		callback := cb.WaitCallback()
 		if callback != nil {
 			return string(callback.Data)
 		}
@@ -290,21 +289,23 @@ func (n *node) CallbackTrigger(exchange *Exchange) {
 }
 
 func (n *node) doRequest(exchange *Exchange) {
+	var response *Exchange
 	switch exchange.TypeDetail {
 	case TypeDetailID:
-		ex := NewResponseExchange(TypeDetailID)
+		response = NewResponseExchange(exchange.TypeDetail)
 		id, err := n.api.ID(&core.IDReq{})
 		if err != nil {
-			ex.Status = StatusFailed
-			ex.Session = exchange.Session
-			ex.SetData([]byte(err.Error()))
+			response.Status = StatusFailed
+			response.Session = exchange.Session
+			response.SetData([]byte(err.Error()))
 		} else {
-			ex.Session = exchange.Session
-			ex.SetData([]byte(id.Name))
+			response.Session = exchange.Session
+			response.SetData([]byte(id.Name))
 		}
-		q := NewQueue(*ex, false)
-		n.SendQueue(q)
+	case TypeDetailPing:
+		response = NewResponseExchange(exchange.TypeDetail)
 	}
+	NewQueue(response).Send(n.sendQueue)
 }
 
 func (n *node) doResponse(exchange *Exchange) {
@@ -332,9 +333,8 @@ func (n *node) infoRequest() core.NodeInfo {
 
 func (n *node) pingRequest() bool {
 	ex := newExchange(TypeRequest, TypeDetailPing)
-	q := NewQueue(*ex, true)
-	if n.SendQueue(q) {
-		callback := q.WaitCallback()
+	if cb, b := n.SendExchange(ex); b {
+		callback := cb.WaitCallback()
 		if callback != nil {
 			return true
 		}
@@ -343,14 +343,17 @@ func (n *node) pingRequest() bool {
 }
 
 // SendQueue ...
+func (n *node) SendExchange(ex *Exchange) (cb CallbackWaiter, b bool) {
+	queue := NewQueue(ex, func(option *QueueOption) {
+		option.Callback = true
+	})
+	b = queue.Send(n.sendQueue)
+	return queue, b
+}
+
+// SendQueue ...
 func (n *node) SendQueue(queue *Queue) bool {
-	t := time.NewTimer(queue.timeout * time.Second)
-	select {
-	case <-t.C:
-		return false
-	case n.sendQueue <- queue:
-		return true
-	}
+	return queue.Send(n.sendQueue)
 }
 
 // Beat ...

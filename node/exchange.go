@@ -32,11 +32,24 @@ type Exchange struct {
 
 // Queue ...
 type Queue struct {
-	exchange    Exchange
-	callback    chan *Exchange
-	timeout     time.Duration
-	hasCallback bool
+	exchange *Exchange
+	option   *QueueOption
+	callback chan *Exchange
 }
+
+// QueueOption ...
+type QueueOption struct {
+	Callback bool
+	Timeout  time.Duration
+}
+
+// CallbackWaiter ...
+type CallbackWaiter interface {
+	WaitCallback() *Exchange
+}
+
+// QueueOptions ...
+type QueueOptions func(option *QueueOption)
 
 const (
 	// TypeError ...
@@ -158,14 +171,25 @@ func dataScan(conn net.Conn) *bufio.Scanner {
 	return scanner
 }
 
-// NewQueue ...
-func NewQueue(exchange Exchange, callback bool) *Queue {
-	q := &Queue{
-		exchange:    exchange,
-		timeout:     30 * time.Second,
-		hasCallback: callback,
+func defaultQueueOption() *QueueOption {
+	return &QueueOption{
+		Callback: false,
+		Timeout:  30 * time.Second,
 	}
-	if callback {
+}
+
+// NewQueue ...
+func NewQueue(exchange *Exchange, opts ...QueueOptions) *Queue {
+	op := defaultQueueOption()
+	for _, opt := range opts {
+		opt(op)
+	}
+
+	q := &Queue{
+		exchange: exchange,
+		option:   op,
+	}
+	if q.option.Callback {
 		q.callback = make(chan *Exchange)
 	}
 	return q
@@ -173,11 +197,11 @@ func NewQueue(exchange Exchange, callback bool) *Queue {
 
 // HasCallback ...
 func (q *Queue) HasCallback() bool {
-	return q.hasCallback
+	return q.option.Callback
 }
 
 // Exchange ...
-func (q *Queue) Exchange() Exchange {
+func (q *Queue) Exchange() *Exchange {
 	return q.exchange
 }
 
@@ -189,7 +213,7 @@ func (q *Queue) SetSession(s uint32) {
 // Callback ...
 func (q *Queue) Callback(exchange *Exchange) {
 	if q.callback != nil {
-		t := time.NewTimer(q.timeout * time.Second)
+		t := time.NewTimer(q.option.Timeout)
 		select {
 		case <-t.C:
 		case q.callback <- exchange:
@@ -197,20 +221,10 @@ func (q *Queue) Callback(exchange *Exchange) {
 	}
 }
 
-// SetTimeOut ...
-func (q *Queue) SetTimeOut(t time.Duration) {
-	q.timeout = t * time.Second
-}
-
-// Timeout ...
-func (q *Queue) Timeout() time.Duration {
-	return q.timeout
-}
-
 // WaitCallback ...
 func (q *Queue) WaitCallback() *Exchange {
 	if q.callback != nil {
-		t := time.NewTimer(q.timeout * time.Second)
+		t := time.NewTimer(q.option.Timeout)
 		select {
 		case <-t.C:
 		case cb := <-q.callback:
@@ -218,4 +232,15 @@ func (q *Queue) WaitCallback() *Exchange {
 		}
 	}
 	return nil
+}
+
+// Send ...
+func (q *Queue) Send(out chan<- *Queue) bool {
+	t := time.NewTimer(q.option.Timeout)
+	select {
+	case <-t.C:
+		return false
+	case out <- q:
+		return true
+	}
 }

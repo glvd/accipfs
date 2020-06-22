@@ -98,7 +98,6 @@ func AcceptNode(conn net.Conn, api core.API) (core.Node, error) {
 		Port:     port,
 	})
 	return nodeRun(n)
-
 }
 
 // ConnectNode ...
@@ -125,7 +124,7 @@ func defaultNode(conn net.Conn) *node {
 		local:     &nodeLocal{},
 		addrs:     nil,
 		isRunning: atomic.NewBool(false),
-		session:   atomic.NewUint32(0),
+		session:   atomic.NewUint32(1),
 		isAccept:  false,
 		conn:      conn,
 		isClosed:  false,
@@ -149,6 +148,7 @@ func (n *node) recv(wg *sync.WaitGroup) {
 	defer func() {
 		wg.Done()
 		if e := recover(); e != nil {
+			_ = n.Close()
 			log.Errorw("panic", "error", e)
 		}
 	}()
@@ -160,24 +160,24 @@ func (n *node) recv(wg *sync.WaitGroup) {
 		default:
 			exchange, err := ScanExchange(scan)
 			if err != nil {
-				continue
+				panic(err)
 			}
 			go n.doRecv(exchange)
 		}
 	}
 	if scan.Err() != nil {
-		log.Errorw("recv", "error", scan.Err())
-		_ = n.Close()
+		panic(scan.Err())
 	}
 }
 
 // Session ...
 func (n *node) Session() uint32 {
 	s := n.session.Load()
+	log.Infow("session", "num", s)
 	if s != math.MaxUint32 {
 		n.session.Inc()
 	} else {
-		n.session.Store(0)
+		n.session.Store(1)
 	}
 	return s
 }
@@ -193,6 +193,7 @@ func (n *node) send(wg *sync.WaitGroup) {
 	defer func() {
 		wg.Done()
 		if e := recover(); e != nil {
+			_ = n.Close()
 			log.Errorw("panic", "error", e)
 		}
 	}()
@@ -206,9 +207,7 @@ func (n *node) send(wg *sync.WaitGroup) {
 			}
 			err := q.Exchange().Pack(n.conn)
 			if err != nil {
-				log.Errorw("recv", "error", err)
-				_ = n.Close()
-				return
+				panic(err)
 			}
 		}
 	}
@@ -300,8 +299,11 @@ func (n *node) doRecv(exchange *Exchange) {
 			ex.SetData([]byte(id.Name))
 		}
 		q := NewQueue(*ex, false)
-		n.sendQueue <- q
+		n.SendQueue(q)
 	case TypeResponse:
+		if exchange.Session == 0 {
+			return
+		}
 		n.CallbackTrigger(exchange)
 	default:
 		return
@@ -336,7 +338,7 @@ func (n *node) SendQueue(queue *Queue) bool {
 }
 
 func (n *node) heartBeat() {
-	tm := time.NewTicker(5 * time.Second)
+	tm := time.NewTicker(15 * time.Second)
 	for {
 		select {
 		case <-tm.C:

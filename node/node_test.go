@@ -3,6 +3,7 @@ package node
 import (
 	"fmt"
 	"github.com/glvd/accipfs/core"
+	"github.com/panjf2000/ants/v2"
 	"github.com/portmapping/go-reuse"
 	"net"
 	"net/http"
@@ -47,14 +48,14 @@ func TestAcceptNode(t *testing.T) {
 			fmt.Printf("start pprof failed on %s\n", ip)
 		}
 	}()
+	pool, _ := ants.NewPool(ants.DefaultAntsPoolSize, ants.WithNonblocking(false))
 
 	for {
 		conn, err := listener.Accept()
 		if err != nil {
 			continue
 		}
-
-		go func(conn net.Conn) {
+		pool.Submit(func() {
 			node, err := AcceptNode(conn, &dummyAPI{
 				id: "server",
 			})
@@ -66,16 +67,14 @@ func TestAcceptNode(t *testing.T) {
 			node.Closed(func(n core.Node) {
 				node = nil
 			})
-		}(conn)
-
+		})
 		//no callback closed
 	}
-
 }
 
 func TestConnectNode(t *testing.T) {
 	wg := sync.WaitGroup{}
-	for i := 0; i < 10000; i++ {
+	for i := 0; i < 10; i++ {
 		wg.Add(1)
 		go func(i int) {
 			toNode, err := ConnectNode(core.Addr{
@@ -90,9 +89,10 @@ func TestConnectNode(t *testing.T) {
 				t.Fatal(err)
 			}
 			j := 0
-			//for ; j < 100; j++ {
+			for ; j < 100000; j++ {
+				toNode.ID()
+			}
 			fmt.Println("get id", i, "index", j, toNode.ID())
-			//}
 			err = toNode.Close()
 			if err != nil {
 				fmt.Println("err", err)

@@ -236,6 +236,9 @@ func (q *Queue) WaitCallback() *Exchange {
 
 // Send ...
 func (q *Queue) Send(out chan<- *Queue) bool {
+	if out == nil {
+		return false
+	}
 	t := time.NewTimer(q.option.Timeout)
 	select {
 	case <-t.C:

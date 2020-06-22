@@ -146,7 +146,12 @@ func (n *node) SetAPI(api core.API) {
 }
 
 func (n *node) recv(wg *sync.WaitGroup) {
-	defer wg.Done()
+	defer func() {
+		wg.Done()
+		if e := recover(); e != nil {
+			log.Errorw("panic", "error", e)
+		}
+	}()
 	scan := dataScan(n.conn)
 	for scan.Scan() {
 		select {
@@ -247,7 +252,6 @@ func (n *node) running() {
 	n.isRunning.Store(true)
 	defer func() {
 		_ = n.Close()
-
 	}()
 	go n.heartBeat()
 	wg := &sync.WaitGroup{}
@@ -261,7 +265,7 @@ func (n *node) running() {
 
 func (n *node) idRequest() string {
 	ex := NewRequestExchange(TypeDetailID)
-	q := NewQueue(ex, true)
+	q := NewQueue(*ex, true)
 	n.sendQueue <- q
 	callback := q.WaitCallback()
 	if callback == nil {
@@ -295,7 +299,7 @@ func (n *node) doRecv(exchange *Exchange) {
 			ex.Session = exchange.Session
 			ex.SetData([]byte(id.Name))
 		}
-		q := NewQueue(ex, false)
+		q := NewQueue(*ex, false)
 		n.sendQueue <- q
 	case TypeResponse:
 		n.CallbackTrigger(exchange)
@@ -310,13 +314,25 @@ func (n *node) infoRequest() core.NodeInfo {
 
 func (n *node) pingRequest() bool {
 	ex := newExchange(TypeRequest, TypeDetailPing)
-	q := NewQueue(ex, true)
-	n.sendQueue <- q
-	callback := q.WaitCallback()
-	if callback == nil {
-		return false
+	q := NewQueue(*ex, true)
+	if n.SendQueue(q) {
+		callback := q.WaitCallback()
+		if callback != nil {
+			return true
+		}
 	}
-	return true
+	return false
+}
+
+// SendQueue ...
+func (n *node) SendQueue(queue *Queue) bool {
+	t := time.NewTimer(queue.timeout * time.Second)
+	select {
+	case <-t.C:
+		return false
+	case n.sendQueue <- queue:
+		return true
+	}
 }
 
 func (n *node) heartBeat() {
@@ -327,6 +343,7 @@ func (n *node) heartBeat() {
 			if !n.pingRequest() {
 				log.Debugw("heartbeat timeout")
 				n.Close()
+				return
 			}
 		}
 	}

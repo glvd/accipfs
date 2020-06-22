@@ -5,6 +5,8 @@ import (
 	"github.com/glvd/accipfs/core"
 	"github.com/portmapping/go-reuse"
 	"net"
+	"net/http"
+	_ "net/http/pprof"
 	"runtime"
 	"sync"
 	"testing"
@@ -39,6 +41,13 @@ func TestAcceptNode(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	go func() {
+		ip := "0.0.0.0:6060"
+		if err := http.ListenAndServe(ip, nil); err != nil {
+			fmt.Printf("start pprof failed on %s\n", ip)
+		}
+	}()
+
 	for {
 		conn, err := listener.Accept()
 		if err != nil {

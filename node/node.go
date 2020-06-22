@@ -130,7 +130,7 @@ func defaultNode(conn net.Conn) *node {
 		heartBeat: time.NewTicker(heartBeatTimer),
 		local:     &nodeLocal{},
 		isTimeout: atomic.NewBool(false),
-		timeout:   time.NewTimer(30 * time.Minute),
+		timeout:   time.NewTimer(24 * time.Hour),
 		addrs:     nil,
 		isRunning: atomic.NewBool(false),
 		session:   atomic.NewUint32(math.MaxUint32 - 5),
@@ -389,7 +389,6 @@ func (n *node) beatChecker() {
 
 	select {
 	case <-n.timeout.C:
-		n.isTimeout.Store(true)
 		//		log.Infow("hearBeat")
 		//		ex := NewRequestExchange(TypeDetailPing)
 		//		q := NewQueue(ex, func(option *QueueOption) {
@@ -399,7 +398,7 @@ func (n *node) beatChecker() {
 		//		if q.Send(n.sendQueue) {
 		//			callback := q.WaitCallback()
 		//			if callback == nil {
-		//				panic("heart beat timeout")
+		panic("heart beat timeout")
 		//			}
 		//		}
 		//	}

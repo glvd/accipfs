@@ -241,8 +241,9 @@ func (n *node) running() {
 	}
 	n.isRunning.Store(true)
 	defer func() {
-		if n.conn != nil {
-			n.conn.Close()
+		n.Close()
+		if e := recover(); e != nil {
+			log.Errorw("panic", "error", e)
 		}
 	}()
 	go n.heartBeat()

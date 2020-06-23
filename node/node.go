@@ -244,18 +244,18 @@ func (n node) Addrs() []core.Addr {
 
 // ID ...
 func (n *node) ID() string {
-	if n.local.id != nil {
-		return *n.local.id
+	if n.local.id == nil {
+		*n.local.id = n.idRequest()
 	}
-	return n.idRequest()
+	return *n.local.id
 }
 
 // Info ...
 func (n *node) Info() core.NodeInfo {
-	if n.info != nil {
-		return *n.info
+	if n.info == nil {
+		n.info = n.infoRequest()
 	}
-	return n.infoRequest()
+	return *n.info
 }
 
 // Ping ...
@@ -360,8 +360,8 @@ func (n *node) doRecv(exchange *Exchange) {
 	}
 }
 
-func (n *node) infoRequest() core.NodeInfo {
-	return core.NodeInfo{}
+func (n *node) infoRequest() *core.NodeInfo {
+	return &core.NodeInfo{}
 }
 
 func (n *node) pingRequest() bool {

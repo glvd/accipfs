@@ -163,8 +163,10 @@ func (n *node) RegisterCallback(queue *Queue) {
 }
 
 // AppendAddr ...
-func (n *node) AppendAddr(addr core.Addr) {
-	n.addrs = append(n.addrs, addr)
+func (n *node) AppendAddr(addrs ...core.Addr) {
+	if addrs != nil {
+		n.addrs = append(n.addrs, addrs...)
+	}
 }
 
 // SetAPI ...

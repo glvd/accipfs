@@ -406,6 +406,7 @@ func (n *node) beatChecker() {
 	case <-n.ctx.Done():
 		//exit timeout
 		n.timeout.Reset(0)
+		n.heartBeat.Stop()
 		return
 	}
 }

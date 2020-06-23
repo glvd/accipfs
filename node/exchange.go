@@ -217,6 +217,7 @@ func (q *Queue) Callback(exchange *Exchange) {
 		select {
 		case <-t.C:
 		case q.callback <- exchange:
+			t.Reset(0)
 		}
 	}
 }
@@ -228,6 +229,7 @@ func (q *Queue) WaitCallback() *Exchange {
 		select {
 		case <-t.C:
 		case cb := <-q.callback:
+			t.Reset(0)
 			return cb
 		}
 	}
@@ -244,6 +246,7 @@ func (q *Queue) Send(out chan<- *Queue) bool {
 	case <-t.C:
 		return false
 	case out <- q:
+		t.Reset(0)
 		return true
 	}
 }

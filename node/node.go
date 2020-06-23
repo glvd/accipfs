@@ -33,6 +33,7 @@ type node struct {
 	api       core.API
 	callback  sync.Map
 	connector bool
+	heartBeat *time.Ticker
 	isTimeout *atomic.Bool
 	timeout   *time.Timer
 	session   *atomic.Uint32
@@ -43,7 +44,6 @@ type node struct {
 	isClosed  bool
 	sendQueue chan *Queue
 	info      *core.NodeInfo
-	heartBeat *time.Ticker
 }
 
 var _ core.Node = &node{}
@@ -128,9 +128,9 @@ func defaultNode(conn net.Conn) *node {
 		ctx:       ctx,
 		cancel:    fn,
 		heartBeat: time.NewTicker(heartBeatTimer),
-		local:     &nodeLocal{},
-		isTimeout: atomic.NewBool(false),
 		timeout:   time.NewTimer(24 * time.Hour),
+		isTimeout: atomic.NewBool(false),
+		local:     &nodeLocal{},
 		addrs:     nil,
 		isRunning: atomic.NewBool(false),
 		session:   atomic.NewUint32(math.MaxUint32 - 5),

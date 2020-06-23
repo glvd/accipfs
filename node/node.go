@@ -326,14 +326,14 @@ func recvRequestPing(api core.API) (exchange *Exchange, err error) {
 	return exchange, nil
 }
 func (n *node) recvRequest(exchange *Exchange) {
-	var response *Exchange
 	f, b := recvReqFunc[exchange.TypeDetail]
 	if !b {
 		return
 	}
+	//ignore error
 	ex, _ := f(n.api)
 	ex.Session = exchange.Session
-	NewQueue(response).Send(n.sendQueue)
+	NewQueue(ex).Send(n.sendQueue)
 }
 
 func (n *node) recvResponse(exchange *Exchange) {

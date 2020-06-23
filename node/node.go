@@ -245,7 +245,8 @@ func (n node) Addrs() []core.Addr {
 // ID ...
 func (n *node) ID() string {
 	if n.local.id == nil {
-		*n.local.id = n.idRequest()
+		id := n.idRequest()
+		n.local.id = &id
 	}
 	return *n.local.id
 }
@@ -400,5 +401,7 @@ func (n *node) beatChecker() {
 	case <-n.timeout.C:
 		n.isTimeout.Store(true)
 		panic("heart beat timeout")
+	case <-n.ctx.Done():
+		return
 	}
 }

@@ -404,6 +404,8 @@ func (n *node) beatChecker() {
 		n.isTimeout.Store(true)
 		panic("heart beat timeout")
 	case <-n.ctx.Done():
+		//exit timeout
+		n.timeout.Reset(0)
 		return
 	}
 }

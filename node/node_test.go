@@ -53,9 +53,10 @@ func TestAcceptNode(t *testing.T) {
 	go func() {
 		for {
 			running := pool.Running()
-			fmt.Println(running)
+			fmt.Println("running pool:", running)
 			if running == 0 {
 				runtime.GC()
+				pool.Reboot()
 			}
 			time.Sleep(15 * time.Second)
 		}

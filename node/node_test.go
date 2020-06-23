@@ -50,7 +50,16 @@ func TestAcceptNode(t *testing.T) {
 		}
 	}()
 	pool, _ := ants.NewPool(ants.DefaultAntsPoolSize, ants.WithNonblocking(false))
-
+	go func() {
+		for {
+			running := pool.Running()
+			fmt.Println(running)
+			if running == 0 {
+				runtime.GC()
+			}
+			time.Sleep(15 * time.Second)
+		}
+	}()
 	for {
 		conn, err := listener.Accept()
 		if err != nil {

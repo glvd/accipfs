@@ -294,6 +294,9 @@ func (n *node) idRequest() string {
 
 // CallbackTrigger ...
 func (n *node) CallbackTrigger(exchange *Exchange) {
+	if exchange.Session == 0 {
+		return
+	}
 	load, ok := n.callback.Load(exchange.Session)
 	if ok {
 		v, b := load.(func(exchange *Exchange))
@@ -341,9 +344,6 @@ func (n *node) recvResponse(exchange *Exchange) {
 		if !n.isTimeout.Load() {
 			n.timeout.Stop()
 		}
-		return
-	}
-	if exchange.Session == 0 {
 		return
 	}
 	n.CallbackTrigger(exchange)

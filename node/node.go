@@ -44,6 +44,11 @@ type node struct {
 	isClosed  bool
 	sendQueue chan *Queue
 	info      *core.NodeInfo
+	cbStore   *sync.Map
+}
+
+func (n *node) RecvCallback(fn core.RecvCBFunc) {
+	n.cbStore.Store("recv", fn)
 }
 
 var _ core.Node = &node{}

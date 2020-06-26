@@ -2,9 +2,6 @@ package node
 
 import (
 	"fmt"
-	"github.com/glvd/accipfs/core"
-	"github.com/panjf2000/ants/v2"
-	"github.com/portmapping/go-reuse"
 	"net"
 	"net/http"
 	_ "net/http/pprof"
@@ -12,6 +9,10 @@ import (
 	"sync"
 	"testing"
 	"time"
+
+	"github.com/glvd/accipfs/core"
+	"github.com/panjf2000/ants/v2"
+	"github.com/portmapping/go-reuse"
 )
 
 type dummyAPI struct {

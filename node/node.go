@@ -1,6 +1,7 @@
 package node
 
 import (
+	"fmt"
 	"net"
 	"time"
 
@@ -115,10 +116,13 @@ func (n *node) ID() string {
 
 // Info ...
 func (n *node) Info() core.NodeInfo {
-	_, b := n.Connection.SendCustomDataOnWait(0x01, nil)
-	//todo
+	msg, b := n.Connection.SendCustomDataOnWait(0x01, []byte("get info from remote"))
 	if b {
-		return core.NodeInfo{}
+		fmt.Println("result msg", *msg)
+		return core.NodeInfo{
+			ID:   "recv id",
+			Type: core.NodeAccelerate,
+		}
 	}
 	return core.NodeInfo{}
 }

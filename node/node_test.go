@@ -53,7 +53,7 @@ func TestAcceptNode(t *testing.T) {
 
 func TestConnectNode(t *testing.T) {
 	wg := sync.WaitGroup{}
-	for i := 0; i < 20000; i++ {
+	for i := 0; i < 100; i++ {
 		wg.Add(1)
 		go func(i int) {
 			toNode, err := ConnectNode(core.Addr{
@@ -71,7 +71,10 @@ func TestConnectNode(t *testing.T) {
 			for ; j < 100; j++ {
 				toNode.ID()
 			}
-			fmt.Println("get id", i, "index", j, toNode.ID())
+			for ; j < 100; j++ {
+				toNode.Info()
+			}
+			fmt.Println("get id", i, "index", j, "id", toNode.ID(), "info", toNode.Info())
 			time.Sleep(30 * time.Minute)
 			err = toNode.Close()
 			if err != nil {

@@ -117,8 +117,9 @@ func (n *node) ID() string {
 // Info ...
 func (n *node) Info() core.NodeInfo {
 	msg, b := n.Connection.SendCustomDataOnWait(0x01, []byte("get info from remote"))
+
 	if b {
-		fmt.Println("result msg", *msg)
+		fmt.Println("result msg", string(msg.Data))
 		return core.NodeInfo{
 			ID:   "recv id",
 			Type: core.NodeAccelerate,

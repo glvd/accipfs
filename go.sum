@@ -140,8 +140,8 @@ github.com/go-playground/validator/v10 v10.2.0/go.mod h1:uOYAAleCW8F/7oMFd6aG0GO
 github.com/go-sourcemap/sourcemap v2.1.2+incompatible/go.mod h1:F8jJfvm2KbVjc5NqelyYJmf/v5J0dwNLS2mL4sNA1Jg=
 github.com/go-stack/stack v1.8.0 h1:5SgMzNM5HxrEjV0ww2lTmX6E2Izsfxas4+YHWRs3Lsk=
 github.com/go-stack/stack v1.8.0/go.mod h1:v0f6uXyyMGvRgIKkXu+yp6POWl0qKG85gN/melR3HDY=
-github.com/godcong/scdt v0.0.1 h1:IvQyhFGZhuAOs68tRAvUMGTIPFpC4NQS3nSssSQ5BU4=
-github.com/godcong/scdt v0.0.1/go.mod h1:QCiIaOX5gAas3rViAMniXfn3lTurbqDU7BqDpOwHp5Y=
+github.com/godcong/scdt v0.0.5 h1:JVQUtUgeqoly/P9fnRDJNUyDSN+B0EHRj332K6EKiOs=
+github.com/godcong/scdt v0.0.5/go.mod h1:QCiIaOX5gAas3rViAMniXfn3lTurbqDU7BqDpOwHp5Y=
 github.com/goextension/extmap v0.0.1 h1:HBNoFczVSs6Twdmi4AN1qFJ6vtmzR80bZ5zt9rrNdi0=
 github.com/goextension/extmap v0.0.1/go.mod h1:Nfdawv1DbZzOgesdNLSiRdUy7oTkN6P4ugpGinSGuRQ=
 github.com/goextension/io v0.0.0-20191016080154-50dbafac3df3 h1:HMUnXbss3UpPgb33MfmuK1U070QIA/FjFEiRjMY/Cmk=

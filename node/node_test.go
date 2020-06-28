@@ -2,6 +2,7 @@ package node
 
 import (
 	"fmt"
+	"github.com/glvd/accipfs/core"
 	"github.com/godcong/scdt"
 	"net"
 	"net/http"
@@ -9,9 +10,6 @@ import (
 	"runtime"
 	"sync"
 	"testing"
-	"time"
-
-	"github.com/glvd/accipfs/core"
 )
 
 type dummyAPI struct {
@@ -40,7 +38,7 @@ func TestAcceptNode(t *testing.T) {
 		t.Fatal(err)
 	}
 	listener.HandleRecv(func(id string, message *scdt.Message) ([]byte, bool) {
-		fmt.Println("id:", id, "message", message)
+		fmt.Println("id:", id, "message:", message, "data:", string(message.Data))
 		return []byte("success"), true
 	})
 
@@ -53,9 +51,10 @@ func TestAcceptNode(t *testing.T) {
 
 func TestConnectNode(t *testing.T) {
 	wg := sync.WaitGroup{}
-	for i := 0; i < 100; i++ {
+	for i := 0; i < 10000; i++ {
 		wg.Add(1)
 		go func(i int) {
+			defer wg.Done()
 			toNode, err := ConnectNode(core.Addr{
 				Protocol: "tcp",
 				IP:       net.IPv4zero,
@@ -64,23 +63,20 @@ func TestConnectNode(t *testing.T) {
 				id: fmt.Sprintf("id(%v),client request", 0),
 			})
 			if err != nil {
-				wg.Done()
 				t.Fatal(err)
 			}
 			j := 0
-			for ; j < 100; j++ {
+			for ; j < 10; j++ {
 				toNode.ID()
 			}
-			for ; j < 100; j++ {
+			for ; j < 10; j++ {
 				toNode.Info()
 			}
 			fmt.Println("get id", i, "index", j, "id", toNode.ID(), "info", toNode.Info())
-			time.Sleep(30 * time.Minute)
 			err = toNode.Close()
 			if err != nil {
 				fmt.Println("err", err)
 			}
-			wg.Done()
 		}(i)
 	}
 	wg.Wait()

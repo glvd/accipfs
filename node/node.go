@@ -10,6 +10,7 @@ import (
 
 	"github.com/glvd/accipfs/basis"
 	"github.com/glvd/accipfs/core"
+	"github.com/godcong/scdt"
 	"github.com/portmapping/go-reuse"
 	"go.uber.org/atomic"
 )
@@ -47,6 +48,7 @@ type node struct {
 	cbStore   *sync.Map
 }
 
+// RecvCallback ...
 func (n *node) RecvCallback(fn core.RecvCBFunc) {
 	n.cbStore.Store("recv", fn)
 }
@@ -127,6 +129,7 @@ func ConnectNode(addr core.Addr, bind int, api core.API) (core.Node, error) {
 }
 
 func defaultNode(conn net.Conn) *node {
+	scdt.NewConnection(conn)
 	ctx, fn := context.WithCancel(context.TODO())
 	return &node{
 		api:       nil,

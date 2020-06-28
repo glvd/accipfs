@@ -1,5 +1,6 @@
 package core
 
+// RecvCBFunc ...
 type RecvCBFunc func(id string, v interface{}) ([]byte, error)
 
 // Node ...

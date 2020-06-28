@@ -187,13 +187,11 @@ func (m *manager) HandleConn(i interface{}) {
 		return
 	}
 
-	acceptNode.Closed(func(n core.Node) {
-		m.nodes.Delete(n.ID())
-	})
-
 	if !acceptNode.IsClosed() {
 		m.Push(acceptNode)
+		return
 	}
+	m.nodes.Delete(acceptNode.ID())
 }
 
 func decodeNode(m core.NodeManager, b []byte, api core.API) error {

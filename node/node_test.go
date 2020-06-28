@@ -2,6 +2,7 @@ package node
 
 import (
 	"fmt"
+	"github.com/godcong/scdt"
 	"net"
 	"net/http"
 	_ "net/http/pprof"
@@ -11,8 +12,6 @@ import (
 	"time"
 
 	"github.com/glvd/accipfs/core"
-	"github.com/panjf2000/ants/v2"
-	"github.com/portmapping/go-reuse"
 )
 
 type dummyAPI struct {
@@ -36,52 +35,20 @@ func (d dummyAPI) ID(req *core.IDReq) (*core.IDResp, error) {
 }
 
 func TestAcceptNode(t *testing.T) {
-	local := &net.TCPAddr{
-		IP:   net.IPv4zero,
-		Port: 16004,
-	}
-	listener, err := reuse.ListenTCP("tcp", local)
+	listener, err := scdt.NewListener("0.0.0.0:12345")
 	if err != nil {
 		t.Fatal(err)
 	}
-	go func() {
-		ip := "0.0.0.0:6060"
-		if err := http.ListenAndServe(ip, nil); err != nil {
-			fmt.Printf("start pprof failed on %s\n", ip)
-		}
-	}()
-	pool, _ := ants.NewPool(ants.DefaultAntsPoolSize, ants.WithNonblocking(false))
-	go func() {
-		for {
-			running := pool.Running()
-			fmt.Println("running pool:", running)
-			if running == 0 {
-				runtime.GC()
-				pool.Reboot()
-			}
-			time.Sleep(15 * time.Second)
-		}
-	}()
-	for {
-		conn, err := listener.Accept()
-		if err != nil {
-			continue
-		}
-		pool.Submit(func() {
-			node, err := AcceptNode(conn, &dummyAPI{
-				id: "server",
-			})
-			if err != nil {
-				fmt.Println("err", err)
-				return
-			}
-			fmt.Println(node.ID())
-			node.Closed(func(n core.Node) {
-				node = nil
-			})
-		})
-		//no callback closed
+	listener.HandleRecv(func(id string, message *scdt.Message) ([]byte, bool) {
+		fmt.Println("id:", id, "message", message)
+		return []byte("success"), true
+	})
+
+	ip := "0.0.0.0:6060"
+	if err := http.ListenAndServe(ip, nil); err != nil {
+		fmt.Printf("start pprof failed on %s\n", ip)
 	}
+	listener.Stop()
 }
 
 func TestConnectNode(t *testing.T) {
@@ -92,7 +59,7 @@ func TestConnectNode(t *testing.T) {
 			toNode, err := ConnectNode(core.Addr{
 				Protocol: "tcp",
 				IP:       net.IPv4zero,
-				Port:     16004,
+				Port:     12345,
 			}, 0, &dummyAPI{
 				id: fmt.Sprintf("id(%v),client request", 0),
 			})

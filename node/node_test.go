@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"github.com/glvd/accipfs/core"
 	"github.com/godcong/scdt"
-	"net"
+	ma "github.com/multiformats/go-multiaddr"
 	"net/http"
 	_ "net/http/pprof"
 	"runtime"
@@ -51,15 +51,15 @@ func TestAcceptNode(t *testing.T) {
 
 func TestConnectNode(t *testing.T) {
 	wg := sync.WaitGroup{}
+	multiaddr, err := ma.NewMultiaddr("/ip4/127.0.0.1/tcp/12345")
+	if err != nil {
+		return
+	}
 	for i := 0; i < 10000; i++ {
 		wg.Add(1)
 		go func(i int) {
 			defer wg.Done()
-			toNode, err := ConnectNode(core.Addr{
-				Protocol: "tcp",
-				IP:       net.IPv4zero,
-				Port:     12345,
-			}, 0, &dummyAPI{
+			toNode, err := ConnectNode(multiaddr, 0, &dummyAPI{
 				id: fmt.Sprintf("id(%v),client request", 0),
 			})
 			if err != nil {

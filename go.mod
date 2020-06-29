@@ -19,6 +19,7 @@ require (
 	github.com/libp2p/go-flow-metrics v0.0.3 // indirect
 	github.com/miekg/dns v1.1.12
 	github.com/multiformats/go-multiaddr v0.1.1
+	github.com/multiformats/go-multiaddr-net v0.1.0
 	github.com/panjf2000/ants/v2 v2.4.1
 	github.com/portmapping/go-reuse v0.0.3
 	github.com/prometheus/tsdb v0.7.1 // indirect

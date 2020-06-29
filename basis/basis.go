@@ -6,9 +6,10 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/glvd/accipfs/core"
 	"github.com/google/uuid"
 	"github.com/gorilla/rpc/v2/json2"
+	ma "github.com/multiformats/go-multiaddr"
+	mnet "github.com/multiformats/go-multiaddr-net"
 	"io"
 	"net"
 	"net/http"
@@ -81,8 +82,12 @@ func RPCPost(url string, method string, input, output interface{}) error {
 }
 
 // RPCAddress ...
-func RPCAddress(addr core.Addr) string {
-	return fmt.Sprintf("http://%s:%d/rpc", addr.IP.String(), addr.Port)
+func RPCAddress(addr ma.Multiaddr) string {
+	netAddr, err := mnet.ToNetAddr(addr)
+	if err != nil {
+		return ""
+	}
+	return fmt.Sprintf("http://%s/rpc", netAddr.String())
 }
 
 // PipeScreen ...

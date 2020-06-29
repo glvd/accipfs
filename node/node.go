@@ -5,16 +5,19 @@ import (
 	"net"
 	"time"
 
-	"github.com/glvd/accipfs/basis"
 	"github.com/glvd/accipfs/core"
 	"github.com/godcong/scdt"
-	"github.com/portmapping/go-reuse"
+	ma "github.com/multiformats/go-multiaddr"
+	mnet "github.com/multiformats/go-multiaddr-net"
 )
 
-const maxByteSize = 65520
+const (
+	// InfoRequest ...
+	InfoRequest = iota + 1
+)
 
 type jsonNode struct {
-	Addrs []core.Addr `json:"addrs"`
+	Addrs []ma.Multiaddr `json:"addrs"`
 }
 
 //temp Data
@@ -25,7 +28,7 @@ type nodeLocal struct {
 type node struct {
 	scdt.Connection
 	api   core.API
-	addrs []core.Addr
+	addrs []ma.Multiaddr
 }
 
 var _ core.Node = &node{}
@@ -51,27 +54,24 @@ func (n *node) Verify() bool {
 
 // AcceptNode ...
 func AcceptNode(conn net.Conn, api core.API) (core.Node, error) {
-	addr := conn.RemoteAddr()
-	ip, port := basis.SplitIP(addr.String())
 	n := defaultNode(conn)
 	n.SetAPI(api)
-	n.AppendAddr(core.Addr{
-		Protocol: "tcp",
-		IP:       ip,
-		Port:     port,
-	})
+	netAddr, err := mnet.FromNetAddr(conn.RemoteAddr())
+	if err != nil {
+		return nil, err
+	}
+	n.AppendAddr(netAddr)
 	return n, nil
 }
 
 // ConnectNode ...
-func ConnectNode(addr core.Addr, bind int, api core.API) (core.Node, error) {
-	conn, err := reuse.DialTCP(addr.Protocol, &net.TCPAddr{
-		IP:   net.IPv4zero,
-		Port: bind,
-	}, addr.TCP())
+func ConnectNode(addr ma.Multiaddr, bind int, api core.API) (core.Node, error) {
+
+	conn, err := mnet.Dial(addr)
 	if err != nil {
 		return nil, err
 	}
+
 	n := defaultNode(conn)
 	n.SetAPI(api)
 	n.AppendAddr(addr)
@@ -89,7 +89,7 @@ func defaultNode(c net.Conn) *node {
 }
 
 // AppendAddr ...
-func (n *node) AppendAddr(addrs ...core.Addr) {
+func (n *node) AppendAddr(addrs ...ma.Multiaddr) {
 	if addrs != nil {
 		n.addrs = append(n.addrs, addrs...)
 	}
@@ -101,7 +101,7 @@ func (n *node) SetAPI(api core.API) {
 }
 
 // Addrs ...
-func (n node) Addrs() []core.Addr {
+func (n node) Addrs() []ma.Multiaddr {
 	return n.addrs
 }
 
@@ -126,4 +126,14 @@ func (n *node) Info() core.NodeInfo {
 		}
 	}
 	return core.NodeInfo{}
+}
+
+// GetDataRequest ...
+func (n *node) GetDataRequest() {
+
+}
+
+// RecvDataRequest ...
+func (n *node) RecvDataRequest(id uint16, cb scdt.RecvCallbackFunc) {
+	//todo
 }

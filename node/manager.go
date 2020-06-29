@@ -96,7 +96,7 @@ func (m *manager) Load() error {
 	}
 
 	if stat.IsDir() {
-		return fmt.Errorf("found file but is directory")
+		return fmt.Errorf("found file but it is a directory")
 	}
 	open, err := os.Open(m.path)
 	if err != nil {

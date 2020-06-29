@@ -8,6 +8,7 @@ import (
 	"github.com/glvd/accipfs/config"
 	"github.com/glvd/accipfs/controller"
 	"github.com/glvd/accipfs/core"
+	"github.com/godcong/scdt"
 	"go.uber.org/atomic"
 	"io"
 	"net"
@@ -18,8 +19,8 @@ import (
 )
 
 type manager struct {
-	cfg *config.Config
-	//exchangePool *ants.PoolWithFunc
+	scdt.Listener
+	cfg          *config.Config
 	t            *time.Ticker
 	currentTS    int64
 	ts           int64

@@ -116,7 +116,7 @@ func (n *node) ID() string {
 
 // Info ...
 func (n *node) Info() core.NodeInfo {
-	msg, b := n.Connection.SendCustomDataOnWait(0x01, []byte("get info from remote"))
+	msg, b := n.Connection.SendOnWait([]byte("get info from remote"))
 
 	if b {
 		fmt.Println("result msg", string(msg.Data))

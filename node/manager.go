@@ -9,6 +9,7 @@ import (
 	"github.com/glvd/accipfs/controller"
 	"github.com/glvd/accipfs/core"
 	"github.com/godcong/scdt"
+	ma "github.com/multiformats/go-multiaddr"
 	"go.uber.org/atomic"
 	"io"
 	"net"
@@ -203,7 +204,11 @@ func decodeNode(m core.NodeManager, b []byte, api core.API) error {
 	}
 	for _, nodes := range nodes {
 		for _, addr := range nodes.Addrs {
-			connectNode, err := ConnectNode(addr, 0, api)
+			multiaddr, err := ma.NewMultiaddr(addr)
+			if err != nil {
+				continue
+			}
+			connectNode, err := ConnectNode(multiaddr, 0, api)
 			if err != nil {
 				continue
 			}
@@ -216,8 +221,12 @@ func decodeNode(m core.NodeManager, b []byte, api core.API) error {
 }
 
 func encodeNode(node core.Node) ([]byte, error) {
+	var strAddrs []string
+	for _, addrs := range node.Addrs() {
+		strAddrs = append(strAddrs, addrs.String())
+	}
 	n := map[string]jsonNode{
-		node.ID(): {Addrs: node.Addrs()},
+		node.ID(): {Addrs: strAddrs},
 	}
 	return json.Marshal(n)
 }

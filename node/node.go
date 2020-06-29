@@ -17,7 +17,7 @@ const (
 )
 
 type jsonNode struct {
-	Addrs []ma.Multiaddr `json:"addrs"`
+	Addrs []string `json:"addrs"`
 }
 
 //temp Data

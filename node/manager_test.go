@@ -2,6 +2,7 @@ package node
 
 import (
 	"github.com/glvd/accipfs/config"
+	"github.com/glvd/accipfs/controller"
 	alog "github.com/glvd/accipfs/log"
 	"testing"
 	"time"
@@ -17,7 +18,7 @@ func init() {
 
 func TestManager_Load(t *testing.T) {
 	cfg := config.Default()
-	nodeManager := New(cfg, nil)
+	nodeManager := New(cfg, &controller.Controller{})
 	err := nodeManager.Load()
 	if err != nil {
 		panic(err)

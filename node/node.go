@@ -1,7 +1,8 @@
 package node
 
 import (
-	"fmt"
+	"encoding/json"
+	"errors"
 	"github.com/libp2p/go-libp2p-core/peer"
 	"go.uber.org/atomic"
 	"net"
@@ -29,10 +30,10 @@ type nodeLocal struct {
 
 type node struct {
 	scdt.Connection
+	local    *peer.AddrInfo
 	remoteID *atomic.String
-	localID  string
-	peer.AddrInfo
-	api core.API
+	remote   *peer.AddrInfo
+	api      core.API
 }
 
 var _ core.Node = &node{}
@@ -94,7 +95,7 @@ func defaultNode(c net.Conn) *node {
 // AppendAddr ...
 func (n *node) AppendAddr(addrs ...ma.Multiaddr) {
 	if addrs != nil {
-		n.AddrInfo.Addrs = append(n.AddrInfo.Addrs, addrs...)
+		n.remote.Addrs = append(n.remote.Addrs, addrs...)
 	}
 }
 
@@ -105,7 +106,7 @@ func (n *node) SetAPI(api core.API) {
 
 // Addrs ...
 func (n node) Addrs() []ma.Multiaddr {
-	return n.AddrInfo.Addrs
+	return n.remote.Addrs
 }
 
 // ID ...
@@ -122,17 +123,19 @@ func (n *node) ID() string {
 }
 
 // Info ...
-func (n *node) Info() core.NodeInfo {
-	msg, b := n.Connection.SendOnWait([]byte("get info from remote"))
-
+func (n *node) Info() (peer.AddrInfo, error) {
+	msg, b := n.Connection.SendCustomDataOnWait(InfoRequest, []byte("get info from remote"))
+	var ai peer.AddrInfo
 	if b {
-		fmt.Println("result msg", string(msg.Data))
-		return core.NodeInfo{
-			ID:   "recv id",
-			Type: core.NodeAccelerate,
+		if msg.DataLength != 0 {
+			err := json.Unmarshal(msg.Data, &ai)
+			if err != nil {
+				return ai, nil
+			}
+			return ai, nil
 		}
 	}
-	return core.NodeInfo{}
+	return ai, errors.New("data not found")
 }
 
 // GetDataRequest ...

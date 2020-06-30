@@ -3,6 +3,7 @@ package node
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"github.com/libp2p/go-libp2p-core/peer"
 	"go.uber.org/atomic"
 	"net"
@@ -70,8 +71,15 @@ func AcceptNode(conn net.Conn, api core.API) (core.Node, error) {
 
 // ConnectNode ...
 func ConnectNode(addr ma.Multiaddr, bind int, api core.API) (core.Node, error) {
-
-	conn, err := mnet.Dial(addr)
+	localAddr, err := ma.NewMultiaddr(fmt.Sprintf("/tcp/%d", bind))
+	if err != nil {
+		return nil, err
+	}
+	d := mnet.Dialer{
+		Dialer:    net.Dialer{},
+		LocalAddr: localAddr,
+	}
+	conn, err := d.Dial(addr)
 	if err != nil {
 		return nil, err
 	}
@@ -156,4 +164,5 @@ func (n *node) infoRequest() peer.AddrInfo {
 	if err != nil {
 		return peer.AddrInfo{}
 	}
+	return *id.AddrInfo
 }

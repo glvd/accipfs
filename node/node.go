@@ -145,5 +145,15 @@ func (n *node) GetDataRequest() {
 
 // RecvDataRequest ...
 func (n *node) RecvDataRequest(id uint16, cb scdt.RecvCallbackFunc) {
-	//todo
+	switch id {
+	case InfoRequest:
+
+	}
+}
+
+func (n *node) infoRequest() peer.AddrInfo {
+	id, err := n.api.ID(&core.IDReq{})
+	if err != nil {
+		return peer.AddrInfo{}
+	}
 }

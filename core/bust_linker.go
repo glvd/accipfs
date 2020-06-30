@@ -25,6 +25,7 @@ type IDReq struct {
 type IDResp struct {
 	Name      string
 	PublicKey string
+	AddrInfo  *AddrInfo
 }
 
 // AddrReq ...

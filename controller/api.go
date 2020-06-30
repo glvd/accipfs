@@ -5,12 +5,13 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
+	"net"
+	"net/http"
+
 	"github.com/gin-gonic/gin"
 	"github.com/glvd/accipfs/config"
 	"github.com/glvd/accipfs/core"
 	"go.uber.org/atomic"
-	"net"
-	"net/http"
 )
 
 // API ...
@@ -28,7 +29,7 @@ type API struct {
 
 // AddrInfo ...
 func (a *API) AddrInfo(req *core.AddrReq) (*core.AddrResp, error) {
-	a.ipfsNode.ID()
+	panic("todo:AddrInfo")
 }
 
 // Ping ...
@@ -40,18 +41,31 @@ func (a *API) Ping(req *core.PingReq) (*core.PingResp, error) {
 
 // ID ...
 func (a *API) ID(req *core.IDReq) (*core.IDResp, error) {
-	ctx := context.Background()
-	id, err := a.ipfsNode.ID(ctx)
-	if err != nil {
-		return nil, err
-	}
+	//ctx := context.Background()
+	//id, err := a.ipfsNode.ID(ctx)
+	//if err != nil {
+	//	return nil, err
+	//}
+	//
+	//privKey, err := base64.StdEncoding.DecodeString(a.cfg.PrivateKey)
+	//if err != nil {
+	//	return nil, err
+	//}
+	//privateKey, err := ic.UnmarshalPrivateKey(privKey)
+	//if err != nil {
+	//	return nil, err
+	//}
+	//key, err := peer.IDFromPrivateKey(privateKey)
+	//if err != nil {
+	//	return nil, err
+	//}
 	//info, err := a.ethNode.NodeInfo(ctx)
 	//if err != nil {
 	//	return nil, err
 	//}
 	return &core.IDResp{
-		Name:      a.cfg.Node.PublicKey,
-		PublicKey: a.cfg.Name,
+		Name:      a.cfg.Identity,
+		PublicKey: "",
 	}, nil
 }
 
@@ -203,5 +217,10 @@ func JSON(c *gin.Context, v interface{}, e error) {
 		"status":  "success",
 		"message": string(m),
 	})
+
+}
+
+func privateToPublicKey(priv string) (string, error) {
+	return "", nil
 
 }

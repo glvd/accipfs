@@ -59,8 +59,10 @@ func (n *node) Verify() bool {
 
 // AcceptNode ...
 func AcceptNode(conn net.Conn, api core.API) (core.Node, error) {
-	n := defaultNode(conn)
-	n.SetAPI(api)
+	n := &node{
+		api:        api,
+		Connection: scdt.Connect(conn),
+	}
 	netAddr, err := mnet.FromNetAddr(conn.RemoteAddr())
 	if err != nil {
 		return nil, err

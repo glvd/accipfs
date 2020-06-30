@@ -30,20 +30,19 @@ var DefaultTokenContractAddr = "0x9064322CfeE623A447ba5aF0dA6AD3341c073535"
 
 // IPFSConfig ...
 type IPFSConfig struct {
+	Enable    bool   `json:"enable" mapstructure:"enable"`
 	LogOutput bool   `json:"log_output" mapstructure:"log_output"` //output log to screen
 	Name      string `json:"name" mapstructure:"name"`
-	//Addr    string `json:"addr" mapstructure:"addr"`
-	Port    int `json:"port" mapstructure:"port"`
-	Timeout int `json:"timeout" mapstructure:"timeout"`
+	Port      int    `json:"port" mapstructure:"port"`
+	Timeout   int    `json:"timeout" mapstructure:"timeout"`
 }
 
 // ETHConfig ...
 type ETHConfig struct {
-	LogOutput bool   `json:"log_output" mapstructure:"log_output"` //output log to screen
-	Name      string `json:"name" mapstructure:"name"`             //bin name
-	//Addr        string       `json:"addr" mapstructure:"addr"`                   //eth rpc address
-	Port int `json:"port" mapstructure:"port"`
-	//KeyHash     string                                    `json:"key_hash" mapstructure:"key_hash"`     //binary key hash
+	Enable      bool   `json:"enable" mapstructure:"enable"`
+	LogOutput   bool   `json:"log_output" mapstructure:"log_output"` //output log to screen
+	Name        string `json:"name" mapstructure:"name"`             //bin name
+	Port        int    `json:"port" mapstructure:"port"`
 	NodeAddr    string `json:"node_addr" mapstructure:"node_addr"`       //node contract address
 	TokenAddr   string `json:"token_addr" mapstructure:"token_addr"`     //token contract address
 	MessageAddr string `json:"message_addr" mapstructure:"message_addr"` //dmessage contract address
@@ -192,15 +191,21 @@ func Default() *Config {
 		PrivateKey: "",
 		PublicKey:  "",
 		ETH: ETHConfig{
-			Name:      "geth",
-			Port:      8545,
-			NodeAddr:  DefaultNodeContractAddr,
-			TokenAddr: DefaultTokenContractAddr,
+			Enable:      false,
+			LogOutput:   false,
+			Name:        "geth",
+			Port:        8545,
+			NodeAddr:    DefaultNodeContractAddr,
+			TokenAddr:   DefaultTokenContractAddr,
+			MessageAddr: "",
+			DTagAddr:    "",
 		},
 		IPFS: IPFSConfig{
-			Name:    "ipfs",
-			Port:    5001,
-			Timeout: 30,
+			Enable:    true,
+			LogOutput: true,
+			Name:      "ipfs",
+			Port:      5001,
+			Timeout:   30,
 		},
 		AWS:      AWSConfig{},
 		Interval: 30,
@@ -215,7 +220,7 @@ func Default() *Config {
 	return def
 }
 
-// Initialize ...
+// Init ...
 func (c *Config) Init() error {
 	err := os.Setenv("IPFS_PATH", filepath.Join(c.Path, _dataDirIPFS))
 	if err != nil {

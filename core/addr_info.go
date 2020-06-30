@@ -19,8 +19,8 @@ func NewAddrInfo(id string, addrs ...ma.Multiaddr) *AddrInfo {
 		_addrs[addr] = true
 	}
 	return &AddrInfo{
-		id:    id,
-		addrs: _addrs,
+		ID:    id,
+		Addrs: _addrs,
 	}
 }
 

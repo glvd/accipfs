@@ -52,17 +52,15 @@ func (a *API) ID(req *core.IDReq) (*core.IDResp, error) {
 }
 
 // New ...
-func newAPI(cfg *config.Config, eth *nodeBinETH, ipfs *nodeBinIPFS) *API {
+func newAPI(cfg *config.Config) *API {
 	if !cfg.Debug {
 		gin.SetMode(gin.ReleaseMode)
 	}
 	eng := gin.Default()
 	return &API{
-		cfg:      cfg,
-		ethNode:  eth,
-		ipfsNode: ipfs,
-		eng:      eng,
-		ready:    atomic.NewBool(false),
+		cfg:   cfg,
+		eng:   eng,
+		ready: atomic.NewBool(false),
 		serv: &http.Server{
 			Handler: eng,
 		},

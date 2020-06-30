@@ -16,6 +16,8 @@ const (
 	IndexIPFS
 	// IndexAPI ...
 	IndexAPI
+	// IndexMax ...
+	IndexMax
 )
 
 // Controller ...
@@ -27,22 +29,28 @@ type Controller struct {
 
 // New ...
 func New(cfg *config.Config) *Controller {
-	eth := newNodeBinETH(cfg)
-	eth.MessageHandle(func(s string) {
-		log.Infow(s, "tag", "eth")
-	})
-	ipfs := newNodeBinIPFS(cfg)
-	ipfs.MessageHandle(func(s string) {
-		log.Infow(s, "tag", "ipfs")
-	})
-	api := newAPI(cfg, eth, ipfs)
 	c := &Controller{
-		services: []core.ControllerService{
-			IndexETH:  eth,
-			IndexIPFS: ipfs,
-			IndexAPI:  api,
-		},
+		services: make([]core.ControllerService, IndexMax),
 	}
+
+	api := newAPI(cfg)
+	if cfg.ETH.Enable {
+		eth := newNodeBinETH(cfg)
+		eth.MessageHandle(func(s string) {
+			log.Infow(s, "tag", "eth")
+		})
+		c.services[IndexETH] = eth
+		api.ethNode = eth
+	}
+	if cfg.IPFS.Enable {
+		ipfs := newNodeBinIPFS(cfg)
+		ipfs.MessageHandle(func(s string) {
+			log.Infow(s, "tag", "ipfs")
+		})
+		c.services[IndexIPFS] = ipfs
+		api.ipfsNode = ipfs
+	}
+	c.services[IndexAPI] = api
 	c.api = api
 	c.wg = &sync.WaitGroup{}
 	return c

@@ -36,7 +36,7 @@ func (i *INT256) BitLen() int {
 // SetBytes ...
 func (i *INT256) SetBytes(b []byte) {
 	n := copy(i.bits[:], b)
-	if n != 20 {
+	if n != 32 {
 		panic(n)
 	}
 }

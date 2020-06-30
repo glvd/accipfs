@@ -1,11 +1,15 @@
 package core
 
-import ma "github.com/multiformats/go-multiaddr"
+import (
+	"github.com/libp2p/go-libp2p-core/peer"
+	ma "github.com/multiformats/go-multiaddr"
+)
 
 // AddrInfo ...
 type AddrInfo struct {
-	id    string
-	addrs map[ma.Multiaddr]bool
+	ID           string
+	Addrs        map[ma.Multiaddr]bool
+	IPFSAddrInfo peer.AddrInfo
 }
 
 // NewAddrInfo ...
@@ -20,24 +24,24 @@ func NewAddrInfo(id string, addrs ...ma.Multiaddr) *AddrInfo {
 	}
 }
 
+// SetIPFSAddrInfo ...
+func (info *AddrInfo) SetIPFSAddrInfo(ipfsAddrInfo peer.AddrInfo) {
+	info.IPFSAddrInfo = ipfsAddrInfo
+}
+
 // SetID ...
 func (info *AddrInfo) SetID(id string) {
-	info.id = id
+	info.ID = id
 }
 
-// ID ...
-func (info *AddrInfo) ID() string {
-	return info.id
+// AppendAddr ...
+func (info *AddrInfo) AppendAddr(multiaddr ma.Multiaddr) {
+	info.Addrs[multiaddr] = true
 }
 
-// Append ...
-func (info *AddrInfo) Append(multiaddr ma.Multiaddr) {
-	info.addrs[multiaddr] = true
-}
-
-// Addrs ...
-func (info *AddrInfo) Addrs() (addrs []ma.Multiaddr) {
-	for addr := range info.addrs {
+// GetAddrs ...
+func (info *AddrInfo) GetAddrs() (addrs []ma.Multiaddr) {
+	for addr := range info.Addrs {
 		addrs = append(addrs, addr)
 	}
 	return

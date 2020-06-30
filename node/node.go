@@ -2,6 +2,8 @@ package node
 
 import (
 	"fmt"
+	"github.com/libp2p/go-libp2p-core/peer"
+	"go.uber.org/atomic"
 	"net"
 	"time"
 
@@ -27,8 +29,9 @@ type nodeLocal struct {
 
 type node struct {
 	scdt.Connection
-	api   core.API
-	addrs []ma.Multiaddr
+	remoteID *atomic.String
+	peer.AddrInfo
+	api core.API
 }
 
 var _ core.Node = &node{}
@@ -91,7 +94,7 @@ func defaultNode(c net.Conn) *node {
 // AppendAddr ...
 func (n *node) AppendAddr(addrs ...ma.Multiaddr) {
 	if addrs != nil {
-		n.addrs = append(n.addrs, addrs...)
+		n.AddrInfo.Addrs = append(n.AddrInfo.Addrs, addrs...)
 	}
 }
 
@@ -102,15 +105,19 @@ func (n *node) SetAPI(api core.API) {
 
 // Addrs ...
 func (n node) Addrs() []ma.Multiaddr {
-	return n.addrs
+	return n.AddrInfo.Addrs
 }
 
 // ID ...
 func (n *node) ID() string {
+	if n.remoteID != nil {
+		return n.remoteID.Load()
+	}
 	id, err := n.Connection.RemoteID()
 	if err != nil {
 		return ""
 	}
+	n.remoteID = atomic.NewString(id)
 	return id
 }
 

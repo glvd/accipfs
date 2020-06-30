@@ -193,7 +193,6 @@ func (m *manager) HandleConn(i interface{}) {
 		m.Push(acceptNode)
 		return
 	}
-	//m.nodes.Delete(acceptNode.ID())
 }
 
 func decodeNode(m core.NodeManager, b []byte, api core.API) error {
@@ -215,7 +214,6 @@ func decodeNode(m core.NodeManager, b []byte, api core.API) error {
 			m.Push(connectNode)
 			break
 		}
-
 	}
 	return nil
 }

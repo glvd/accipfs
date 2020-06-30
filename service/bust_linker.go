@@ -40,7 +40,7 @@ func NewBustLinker(cfg *config.Config) (linker *BustLinker, err error) {
 	}
 	linker.self = selfAcc
 	linker.controller = controller.New(cfg)
-	linker.nodes = node.New(cfg, linker.controller)
+	linker.nodes = node.New(cfg, linker.controller.GetAPI())
 	linker.listener = NewLinkListener(cfg, linker.nodes.HandleConn)
 
 	return linker, nil

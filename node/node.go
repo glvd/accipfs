@@ -30,12 +30,12 @@ type nodeLocal struct {
 type node struct {
 	scdt.Connection
 	remoteID *atomic.String
+	localID  string
 	peer.AddrInfo
 	api core.API
 }
 
 var _ core.Node = &node{}
-var heartBeatTimer = 15 * time.Second
 
 // IsClosed ...
 func (n *node) IsClosed() bool {

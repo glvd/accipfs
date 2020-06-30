@@ -35,6 +35,7 @@ type node struct {
 	remoteID *atomic.String
 	remote   *peer.AddrInfo
 	api      core.API
+	addrInfo *core.AddrInfo
 }
 
 var _ core.Node = &node{}
@@ -161,10 +162,14 @@ func (n *node) RecvDataRequest(id uint16, cb scdt.RecvCallbackFunc) {
 	}
 }
 
-func (n *node) infoRequest() peer.AddrInfo {
-	id, err := n.api.ID(&core.IDReq{})
-	if err != nil {
-		return peer.AddrInfo{}
+func (n *node) addrInfoRequest() (*core.AddrInfo, error) {
+	if n.addrInfo != nil {
+		return n.addrInfo, nil
 	}
-	return *id.AddrInfo
+	id, err := n.api.AddrInfo(&core.AddrReq{})
+	if err != nil {
+		return nil, err
+	}
+	n.addrInfo = id.AddrInfo
+	return n.addrInfo, nil
 }

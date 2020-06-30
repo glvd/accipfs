@@ -1,7 +1,5 @@
 package core
 
-import "github.com/libp2p/go-libp2p-core/peer"
-
 // PingReq ...
 type PingReq struct {
 }
@@ -26,9 +24,16 @@ type IDReq struct {
 // IDResp ...
 type IDResp struct {
 	Name      string
-	AddrInfo  *peer.AddrInfo
-	DataStore *DataStoreInfo
-	Contract  *ContractInfo
+	PublicKey string
+}
+
+// AddrReq ...
+type AddrReq struct {
+}
+
+// AddrResp ...
+type AddrResp struct {
+	AddrInfo *AddrInfo
 }
 
 // ConnectedReq ...

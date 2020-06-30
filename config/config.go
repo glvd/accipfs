@@ -4,12 +4,13 @@ import (
 	"crypto/tls"
 	"encoding/json"
 	"fmt"
-	"github.com/goextension/extmap"
-	"github.com/spf13/viper"
 	"io/ioutil"
 	"os"
 	"path/filepath"
 	"time"
+
+	"github.com/goextension/extmap"
+	"github.com/spf13/viper"
 )
 
 const _keyDir = "key"
@@ -96,8 +97,8 @@ type Config struct {
 	Schema     string         `json:"schema" mapstructure:"schema"`
 	Path       string         `json:"path" mapstructure:"path" `
 	Account    string         `json:"account" mapstructure:"account"`
+	Identity   string         `json:"identity" mapstructure:"identity"`
 	PrivateKey string         `json:"private_key" mapstructure:"private_key"`
-	PublicKey  string         `json:"public_key" mapstructure:"public_key"`
 	ETH        ETHConfig      `json:"eth" mapstructure:"eth"`
 	IPFS       IPFSConfig     `json:"ipfs" mapstructure:"ipfs"`
 	AWS        AWSConfig      `json:"aws" mapstructure:"aws"`
@@ -189,7 +190,6 @@ func Default() *Config {
 		Path:       WorkDir,
 		Account:    "",
 		PrivateKey: "",
-		PublicKey:  "",
 		ETH: ETHConfig{
 			Enable:      false,
 			LogOutput:   false,

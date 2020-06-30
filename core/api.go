@@ -4,4 +4,5 @@ package core
 type API interface {
 	Ping(req *PingReq) (*PingResp, error)
 	ID(req *IDReq) (*IDResp, error)
+	AddrInfo(req *AddrReq) (*AddrResp, error)
 }

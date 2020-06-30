@@ -26,6 +26,11 @@ type API struct {
 	msg        func(s string)
 }
 
+// AddrInfo ...
+func (a *API) AddrInfo(req *core.AddrReq) (*core.AddrResp, error) {
+	a.ipfsNode.ID()
+}
+
 // Ping ...
 func (a *API) Ping(req *core.PingReq) (*core.PingResp, error) {
 	return &core.PingResp{
@@ -40,14 +45,13 @@ func (a *API) ID(req *core.IDReq) (*core.IDResp, error) {
 	if err != nil {
 		return nil, err
 	}
-	info, err := a.ethNode.NodeInfo(ctx)
-	if err != nil {
-		return nil, err
-	}
+	//info, err := a.ethNode.NodeInfo(ctx)
+	//if err != nil {
+	//	return nil, err
+	//}
 	return &core.IDResp{
-		Name:      "",
-		DataStore: id,
-		Contract:  info,
+		Name:      a.cfg.Node.PublicKey,
+		PublicKey: a.cfg.Name,
 	}, nil
 }
 

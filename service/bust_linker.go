@@ -25,7 +25,6 @@ type BustLinker struct {
 	cron       *cron.Cron
 	listener   core.Listener
 	controller *controller.Controller
-	api        *controller.API
 }
 
 // NewBustLinker ...

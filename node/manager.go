@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"github.com/glvd/accipfs/basis"
 	"github.com/glvd/accipfs/config"
-	"github.com/glvd/accipfs/controller"
 	"github.com/glvd/accipfs/core"
 	"github.com/godcong/scdt"
 	ma "github.com/multiformats/go-multiaddr"
@@ -30,7 +29,8 @@ type manager struct {
 	expNodes     sync.Map
 	path         string
 	expPath      string
-	c            *controller.Controller
+	//c            *controller.Controller
+	api core.API
 }
 
 var _nodes = "bl.nodes"
@@ -38,10 +38,10 @@ var _expNodes = "exp.nodes"
 var _ core.NodeManager = &manager{}
 
 // New ...
-func New(cfg *config.Config, c *controller.Controller) core.NodeManager {
+func New(cfg *config.Config, api core.API) core.NodeManager {
 	m := &manager{
 		cfg:     cfg,
-		c:       c,
+		api:     api,
 		path:    filepath.Join(cfg.Path, _nodes),
 		expPath: filepath.Join(cfg.Path, _expNodes),
 		t:       time.NewTicker(cfg.Node.BackupSeconds),
@@ -114,7 +114,7 @@ func (m *manager) Load() error {
 			}
 			return err
 		}
-		err = decodeNode(m, n, m.c.LocalAPI())
+		err = decodeNode(m, n, m.api)
 		if err != nil {
 			log.Errorw("decode failed", "error", err, "data", string(n))
 			continue
@@ -184,7 +184,7 @@ func (m *manager) HandleConn(i interface{}) {
 	if !b {
 		return
 	}
-	acceptNode, err := AcceptNode(v, m.c.LocalAPI())
+	acceptNode, err := AcceptNode(v, m.api)
 	if err != nil {
 		return
 	}
@@ -193,7 +193,7 @@ func (m *manager) HandleConn(i interface{}) {
 		m.Push(acceptNode)
 		return
 	}
-	m.nodes.Delete(acceptNode.ID())
+	//m.nodes.Delete(acceptNode.ID())
 }
 
 func decodeNode(m core.NodeManager, b []byte, api core.API) error {

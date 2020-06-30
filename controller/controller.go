@@ -82,8 +82,8 @@ func (c *Controller) Run() {
 	wg.Wait()
 }
 
-// StopRun ...
-func (c *Controller) StopRun() (e error) {
+// Stop ...
+func (c *Controller) Stop() (e error) {
 	for i, service := range c.services {
 		if err := service.Stop(); err != nil {
 			//stop all and collect exceptions
@@ -94,7 +94,7 @@ func (c *Controller) StopRun() (e error) {
 	return
 }
 
-// LocalAPI ...
-func (c *Controller) LocalAPI() core.API {
+// GetAPI ...
+func (c *Controller) GetAPI() core.API {
 	return c.api
 }

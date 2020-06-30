@@ -2,9 +2,11 @@ package controller
 
 import (
 	"context"
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
+	"github.com/libp2p/go-libp2p-core/peer"
 	"net"
 	"net/http"
 
@@ -46,26 +48,27 @@ func (a *API) ID(req *core.IDReq) (*core.IDResp, error) {
 	//if err != nil {
 	//	return nil, err
 	//}
-	//
-	//privKey, err := base64.StdEncoding.DecodeString(a.cfg.PrivateKey)
-	//if err != nil {
-	//	return nil, err
-	//}
-	//privateKey, err := ic.UnmarshalPrivateKey(privKey)
-	//if err != nil {
-	//	return nil, err
-	//}
-	//key, err := peer.IDFromPrivateKey(privateKey)
-	//if err != nil {
-	//	return nil, err
-	//}
+	fromString, err := peer.IDFromString(a.cfg.Identity)
+	if err != nil {
+		return nil, err
+	}
+	key, err := fromString.ExtractPublicKey()
+	if err != nil {
+		return nil, err
+	}
+	bytes, err := key.Bytes()
+	if err != nil {
+		return nil, err
+	}
+	pubKey := base64.StdEncoding.EncodeToString(bytes)
+
 	//info, err := a.ethNode.NodeInfo(ctx)
 	//if err != nil {
 	//	return nil, err
 	//}
 	return &core.IDResp{
 		Name:      a.cfg.Identity,
-		PublicKey: "",
+		PublicKey: pubKey,
 	}, nil
 }
 
@@ -217,10 +220,5 @@ func JSON(c *gin.Context, v interface{}, e error) {
 		"status":  "success",
 		"message": string(m),
 	})
-
-}
-
-func privateToPublicKey(priv string) (string, error) {
-	return "", nil
 
 }

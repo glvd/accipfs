@@ -8,28 +8,28 @@ import (
 	"github.com/tidwall/buntdb"
 )
 
-const hashName = "hash.db"
+const hashName = "hashCache.db"
 
-type hash struct {
+type hashCache struct {
 	v   sync.Map
 	db  *buntdb.DB
 	cfg *config.Config
 }
 
-func newHashCacher(cfg *config.Config) *hash {
+func newHashCacher(cfg *config.Config) *hashCache {
 	db, err := buntdb.Open(filepath.Join(cfg.Path, hashName))
 	// Open the data.db file. It will be created if it doesn't exist.
 	if err != nil {
 		log.Fatal(err)
 	}
-	return &hash{
+	return &hashCache{
 		cfg: cfg,
 		db:  db,
 	}
 }
 
 // Close ...
-func (h *hash) Close() error {
+func (h *hashCache) Close() error {
 	if h.db != nil {
 		err := h.db.Close()
 		if err != nil {
@@ -39,4 +39,10 @@ func (h *hash) Close() error {
 		return nil
 	}
 	return nil
+}
+
+// Store ...
+func (h *hashCache) Store(hash string) {
+	h.db.Update(func(tx *buntdb.Tx) error {
+	})
 }

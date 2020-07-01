@@ -10,19 +10,17 @@ import (
 	"github.com/glvd/accipfs/task"
 	"sync"
 
-	"github.com/robfig/cron/v3"
 	"go.uber.org/atomic"
 )
 
 // BustLinker ...
 type BustLinker struct {
 	id         core.Node
-	nodes      core.NodeManager
+	manager    core.NodeManager
 	tasks      task.Task
 	lock       *atomic.Bool
 	self       *account.Account
 	cfg        *config.Config
-	cron       *cron.Cron
 	listener   core.Listener
 	controller *controller.Controller
 }
@@ -40,8 +38,8 @@ func NewBustLinker(cfg *config.Config) (linker *BustLinker, err error) {
 	}
 	linker.self = selfAcc
 	linker.controller = controller.New(cfg)
-	linker.nodes = node.New(cfg, linker.controller.GetAPI())
-	linker.listener = NewLinkListener(cfg, linker.nodes.HandleConn)
+	linker.manager = node.Manager(cfg, linker.controller.GetAPI())
+	linker.listener = NewLinkListener(cfg, linker.manager.HandleConn)
 
 	return linker, nil
 }
@@ -61,7 +59,7 @@ func (l *BustLinker) Run() {
 	l.lock.Store(true)
 	defer l.lock.Store(false)
 	wg := &sync.WaitGroup{}
-	l.nodes.Range(func(key string, node core.Node) bool {
+	l.manager.Range(func(key string, node core.Node) bool {
 		return true
 	})
 	wg.Wait()
@@ -75,6 +73,4 @@ func (l *BustLinker) WaitingForReady() {
 
 // Stop ...
 func (l *BustLinker) Stop() {
-	ctx := l.cron.Stop()
-	<-ctx.Done()
 }

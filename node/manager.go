@@ -37,8 +37,8 @@ var _nodes = "bl.nodes"
 var _expNodes = "exp.nodes"
 var _ core.NodeManager = &manager{}
 
-// New ...
-func New(cfg *config.Config, api core.API) core.NodeManager {
+// Manager ...
+func Manager(cfg *config.Config, api core.API) core.NodeManager {
 	m := &manager{
 		cfg:     cfg,
 		api:     api,

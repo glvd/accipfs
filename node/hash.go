@@ -11,9 +11,9 @@ import (
 const hashName = "hash.db"
 
 type hash struct {
-	path string
-	v    sync.Map
-	db   *buntdb.DB
+	v   sync.Map
+	db  *buntdb.DB
+	cfg *config.Config
 }
 
 func newHashCacher(cfg *config.Config) *hash {
@@ -23,7 +23,8 @@ func newHashCacher(cfg *config.Config) *hash {
 		log.Fatal(err)
 	}
 	return &hash{
-		db: db,
+		cfg: cfg,
+		db:  db,
 	}
 }
 

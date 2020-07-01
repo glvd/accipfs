@@ -71,6 +71,11 @@ func (h *hashCache) Load(hash string, data core.DataDecoder) error {
 }
 
 // GC ...
-func (h *hashCache) GC() {
-	h.db.Shrink()
+func (h *hashCache) GC() error {
+	if h.db != nil {
+		if err := h.db.Shrink(); err != nil {
+			return err
+		}
+	}
+	return nil
 }

@@ -1,6 +1,9 @@
 package core
 
-import "encoding/json"
+import (
+	"encoding/json"
+	"github.com/glvd/accipfs/basis/hash"
+)
 
 // DataEncoder ...
 type DataEncoder interface {
@@ -75,20 +78,6 @@ type DataInfoV1 struct {
 	Version    Version   `xorm:"version" json:"version"`         //版本
 }
 
-// Decode ...
-func (v *DataInfoV1) Decode(data string) error {
-	return json.Unmarshal([]byte(data), v)
-}
-
-// Encode ...
-func (v *DataInfoV1) Encode() (string, error) {
-	marshal, err := json.Marshal(v)
-	if err != nil {
-		return "", nil
-	}
-	return string(marshal), nil
-}
-
 // JSON ...
 func (v *DataInfoV1) JSON() []byte {
 	marshal, err := json.Marshal(v)
@@ -96,6 +85,15 @@ func (v *DataInfoV1) JSON() []byte {
 		return nil
 	}
 	return marshal
+}
+
+// Hash ...
+func (v *DataInfoV1) Hash() []byte {
+	sum, err := hash.Sum(v, nil)
+	if err != nil {
+		return nil
+	}
+	return sum
 }
 
 // VerifyVersion ...

@@ -253,7 +253,7 @@ func (w *walker) visit(v reflect.Value, opts *visitOpts) ([]byte, error) {
 					}
 				}
 
-				// Check if we implement includable and check it
+				// Check if we implement encoder and check it
 				if include != nil {
 					incl, err := include.Encode(fieldType.Name, innerV)
 					if err != nil {

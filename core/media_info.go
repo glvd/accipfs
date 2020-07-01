@@ -44,12 +44,13 @@ type MediaInfoV1 struct {
 	No           string   `xorm:"no" json:"no"`                       //编号
 	Intro        string   `xorm:"varchar(2048)" json:"intro"`         //简介
 	Alias        []string `xorm:"json" json:"alias"`                  //别名，片名
+	SourceInfo   string   `xorm:"source_info" json:"source_info"`     //片源信息
+	IndexHash    string   `xorm:"index_hash" json:"index_hash"`       //入口索引Hash
+	MediaHash    string   `xorm:"media_hash" json:"media_hash"`       //入口地址
+	MediaIndex   string   `xorm:"media_index" json:"media_index"`     //入口名称
 	ThumbHash    string   `xorm:"thumb_hash" json:"thumb_hash"`       //缩略图
 	PosterHash   string   `xorm:"poster_hash" json:"poster_hash"`     //海报地址
-	SourceHash   string   `xorm:"source_hash" json:"source_hash"`     //原片地址
-	M3U8Hash     string   `xorm:"m3u8_hash" json:"m3u8_hash"`         //切片地址
-	Key          string   `xorm:"key"  json:"-"`                      //秘钥
-	M3U8         string   `xorm:"m3u8" json:"-"`                      //M3U8名
+	SecurityKey  string   `xorm:"security_key" json:"security_key"`   //秘钥
 	Role         []string `xorm:"json" json:"role"`                   //主演
 	Director     string   `xorm:"director" json:"director"`           //导演
 	Systematics  string   `xorm:"systematics" json:"systematics"`     //分级

@@ -2,6 +2,7 @@ package node
 
 import (
 	"github.com/glvd/accipfs/config"
+	"github.com/glvd/accipfs/core"
 	"path/filepath"
 	"sync"
 
@@ -14,6 +15,11 @@ type hashCache struct {
 	v   sync.Map
 	db  *buntdb.DB
 	cfg *config.Config
+}
+
+type hashData struct {
+	Hash      string
+	MediaInfo core.MediaInfoV1
 }
 
 func newHashCacher(cfg *config.Config) *hashCache {

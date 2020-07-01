@@ -19,7 +19,7 @@ type hashCache struct {
 
 type hashData struct {
 	Hash      string
-	MediaInfo core.MediaInfoV1
+	MediaInfo core.DataInfoV1
 }
 
 func newHashCacher(cfg *config.Config) *hashCache {

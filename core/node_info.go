@@ -11,9 +11,6 @@ const (
 	NodeRoute NodeType = 0x03
 )
 
-// Version ...
-const Version = "0.0.1"
-
 // NodeType ...
 type NodeType int
 

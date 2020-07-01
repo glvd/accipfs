@@ -5,6 +5,7 @@ import (
 	"bytes"
 	"encoding/binary"
 	"encoding/json"
+	"github.com/glvd/accipfs/core"
 	"io"
 	"net"
 	"time"
@@ -21,7 +22,7 @@ type Status int32
 
 // Exchange ...
 type Exchange struct {
-	Version    Version
+	Version    core.Version
 	Length     uint64
 	Session    uint32
 	Type       Type
@@ -66,7 +67,7 @@ func NewResponseExchange(detail TypeDetail) *Exchange {
 // newExchange ...
 func newExchange(t Type, detail TypeDetail) *Exchange {
 	return &Exchange{
-		Version:    Version{'v', 0, 0, 1},
+		Version:    core.Version{'v', 0, 0, 1},
 		Length:     0,
 		Session:    0,
 		Type:       t,

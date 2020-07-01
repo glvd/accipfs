@@ -18,8 +18,8 @@ type hashCache struct {
 }
 
 type hashData struct {
-	Hash      string
-	MediaInfo core.DataInfoV1
+	Hash string
+	Data core.DataInfoV1
 }
 
 func newHashCacher(cfg *config.Config) *hashCache {
@@ -48,7 +48,7 @@ func (h *hashCache) Close() error {
 }
 
 // Store ...
-func (h *hashCache) Store(hash string) {
+func (h *hashCache) Store(hash string, data core.DataInfoV1) {
 	h.db.Update(func(tx *buntdb.Tx) error {
 	})
 }

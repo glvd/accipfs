@@ -35,8 +35,8 @@ type Security struct {
 	Key string `xorm:"key" json:"key"`
 }
 
-// MediaInformationVersion1 ...
-const MediaInformationVersion1 = iota
+// DataInfoVersion1 ...
+var DataInfoVersion1, _ = ParseVersion("v0.0.1")
 
 // Info ...
 type Info struct {
@@ -56,7 +56,7 @@ type DataInfoV1 struct {
 	Info       Info      `xorm:"info" json:"info"`               //补充信息
 	InfoURI    string    `xorm:"info_uri" json:"info_uri"`       //补充信息地址
 	Security   Security  `xorm:"security" json:"security"`       //安全验证
-	Version    Version   `xorm:"security" json:"security"`       //安全验证
+	Version    Version   `xorm:"version" json:"version"`         //版本
 }
 
 // JSON ...
@@ -66,4 +66,9 @@ func (v *DataInfoV1) JSON() ([]byte, error) {
 		return nil, err
 	}
 	return marshal, nil
+}
+
+// VerifyVersion ...
+func (v *DataInfoV1) VerifyVersion() bool {
+	return v.Version.Compare(DataInfoVersion1) == 0
 }

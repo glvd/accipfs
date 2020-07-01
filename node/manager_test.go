@@ -21,7 +21,8 @@ func init() {
 
 func TestManager_Store(t *testing.T) {
 	cfg := config.Default()
-	nodeManager := Manager(cfg, &controller.Controller{})
+	c := controller.New(cfg)
+	nodeManager := Manager(cfg, c.GetAPI())
 	multiaddr, err := ma.NewMultiaddr("/ip4/127.0.0.1/tcp/12345")
 	if err != nil {
 		panic(err)
@@ -40,7 +41,8 @@ func TestManager_Store(t *testing.T) {
 }
 func TestManager_Load(t *testing.T) {
 	cfg := config.Default()
-	nodeManager := Manager(cfg, &controller.Controller{})
+	c := controller.New(cfg)
+	nodeManager := Manager(cfg, c.GetAPI())
 	for i := 0; i < 100; i++ {
 		err := nodeManager.Load()
 		if err != nil {

@@ -16,6 +16,10 @@ type dummyAPI struct {
 	id string
 }
 
+func (d *dummyAPI) AddrInfo(req *core.AddrReq) (*core.AddrResp, error) {
+	return nil, nil
+}
+
 func init() {
 	runtime.GOMAXPROCS(2)
 }
@@ -26,9 +30,7 @@ func (d dummyAPI) Ping(req *core.PingReq) (*core.PingResp, error) {
 
 func (d dummyAPI) ID(req *core.IDReq) (*core.IDResp, error) {
 	return &core.IDResp{
-		Name:      d.id,
-		DataStore: nil,
-		Contract:  nil,
+		Name: d.id,
 	}, nil
 }
 
@@ -71,8 +73,13 @@ func TestConnectNode(t *testing.T) {
 			}
 			for ; j < 10; j++ {
 				toNode.Info()
+
 			}
-			fmt.Println("get id", i, "index", j, "id", toNode.ID(), "info", toNode.Info())
+
+			info, err := toNode.Info()
+
+			fmt.Println("get id", i, "index", j, "id", toNode.ID(), "info", info.String())
+
 			err = toNode.Close()
 			if err != nil {
 				fmt.Println("err", err)

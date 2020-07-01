@@ -9,7 +9,7 @@ import (
 	"github.com/tidwall/buntdb"
 )
 
-const hashName = "hashCache.db"
+const hashName = "hash.db"
 
 type hashCache struct {
 	v   sync.Map
@@ -48,8 +48,8 @@ func (h *hashCache) Close() error {
 }
 
 // Store ...
-func (h *hashCache) Store(hash string, data core.DataEncoder) {
-	h.db.Update(func(tx *buntdb.Tx) error {
+func (h *hashCache) Store(hash string, data core.DataEncoder) error {
+	return h.db.Update(func(tx *buntdb.Tx) error {
 		encode, err := data.Encode()
 		if err != nil {
 			return err
@@ -57,4 +57,20 @@ func (h *hashCache) Store(hash string, data core.DataEncoder) {
 		_, _, err = tx.Set(hash, encode, nil)
 		return err
 	})
+}
+
+// Load ...
+func (h *hashCache) Load(hash string, data core.DataDecoder) error {
+	return h.db.View(func(tx *buntdb.Tx) error {
+		datum, err := tx.Get(hash)
+		if err != nil {
+			return err
+		}
+		return data.Decode(datum)
+	})
+}
+
+// GC ...
+func (h *hashCache) GC() {
+	h.db.Shrink()
 }

@@ -36,3 +36,16 @@ func ParseVersion(s string) (Version, error) {
 	}
 	return v, nil
 }
+
+// Compare ...
+func (v Version) Compare(version Version) int {
+	max := len(v)
+	for i := 1; i < max; i++ {
+		if v[i] > version[i] {
+			return i
+		} else if v[i] < version[i] {
+			return -i
+		}
+	}
+	return 0
+}

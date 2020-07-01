@@ -54,6 +54,7 @@ func (h *hashCache) Store(hash string, data core.DataEncoder) {
 		if err != nil {
 			return err
 		}
-		tx.Set(hash, encode)
+		_, _, err = tx.Set(hash, encode, nil)
+		return err
 	})
 }

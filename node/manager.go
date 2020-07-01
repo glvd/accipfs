@@ -29,8 +29,8 @@ type manager struct {
 	expNodes     sync.Map
 	path         string
 	expPath      string
-	//c            *controller.Controller
-	api core.API
+	api          core.API
+	hash         *hashCache
 }
 
 var _nodes = "bl.nodes"
@@ -44,6 +44,7 @@ func Manager(cfg *config.Config, api core.API) core.NodeManager {
 		api:     api,
 		path:    filepath.Join(cfg.Path, _nodes),
 		expPath: filepath.Join(cfg.Path, _expNodes),
+		hash:    newHashCacher(cfg),
 		t:       time.NewTicker(cfg.Node.BackupSeconds),
 	}
 	//m.exchangePool = mustPool(ants.DefaultAntsPoolSize, m.HandleConn)

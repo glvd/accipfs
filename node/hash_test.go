@@ -45,14 +45,19 @@ func TestHashCache_Store(t *testing.T) {
 		Security:   core.Security{},
 		Version:    core.Version{},
 	}
-	t.Log(ds1)
-	cache.Store("QmVq9Du6jAgHBJfyXuhHkP9KHARxJ1RYoYPXTKdVkoN6F4", ds1)
-	var d1 core.DataInfoV1
-	err := cache.Load("QmVq9Du6jAgHBJfyXuhHkP9KHARxJ1RYoYPXTKdVkoN6F4", &d1)
+	info1 := newDataHashInfo(ds1)
+	t.Log(info1)
+	err := cache.Store(info1.Hash(), info1)
 	if err != nil {
-		return
+		t.Fatal(err)
 	}
-	cache.GC()
-	t.Log(d1)
+	ds2 := &core.DataInfoV1{}
+	d1 := newDataHashInfo(ds2)
+	err = cache.Load(info1.Hash(), d1)
+	if err != nil {
+		t.Fatal(err)
+	}
+	err = cache.GC()
+	t.Log(info1)
 
 }

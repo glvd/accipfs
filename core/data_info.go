@@ -2,8 +2,24 @@ package core
 
 import (
 	"encoding/json"
+	"fmt"
 	"github.com/glvd/accipfs/basis/hash"
 )
+
+// DataHashEncoder ...
+type DataHashEncoder interface {
+	Hash() string
+}
+
+// DataJSONer ...
+type DataJSONer interface {
+	JSON() string
+}
+
+// DataRooter ...
+type DataRooter interface {
+	Root() string
+}
 
 // DataEncoder ...
 type DataEncoder interface {
@@ -19,6 +35,13 @@ type DataDecoder interface {
 type DataEncodeDecoder interface {
 	DataEncoder
 	DataDecoder
+}
+
+// MediaSerializer ...
+type MediaSerializer interface {
+	DataHashEncoder
+	DataJSONer
+	DataRooter
 }
 
 // MediaInfo ...
@@ -79,21 +102,40 @@ type DataInfoV1 struct {
 }
 
 // JSON ...
-func (v *DataInfoV1) JSON() []byte {
+func (v *DataInfoV1) JSON() string {
 	marshal, err := json.Marshal(v)
 	if err != nil {
-		return nil
+		return ""
 	}
-	return marshal
+	return string(marshal)
+}
+
+// Encode ...
+func (v *DataInfoV1) Encode() (string, error) {
+	marshal, err := json.Marshal(v)
+	if err != nil {
+		return "", err
+	}
+	return string(marshal), nil
+}
+
+// Decode ...
+func (v *DataInfoV1) Decode(s string) error {
+	return json.Unmarshal([]byte(s), v)
+}
+
+// Root ...
+func (v *DataInfoV1) Root() string {
+	return v.RootHash
 }
 
 // Hash ...
-func (v *DataInfoV1) Hash() []byte {
-	sum, err := hash.Sum(v, nil)
+func (v *DataInfoV1) Hash() string {
+	sum, err := hash.Sum(v)
 	if err != nil {
-		return nil
+		return ""
 	}
-	return sum
+	return fmt.Sprintf("%x", sum)
 }
 
 // VerifyVersion ...

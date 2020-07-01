@@ -1,6 +1,8 @@
 package node
 
 import (
+	"encoding/json"
+	"fmt"
 	"github.com/glvd/accipfs/config"
 	"github.com/glvd/accipfs/core"
 	"path/filepath"
@@ -17,9 +19,57 @@ type hashCache struct {
 	cfg *config.Config
 }
 
-type hashData struct {
-	Hash string
-	Data core.DataInfoV1
+// DataHashInfo ...
+type DataHashInfo struct {
+	dataInfo core.MediaSerializer
+	DataHash string               `json:"data_hash"`
+	DataInfo core.MediaSerializer `json:"data_info"`
+	AddrInfo core.AddrInfo        `json:"addr_info"`
+}
+
+func newDataHashInfo(data core.MediaSerializer) *DataHashInfo {
+	return &DataHashInfo{
+		DataHash: data.Hash(),
+		DataInfo: data,
+		dataInfo: data,
+		AddrInfo: core.AddrInfo{},
+	}
+}
+
+// Hash ...
+func (v DataHashInfo) Hash() string {
+	if v.DataInfo != nil {
+		return v.DataInfo.Root()
+	}
+	return ""
+}
+
+// Encode ...
+func (v DataHashInfo) Encode() (string, error) {
+	marshal, err := json.Marshal(v)
+	if err != nil {
+		return "", err
+	}
+	return string(marshal), nil
+}
+
+// Decode ...
+func (v *DataHashInfo) Decode(s string) error {
+	err := json.Unmarshal([]byte(s), v)
+	if err != nil {
+		return fmt.Errorf("data decode failed:%w", err)
+	}
+	//if v.dataInfo == nil {
+	//	return fmt.Errorf("nil data info object")
+	//}
+	//err = v.dataInfo.Decode(v.DataInfo)
+	//if err != nil {
+	//	return err
+	//}
+	if h := v.dataInfo.Hash(); h != v.DataHash {
+		return fmt.Errorf("wrong hash(%s) from hash(%s)", h, v.DataHash)
+	}
+	return nil
 }
 
 func newHashCacher(cfg *config.Config) *hashCache {

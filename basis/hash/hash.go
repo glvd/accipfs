@@ -8,14 +8,16 @@ import (
 	"reflect"
 )
 
+// DefaultOption ...
+var DefaultOption = &Options{
+	Hash:    sha256.New(),
+	TagName: "hash",
+	ZeroNil: false,
+}
+
 // ErrNotStringer is returned when there's an error with hash:"string"
 type ErrNotStringer struct {
 	Field string
-}
-
-// Error implements error for ErrNotStringer
-func (ens *ErrNotStringer) Error() string {
-	return fmt.Sprintf("hashstructure: %s has hash:\"string\" set, but does not implement fmt.Stringer", ens.Field)
 }
 
 // Options are options that are available for hashing.
@@ -31,6 +33,26 @@ type Options struct {
 	// ZeroNil is flag determining if nil pointer should be treated equal
 	// to a zero value of pointed type. By default this is false.
 	ZeroNil bool
+}
+
+type walker struct {
+	h       hash.Hash
+	tag     string
+	zeronil bool
+}
+
+type visitOpts struct {
+	// Flags are a bitmask of flags to affect behavior of this visit
+	Flags visitFlag
+
+	// Information about the struct containing this field
+	Struct      interface{}
+	StructField string
+}
+
+// Error implements error for ErrNotStringer
+func (ens *ErrNotStringer) Error() string {
+	return fmt.Sprintf("hashstructure: %s has hash:\"string\" set, but does not implement fmt.Stringer", ens.Field)
 }
 
 // Sum returns the hash value of an arbitrary value.
@@ -65,43 +87,17 @@ type Options struct {
 //   * "string" - The field will be hashed as a string, only works when the
 //                field implements fmt.Stringer
 //
-func Sum(v interface{}, opts *Options) ([]byte, error) {
-	// Create default options
-	if opts == nil {
-		opts = &Options{}
-	}
-	if opts.Hash == nil {
-		opts.Hash = sha256.New()
-	}
-	if opts.TagName == "" {
-		opts.TagName = "hash"
-	}
-
+func Sum(v interface{}) ([]byte, error) {
 	// Reset the hash
-	opts.Hash.Reset()
+	DefaultOption.Hash.Reset()
 
 	// Create our walker and walk the structure
 	w := &walker{
-		h:       opts.Hash,
-		tag:     opts.TagName,
-		zeronil: opts.ZeroNil,
+		h:       DefaultOption.Hash,
+		tag:     DefaultOption.TagName,
+		zeronil: DefaultOption.ZeroNil,
 	}
 	return w.visit(reflect.ValueOf(v), nil)
-}
-
-type walker struct {
-	h       hash.Hash
-	tag     string
-	zeronil bool
-}
-
-type visitOpts struct {
-	// Flags are a bitmask of flags to affect behavior of this visit
-	Flags visitFlag
-
-	// Information about the struct containing this field
-	Struct      interface{}
-	StructField string
 }
 
 func (w *walker) visit(v reflect.Value, opts *visitOpts) ([]byte, error) {

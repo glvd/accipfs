@@ -2,7 +2,6 @@ package hash_test
 
 import (
 	"bytes"
-	"crypto/sha256"
 	"github.com/glvd/accipfs/basis/hash"
 	"testing"
 
@@ -47,10 +46,6 @@ func TestSumStruct(t *testing.T) {
 		InfoURI:    "",
 		Security:   core.Security{},
 		Version:    core.Version{},
-	}, &hash.Options{
-		Hash:    nil,
-		TagName: "",
-		ZeroNil: false,
 	})
 	if err != nil {
 		return
@@ -91,10 +86,6 @@ func TestSumStruct(t *testing.T) {
 		InfoURI:    "",
 		Security:   core.Security{},
 		Version:    core.Version{},
-	}, &hash.Options{
-		Hash:    nil,
-		TagName: "",
-		ZeroNil: true,
 	})
 	if err != nil {
 		return
@@ -109,10 +100,6 @@ func TestSum(t *testing.T) {
 		"vala": "a",
 		"valb": "b",
 		"valc": "c",
-	}, &hash.Options{
-		Hash:    nil,
-		TagName: "",
-		ZeroNil: true,
 	})
 	if err != nil {
 		return
@@ -122,10 +109,6 @@ func TestSum(t *testing.T) {
 		"valb": "b",
 		"vala": "a",
 		"valc": "c",
-	}, &hash.Options{
-		Hash:    nil,
-		TagName: "",
-		ZeroNil: false,
 	})
 	if err != nil {
 		return
@@ -137,20 +120,12 @@ func TestSum(t *testing.T) {
 }
 
 func TestSumString(t *testing.T) {
-	sum, err := hash.Sum("hello world", &hash.Options{
-		Hash:    sha256.New(),
-		TagName: "sum",
-		ZeroNil: false,
-	})
+	sum, err := hash.Sum("hello world")
 	if err != nil {
 		return
 	}
 	t.Logf("%x\n", sum)
-	sum1, err := hash.Sum("hello world", &hash.Options{
-		Hash:    sha256.New(),
-		TagName: "",
-		ZeroNil: false,
-	})
+	sum1, err := hash.Sum("hello world")
 	if err != nil {
 		return
 	}

@@ -48,7 +48,12 @@ func (h *hashCache) Close() error {
 }
 
 // Store ...
-func (h *hashCache) Store(hash string, data core.DataInfoV1) {
+func (h *hashCache) Store(hash string, data core.DataEncoder) {
 	h.db.Update(func(tx *buntdb.Tx) error {
+		encode, err := data.Encode()
+		if err != nil {
+			return err
+		}
+		tx.Set(hash, encode)
 	})
 }

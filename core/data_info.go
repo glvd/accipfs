@@ -2,6 +2,22 @@ package core
 
 import "encoding/json"
 
+// DataEncoder ...
+type DataEncoder interface {
+	Encode() (string, error)
+}
+
+// DataDecoder ...
+type DataDecoder interface {
+	Decode(string) error
+}
+
+// DataEncodeDecoder ...
+type DataEncodeDecoder interface {
+	DataEncoder
+	DataDecoder
+}
+
 // MediaInfo ...
 type MediaInfo struct {
 	No           string   `json:"no"`            //编号
@@ -59,13 +75,27 @@ type DataInfoV1 struct {
 	Version    Version   `xorm:"version" json:"version"`         //版本
 }
 
-// JSON ...
-func (v *DataInfoV1) JSON() ([]byte, error) {
+// Decode ...
+func (v *DataInfoV1) Decode(data string) error {
+	return json.Unmarshal([]byte(data), v)
+}
+
+// Encode ...
+func (v *DataInfoV1) Encode() (string, error) {
 	marshal, err := json.Marshal(v)
 	if err != nil {
-		return nil, err
+		return "", nil
 	}
-	return marshal, nil
+	return string(marshal), nil
+}
+
+// JSON ...
+func (v *DataInfoV1) JSON() []byte {
+	marshal, err := json.Marshal(v)
+	if err != nil {
+		return nil
+	}
+	return marshal
 }
 
 // VerifyVersion ...

@@ -16,8 +16,8 @@ import (
 	"go.uber.org/atomic"
 )
 
-// API ...
-type API struct {
+// Context ...
+type Context struct {
 	cfg        *config.Config
 	eng        *gin.Engine
 	listener   net.Listener
@@ -30,25 +30,20 @@ type API struct {
 }
 
 // AddrInfo ...
-func (a *API) AddrInfo(req *core.AddrReq) (*core.AddrResp, error) {
+func (c *Context) AddrInfo(req *core.AddrReq) (*core.AddrResp, error) {
 	panic("todo:AddrInfo")
 }
 
 // Ping ...
-func (a *API) Ping(req *core.PingReq) (*core.PingResp, error) {
+func (c *Context) Ping(req *core.PingReq) (*core.PingResp, error) {
 	return &core.PingResp{
 		Data: "pong",
 	}, nil
 }
 
 // ID ...
-func (a *API) ID(req *core.IDReq) (*core.IDResp, error) {
-	//ctx := context.Background()
-	//id, err := a.ipfsNode.ID(ctx)
-	//if err != nil {
-	//	return nil, err
-	//}
-	fromString, err := peer.IDFromString(a.cfg.Identity)
+func (c *Context) ID(req *core.IDReq) (*core.IDResp, error) {
+	fromString, err := peer.IDFromString(c.cfg.Identity)
 	if err != nil {
 		return nil, err
 	}
@@ -62,23 +57,19 @@ func (a *API) ID(req *core.IDReq) (*core.IDResp, error) {
 	}
 	pubKey := base64.StdEncoding.EncodeToString(bytes)
 
-	//info, err := a.ethNode.NodeInfo(ctx)
-	//if err != nil {
-	//	return nil, err
-	//}
 	return &core.IDResp{
-		Name:      a.cfg.Identity,
+		Name:      c.cfg.Identity,
 		PublicKey: pubKey,
 	}, nil
 }
 
 // New ...
-func newAPI(cfg *config.Config) *API {
+func newAPI(cfg *config.Config) *Context {
 	if !cfg.Debug {
 		gin.SetMode(gin.ReleaseMode)
 	}
 	eng := gin.Default()
-	return &API{
+	return &Context{
 		cfg:   cfg,
 		eng:   eng,
 		ready: atomic.NewBool(false),
@@ -89,41 +80,41 @@ func newAPI(cfg *config.Config) *API {
 }
 
 // Start ...
-func (a *API) Start() error {
+func (c *Context) Start() error {
 	l, err := net.ListenTCP("tcp", &net.TCPAddr{
 		IP:   net.IPv4zero,
-		Port: a.cfg.API.Port,
+		Port: c.cfg.API.Port,
 	})
 	if err != nil {
 		return err
 	}
-	a.registerRoutes()
-	if a.cfg.API.UseTLS {
-		go a.serv.ServeTLS(l, a.cfg.API.TLS.KeyFile, a.cfg.API.TLS.KeyPassFile)
+	c.registerRoutes()
+	if c.cfg.API.UseTLS {
+		go c.serv.ServeTLS(l, c.cfg.API.TLS.KeyFile, c.cfg.API.TLS.KeyPassFile)
 		return nil
 	}
-	go a.serv.Serve(l)
-	a.ready.Store(true)
+	go c.serv.Serve(l)
+	c.ready.Store(true)
 	return nil
 }
 
-func (a *API) registerRoutes() {
-	api := a.eng.Group("/api")
-	api.GET("/ping", a.ping)
-	if a.cfg.Debug {
-		api.GET("/debug", a.debug)
+func (c *Context) registerRoutes() {
+	api := c.eng.Group("/api")
+	api.GET("/ping", c.ping)
+	if c.cfg.Debug {
+		api.GET("/debug", c.debug)
 	}
 
-	v0 := api.Group(a.cfg.API.Version)
-	v0.POST("/id", a.id)
-	v0.GET("/get", a.get)
-	v0.GET("/query", a.query)
+	v0 := api.Group(c.cfg.API.Version)
+	v0.POST("/id", c.id)
+	v0.GET("/get", c.get)
+	v0.GET("/query", c.query)
 }
 
 // Stop ...
-func (a *API) Stop() error {
-	if a.serv != nil {
-		if err := a.serv.Shutdown(context.TODO()); err != nil {
+func (c *Context) Stop() error {
+	if c.serv != nil {
+		if err := c.serv.Shutdown(context.TODO()); err != nil {
 			return err
 		}
 	}
@@ -131,72 +122,72 @@ func (a *API) Stop() error {
 }
 
 // Initialize ...
-func (a *API) Initialize() error {
+func (c *Context) Initialize() error {
 	//nothing
 	return nil
 }
 
 // IsReady ...
-func (a *API) IsReady() bool {
-	return a.ready.Load()
+func (c *Context) IsReady() bool {
+	return c.ready.Load()
 }
 
 // MessageHandle ...
-func (a *API) MessageHandle(f func(s string)) {
+func (c *Context) MessageHandle(f func(s string)) {
 	if f != nil {
-		a.msg = f
+		c.msg = f
 	}
 }
 
-func (a *API) id(c *gin.Context) {
-	id, err := a.ID(&core.IDReq{})
-	JSON(c, id, err)
+func (c *Context) id(ctx *gin.Context) {
+	id, err := c.ID(&core.IDReq{})
+	JSON(ctx, id, err)
 }
 
-func (a *API) get(c *gin.Context) {
-	c.Redirect(http.StatusMovedPermanently, ipfsGetURL("api/v0/get"))
+func (c *Context) get(ctx *gin.Context) {
+	ctx.Redirect(http.StatusMovedPermanently, ipfsGetURL("api/v0/get"))
 }
 
 func ipfsGetURL(uri string) string {
 	return fmt.Sprintf("%s/%s", config.IPFSAddrHTTP(), uri)
 }
 
-func (a *API) ping(c *gin.Context) {
-	ping, err := a.Ping(&core.PingReq{})
-	JSON(c, ping, err)
+func (c *Context) ping(ctx *gin.Context) {
+	ping, err := c.Ping(&core.PingReq{})
+	JSON(ctx, ping, err)
 }
 
-func (a *API) debug(c *gin.Context) {
-	uri := c.Query("uri")
-	c.Redirect(http.StatusFound, ipfsGetURL(uri))
+func (c *Context) debug(ctx *gin.Context) {
+	uri := ctx.Query("uri")
+	ctx.Redirect(http.StatusFound, ipfsGetURL(uri))
 }
 
-func (a *API) query(c *gin.Context) {
+func (c *Context) query(ctx *gin.Context) {
 	var err error
 	j := struct {
 		No string
 	}{}
-	err = c.BindJSON(&j)
+	err = ctx.BindJSON(&j)
 	if err != nil {
-		JSON(c, "", fmt.Errorf("query failed(%w)", err))
+		JSON(ctx, "", fmt.Errorf("query failed(%w)", err))
 		return
 	}
-	dTag, e := a.ethNode.DTag()
+	dTag, e := c.ethNode.DTag()
 	if e != nil {
-		JSON(c, "", fmt.Errorf("query failed(%w)", e))
+		JSON(ctx, "", fmt.Errorf("query failed(%w)", e))
 		return
 	}
 	message, e := dTag.GetTagMessage(&bind.CallOpts{Pending: true}, "video", j.No)
 	if e != nil {
-		JSON(c, "", fmt.Errorf("query failed(%w)", e))
+		JSON(ctx, "", fmt.Errorf("query failed(%w)", e))
 		return
 	}
 
 	if message.Size.Int64() > 0 {
-		JSON(c, message.Value[0], nil)
+		JSON(ctx, message.Value[0], nil)
 		return
 	}
-	JSON(c, "", nil)
+	JSON(ctx, "", nil)
 }
 
 // JSON ...

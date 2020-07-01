@@ -88,6 +88,11 @@ type NodeConfig struct {
 	PoolMax       int
 }
 
+// HashConfig ...
+type HashConfig struct {
+	Path string `json:"path" mapstructure:"path"`
+}
+
 // Config ...
 type Config struct {
 	Node       NodeConfig     `json:"node" mapstructure:"node"`

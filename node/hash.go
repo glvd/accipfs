@@ -21,7 +21,6 @@ type hashCache struct {
 
 // DataHashInfo ...
 type DataHashInfo struct {
-	dataInfo core.MediaSerializer
 	DataHash string               `json:"data_hash"`
 	DataInfo core.MediaSerializer `json:"data_info"`
 	AddrInfo core.AddrInfo        `json:"addr_info"`
@@ -31,17 +30,13 @@ func newDataHashInfo(data core.MediaSerializer) *DataHashInfo {
 	return &DataHashInfo{
 		DataHash: data.Hash(),
 		DataInfo: data,
-		dataInfo: data,
 		AddrInfo: core.AddrInfo{},
 	}
 }
 
 // Hash ...
 func (v DataHashInfo) Hash() string {
-	if v.DataInfo != nil {
-		return v.DataInfo.Root()
-	}
-	return ""
+	return v.DataHash
 }
 
 // Encode ...
@@ -66,7 +61,7 @@ func (v *DataHashInfo) Decode(s string) error {
 	//if err != nil {
 	//	return err
 	//}
-	if h := v.dataInfo.Hash(); h != v.DataHash {
+	if h := v.DataInfo.Hash(); h != v.DataHash {
 		return fmt.Errorf("wrong hash(%s) from hash(%s)", h, v.DataHash)
 	}
 	return nil

@@ -1,6 +1,7 @@
 package hash
 
 import (
+	"crypto/hmac"
 	"crypto/sha256"
 	"encoding/binary"
 	"fmt"
@@ -8,9 +9,14 @@ import (
 	"reflect"
 )
 
+// Key ...
+const key = "trfs_hash"
+
 // DefaultOption ...
 var DefaultOption = &Options{
-	Hash:    sha256.New(),
+	Hash: hmac.New(func() hash.Hash {
+		return sha256.New()
+	}, []byte(key)),
 	TagName: "hash",
 	ZeroNil: false,
 }

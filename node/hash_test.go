@@ -46,6 +46,7 @@ func TestHashCache_Store(t *testing.T) {
 		Version:    core.Version{},
 	}
 	info1 := newDataHashInfo(ds1)
+	info1.AddrInfo.ID = "QmeqN54NuCYSuTxHGZbvG3YoKnLewaECxAiGZUQsXyuXdY"
 	t.Log(info1)
 	err := cache.Store(info1.Hash(), info1)
 	if err != nil {
@@ -58,6 +59,6 @@ func TestHashCache_Store(t *testing.T) {
 		t.Fatal(err)
 	}
 	err = cache.GC()
-	t.Log(info1)
+	t.Log(d1)
 
 }

@@ -30,7 +30,7 @@ require (
 	github.com/tidwall/buntdb v1.1.2
 	go.uber.org/atomic v1.6.0
 	go.uber.org/zap v1.13.0
-	golang.org/x/crypto v0.0.0-20200302210943-78000ba7a073 // indirect
+	golang.org/x/crypto v0.0.0-20200302210943-78000ba7a073
 	golang.org/x/net v0.0.0-20190628185345-da137c7871d7
 	gopkg.in/check.v1 v1.0.0-20190902080502-41f04d3bba15 // indirect
 )

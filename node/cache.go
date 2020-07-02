@@ -148,6 +148,32 @@ func (h *hashCache) Load(hash string, data core.Unmarshaler) error {
 		})
 }
 
+// Range ...
+func (h *hashCache) Range(f func(key, value []byte) bool) {
+	h.db.View(func(txn *badger.Txn) error {
+		opts := badger.DefaultIteratorOptions
+		opts.Reverse = true
+		iter := txn.NewIterator(opts)
+		defer iter.Close()
+		var item *badger.Item
+		for iter.Rewind(); iter.Valid(); iter.Next() {
+			item = iter.Item()
+			return item.Value(func(v []byte) error {
+				key := item.Key()
+				val, err := item.ValueCopy(v)
+				if err != nil {
+					return err
+				}
+				if f(key, val) {
+
+				}
+				return nil
+			})
+		}
+		return nil
+	})
+}
+
 func nodeCacher(cfg *config.Config) Cacher {
 	opts := badger.DefaultOptions(filepath.Join(cfg.Path, cacheDir, nodeName))
 	opts.Truncate = true

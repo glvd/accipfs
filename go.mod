@@ -24,13 +24,13 @@ require (
 	github.com/panjf2000/ants/v2 v2.4.1
 	github.com/portmapping/go-reuse v0.0.3
 	github.com/prometheus/tsdb v0.7.1 // indirect
-	github.com/robfig/cron/v3 v3.0.1
 	github.com/spf13/cobra v0.0.5
 	github.com/spf13/viper v1.3.2
 	github.com/tidwall/buntdb v1.1.2
+	github.com/xujiajun/nutsdb v0.5.0
 	go.uber.org/atomic v1.6.0
 	go.uber.org/zap v1.13.0
-	golang.org/x/crypto v0.0.0-20200302210943-78000ba7a073
+	golang.org/x/crypto v0.0.0-20200302210943-78000ba7a073 // indirect
 	golang.org/x/net v0.0.0-20190628185345-da137c7871d7
 	gopkg.in/check.v1 v1.0.0-20190902080502-41f04d3bba15 // indirect
 )

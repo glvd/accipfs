@@ -112,12 +112,18 @@ func (h *hashCache) Store(hash string, data core.DataEncoder) error {
 // Load ...
 func (h *hashCache) Load(hash string, data core.DataDecoder) error {
 	return h.db.View(func(tx *buntdb.Tx) error {
-		var datum string
-		err := tx.Ascend("hash", func(key, value string) bool {
-			//fmt.Printf("%s: %s\n", key, value)
-			datum = value
-			return false
-		})
+		//var datum string
+		//err := tx.Ascend("hash", func(key, value string) bool {
+		//	//fmt.Printf("%s: %s\n", key, value)
+		//	//datum = value
+		//	return false
+		//})
+		//if err != nil {
+		//	return err
+		//}
+		//return nil
+		//var datum string
+		datum, err := tx.Get(hash)
 		if err != nil {
 			return err
 		}

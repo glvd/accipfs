@@ -55,10 +55,10 @@ func Manager(cfg *config.Config, api core.API) core.NodeManager {
 
 // Store ...
 func (m *manager) Store() error {
-	err := os.Remove(m.path)
-	if err != nil && !os.IsNotExist(err) {
-		return err
-	}
+	//err := os.Remove(m.path)
+	//if err != nil && !os.IsNotExist(err) {
+	//	return err
+	//}
 	file, err := os.OpenFile(m.path, os.O_CREATE|os.O_RDWR|os.O_SYNC|os.O_APPEND, 0755)
 	if err != nil {
 		return err

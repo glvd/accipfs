@@ -48,7 +48,7 @@ func store(wg *sync.WaitGroup, nodeManager core.NodeManager) {
 	if err != nil {
 		panic(err)
 	}
-	for i := 0; i < 10000; i++ {
+	for i := 0; i < 1000; i++ {
 		connectNode, err := ConnectNode(multiaddr, 0, &dummyAPI{
 			id: basis.UUID(),
 		})
@@ -86,8 +86,8 @@ func TestManager_Load(t *testing.T) {
 	nodeManager := Manager(cfg, c.GetAPI())
 	defer nodeManager.Close()
 	wg := &sync.WaitGroup{}
-	wg.Add(1)
-	store(wg, nodeManager)
+	wg.Add(2)
 	go load(wg, nodeManager)
+	store(wg, nodeManager)
 	wg.Done()
 }

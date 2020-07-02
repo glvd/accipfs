@@ -3,6 +3,8 @@ module github.com/glvd/accipfs
 go 1.13
 
 require (
+	github.com/dgraph-io/badger v1.6.0-rc1
+	github.com/dgraph-io/badger/v2 v2.0.3
 	github.com/elastic/gosigar v0.10.5 // indirect
 	github.com/ethereum/go-ethereum v1.9.11
 	github.com/gin-gonic/gin v1.6.2
@@ -32,5 +34,4 @@ require (
 	go.uber.org/zap v1.13.0
 	golang.org/x/crypto v0.0.0-20200302210943-78000ba7a073 // indirect
 	golang.org/x/net v0.0.0-20190628185345-da137c7871d7
-	gopkg.in/check.v1 v1.0.0-20190902080502-41f04d3bba15 // indirect
 )

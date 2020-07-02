@@ -10,6 +10,7 @@ import (
 // DataHashEncoder ...
 type DataHashEncoder interface {
 	Hash() string
+	Verify(s string) bool
 }
 
 // DataJSONer ...
@@ -22,27 +23,28 @@ type DataRooter interface {
 	Root() string
 }
 
-// DataEncoder ...
-type DataEncoder interface {
-	Encode() (string, error)
+// Marshaler ...
+type Marshaler interface {
+	Marshal() ([]byte, error)
 }
 
-// DataDecoder ...
-type DataDecoder interface {
-	Decode(string) error
+// Unmarshaler ...
+type Unmarshaler interface {
+	Unmarshal([]byte) error
 }
 
-// DataEncodeDecoder ...
-type DataEncodeDecoder interface {
-	DataEncoder
-	DataDecoder
+// JSONer ...
+type JSONer interface {
+	Marshaler
+	Unmarshaler
 }
 
-// MediaSerializer ...
-type MediaSerializer interface {
+// Serializable ...
+type Serializable interface {
+	JSONer
+	DataRooter
 	DataHashEncoder
 	DataJSONer
-	DataRooter
 }
 
 // MediaInfo ...
@@ -112,18 +114,14 @@ func (v *DataInfoV1) JSON() string {
 	return string(marshal)
 }
 
-// Encode ...
-func (v *DataInfoV1) Encode() (string, error) {
-	marshal, err := json.Marshal(v)
-	if err != nil {
-		return "", err
-	}
-	return string(marshal), nil
+// Marshal ...
+func (v *DataInfoV1) Marshal() ([]byte, error) {
+	return json.Marshal(v)
 }
 
-// Decode ...
-func (v *DataInfoV1) Decode(s string) error {
-	return json.Unmarshal([]byte(s), v)
+// Unmarshal ...
+func (v *DataInfoV1) Unmarshal(b []byte) error {
+	return json.Unmarshal(b, v)
 }
 
 // Root ...

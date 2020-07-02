@@ -2,35 +2,32 @@ package node
 
 import (
 	"encoding/json"
-	"fmt"
+	"github.com/dgraph-io/badger/v2"
 	"github.com/glvd/accipfs/config"
 	"github.com/glvd/accipfs/core"
 	"path/filepath"
 	"sync"
-
-	"github.com/tidwall/buntdb"
 )
 
-const hashName = "hash.db"
+const hashName = "hashes"
 
 type hashCache struct {
 	v   sync.Map
-	db  *buntdb.DB
+	db  *badger.DB
 	cfg *config.Config
 }
 
 // DataHashInfo ...
 type DataHashInfo struct {
-	DataHash string               `json:"data_hash"`
-	DataInfo core.MediaSerializer `json:"data_info"`
-	AddrInfo core.AddrInfo        `json:"addr_info"`
+	DataHash string            `json:"data_hash"`
+	DataInfo core.Serializable `json:"data_info"`
+	AddrInfo core.AddrInfo     `json:"addr_info"`
 }
 
-func newDataHashInfo(data core.MediaSerializer) *DataHashInfo {
+func newDataHashInfo(data core.Serializable) *DataHashInfo {
 	return &DataHashInfo{
 		DataHash: data.Hash(),
 		DataInfo: data,
-		AddrInfo: core.AddrInfo{},
 	}
 }
 
@@ -39,45 +36,21 @@ func (v DataHashInfo) Hash() string {
 	return v.DataHash
 }
 
-// Encode ...
-func (v DataHashInfo) Encode() (string, error) {
-	marshal, err := json.Marshal(v)
-	if err != nil {
-		return "", err
-	}
-	return string(marshal), nil
+// Marshal ...
+func (v DataHashInfo) Marshal() ([]byte, error) {
+	return json.Marshal(v)
 }
 
-// Decode ...
-func (v *DataHashInfo) Decode(s string) error {
-	err := json.Unmarshal([]byte(s), v)
-	if err != nil {
-		return fmt.Errorf("data decode failed:%w", err)
-	}
-	return nil
-	//if v.dataInfo == nil {
-	//	return fmt.Errorf("nil data info object")
-	//}
-	//err = v.dataInfo.Decode(v.DataInfo)
-	//if err != nil {
-	//	return err
-	//}
-	//if h := v.DataInfo.Hash(); h != v.DataHash {
-	//	return fmt.Errorf("wrong hash(%s) from hash(%s)", h, v.DataHash)
-	//}
-	//return nil
+// Unmarshal ...
+func (v *DataHashInfo) Unmarshal(b []byte) error {
+	return json.Unmarshal(b, v)
 }
 
 func newHashCacher(cfg *config.Config) *hashCache {
-	//db, err := buntdb.Open(":memory:")
-	db, err := buntdb.Open(filepath.Join(cfg.Path, hashName))
-	// Open the data.db file. It will be created if it doesn't exist.
+	db, err := badger.Open(badger.DefaultOptions(filepath.Join(cfg.Path, hashName)))
 	if err != nil {
-		log.Fatal(err)
+		panic(err)
 	}
-	db.CreateIndex("hash", "*",
-		buntdb.IndexJSON("data_info.root_hash"),
-		buntdb.Desc(buntdb.IndexJSON("data_info.last_update")))
 	return &hashCache{
 		cfg: cfg,
 		db:  db,
@@ -98,45 +71,27 @@ func (h *hashCache) Close() error {
 }
 
 // Store ...
-func (h *hashCache) Store(hash string, data core.DataEncoder) error {
-	return h.db.Update(func(tx *buntdb.Tx) error {
-		encode, err := data.Encode()
-		if err != nil {
-			return err
-		}
-		_, _, err = tx.Set(hash, encode, nil)
-		return err
-	})
+func (h *hashCache) Store(hash string, data core.Marshaler) error {
+	return h.db.Update(
+		func(txn *badger.Txn) error {
+			encode, err := data.Marshal()
+			if err != nil {
+				return err
+			}
+			return txn.Set([]byte(hash), encode)
+		})
 }
 
 // Load ...
-func (h *hashCache) Load(hash string, data core.DataDecoder) error {
-	return h.db.View(func(tx *buntdb.Tx) error {
-		//var datum string
-		//err := tx.Ascend("hash", func(key, value string) bool {
-		//	//fmt.Printf("%s: %s\n", key, value)
-		//	//datum = value
-		//	return false
-		//})
-		//if err != nil {
-		//	return err
-		//}
-		//return nil
-		//var datum string
-		datum, err := tx.Get(hash)
-		if err != nil {
-			return err
-		}
-		return data.Decode(datum)
-	})
-}
-
-// GC ...
-func (h *hashCache) GC() error {
-	if h.db != nil {
-		if err := h.db.Shrink(); err != nil {
-			return err
-		}
-	}
-	return nil
+func (h *hashCache) Load(hash string, data core.Unmarshaler) error {
+	return h.db.View(
+		func(txn *badger.Txn) error {
+			item, err := txn.Get([]byte(hash))
+			if err != nil {
+				return err
+			}
+			return item.Value(func(val []byte) error {
+				return data.Unmarshal(val)
+			})
+		})
 }

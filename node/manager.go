@@ -25,12 +25,12 @@ type manager struct {
 	currentTS    int64
 	ts           int64
 	currentNodes *atomic.Uint64
-	nodes        sync.Map
 	expNodes     sync.Map
 	path         string
 	expPath      string
 	api          core.API
-	hash         *hashCache
+	nodes        *nodeCache
+	hashes       *hashCache
 }
 
 var _nodes = "bl.nodes"
@@ -44,7 +44,8 @@ func Manager(cfg *config.Config, api core.API) core.NodeManager {
 		api:     api,
 		path:    filepath.Join(cfg.Path, _nodes),
 		expPath: filepath.Join(cfg.Path, _expNodes),
-		hash:    newHashCacher(cfg),
+		nodes:   newNodeCacher(cfg),
+		hashes:  newHashCacher(cfg),
 		t:       time.NewTicker(cfg.Node.BackupSeconds),
 	}
 	//m.exchangePool = mustPool(ants.DefaultAntsPoolSize, m.HandleConn)
@@ -232,5 +233,5 @@ func encodeNode(node core.Node) ([]byte, error) {
 
 // Close ...
 func (m *manager) Close() {
-	m.hash.Close()
+	m.hashes.Close()
 }

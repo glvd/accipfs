@@ -59,7 +59,7 @@ func (m *manager) Store() error {
 	if err != nil && !os.IsNotExist(err) {
 		return err
 	}
-	file, err := os.OpenFile(m.path, os.O_CREATE|os.O_RDWR|os.O_SYNC, 0755)
+	file, err := os.OpenFile(m.path, os.O_CREATE|os.O_RDWR|os.O_SYNC|os.O_APPEND, 0755)
 	if err != nil {
 		return err
 	}
@@ -228,4 +228,9 @@ func encodeNode(node core.Node) ([]byte, error) {
 		node.ID(): {Addrs: strAddrs},
 	}
 	return json.Marshal(n)
+}
+
+// Close ...
+func (m *manager) Close() {
+	m.hash.Close()
 }

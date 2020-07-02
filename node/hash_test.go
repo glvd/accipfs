@@ -6,6 +6,7 @@ import (
 	"time"
 
 	badger "github.com/dgraph-io/badger/v2"
+	"github.com/emirpasic/gods/maps/hashmap"
 	"github.com/glvd/accipfs/basis"
 	"github.com/glvd/accipfs/config"
 	"github.com/glvd/accipfs/core"
@@ -195,5 +196,36 @@ func BenchmarkDatabase2Read(b *testing.B) {
 		if err != nil {
 			continue
 		}
+	}
+}
+func BenchmarkDatabaseMap(b *testing.B) {
+	v := map[string]string{}
+	key := "a3e465c1-bc35-11ea-aa2c-00155d639067"
+	b.StopTimer()
+	for i := 0; i < 100000; i++ {
+		data, value := generateTestData()
+		v[data] = value
+		key = data
+	}
+	fmt.Println("last key", key)
+	b.StartTimer()
+	for i := 0; i < 100; i++ {
+		fmt.Println(v[key])
+	}
+}
+
+func BenchmarkHashMap(b *testing.B) {
+	m := hashmap.New()
+	key := "a3e465c1-bc35-11ea-aa2c-00155d639067"
+	b.StopTimer()
+	for i := 0; i < 100000; i++ {
+		data, value := generateTestData()
+		m.Put(data, value)
+		key = data
+	}
+	fmt.Println("last key", key)
+	b.StartTimer()
+	for i := 0; i < 100; i++ {
+		fmt.Println(m.Get(key))
 	}
 }

@@ -2,6 +2,7 @@ package node
 
 import (
 	"fmt"
+	"github.com/glvd/accipfs/basis"
 	"github.com/glvd/accipfs/core"
 	"github.com/godcong/scdt"
 	ma "github.com/multiformats/go-multiaddr"
@@ -39,6 +40,9 @@ func TestAcceptNode(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	listener.ID(func() string {
+		return basis.UUID()
+	})
 	listener.HandleRecv(func(id string, message *scdt.Message) ([]byte, bool) {
 		fmt.Println("id:", id, "message:", message, "data:", string(message.Data))
 		return []byte("success"), true

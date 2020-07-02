@@ -5,6 +5,7 @@ import (
 	"github.com/glvd/accipfs/config"
 	"github.com/glvd/accipfs/core"
 	"testing"
+	"time"
 )
 
 func TestHashCache_Store(t *testing.T) {
@@ -43,22 +44,23 @@ func TestHashCache_Store(t *testing.T) {
 		Info:       core.Info{},
 		InfoURI:    "",
 		Security:   core.Security{},
+		LastUpdate: time.Now().Unix(),
 		Version:    core.Version{},
 	}
 	info1 := newDataHashInfo(ds1)
 	info1.AddrInfo.ID = "QmeqN54NuCYSuTxHGZbvG3YoKnLewaECxAiGZUQsXyuXdY"
-	t.Log(info1)
+	t.Logf("%+v", info1)
 	err := cache.Store(info1.Hash(), info1)
 	if err != nil {
 		t.Fatal(err)
 	}
 	ds2 := &core.DataInfoV1{}
 	d1 := newDataHashInfo(ds2)
-	err = cache.Load(info1.Hash(), d1)
+	err = cache.Load(ds1.RootHash, d1)
 	if err != nil {
 		t.Fatal(err)
 	}
 	err = cache.GC()
-	t.Log(d1)
+	t.Logf("%+v", d1)
 
 }

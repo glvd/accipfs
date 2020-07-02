@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/glvd/accipfs/basis/hash"
+	"strings"
 )
 
 // DataHashEncoder ...
@@ -98,6 +99,7 @@ type DataInfoV1 struct {
 	Info       Info      `xorm:"info" json:"info"`               //补充信息
 	InfoURI    string    `xorm:"info_uri" json:"info_uri"`       //补充信息地址
 	Security   Security  `xorm:"security" json:"security"`       //安全验证
+	LastUpdate int64     `xorm:"last_update" json:"last_update"` //最后更新时间
 	Version    Version   `xorm:"version" json:"version"`         //版本
 }
 
@@ -136,6 +138,11 @@ func (v *DataInfoV1) Hash() string {
 		return ""
 	}
 	return fmt.Sprintf("%x", sum)
+}
+
+// Verify ...
+func (v *DataInfoV1) Verify(hash string) bool {
+	return strings.Compare(v.Hash(), hash) == 0
 }
 
 // VerifyVersion ...

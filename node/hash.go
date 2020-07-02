@@ -54,6 +54,7 @@ func (v *DataHashInfo) Decode(s string) error {
 	if err != nil {
 		return fmt.Errorf("data decode failed:%w", err)
 	}
+	return nil
 	//if v.dataInfo == nil {
 	//	return fmt.Errorf("nil data info object")
 	//}
@@ -61,10 +62,10 @@ func (v *DataHashInfo) Decode(s string) error {
 	//if err != nil {
 	//	return err
 	//}
-	if h := v.DataInfo.Hash(); h != v.DataHash {
-		return fmt.Errorf("wrong hash(%s) from hash(%s)", h, v.DataHash)
-	}
-	return nil
+	//if h := v.DataInfo.Hash(); h != v.DataHash {
+	//	return fmt.Errorf("wrong hash(%s) from hash(%s)", h, v.DataHash)
+	//}
+	//return nil
 }
 
 func newHashCacher(cfg *config.Config) *hashCache {
@@ -73,6 +74,9 @@ func newHashCacher(cfg *config.Config) *hashCache {
 	if err != nil {
 		log.Fatal(err)
 	}
+	db.CreateIndex("hash", "*",
+		buntdb.IndexJSON("data_info.root_hash"),
+		buntdb.Desc(buntdb.IndexJSON("data_info.last_update")))
 	return &hashCache{
 		cfg: cfg,
 		db:  db,
@@ -107,7 +111,12 @@ func (h *hashCache) Store(hash string, data core.DataEncoder) error {
 // Load ...
 func (h *hashCache) Load(hash string, data core.DataDecoder) error {
 	return h.db.View(func(tx *buntdb.Tx) error {
-		datum, err := tx.Get(hash)
+		var datum string
+		err := tx.Ascend("hash", func(key, value string) bool {
+			fmt.Printf("%s: %s\n", key, value)
+			datum = value
+			return false
+		})
 		if err != nil {
 			return err
 		}

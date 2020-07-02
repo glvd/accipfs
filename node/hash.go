@@ -69,6 +69,7 @@ func (v *DataHashInfo) Decode(s string) error {
 }
 
 func newHashCacher(cfg *config.Config) *hashCache {
+	//db, err := buntdb.Open(":memory:")
 	db, err := buntdb.Open(filepath.Join(cfg.Path, hashName))
 	// Open the data.db file. It will be created if it doesn't exist.
 	if err != nil {
@@ -113,7 +114,7 @@ func (h *hashCache) Load(hash string, data core.DataDecoder) error {
 	return h.db.View(func(tx *buntdb.Tx) error {
 		var datum string
 		err := tx.Ascend("hash", func(key, value string) bool {
-			fmt.Printf("%s: %s\n", key, value)
+			//fmt.Printf("%s: %s\n", key, value)
 			datum = value
 			return false
 		})

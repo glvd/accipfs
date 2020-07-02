@@ -20,17 +20,18 @@ import (
 
 type manager struct {
 	scdt.Listener
-	cfg          *config.Config
-	t            *time.Ticker
-	currentTS    int64
-	ts           int64
-	currentNodes *atomic.Uint64
-	expNodes     sync.Map
-	path         string
-	expPath      string
-	api          core.API
-	nodes        Cacher
-	hashes       Cacher
+	cfg             *config.Config
+	t               *time.Ticker
+	currentTS       int64
+	ts              int64
+	currentNodes    *atomic.Uint64
+	path            string
+	expPath         string
+	api             core.API
+	connectNodes    sync.Map
+	disconnectNodes sync.Map
+	nodes           Cacher
+	hashes          Cacher
 }
 
 var _nodes = "bl.nodes"
@@ -66,7 +67,7 @@ func (m *manager) Store() error {
 	}
 	defer file.Close()
 	writer := bufio.NewWriter(file)
-	m.nodes.Range(func(key, value interface{}) bool {
+	m.nodes.Range(func(key, value []byte) bool {
 		n, b := value.(core.Node)
 		if !b {
 			return true

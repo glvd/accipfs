@@ -98,7 +98,7 @@ func (v *DataHashInfo) Unmarshal(b []byte) error {
 	return json.Unmarshal(b, v)
 }
 
-func newHashCacher(cfg *config.Config) *hashCache {
+func hashCacher(cfg *config.Config) Cacher {
 	opts := badger.DefaultOptions(filepath.Join(cfg.Path, cacheDir, hashName))
 	opts.Truncate = true
 	db, err := badger.Open(opts)
@@ -148,8 +148,7 @@ func (h *hashCache) Load(hash string, data core.Unmarshaler) error {
 		})
 }
 
-// NewNodeCacher ...
-func NewNodeCacher(cfg *config.Config) Cacher {
+func nodeCacher(cfg *config.Config) Cacher {
 	opts := badger.DefaultOptions(filepath.Join(cfg.Path, cacheDir, nodeName))
 	opts.Truncate = true
 	db, err := badger.Open(opts)

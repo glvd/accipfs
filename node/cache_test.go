@@ -26,7 +26,7 @@ s":null,"IPFSAddrInfo":{"Addrs":null,"ID":""}}}`
 
 func TestHashCache_Store(t *testing.T) {
 	root := "QmVq9Du6jAgHBJfyXuhHkP9KHARxJ1RYoYPXTKdVkoN6F4"
-	cache := newHashCacher(config.Default())
+	cache := hashCacher(config.Default())
 	for i := 0; i < 100000; i++ {
 		ds1 := &core.DataInfoV1{
 			RootHash: root,
@@ -86,7 +86,7 @@ func TestHashCache_Store(t *testing.T) {
 
 func BenchmarkHashCache_Load(b *testing.B) {
 	//root := "QmVq9Du6jAgHBJfyXuhHkP9KHARxJ1RYoYPXTKdVkoN6F4"
-	cache := newHashCacher(config.Default())
+	cache := hashCacher(config.Default())
 	for i := 0; i < 100; i++ {
 		ds2 := &core.DataInfoV1{}
 		d1 := newDataHashInfo(ds2)

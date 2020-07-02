@@ -29,8 +29,8 @@ type manager struct {
 	path         string
 	expPath      string
 	api          core.API
-	nodes        *nodeCache
-	hashes       *hashCache
+	nodes        Cacher
+	hashes       Cacher
 }
 
 var _nodes = "bl.nodes"
@@ -44,8 +44,8 @@ func Manager(cfg *config.Config, api core.API) core.NodeManager {
 		api:     api,
 		path:    filepath.Join(cfg.Path, _nodes),
 		expPath: filepath.Join(cfg.Path, _expNodes),
-		nodes:   newNodeCacher(cfg),
-		hashes:  newHashCacher(cfg),
+		nodes:   nodeCacher(cfg),
+		hashes:  hashCacher(cfg),
 		t:       time.NewTicker(cfg.Node.BackupSeconds),
 	}
 	//m.exchangePool = mustPool(ants.DefaultAntsPoolSize, m.HandleConn)
@@ -124,8 +124,8 @@ func (m *manager) Load() error {
 	}
 }
 
-// StateExamination ...
-func (m *manager) StateExamination(id string, f func(node core.Node) bool) {
+// StateEx State Examination checks the node status
+func (m *manager) StateEx(id string, f func(node core.Node) bool) {
 	if f == nil {
 		return
 	}

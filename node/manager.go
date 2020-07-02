@@ -67,7 +67,7 @@ func (m *manager) Store() error {
 	}
 	defer file.Close()
 	writer := bufio.NewWriter(file)
-	m.nodes.Range(func(key, value []byte) bool {
+	m.connectNodes.Range(func(key, value interface{}) bool {
 		n, b := value.(core.Node)
 		if !b {
 			return true
@@ -130,26 +130,26 @@ func (m *manager) StateEx(id string, f func(node core.Node) bool) {
 	if f == nil {
 		return
 	}
-	node, ok := m.nodes.Load(id)
+	node, ok := m.connectNodes.Load(id)
 	if ok {
 		if f(node.(core.Node)) {
-			m.nodes.Delete(id)
-			m.expNodes.Store(id, node)
+			m.connectNodes.Delete(id)
+			m.disconnectNodes.Store(id, node)
 		}
 	}
 
-	exp, ok := m.expNodes.Load(id)
+	exp, ok := m.disconnectNodes.Load(id)
 	if ok {
 		if f(exp.(core.Node)) {
-			m.expNodes.Delete(id)
-			m.nodes.Store(id, exp)
+			m.disconnectNodes.Delete(id)
+			m.connectNodes.Store(id, exp)
 		}
 	}
 }
 
 // Range ...
 func (m *manager) Range(f func(key string, node core.Node) bool) {
-	m.nodes.Range(func(key, value interface{}) bool {
+	m.connectNodes.Range(func(key, value interface{}) bool {
 		k, b1 := key.(string)
 		n, b2 := value.(core.Node)
 		if !b1 || !b2 {
@@ -165,7 +165,7 @@ func (m *manager) Range(f func(key string, node core.Node) bool) {
 // Push ...
 func (m *manager) Push(node core.Node) {
 	m.ts = time.Now().Unix()
-	m.nodes.Store(node.ID(), node)
+	m.connectNodes.Store(node.ID(), node)
 }
 
 // save nodes

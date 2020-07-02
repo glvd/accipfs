@@ -31,11 +31,11 @@ type nodeLocal struct {
 
 type node struct {
 	scdt.Connection
-	local    *peer.AddrInfo
+	local    peer.AddrInfo
 	remoteID *atomic.String
-	remote   *peer.AddrInfo
-	api      core.API
+	remote   peer.AddrInfo
 	addrInfo *core.AddrInfo
+	api      core.API
 }
 
 var _ core.Node = &node{}
@@ -74,7 +74,7 @@ func AcceptNode(conn net.Conn, api core.API) (core.Node, error) {
 
 // ConnectNode ...
 func ConnectNode(addr ma.Multiaddr, bind int, api core.API) (core.Node, error) {
-	localAddr, err := ma.NewMultiaddr(fmt.Sprintf("/tcp/%d", bind))
+	localAddr, err := ma.NewMultiaddr(fmt.Sprintf("/ip4/0.0.0.0/tcp/%d", bind))
 	if err != nil {
 		return nil, err
 	}

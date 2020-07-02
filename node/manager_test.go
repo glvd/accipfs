@@ -2,6 +2,7 @@ package node
 
 import (
 	"fmt"
+	"github.com/glvd/accipfs/basis"
 	"github.com/glvd/accipfs/config"
 	"github.com/glvd/accipfs/controller"
 	"github.com/glvd/accipfs/core"
@@ -42,20 +43,24 @@ func TestManager_Store(t *testing.T) {
 }
 
 func store(wg *sync.WaitGroup, nodeManager core.NodeManager) {
-	defer wg.Done()
+	//defer wg.Done()
 	multiaddr, err := ma.NewMultiaddr("/ip4/127.0.0.1/tcp/12345")
 	if err != nil {
 		panic(err)
 	}
 	for i := 0; i < 10000; i++ {
-		connectNode, err := ConnectNode(multiaddr, 0, &dummyAPI{})
+		connectNode, err := ConnectNode(multiaddr, 0, &dummyAPI{
+			id: basis.UUID(),
+		})
+
 		if err != nil {
-			continue
+			fmt.Println("error", err)
 		}
+		fmt.Println("remote id:", connectNode.ID())
 		nodeManager.Push(connectNode)
 		err = nodeManager.Store()
 		if err != nil {
-			continue
+			fmt.Println("error", err)
 		}
 	}
 }
@@ -65,6 +70,7 @@ func load(wg *sync.WaitGroup, nodeManager core.NodeManager) {
 	for i := 0; i < 100; i++ {
 		err := nodeManager.Load()
 		if err != nil {
+			fmt.Println("error", err)
 			continue
 		}
 		nodeManager.Range(func(key string, n core.Node) bool {
@@ -80,8 +86,8 @@ func TestManager_Load(t *testing.T) {
 	nodeManager := Manager(cfg, c.GetAPI())
 	defer nodeManager.Close()
 	wg := &sync.WaitGroup{}
-	wg.Add(2)
-	go store(wg, nodeManager)
+	wg.Add(1)
+	store(wg, nodeManager)
 	go load(wg, nodeManager)
 	wg.Done()
 }

@@ -8,7 +8,7 @@ require (
 	github.com/emirpasic/gods v1.12.0
 	github.com/ethereum/go-ethereum v1.9.11
 	github.com/gin-gonic/gin v1.6.2
-	github.com/godcong/scdt v0.0.11
+	github.com/godcong/scdt v0.0.12
 	github.com/goextension/extmap v0.0.1
 	github.com/goextension/io v0.0.0-20191016080154-50dbafac3df3
 	github.com/goextension/tool v0.0.2

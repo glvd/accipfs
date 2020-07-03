@@ -75,6 +75,14 @@ func (m *manager) Load() error {
 		if err != nil {
 			log.Errorw("load addr info failed", "err", err)
 		}
+		for multiaddr := range addrInfo.Addrs {
+			connectNode, err := ConnectNode(multiaddr, 0, m.api)
+			if err != nil {
+				continue
+			}
+			m.connectNodes.Store(hash, connectNode)
+			return true
+		}
 		return true
 	})
 	return nil

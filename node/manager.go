@@ -14,6 +14,7 @@ import (
 
 type manager struct {
 	scdt.Listener
+	initLoad        *atomic.Bool
 	cfg             *config.Config
 	t               *time.Ticker
 	currentTS       int64
@@ -133,6 +134,12 @@ func (m *manager) Push(node core.Node) {
 
 // save nodes
 func (m *manager) loop() {
+	if m.initLoad.Load() {
+		err := m.Load()
+		if err != nil {
+			log.Errorw("load node failed", "err", err)
+		}
+	}
 	for {
 		<-m.t.C
 		if m.ts != m.currentTS {

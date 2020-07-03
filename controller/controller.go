@@ -59,6 +59,9 @@ func New(cfg *config.Config) *Controller {
 // Initialize ...
 func (c *Controller) Initialize() (e error) {
 	for _, service := range c.services {
+		if service == nil {
+			continue
+		}
 		e = service.Initialize()
 		if e != nil {
 			return e

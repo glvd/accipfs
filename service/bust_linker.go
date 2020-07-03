@@ -52,11 +52,9 @@ func (l *BustLinker) Start() {
 
 // Run ...
 func (l *BustLinker) Run() {
-	if l.lock.Load() {
-		fmt.Println(module, "the previous task has not been completed")
+	if !l.lock.CAS(false, true) {
 		return
 	}
-	l.lock.Store(true)
 	defer l.lock.Store(false)
 	wg := &sync.WaitGroup{}
 	l.manager.Range(func(key string, node core.Node) bool {

@@ -57,22 +57,15 @@ func Manager(cfg *config.Config, api core.API) core.NodeManager {
 
 // Store ...
 func (m *manager) Store() error {
-	//err := os.Remove(m.path)
-	//if err != nil && !os.IsNotExist(err) {
-	//	return err
-	//}
 	file, err := os.OpenFile(m.path, os.O_CREATE|os.O_RDWR|os.O_SYNC|os.O_APPEND, 0755)
 	if err != nil {
 		return err
 	}
 	defer file.Close()
 	writer := bufio.NewWriter(file)
-	m.connectNodes.Range(func(key, value interface{}) bool {
-		n, b := value.(core.Node)
-		if !b {
-			return true
-		}
-		nodeData, err := encodeNode(n)
+	m.Range(func(key string, value core.Node) bool {
+
+		nodeData, err := encodeNode(value)
 		if err != nil {
 			return false
 		}

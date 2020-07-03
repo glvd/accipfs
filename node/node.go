@@ -20,15 +20,6 @@ const (
 	InfoRequest = iota + 1
 )
 
-type jsonNode struct {
-	Addrs []string `json:"addrs"`
-}
-
-//temp Data
-type nodeLocal struct {
-	id *string
-}
-
 type node struct {
 	scdt.Connection
 	local    peer.AddrInfo
@@ -38,11 +29,32 @@ type node struct {
 	api      core.API
 }
 
+type jsonNode struct {
+	ID    string
+	Addrs []ma.Multiaddr
+	peer.AddrInfo
+}
+
 var _ core.Node = &node{}
 
 // IsClosed ...
 func (n *node) IsClosed() bool {
 	return n.Connection.IsClosed()
+}
+
+// IPFSAddrInfo ...
+func (n *node) IPFSAddrInfo() (peer.AddrInfo, error) {
+	panic("implement me")
+}
+
+// Marshal ...
+func (n *node) Marshal() ([]byte, error) {
+	return n.addrInfo.MarshalJSON()
+}
+
+// Unmarshal ...
+func (n *node) Unmarshal(bytes []byte) error {
+	return n.addrInfo.UnmarshalJSON(bytes)
 }
 
 // Close ...

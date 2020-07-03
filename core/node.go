@@ -12,6 +12,7 @@ type RecvCBFunc func(id string, v interface{}) ([]byte, error)
 type Node interface {
 	ID() string
 	Addrs() []ma.Multiaddr
+	IPFSAddrInfo() (peer.AddrInfo, error)
 	Info() (peer.AddrInfo, error)
 	Close() (err error)
 	IsClosed() bool

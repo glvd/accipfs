@@ -23,30 +23,6 @@ type jsonAddrInfo struct {
 	IPFSAddrInfo peer.AddrInfo `json:"ipfs_addr_info"`
 }
 
-//func parseIPFSAddrInfo(b []byte) (peer.AddrInfo, error) {
-//	var info jsonIPFSAddrInfo
-//	err := json.Unmarshal(b, &info)
-//	if err != nil {
-//		return peer.AddrInfo{}, err
-//	}
-//	var addrs []ma.Multiaddr
-//	for i := range info.Addrs {
-//		multiaddr, err := ma.NewMultiaddr(info.Addrs[i])
-//		if err != nil {
-//			continue
-//		}
-//		addrs = append(addrs, multiaddr)
-//	}
-//	fromString, err := peer.IDFromString(info.ID)
-//	if err != nil {
-//		return peer.AddrInfo{}, err
-//	}
-//	return peer.AddrInfo{
-//		ID:    fromString,
-//		Addrs: addrs,
-//	}, nil
-//}
-
 func parseAddrInfo(b []byte, addrInfo *AddrInfo) error {
 	var info jsonAddrInfo
 	err := json.Unmarshal(b, &info)
@@ -55,17 +31,6 @@ func parseAddrInfo(b []byte, addrInfo *AddrInfo) error {
 
 	}
 	addrInfo.ID = info.ID
-	//if info.IPFSAddrInfo != "" {
-	//	err = json.Unmarshal([]byte(info.IPFSAddrInfo), &addrInfo.IPFSAddrInfo)
-	//	if err != nil {
-	//		return fmt.Errorf("unmarshal ipfs address info failed:%w", err)
-	//	}
-	//}
-	//ipfsAddrInfo, err := parseIPFSAddrInfo([]byte(info.IPFSAddrInfo))
-	//if err != nil {
-	//	return err
-	//}
-	//addrInfo.IPFSAddrInfo = ipfsAddrInfo
 	addrs := make(map[ma.Multiaddr]bool, len(info.Addrs))
 	for i := range info.Addrs {
 		multiaddr, err := ma.NewMultiaddr(info.Addrs[i])

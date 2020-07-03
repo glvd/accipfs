@@ -130,7 +130,7 @@ func (v *DataHashInfo) Unmarshal(b []byte) error {
 }
 
 func hashCacher(cfg *config.Config) Cacher {
-	path := filepath.Join(cfg.Path, cacheDir, nodeName)
+	path := filepath.Join(cfg.Path, cacheDir, hashName)
 	_, err := os.Stat(path)
 	if err != nil && os.IsNotExist(err) {
 		err := os.MkdirAll(path, 0755)

@@ -69,7 +69,14 @@ func (m *manager) Store() (err error) {
 
 // Load ...
 func (m *manager) Load() error {
-	m.nodes.Range()
+	m.nodes.Range(func(hash string, value string) bool {
+		var addrInfo core.AddrInfo
+		err := json.Unmarshal([]byte(value), &addrInfo)
+		if err != nil {
+			log.Errorw("load addr info failed", "err", err)
+		}
+		return true
+	})
 	return nil
 }
 

@@ -2,6 +2,7 @@ package node
 
 import (
 	"encoding/json"
+	"os"
 	"path/filepath"
 
 	"github.com/dgraph-io/badger/v2"
@@ -129,7 +130,15 @@ func (v *DataHashInfo) Unmarshal(b []byte) error {
 }
 
 func hashCacher(cfg *config.Config) Cacher {
-	opts := badger.DefaultOptions(filepath.Join(cfg.Path, cacheDir, hashName))
+	path := filepath.Join(cfg.Path, cacheDir, nodeName)
+	_, err := os.Stat(path)
+	if err != nil && os.IsNotExist(err) {
+		err := os.MkdirAll(path, 0755)
+		if err != nil {
+			panic(err)
+		}
+	}
+	opts := badger.DefaultOptions(path)
 	opts.Truncate = true
 	db, err := badger.Open(opts)
 	if err != nil {
@@ -208,7 +217,15 @@ func (c *hashCache) Close() error {
 }
 
 func nodeCacher(cfg *config.Config) Cacher {
-	opts := badger.DefaultOptions(filepath.Join(cfg.Path, cacheDir, nodeName))
+	path := filepath.Join(cfg.Path, cacheDir, nodeName)
+	_, err := os.Stat(path)
+	if err != nil && os.IsNotExist(err) {
+		err := os.MkdirAll(path, 0755)
+		if err != nil {
+			panic(err)
+		}
+	}
+	opts := badger.DefaultOptions(path)
 	opts.Truncate = true
 	db, err := badger.Open(opts)
 	if err != nil {

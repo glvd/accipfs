@@ -4,7 +4,6 @@ import (
 	"bufio"
 	"encoding/json"
 	"fmt"
-	"github.com/glvd/accipfs/basis"
 	"github.com/glvd/accipfs/config"
 	"github.com/glvd/accipfs/core"
 	"github.com/godcong/scdt"
@@ -56,30 +55,21 @@ func Manager(cfg *config.Config, api core.API) core.NodeManager {
 }
 
 // Store ...
-func (m *manager) Store() error {
-	file, err := os.OpenFile(m.path, os.O_CREATE|os.O_RDWR|os.O_SYNC|os.O_APPEND, 0755)
-	if err != nil {
-		return err
-	}
-	defer file.Close()
-	writer := bufio.NewWriter(file)
-	m.Range(func(key string, value core.Node) bool {
-
-		nodeData, err := encodeNode(value)
-		if err != nil {
-			return false
+func (m *manager) Store() (err error) {
+	m.connectNodes.Range(func(key, value interface{}) bool {
+		keyk, keyb := key.(string)
+		valv, valb := value.(core.Marshaler)
+		if !valb || !keyb {
+			return true
 		}
-		_, err = writer.Write(nodeData)
-		if err != nil {
-			return false
-		}
-		_, err = writer.WriteString(basis.NewLine)
+		err := m.nodes.Store(keyk, valv)
 		if err != nil {
 			return false
 		}
 		return true
 	})
-	return writer.Flush()
+	//return the last err
+	return
 }
 
 // Load ...

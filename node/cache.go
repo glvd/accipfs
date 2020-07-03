@@ -17,17 +17,20 @@ const (
 
 type hashCache struct {
 	//v   sync.Map
-	db  *badger.DB
-	cfg *config.Config
+	db           *badger.DB
+	iteratorOpts badger.IteratorOptions
+	cfg          *config.Config
 }
+
 type nodeCache struct {
-	db  *badger.DB
-	cfg *config.Config
+	db           *badger.DB
+	iteratorOpts badger.IteratorOptions
+	cfg          *config.Config
 }
 
 // Load ...
-func (n *nodeCache) Load(hash string, data core.Unmarshaler) error {
-	return n.db.View(
+func (c *nodeCache) Load(hash string, data core.Unmarshaler) error {
+	return c.db.View(
 		func(txn *badger.Txn) error {
 			item, err := txn.Get([]byte(hash))
 			if err != nil {
@@ -40,8 +43,8 @@ func (n *nodeCache) Load(hash string, data core.Unmarshaler) error {
 }
 
 // Store ...
-func (n *nodeCache) Store(hash string, data core.Marshaler) error {
-	return n.db.Update(
+func (c *nodeCache) Store(hash string, data core.Marshaler) error {
+	return c.db.Update(
 		func(txn *badger.Txn) error {
 			encode, err := data.Marshal()
 			if err != nil {
@@ -51,13 +54,39 @@ func (n *nodeCache) Store(hash string, data core.Marshaler) error {
 		})
 }
 
+// Range ...
+func (c *nodeCache) Range(f func(hash string, value string) bool) {
+	c.db.View(func(txn *badger.Txn) error {
+		iter := txn.NewIterator(c.iteratorOpts)
+		defer iter.Close()
+		var item *badger.Item
+		var continueFlag bool
+		for iter.Rewind(); iter.Valid(); iter.Next() {
+			if !continueFlag {
+				return nil
+			}
+			item = iter.Item()
+			return item.Value(func(v []byte) error {
+				key := item.Key()
+				val, err := item.ValueCopy(v)
+				if err != nil {
+					return err
+				}
+				continueFlag = f(string(key), string(val))
+				return nil
+			})
+		}
+		return nil
+	})
+}
+
 // Close ...
-func (n *nodeCache) Close() error {
-	if n.db != nil {
+func (c *nodeCache) Close() error {
+	if c.db != nil {
 		defer func() {
-			n.db = nil
+			c.db = nil
 		}()
-		return n.db.Close()
+		return c.db.Close()
 	}
 	return nil
 }
@@ -67,6 +96,7 @@ type Cacher interface {
 	Load(hash string, data core.Unmarshaler) error
 	Store(hash string, data core.Marshaler) error
 	Close() error
+	Range(f func(hash string, value string) bool)
 }
 
 // DataHashInfo ...
@@ -105,26 +135,18 @@ func hashCacher(cfg *config.Config) Cacher {
 	if err != nil {
 		panic(err)
 	}
+	itOpts := badger.DefaultIteratorOptions
+	itOpts.Reverse = true
 	return &hashCache{
-		cfg: cfg,
-		db:  db,
+		cfg:          cfg,
+		iteratorOpts: itOpts,
+		db:           db,
 	}
-}
-
-// Close ...
-func (h *hashCache) Close() error {
-	if h.db != nil {
-		defer func() {
-			h.db = nil
-		}()
-		return h.db.Close()
-	}
-	return nil
 }
 
 // Store ...
-func (h *hashCache) Store(hash string, data core.Marshaler) error {
-	return h.db.Update(
+func (c *hashCache) Store(hash string, data core.Marshaler) error {
+	return c.db.Update(
 		func(txn *badger.Txn) error {
 			encode, err := data.Marshal()
 			if err != nil {
@@ -135,8 +157,8 @@ func (h *hashCache) Store(hash string, data core.Marshaler) error {
 }
 
 // Load ...
-func (h *hashCache) Load(hash string, data core.Unmarshaler) error {
-	return h.db.View(
+func (c *hashCache) Load(hash string, data core.Unmarshaler) error {
+	return c.db.View(
 		func(txn *badger.Txn) error {
 			item, err := txn.Get([]byte(hash))
 			if err != nil {
@@ -149,14 +171,16 @@ func (h *hashCache) Load(hash string, data core.Unmarshaler) error {
 }
 
 // Range ...
-func (h *hashCache) Range(f func(key, value []byte) bool) {
-	h.db.View(func(txn *badger.Txn) error {
-		opts := badger.DefaultIteratorOptions
-		opts.Reverse = true
-		iter := txn.NewIterator(opts)
+func (c *hashCache) Range(f func(key, value string) bool) {
+	c.db.View(func(txn *badger.Txn) error {
+		iter := txn.NewIterator(c.iteratorOpts)
 		defer iter.Close()
 		var item *badger.Item
+		var continueFlag bool
 		for iter.Rewind(); iter.Valid(); iter.Next() {
+			if !continueFlag {
+				return nil
+			}
 			item = iter.Item()
 			return item.Value(func(v []byte) error {
 				key := item.Key()
@@ -164,14 +188,23 @@ func (h *hashCache) Range(f func(key, value []byte) bool) {
 				if err != nil {
 					return err
 				}
-				if f(key, val) {
-
-				}
+				continueFlag = f(string(key), string(val))
 				return nil
 			})
 		}
 		return nil
 	})
+}
+
+// Close ...
+func (c *hashCache) Close() error {
+	if c.db != nil {
+		defer func() {
+			c.db = nil
+		}()
+		return c.db.Close()
+	}
+	return nil
 }
 
 func nodeCacher(cfg *config.Config) Cacher {
@@ -181,8 +214,11 @@ func nodeCacher(cfg *config.Config) Cacher {
 	if err != nil {
 		panic(err)
 	}
+	itOpts := badger.DefaultIteratorOptions
+	itOpts.Reverse = true
 	return &nodeCache{
-		cfg: cfg,
-		db:  db,
+		cfg:          cfg,
+		iteratorOpts: itOpts,
+		db:           db,
 	}
 }

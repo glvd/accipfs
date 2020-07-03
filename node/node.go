@@ -44,7 +44,7 @@ func (n *node) IsClosed() bool {
 
 // IPFSAddrInfo ...
 func (n *node) IPFSAddrInfo() (peer.AddrInfo, error) {
-	panic("implement me")
+	return n.addrInfo.IPFSAddrInfo, nil
 }
 
 // Marshal ...

@@ -1,17 +1,12 @@
 package node
 
 import (
-	"bufio"
 	"encoding/json"
-	"fmt"
 	"github.com/glvd/accipfs/config"
 	"github.com/glvd/accipfs/core"
 	"github.com/godcong/scdt"
-	ma "github.com/multiformats/go-multiaddr"
 	"go.uber.org/atomic"
-	"io"
 	"net"
-	"os"
 	"path/filepath"
 	"sync"
 	"time"
@@ -74,38 +69,8 @@ func (m *manager) Store() (err error) {
 
 // Load ...
 func (m *manager) Load() error {
-	stat, err := os.Stat(m.path)
-	if err != nil {
-		if os.IsNotExist(err) {
-			return nil
-		}
-		return err
-	}
-
-	if stat.IsDir() {
-		return fmt.Errorf("found file but it is a directory")
-	}
-	open, err := os.Open(m.path)
-	if err != nil {
-		return err
-	}
-	defer open.Close()
-	reader := bufio.NewReader(open)
-	for {
-		n, prefix, err := reader.ReadLine()
-		log.Debugw("load nodes", "line", string(n), "prefix", prefix)
-		if err != nil {
-			if err == io.EOF {
-				return nil
-			}
-			return err
-		}
-		err = decodeNode(m, n, m.api)
-		if err != nil {
-			log.Errorw("decode failed", "error", err, "data", string(n))
-			continue
-		}
-	}
+	m.nodes.Range()
+	return nil
 }
 
 // StateEx State Examination checks the node status
@@ -189,11 +154,7 @@ func decodeNode(m core.NodeManager, b []byte, api core.API) error {
 	}
 	for _, nodes := range nodes {
 		for _, addr := range nodes.Addrs {
-			multiaddr, err := ma.NewMultiaddr(addr)
-			if err != nil {
-				continue
-			}
-			connectNode, err := ConnectNode(multiaddr, 0, api)
+			connectNode, err := ConnectNode(addr, 0, api)
 			if err != nil {
 				continue
 			}
@@ -205,12 +166,8 @@ func decodeNode(m core.NodeManager, b []byte, api core.API) error {
 }
 
 func encodeNode(node core.Node) ([]byte, error) {
-	var strAddrs []string
-	for _, addrs := range node.Addrs() {
-		strAddrs = append(strAddrs, addrs.String())
-	}
 	n := map[string]jsonNode{
-		node.ID(): {Addrs: strAddrs},
+		node.ID(): {Addrs: node.Addrs()},
 	}
 	return json.Marshal(n)
 }

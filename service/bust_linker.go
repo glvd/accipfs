@@ -1,15 +1,12 @@
 package service
 
 import (
-	"fmt"
 	"github.com/glvd/accipfs/account"
 	"github.com/glvd/accipfs/config"
 	"github.com/glvd/accipfs/controller"
 	"github.com/glvd/accipfs/core"
 	"github.com/glvd/accipfs/node"
 	"github.com/glvd/accipfs/task"
-	"sync"
-
 	"go.uber.org/atomic"
 )
 
@@ -56,12 +53,7 @@ func (l *BustLinker) Run() {
 		return
 	}
 	defer l.lock.Store(false)
-	wg := &sync.WaitGroup{}
-	l.manager.Range(func(key string, node core.Node) bool {
-		return true
-	})
-	wg.Wait()
-	fmt.Println(module, "syncing done")
+	//todo
 }
 
 // WaitingForReady ...

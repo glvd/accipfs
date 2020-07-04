@@ -16,17 +16,18 @@ const (
 	nodeName = "nodes"
 )
 
-type hashCache struct {
-	//v   sync.Map
+type baseCache struct {
 	db           *badger.DB
 	iteratorOpts badger.IteratorOptions
 	cfg          *config.Config
 }
 
+type hashCache struct {
+	baseCache
+}
+
 type nodeCache struct {
-	db           *badger.DB
-	iteratorOpts badger.IteratorOptions
-	cfg          *config.Config
+	baseCache
 }
 
 // Load ...
@@ -147,9 +148,11 @@ func hashCacher(cfg *config.Config) Cacher {
 	itOpts := badger.DefaultIteratorOptions
 	itOpts.Reverse = true
 	return &hashCache{
-		cfg:          cfg,
-		iteratorOpts: itOpts,
-		db:           db,
+		baseCache: baseCache{
+			cfg:          cfg,
+			iteratorOpts: itOpts,
+			db:           db,
+		},
 	}
 }
 
@@ -234,8 +237,10 @@ func nodeCacher(cfg *config.Config) Cacher {
 	itOpts := badger.DefaultIteratorOptions
 	itOpts.Reverse = true
 	return &nodeCache{
-		cfg:          cfg,
-		iteratorOpts: itOpts,
-		db:           db,
+		baseCache: baseCache{
+			cfg:          cfg,
+			iteratorOpts: itOpts,
+			db:           db,
+		},
 	}
 }

@@ -30,69 +30,6 @@ type nodeCache struct {
 	baseCache
 }
 
-// Load ...
-func (c *nodeCache) Load(hash string, data core.Unmarshaler) error {
-	return c.db.View(
-		func(txn *badger.Txn) error {
-			item, err := txn.Get([]byte(hash))
-			if err != nil {
-				return err
-			}
-			return item.Value(func(val []byte) error {
-				return data.Unmarshal(val)
-			})
-		})
-}
-
-// Store ...
-func (c *nodeCache) Store(hash string, data core.Marshaler) error {
-	return c.db.Update(
-		func(txn *badger.Txn) error {
-			encode, err := data.Marshal()
-			if err != nil {
-				return err
-			}
-			return txn.Set([]byte(hash), encode)
-		})
-}
-
-// Range ...
-func (c *nodeCache) Range(f func(hash string, value string) bool) {
-	c.db.View(func(txn *badger.Txn) error {
-		iter := txn.NewIterator(c.iteratorOpts)
-		defer iter.Close()
-		var item *badger.Item
-		var continueFlag bool
-		for iter.Rewind(); iter.Valid(); iter.Next() {
-			if !continueFlag {
-				return nil
-			}
-			item = iter.Item()
-			return item.Value(func(v []byte) error {
-				key := item.Key()
-				val, err := item.ValueCopy(v)
-				if err != nil {
-					return err
-				}
-				continueFlag = f(string(key), string(val))
-				return nil
-			})
-		}
-		return nil
-	})
-}
-
-// Close ...
-func (c *nodeCache) Close() error {
-	if c.db != nil {
-		defer func() {
-			c.db = nil
-		}()
-		return c.db.Close()
-	}
-	return nil
-}
-
 // Cacher ...
 type Cacher interface {
 	Load(hash string, data core.Unmarshaler) error
@@ -157,7 +94,7 @@ func hashCacher(cfg *config.Config) Cacher {
 }
 
 // Store ...
-func (c *hashCache) Store(hash string, data core.Marshaler) error {
+func (c *baseCache) Store(hash string, data core.Marshaler) error {
 	return c.db.Update(
 		func(txn *badger.Txn) error {
 			encode, err := data.Marshal()
@@ -169,7 +106,7 @@ func (c *hashCache) Store(hash string, data core.Marshaler) error {
 }
 
 // Load ...
-func (c *hashCache) Load(hash string, data core.Unmarshaler) error {
+func (c *baseCache) Load(hash string, data core.Unmarshaler) error {
 	return c.db.View(
 		func(txn *badger.Txn) error {
 			item, err := txn.Get([]byte(hash))
@@ -183,7 +120,7 @@ func (c *hashCache) Load(hash string, data core.Unmarshaler) error {
 }
 
 // Range ...
-func (c *hashCache) Range(f func(key, value string) bool) {
+func (c *baseCache) Range(f func(key, value string) bool) {
 	c.db.View(func(txn *badger.Txn) error {
 		iter := txn.NewIterator(c.iteratorOpts)
 		defer iter.Close()
@@ -209,7 +146,7 @@ func (c *hashCache) Range(f func(key, value string) bool) {
 }
 
 // Close ...
-func (c *hashCache) Close() error {
+func (c *baseCache) Close() error {
 	if c.db != nil {
 		defer func() {
 			c.db = nil

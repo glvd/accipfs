@@ -26,7 +26,6 @@ func NewLinkListener(cfg *config.Config, cb func(interface{})) core.Listener {
 		port:     cfg.Node.Port,
 		cb:       cb,
 	}
-	l.pool = mustPool(cfg.Node.PoolMax, cb)
 	return l
 }
 

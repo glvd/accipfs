@@ -5,6 +5,7 @@ import (
 	"github.com/glvd/accipfs/config"
 	"github.com/glvd/accipfs/core"
 	"github.com/godcong/scdt"
+	"github.com/panjf2000/ants/v2"
 	"go.uber.org/atomic"
 	"net"
 	"path/filepath"
@@ -23,6 +24,7 @@ type manager struct {
 	path            string
 	expPath         string
 	api             core.API
+	nodePool        *ants.PoolWithFunc
 	connectNodes    sync.Map
 	disconnectNodes sync.Map
 	nodes           Cacher

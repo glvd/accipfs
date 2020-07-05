@@ -46,10 +46,19 @@ func Manager(cfg *config.Config, api core.API) core.NodeManager {
 		hashes:  hashCacher(cfg),
 		t:       time.NewTicker(cfg.Node.BackupSeconds),
 	}
-	//m.exchangePool = mustPool(ants.DefaultAntsPoolSize, m.HandleConn)
+
+	m.nodePool = mustPool(ants.DefaultAntsPoolSize, m.poolRun)
 	go m.loop()
 
 	return m
+}
+
+func mustPool(size int, pf func(v interface{})) *ants.PoolWithFunc {
+	withFunc, err := ants.NewPoolWithFunc(size, pf)
+	if err != nil {
+		panic(err)
+	}
+	return withFunc
 }
 
 // Store ...
@@ -153,20 +162,24 @@ func (m *manager) loop() {
 	}
 }
 
-// HandleConn ...
-func (m *manager) HandleConn(i interface{}) {
-	v, b := i.(net.Conn)
-	if !b {
-		return
-	}
-	acceptNode, err := AcceptNode(v, m.api)
+// Conn ...
+func (m *manager) Conn(c net.Conn) {
+	acceptNode, err := AcceptNode(c, m.api)
 	if err != nil {
 		return
 	}
 
-	if !acceptNode.IsClosed() {
-		m.Push(acceptNode)
+	m.nodePool.Invoke(acceptNode)
+	return
+}
+
+func (m *manager) poolRun(v interface{}) {
+	n, b := v.(core.Node)
+	if !b {
 		return
+	}
+	if !n.IsClosed() {
+		m.Push(n)
 	}
 }
 

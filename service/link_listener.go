@@ -14,11 +14,11 @@ type linkListener struct {
 	protocol string
 	bindPort int
 	port     int
-	cb       func(interface{})
+	cb       func(conn net.Conn)
 }
 
 // NewLinkListener listen other client connections
-func NewLinkListener(cfg *config.Config, cb func(interface{})) core.Listener {
+func NewLinkListener(cfg *config.Config, cb func(conn net.Conn)) core.Listener {
 	l := &linkListener{
 		protocol: "tcp",
 		bindPort: cfg.Node.BindPort,
@@ -52,11 +52,14 @@ func (h *linkListener) Listen() (err error) {
 			continue
 		}
 		if h.cb != nil {
-			h.pool.Invoke(conn)
+			h.cb(conn)
 			continue
 		}
 		//no callback closed
-		conn.Close()
+		err = conn.Close()
+		if err != nil {
+			log.Errorw("accept conn error", "err", err)
+		}
 	}
 }
 func mustPool(size int, f func(interface{})) *ants.PoolWithFunc {

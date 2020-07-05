@@ -15,7 +15,6 @@ type linkListener struct {
 	bindPort int
 	port     int
 	cb       func(interface{})
-	pool     *ants.PoolWithFunc
 }
 
 // NewLinkListener listen other client connections

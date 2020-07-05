@@ -174,6 +174,7 @@ func (m *manager) Conn(c net.Conn) {
 }
 
 func (m *manager) poolRun(v interface{}) {
+	//todo: do something loop
 	n, b := v.(core.Node)
 	if !b {
 		return

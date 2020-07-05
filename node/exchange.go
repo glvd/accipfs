@@ -54,13 +54,13 @@ const (
 	StatusFailed = 0x01
 )
 
-// NewRequestExchange ...
-func NewRequestExchange(detail TypeDetail) *Exchange {
+// newRequestExchange ...
+func newRequestExchange(detail TypeDetail) *Exchange {
 	return newExchange(TypeRequest, detail)
 }
 
-// NewResponseExchange ...
-func NewResponseExchange(detail TypeDetail) *Exchange {
+// newResponseExchange ...
+func newResponseExchange(detail TypeDetail) *Exchange {
 	return newExchange(TypeResponse, detail)
 }
 

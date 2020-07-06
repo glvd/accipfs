@@ -5,6 +5,7 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
+	ma "github.com/multiformats/go-multiaddr"
 	"net"
 	"net/http"
 
@@ -44,11 +45,11 @@ func (c *Context) Ping(req *core.PingReq) (*core.PingResp, error) {
 
 // ID ...
 func (c *Context) ID(req *core.IDReq) (*core.IDResp, error) {
-	fromString, err := peer.Decode(c.cfg.Identity)
+	fromStringID, err := peer.Decode(c.cfg.Identity)
 	if err != nil {
 		return nil, err
 	}
-	log.Infow("get id", "id", fromString.String())
+	log.Infow("get id", "id", fromStringID.String())
 
 	pkb, err := base64.StdEncoding.DecodeString(c.cfg.PrivateKey)
 	if err != nil {
@@ -65,9 +66,23 @@ func (c *Context) ID(req *core.IDReq) (*core.IDResp, error) {
 	}
 	pubString := base64.StdEncoding.EncodeToString(bytes)
 	log.Infow("result id", "id", c.cfg.Identity, "public key", pubString)
+	ipfsID, err := c.ipfsNode.ID(context.TODO())
+	if err != nil {
+		return nil, err
+	}
+	var multiAddress []ma.Multiaddr
+	for _, address := range ipfsID.Addresses {
+		multiaddr, err := ma.NewMultiaddr(address)
+		if err != nil {
+			continue
+		}
+		multiAddress = append(multiAddress, multiaddr)
+	}
 	return &core.IDResp{
 		Name:      c.cfg.Identity,
 		PublicKey: pubString,
+		Addrs:     nil,
+		DataStore: *ipfsID,
 	}, nil
 }
 

@@ -1,5 +1,7 @@
 package core
 
+import ma "github.com/multiformats/go-multiaddr"
+
 // PingReq ...
 type PingReq struct {
 }
@@ -25,7 +27,8 @@ type IDReq struct {
 type IDResp struct {
 	Name      string
 	PublicKey string
-	AddrInfo  *AddrInfo
+	Addrs     []ma.Multiaddr
+	DataStore DataStoreInfo
 }
 
 // AddrReq ...

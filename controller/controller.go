@@ -33,7 +33,9 @@ func New(cfg *config.Config) *Controller {
 		services: make([]core.ControllerService, IndexMax),
 	}
 
-	api := newAPI(cfg)
+	api := newAPI(cfg, func(tag core.RequestTag, v interface{}) error {
+
+	})
 	if cfg.ETH.Enable {
 		eth := newNodeBinETH(cfg)
 		eth.MessageHandle(func(s string) {

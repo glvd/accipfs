@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/base64"
 	"encoding/json"
+	"errors"
 	"fmt"
 	ma "github.com/multiformats/go-multiaddr"
 	"net"
@@ -44,14 +45,18 @@ func (c *Context) NodeAddrInfo(req *core.AddrReq) (*core.AddrResp, error) {
 
 // Link ...
 func (c *Context) Link(req *core.LinkReq) (*core.LinkResp, error) {
-	var err error
 	for _, addr := range req.Addrs {
 		multiaddr, err := ma.NewMultiaddr(addr)
 		if err != nil {
 			continue
 		}
+		err = c.cb(core.RequestTagLink, multiaddr)
+		if err != nil {
+			continue
+		}
+		return &core.LinkResp{}, nil
 	}
-	return &core.LinkResp{}, err
+	return &core.LinkResp{}, errors.New("all request was failed")
 }
 
 // Ping ...

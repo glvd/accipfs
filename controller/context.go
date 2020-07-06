@@ -5,15 +5,15 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
-	"github.com/ethereum/go-ethereum/accounts/abi/bind"
-	"github.com/glvd/accipfs/account"
-	"github.com/libp2p/go-libp2p-core/peer"
 	"net"
 	"net/http"
 
+	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/gin-gonic/gin"
 	"github.com/glvd/accipfs/config"
 	"github.com/glvd/accipfs/core"
+	ic "github.com/libp2p/go-libp2p-core/crypto"
+	peer "github.com/libp2p/go-libp2p-core/peer"
 	"go.uber.org/atomic"
 )
 
@@ -44,16 +44,16 @@ func (c *Context) Ping(req *core.PingReq) (*core.PingResp, error) {
 
 // ID ...
 func (c *Context) ID(req *core.IDReq) (*core.IDResp, error) {
-	loadAccount, err := account.LoadAccount(c.cfg)
-	if err != nil {
-		return nil, err
-	}
+	//loadAccount, err := account.LoadAccount(c.cfg)
+	//if err != nil {
+	//	return nil, err
+	//}
 	//loadAccount.Identity
-	fromStringID, err := peer.Decode(loadAccount.Identity.PeerID)
-	if err != nil {
-		return nil, err
-	}
-	log.Infow("get id", "id", fromStringID)
+	//fromStringID, err := peer.Decode(loadAccount.Identity.PeerID)
+	//if err != nil {
+	//	return nil, err
+	//}
+	//log.Infow("get id", "id", fromStringID)
 	//fromString := peer.ID(c.cfg.Identity)
 	//if err != nil {
 	//	log.Errorw("id from string", "id", c.cfg.Identity, "err", err)
@@ -65,18 +65,28 @@ func (c *Context) ID(req *core.IDReq) (*core.IDResp, error) {
 	}
 	log.Infow("get id", "id", fromString.String())
 	key, err := fromString.ExtractPublicKey()
+	log.Infow("result id", "id", c.cfg.Identity, "key", key, "err", err)
 	if err != nil {
 		return nil, err
 	}
-	bytes, err := key.Bytes()
+	log.Infow("result id", "id", c.cfg.Identity, "key", key)
+	pkb, err := base64.StdEncoding.DecodeString(c.cfg.PrivateKey)
 	if err != nil {
 		return nil, err
 	}
-	pubKey := base64.StdEncoding.EncodeToString(bytes)
+	privateKey, err := ic.UnmarshalPrivateKey(pkb)
+	if err != nil {
+		return nil, err
+	}
+	bytes, err := privateKey.Bytes()
+	if err != nil {
+		return nil, err
+	}
+	priv := base64.StdEncoding.EncodeToString(bytes)
 	log.Infow("result id", "id", c.cfg.Identity, "key", pubKey)
 	return &core.IDResp{
 		Name:      c.cfg.Identity,
-		PublicKey: pubKey,
+		PublicKey: priv,
 	}, nil
 }
 

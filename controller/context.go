@@ -79,7 +79,7 @@ func (c *Context) ID(req *core.IDReq) (*core.IDResp, error) {
 		return nil, err
 	}
 	pubString := base64.StdEncoding.EncodeToString(bytes)
-	log.Infow("result id", "id", c.cfg.Identity, "bpulic key", pubString)
+	log.Infow("result id", "id", c.cfg.Identity, "public key", pubString)
 	return &core.IDResp{
 		Name:      c.cfg.Identity,
 		PublicKey: pubString,

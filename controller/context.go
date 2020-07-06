@@ -35,6 +35,9 @@ var _ core.API = &Context{}
 
 // NodeAddrInfo ...
 func (c *Context) NodeAddrInfo(req *core.AddrReq) (*core.AddrResp, error) {
+	if req.ID == "" {
+		return &core.AddrResp{}, nil
+	}
 	panic("implement me")
 }
 

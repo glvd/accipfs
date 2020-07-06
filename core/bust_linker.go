@@ -33,6 +33,7 @@ type IDResp struct {
 
 // AddrReq ...
 type AddrReq struct {
+	ID string
 }
 
 // AddrResp ...
@@ -83,4 +84,12 @@ type GetReq struct {
 
 // GetResp ...
 type GetResp struct {
+}
+
+// LinkReq ...
+type LinkReq struct {
+}
+
+// LinkResp ...
+type LinkResp struct {
 }

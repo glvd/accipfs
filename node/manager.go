@@ -183,6 +183,14 @@ func (m *manager) poolRun(v interface{}) {
 	if !n.IsClosed() {
 		m.Push(n)
 	}
+	node, b := m.connectNodes.LoadOrStore(n.ID(), n)
+	if b {
+		nbase := node.(core.Node)
+		nbase.AppendAddr(n.Addrs())
+	} else {
+		//
+	}
+
 }
 
 func decodeNode(m core.NodeManager, b []byte, api core.API) error {

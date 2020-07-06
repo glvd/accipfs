@@ -16,4 +16,5 @@ type Node interface {
 	Info() (peer.AddrInfo, error)
 	Close() (err error)
 	IsClosed() bool
+	AppendAddr(addrs []ma.Multiaddr)
 }

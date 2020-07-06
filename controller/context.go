@@ -31,9 +31,11 @@ type Context struct {
 	msg        func(s string)
 }
 
-// AddrInfo ...
-func (c *Context) AddrInfo(req *core.AddrReq) (*core.AddrResp, error) {
-	panic("todo:AddrInfo")
+var _ core.API = &Context{}
+
+// NodeAddrInfo ...
+func (c *Context) NodeAddrInfo(req *core.AddrReq) (*core.AddrResp, error) {
+	panic("implement me")
 }
 
 // Ping ...
@@ -50,7 +52,6 @@ func (c *Context) ID(req *core.IDReq) (*core.IDResp, error) {
 		return nil, err
 	}
 	log.Infow("get id", "id", fromStringID.String())
-
 	pkb, err := base64.StdEncoding.DecodeString(c.cfg.PrivateKey)
 	if err != nil {
 		return nil, err

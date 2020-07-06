@@ -6,7 +6,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
-	"github.com/glvd/accipfs/account"
 	"github.com/libp2p/go-libp2p-core/peer"
 	"net"
 	"net/http"
@@ -44,16 +43,18 @@ func (c *Context) Ping(req *core.PingReq) (*core.PingResp, error) {
 
 // ID ...
 func (c *Context) ID(req *core.IDReq) (*core.IDResp, error) {
-	loadAccount, err := account.LoadAccount(c.cfg)
-	if err != nil {
-		return nil, err
-	}
+	//loadAccount, err := account.LoadAccount(c.cfg)
+	//if err != nil {
+	//	return nil, err
+	//}
 	//loadAccount.Identity
-	log.Infow("get id", "account", loadAccount)
-	fromString, err := peer.IDFromString(loadAccount.Identity.PeerID)
-	if err != nil {
-		return nil, err
-	}
+	//log.Infow("get id", "account", loadAccount)
+	fromString := peer.ID(c.cfg.Identity)
+	//if err != nil {
+	//	log.Errorw("id from string", "id", c.cfg.Identity, "err", err)
+	//	return nil, err
+	//}
+	log.Infow("get id", "account", fromString.String())
 	key, err := fromString.ExtractPublicKey()
 	if err != nil {
 		return nil, err
@@ -63,7 +64,7 @@ func (c *Context) ID(req *core.IDReq) (*core.IDResp, error) {
 		return nil, err
 	}
 	pubKey := base64.StdEncoding.EncodeToString(bytes)
-
+	log.Infow("result id", "id", c.cfg.Identity, "key", pubKey)
 	return &core.IDResp{
 		Name:      c.cfg.Identity,
 		PublicKey: pubKey,

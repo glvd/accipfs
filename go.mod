@@ -40,4 +40,4 @@ require (
 	honnef.co/go/tools v0.0.1-2020.1.4 // indirect
 )
 
-replace github.com/libp2p/go-libp2p-core v0.6.0 => git.5gnode.cn/chain/go-libp2p-core v0.6.01
+replace github.com/libp2p/go-libp2p-core v0.6.0 => git.5gnode.cn/chain/go-libp2p-core v0.0.0-20200706033803-a09882e801a0

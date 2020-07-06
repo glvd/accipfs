@@ -1,8 +1,11 @@
 package controller
 
 import (
+	"errors"
 	"github.com/glvd/accipfs/config"
 	"github.com/glvd/accipfs/core"
+	ma "github.com/multiformats/go-multiaddr"
+	mnet "github.com/multiformats/go-multiaddr-net"
 	"sync"
 )
 
@@ -22,19 +25,27 @@ const (
 
 // Controller ...
 type Controller struct {
-	//wg       *sync.WaitGroup
+	manager  core.NodeManager
 	services []core.ControllerService
 	api      core.API
 }
 
 // New ...
-func New(cfg *config.Config) *Controller {
+func New(cfg *config.Config, manager core.NodeManager) *Controller {
 	c := &Controller{
 		services: make([]core.ControllerService, IndexMax),
 	}
 
 	api := newAPI(cfg, func(tag core.RequestTag, v interface{}) error {
-
+		m, b := v.(ma.Multiaddr)
+		if !b {
+			return errors.New("wrong type convert")
+		}
+		dial, err := mnet.Dial(m)
+		if err != nil {
+			return err
+		}
+		manager.Conn(dial)
 	})
 	if cfg.ETH.Enable {
 		eth := newNodeBinETH(cfg)
@@ -54,6 +65,7 @@ func New(cfg *config.Config) *Controller {
 	}
 	c.services[IndexAPI] = api
 	c.api = api
+	c.manager = manager
 	//c.wg = &sync.WaitGroup{}
 	return c
 }

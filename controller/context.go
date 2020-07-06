@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
+	"github.com/glvd/accipfs/account"
 	"github.com/libp2p/go-libp2p-core/peer"
 	"net"
 	"net/http"
@@ -43,7 +44,13 @@ func (c *Context) Ping(req *core.PingReq) (*core.PingResp, error) {
 
 // ID ...
 func (c *Context) ID(req *core.IDReq) (*core.IDResp, error) {
-	fromString, err := peer.IDFromString(c.cfg.Identity)
+	loadAccount, err := account.LoadAccount(c.cfg)
+	if err != nil {
+		return nil, err
+	}
+	//loadAccount.Identity
+	log.Infow("get id", "account", loadAccount)
+	fromString, err := peer.IDFromString(loadAccount.Identity.PeerID)
 	if err != nil {
 		return nil, err
 	}

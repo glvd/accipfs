@@ -38,13 +38,14 @@ var _ core.NodeManager = &manager{}
 // Manager ...
 func Manager(cfg *config.Config, api core.API) core.NodeManager {
 	m := &manager{
-		cfg:     cfg,
-		api:     api,
-		path:    filepath.Join(cfg.Path, _nodes),
-		expPath: filepath.Join(cfg.Path, _expNodes),
-		nodes:   nodeCacher(cfg),
-		hashes:  hashCacher(cfg),
-		t:       time.NewTicker(cfg.Node.BackupSeconds),
+		cfg:      cfg,
+		api:      api,
+		initLoad: atomic.NewBool(false),
+		path:     filepath.Join(cfg.Path, _nodes),
+		expPath:  filepath.Join(cfg.Path, _expNodes),
+		nodes:    nodeCacher(cfg),
+		hashes:   hashCacher(cfg),
+		t:        time.NewTicker(cfg.Node.BackupSeconds),
 	}
 
 	m.nodePool = mustPool(ants.DefaultAntsPoolSize, m.poolRun)

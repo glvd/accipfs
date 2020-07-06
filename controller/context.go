@@ -29,6 +29,7 @@ type Context struct {
 	ethNode    *nodeBinETH
 	ipfsNode   *nodeBinIPFS
 	msg        func(s string)
+	cb         func(tag core.RequestTag, v interface{}) error
 }
 
 var _ core.API = &Context{}
@@ -103,7 +104,7 @@ func (c *Context) ID(req *core.IDReq) (*core.IDResp, error) {
 }
 
 // New ...
-func newAPI(cfg *config.Config, cb func(tag RequestTag, v interface{})) *Context {
+func newAPI(cfg *config.Config, cb func(tag core.RequestTag, v interface{}) error) *Context {
 	if !cfg.Debug {
 		gin.SetMode(gin.ReleaseMode)
 	}
@@ -112,6 +113,7 @@ func newAPI(cfg *config.Config, cb func(tag RequestTag, v interface{})) *Context
 		cfg:   cfg,
 		eng:   eng,
 		ready: atomic.NewBool(false),
+		cb:    cb,
 		serv: &http.Server{
 			Handler: eng,
 		},

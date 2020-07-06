@@ -2,6 +2,12 @@ package core
 
 import ma "github.com/multiformats/go-multiaddr"
 
+// AddTypePeer ...
+const AddTypePeer AddType = 0x01
+
+// RequestTagLink ...
+const RequestTagLink RequestTag = iota
+
 // PingReq ...
 type PingReq struct {
 }
@@ -64,9 +70,6 @@ type ConnectToResp struct {
 // AddType ...
 type AddType int
 
-// AddTypePeer ...
-const AddTypePeer AddType = 0x01
-
 // AddReq ...
 type AddReq struct {
 	AddType
@@ -86,8 +89,12 @@ type GetReq struct {
 type GetResp struct {
 }
 
+// RequestTag ...
+type RequestTag int
+
 // LinkReq ...
 type LinkReq struct {
+	Addrs []string
 }
 
 // LinkResp ...

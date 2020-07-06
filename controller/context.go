@@ -41,6 +41,18 @@ func (c *Context) NodeAddrInfo(req *core.AddrReq) (*core.AddrResp, error) {
 	panic("implement me")
 }
 
+// Link ...
+func (c *Context) Link(req *core.LinkReq) (*core.LinkResp, error) {
+	var err error
+	for _, addr := range req.Addrs {
+		multiaddr, err := ma.NewMultiaddr(addr)
+		if err != nil {
+			continue
+		}
+	}
+	return &core.LinkResp{}, err
+}
+
 // Ping ...
 func (c *Context) Ping(req *core.PingReq) (*core.PingResp, error) {
 	return &core.PingResp{
@@ -91,7 +103,7 @@ func (c *Context) ID(req *core.IDReq) (*core.IDResp, error) {
 }
 
 // New ...
-func newAPI(cfg *config.Config) *Context {
+func newAPI(cfg *config.Config, cb func(tag RequestTag, v interface{})) *Context {
 	if !cfg.Debug {
 		gin.SetMode(gin.ReleaseMode)
 	}

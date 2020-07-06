@@ -64,12 +64,7 @@ func (c *Context) ID(req *core.IDReq) (*core.IDResp, error) {
 		return nil, err
 	}
 	log.Infow("get id", "id", fromString.String())
-	key, err := fromString.ExtractPublicKey()
-	log.Infow("result id", "id", c.cfg.Identity, "key", key, "err", err)
-	if err != nil {
-		return nil, err
-	}
-	log.Infow("result id", "id", c.cfg.Identity, "key", key)
+
 	pkb, err := base64.StdEncoding.DecodeString(c.cfg.PrivateKey)
 	if err != nil {
 		return nil, err
@@ -78,15 +73,16 @@ func (c *Context) ID(req *core.IDReq) (*core.IDResp, error) {
 	if err != nil {
 		return nil, err
 	}
-	bytes, err := privateKey.Bytes()
+	publicKey := privateKey.GetPublic()
+	bytes, err := publicKey.Bytes()
 	if err != nil {
 		return nil, err
 	}
-	priv := base64.StdEncoding.EncodeToString(bytes)
-	log.Infow("result id", "id", c.cfg.Identity, "key", pubKey)
+	pubString := base64.StdEncoding.EncodeToString(bytes)
+	log.Infow("result id", "id", c.cfg.Identity, "bpulic key", pubString)
 	return &core.IDResp{
 		Name:      c.cfg.Identity,
-		PublicKey: priv,
+		PublicKey: pubString,
 	}, nil
 }
 

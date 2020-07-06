@@ -46,6 +46,7 @@ func New(cfg *config.Config, manager core.NodeManager) *Controller {
 			return err
 		}
 		manager.Conn(dial)
+		return nil
 	})
 	if cfg.ETH.Enable {
 		eth := newNodeBinETH(cfg)

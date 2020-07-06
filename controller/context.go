@@ -49,12 +49,16 @@ func (c *Context) ID(req *core.IDReq) (*core.IDResp, error) {
 	//}
 	//loadAccount.Identity
 	//log.Infow("get id", "account", loadAccount)
-	fromString := peer.ID(c.cfg.Identity)
+	//fromString := peer.ID(c.cfg.Identity)
 	//if err != nil {
 	//	log.Errorw("id from string", "id", c.cfg.Identity, "err", err)
 	//	return nil, err
 	//}
-	log.Infow("get id", "account", fromString.String())
+	fromString, err := peer.Decode(c.cfg.Identity)
+	if err != nil {
+		return nil, err
+	}
+	log.Infow("get id", "id", fromString.String())
 	key, err := fromString.ExtractPublicKey()
 	if err != nil {
 		return nil, err

@@ -22,7 +22,7 @@ const (
 
 // Controller ...
 type Controller struct {
-	wg       *sync.WaitGroup
+	//wg       *sync.WaitGroup
 	services []core.ControllerService
 	api      core.API
 }
@@ -52,7 +52,7 @@ func New(cfg *config.Config) *Controller {
 	}
 	c.services[IndexAPI] = api
 	c.api = api
-	c.wg = &sync.WaitGroup{}
+	//c.wg = &sync.WaitGroup{}
 	return c
 }
 
@@ -77,7 +77,7 @@ func (c *Controller) Run() {
 		if c.services[idx] != nil {
 			wg.Add(1)
 			go func(service core.ControllerService) {
-				defer c.wg.Done()
+				defer wg.Done()
 				if err := service.Start(); err != nil {
 					return
 				}

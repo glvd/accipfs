@@ -35,6 +35,23 @@ type Context struct {
 
 var _ core.API = &Context{}
 
+// New ...
+func newAPI(cfg *config.Config, cb func(tag core.RequestTag, v interface{}) error) *Context {
+	if !cfg.Debug {
+		gin.SetMode(gin.ReleaseMode)
+	}
+	eng := gin.Default()
+	return &Context{
+		cfg:   cfg,
+		eng:   eng,
+		ready: atomic.NewBool(false),
+		cb:    cb,
+		serv: &http.Server{
+			Handler: eng,
+		},
+	}
+}
+
 // NodeAddrInfo ...
 func (c *Context) NodeAddrInfo(req *core.AddrReq) (*core.AddrResp, error) {
 	if req.ID == "" {
@@ -106,23 +123,6 @@ func (c *Context) ID(req *core.IDReq) (*core.IDResp, error) {
 		Addrs:     nil,
 		DataStore: *ipfsID,
 	}, nil
-}
-
-// New ...
-func newAPI(cfg *config.Config, cb func(tag core.RequestTag, v interface{}) error) *Context {
-	if !cfg.Debug {
-		gin.SetMode(gin.ReleaseMode)
-	}
-	eng := gin.Default()
-	return &Context{
-		cfg:   cfg,
-		eng:   eng,
-		ready: atomic.NewBool(false),
-		cb:    cb,
-		serv: &http.Server{
-			Handler: eng,
-		},
-	}
 }
 
 // Start ...

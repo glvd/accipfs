@@ -165,7 +165,7 @@ func (m *manager) loop() {
 
 // Conn ...
 func (m *manager) Conn(c net.Conn) {
-	acceptNode, err := AcceptNode(c, m.api)
+	acceptNode, err := CoreNode(c, m.api)
 	if err != nil {
 		return
 	}

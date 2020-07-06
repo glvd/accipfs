@@ -70,8 +70,8 @@ func (n *node) Verify() bool {
 	return true
 }
 
-// AcceptNode ...
-func AcceptNode(conn net.Conn, api core.API) (core.Node, error) {
+// CoreNode ...
+func CoreNode(conn net.Conn, api core.API) (core.Node, error) {
 	n := &node{
 		api:        api,
 		Connection: scdt.Connect(conn),

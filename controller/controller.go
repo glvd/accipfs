@@ -74,13 +74,15 @@ func (c *Controller) Initialize() (e error) {
 func (c *Controller) Run() {
 	wg := &sync.WaitGroup{}
 	for idx := range c.services {
-		wg.Add(1)
-		go func(service core.ControllerService) {
-			defer c.wg.Done()
-			if err := service.Start(); err != nil {
-				return
-			}
-		}(c.services[idx])
+		if c.services[idx] != nil {
+			wg.Add(1)
+			go func(service core.ControllerService) {
+				defer c.wg.Done()
+				if err := service.Start(); err != nil {
+					return
+				}
+			}(c.services[idx])
+		}
 	}
 	wg.Wait()
 }

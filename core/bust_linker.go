@@ -99,4 +99,5 @@ type LinkReq struct {
 
 // LinkResp ...
 type LinkResp struct {
+	Addr string
 }

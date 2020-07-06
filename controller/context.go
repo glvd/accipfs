@@ -71,7 +71,9 @@ func (c *Context) Link(req *core.LinkReq) (*core.LinkResp, error) {
 		if err != nil {
 			continue
 		}
-		return &core.LinkResp{}, nil
+		return &core.LinkResp{
+			Addr: multiaddr.String(),
+		}, nil
 	}
 	return &core.LinkResp{}, errors.New("all request was failed")
 }

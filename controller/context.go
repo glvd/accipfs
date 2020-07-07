@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	ma "github.com/multiformats/go-multiaddr"
+	mnet "github.com/multiformats/go-multiaddr-net"
 	"net"
 	"net/http"
 
@@ -30,8 +31,8 @@ type APIContext struct {
 	ethNode    *nodeBinETH
 	ipfsNode   *nodeBinIPFS
 	msg        func(s string)
-	cb         func(tag core.RequestTag, v interface{}) error
-	manager    core.NodeManager
+	//cb         func(tag core.RequestTag, v interface{}) error
+	manager core.NodeManager
 }
 
 // Add ...
@@ -83,10 +84,11 @@ func (c *APIContext) Link(req *core.LinkReq) (*core.LinkResp, error) {
 		if err != nil {
 			continue
 		}
-		err = c.cb(core.RequestTagLink, multiaddr)
+		dial, err := mnet.Dial(multiaddr)
 		if err != nil {
 			continue
 		}
+		c.manager.Conn(dial)
 		return &core.LinkResp{
 			Addr: multiaddr.String(),
 		}, nil

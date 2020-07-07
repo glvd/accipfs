@@ -140,13 +140,27 @@ func (c *client) ID(req *core.IDReq) (resp *core.IDResp, err error) {
 	return
 }
 
-// AddrInfo ...
-func AddrInfo(req *core.AddrReq) (*core.AddrResp, error) {
-	return DefaultClient.AddrInfo(req)
+// Link ...
+func (c *client) Link(req *core.LinkReq) (resp *core.LinkResp, err error) {
+	resp = new(core.LinkResp)
+	err = c.doPost("link", req, resp)
+	return
 }
 
-// AddrInfo ...
-func (c *client) AddrInfo(req *core.AddrReq) (resp *core.AddrResp, err error) {
+// Add ...
+func (c *client) Add(req *core.AddReq) (resp *core.AddResp, err error) {
+	resp = new(core.AddResp)
+	err = c.doPost("link", req, resp)
+	return
+}
+
+// NodeAddrInfo ...
+func NodeAddrInfo(req *core.AddrReq) (*core.AddrResp, error) {
+	return DefaultClient.NodeAddrInfo(req)
+}
+
+// NodeAddrInfo ...
+func (c *client) NodeAddrInfo(req *core.AddrReq) (resp *core.AddrResp, err error) {
 	resp = new(core.AddrResp)
 	err = c.doPost("info", req, resp)
 	return

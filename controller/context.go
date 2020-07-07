@@ -40,8 +40,7 @@ func (c *Context) Add(req *core.AddReq) (*core.AddResp, error) {
 	if err != nil {
 		return nil, err
 	}
-	hash := info.Hash()
-	c.controller.Run()
+	return &core.AddResp{}, nil
 }
 
 var _ core.API = &Context{}

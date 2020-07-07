@@ -6,6 +6,7 @@ import (
 	"github.com/glvd/accipfs/core"
 	ma "github.com/multiformats/go-multiaddr"
 	mnet "github.com/multiformats/go-multiaddr-net"
+	"go.uber.org/atomic"
 	"sync"
 )
 
@@ -25,9 +26,10 @@ const (
 
 // Controller ...
 type Controller struct {
-	manager  core.NodeManager
-	services []core.ControllerService
-	api      core.API
+	manager   core.NodeManager
+	isRunning *atomic.Bool
+	services  []core.ControllerService
+	api       core.API
 }
 
 // New ...
@@ -64,6 +66,7 @@ func New(cfg *config.Config, manager core.NodeManager) *Controller {
 		c.services[IndexIPFS] = ipfs
 		api.ipfsNode = ipfs
 	}
+	c.isRunning = atomic.NewBool(false)
 	c.services[IndexAPI] = api
 	c.api = api
 	c.manager = manager
@@ -87,6 +90,9 @@ func (c *Controller) Initialize() (e error) {
 
 // Run ...
 func (c *Controller) Run() {
+	if !c.isRunning.CAS(false, true) {
+		return
+	}
 	wg := &sync.WaitGroup{}
 	for idx := range c.services {
 		if c.services[idx] != nil {

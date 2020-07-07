@@ -33,6 +33,17 @@ type Context struct {
 	cb         func(tag core.RequestTag, v interface{}) error
 }
 
+// Add ...
+func (c *Context) Add(req *core.AddReq) (*core.AddResp, error) {
+	var info core.DataInfoV1
+	err := info.Unmarshal([]byte(req.JSNFO))
+	if err != nil {
+		return nil, err
+	}
+	hash := info.Hash()
+	c.controller.Run()
+}
+
 var _ core.API = &Context{}
 
 // New ...

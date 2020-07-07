@@ -186,7 +186,9 @@ func (m *manager) poolRun(v interface{}) {
 	node, b := m.connectNodes.LoadOrStore(n.ID(), n)
 	if b {
 		nbase := node.(core.Node)
-		nbase.AppendAddr(n.Addrs())
+		if n.Addrs() != nil {
+			nbase.AppendAddr(n.Addrs()...)
+		}
 	} else {
 		//
 	}

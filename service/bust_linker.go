@@ -53,7 +53,7 @@ func (l *BustLinker) Run() {
 		return
 	}
 	defer l.lock.Store(false)
-	//todo
+	//todo do something on run
 }
 
 // WaitingForReady ...

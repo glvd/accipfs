@@ -23,7 +23,6 @@ const (
 
 // Controller ...
 type Controller struct {
-	manager   core.NodeManager
 	isRunning *atomic.Bool
 	services  []core.ControllerService
 	ctx       *APIContext
@@ -106,6 +105,6 @@ func (c *Controller) Stop() (e error) {
 }
 
 // GetAPI ...
-func (c *Controller) GetAPI() core.API {
-	return c.api
+func (c *Controller) API(manager core.NodeManager) core.API {
+	return c.ctx.API(manager)
 }

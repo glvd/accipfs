@@ -72,8 +72,6 @@ type AddType int
 
 // AddReq ...
 type AddReq struct {
-	AddType
-	Node
 }
 
 // AddResp ...

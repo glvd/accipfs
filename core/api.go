@@ -6,4 +6,5 @@ type API interface {
 	ID(req *IDReq) (*IDResp, error)
 	NodeAddrInfo(req *AddrReq) (*AddrResp, error)
 	Link(req *LinkReq) (*LinkResp, error)
+	Add(req *AddReq) (*AddResp, error)
 }

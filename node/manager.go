@@ -3,6 +3,7 @@ package node
 import (
 	"encoding/json"
 	"github.com/glvd/accipfs/config"
+	"github.com/glvd/accipfs/controller"
 	"github.com/glvd/accipfs/core"
 	"github.com/godcong/scdt"
 	"github.com/panjf2000/ants/v2"
@@ -36,10 +37,9 @@ var _expNodes = "exp.nodes"
 var _ core.NodeManager = &manager{}
 
 // Manager ...
-func Manager(cfg *config.Config, api core.API) core.NodeManager {
+func Manager(cfg *config.Config, ctx *controller.APIContext) core.NodeManager {
 	m := &manager{
 		cfg:      cfg,
-		api:      api,
 		initLoad: atomic.NewBool(false),
 		path:     filepath.Join(cfg.Path, _nodes),
 		expPath:  filepath.Join(cfg.Path, _expNodes),
@@ -47,7 +47,7 @@ func Manager(cfg *config.Config, api core.API) core.NodeManager {
 		hashes:   hashCacher(cfg),
 		t:        time.NewTicker(cfg.Node.BackupSeconds),
 	}
-
+	m.api = ctx.API(m)
 	m.nodePool = mustPool(ants.DefaultAntsPoolSize, m.poolRun)
 	go m.loop()
 

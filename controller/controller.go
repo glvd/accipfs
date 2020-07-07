@@ -1,11 +1,8 @@
 package controller
 
 import (
-	"errors"
 	"github.com/glvd/accipfs/config"
 	"github.com/glvd/accipfs/core"
-	ma "github.com/multiformats/go-multiaddr"
-	mnet "github.com/multiformats/go-multiaddr-net"
 	"go.uber.org/atomic"
 	"sync"
 )
@@ -29,34 +26,24 @@ type Controller struct {
 	manager   core.NodeManager
 	isRunning *atomic.Bool
 	services  []core.ControllerService
-	api       core.API
+	ctx       *APIContext
+	ethNode   *nodeBinETH
+	ipfsNode  *nodeBinIPFS
 }
 
 // New ...
-func New(cfg *config.Config, manager core.NodeManager) *Controller {
+func New(cfg *config.Config, ctx *APIContext) *Controller {
 	c := &Controller{
 		services: make([]core.ControllerService, IndexMax),
 	}
 
-	api := newAPI(cfg, func(tag core.RequestTag, v interface{}) error {
-		m, b := v.(ma.Multiaddr)
-		if !b {
-			return errors.New("wrong type convert")
-		}
-		dial, err := mnet.Dial(m)
-		if err != nil {
-			return err
-		}
-		manager.Conn(dial)
-		return nil
-	})
 	if cfg.ETH.Enable {
 		eth := newNodeBinETH(cfg)
 		eth.MessageHandle(func(s string) {
 			log.Infow(s, "tag", "eth")
 		})
 		c.services[IndexETH] = eth
-		api.ethNode = eth
+		c.ethNode = eth
 	}
 	if cfg.IPFS.Enable {
 		ipfs := newNodeBinIPFS(cfg)
@@ -64,13 +51,11 @@ func New(cfg *config.Config, manager core.NodeManager) *Controller {
 			log.Infow(s, "tag", "ipfs")
 		})
 		c.services[IndexIPFS] = ipfs
-		api.ipfsNode = ipfs
+		c.ipfsNode = ipfs
 	}
 	c.isRunning = atomic.NewBool(false)
 	c.services[IndexAPI] = api
-	c.api = api
-	c.manager = manager
-	//c.wg = &sync.WaitGroup{}
+	c.ctx = api
 	return c
 }
 

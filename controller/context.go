@@ -19,8 +19,8 @@ import (
 	"go.uber.org/atomic"
 )
 
-// Context ...
-type Context struct {
+// APIContext ...
+type APIContext struct {
 	cfg        *config.Config
 	eng        *gin.Engine
 	listener   net.Listener
@@ -31,10 +31,11 @@ type Context struct {
 	ipfsNode   *nodeBinIPFS
 	msg        func(s string)
 	cb         func(tag core.RequestTag, v interface{}) error
+	manager    core.NodeManager
 }
 
 // Add ...
-func (c *Context) Add(req *core.AddReq) (*core.AddResp, error) {
+func (c *APIContext) Add(req *core.AddReq) (*core.AddResp, error) {
 	var info core.DataInfoV1
 	err := info.Unmarshal([]byte(req.JSNFO))
 	if err != nil {
@@ -43,27 +44,32 @@ func (c *Context) Add(req *core.AddReq) (*core.AddResp, error) {
 	return &core.AddResp{}, nil
 }
 
-var _ core.API = &Context{}
+var _ core.API = &APIContext{}
 
-// New ...
-func newAPI(cfg *config.Config, cb func(tag core.RequestTag, v interface{}) error) *Context {
+// NewContext ...
+func NewContext(cfg *config.Config) *APIContext {
 	if !cfg.Debug {
 		gin.SetMode(gin.ReleaseMode)
 	}
 	eng := gin.Default()
-	return &Context{
+	return &APIContext{
 		cfg:   cfg,
 		eng:   eng,
 		ready: atomic.NewBool(false),
-		cb:    cb,
 		serv: &http.Server{
 			Handler: eng,
 		},
 	}
 }
 
+// API ...
+func (c *APIContext) API(manager core.NodeManager) core.API {
+	c.manager = manager
+	return c
+}
+
 // NodeAddrInfo ...
-func (c *Context) NodeAddrInfo(req *core.AddrReq) (*core.AddrResp, error) {
+func (c *APIContext) NodeAddrInfo(req *core.AddrReq) (*core.AddrResp, error) {
 	if req.ID == "" {
 		return &core.AddrResp{}, nil
 	}
@@ -71,7 +77,7 @@ func (c *Context) NodeAddrInfo(req *core.AddrReq) (*core.AddrResp, error) {
 }
 
 // Link ...
-func (c *Context) Link(req *core.LinkReq) (*core.LinkResp, error) {
+func (c *APIContext) Link(req *core.LinkReq) (*core.LinkResp, error) {
 	for _, addr := range req.Addrs {
 		multiaddr, err := ma.NewMultiaddr(addr)
 		if err != nil {
@@ -89,14 +95,14 @@ func (c *Context) Link(req *core.LinkReq) (*core.LinkResp, error) {
 }
 
 // Ping ...
-func (c *Context) Ping(req *core.PingReq) (*core.PingResp, error) {
+func (c *APIContext) Ping(req *core.PingReq) (*core.PingResp, error) {
 	return &core.PingResp{
 		Data: "pong",
 	}, nil
 }
 
 // ID ...
-func (c *Context) ID(req *core.IDReq) (*core.IDResp, error) {
+func (c *APIContext) ID(req *core.IDReq) (*core.IDResp, error) {
 	fromStringID, err := peer.Decode(c.cfg.Identity)
 	if err != nil {
 		return nil, err
@@ -138,7 +144,7 @@ func (c *Context) ID(req *core.IDReq) (*core.IDResp, error) {
 }
 
 // Start ...
-func (c *Context) Start() error {
+func (c *APIContext) Start() error {
 	l, err := net.ListenTCP("tcp", &net.TCPAddr{
 		IP:   net.IPv4zero,
 		Port: c.cfg.API.Port,
@@ -156,7 +162,7 @@ func (c *Context) Start() error {
 	return nil
 }
 
-func (c *Context) registerRoutes() {
+func (c *APIContext) registerRoutes() {
 	api := c.eng.Group("/api")
 	api.GET("/ping", c.ping)
 	if c.cfg.Debug {
@@ -170,7 +176,7 @@ func (c *Context) registerRoutes() {
 }
 
 // Stop ...
-func (c *Context) Stop() error {
+func (c *APIContext) Stop() error {
 	if c.serv != nil {
 		if err := c.serv.Shutdown(context.TODO()); err != nil {
 			return err
@@ -180,29 +186,29 @@ func (c *Context) Stop() error {
 }
 
 // Initialize ...
-func (c *Context) Initialize() error {
+func (c *APIContext) Initialize() error {
 	//nothing
 	return nil
 }
 
 // IsReady ...
-func (c *Context) IsReady() bool {
+func (c *APIContext) IsReady() bool {
 	return c.ready.Load()
 }
 
 // MessageHandle ...
-func (c *Context) MessageHandle(f func(s string)) {
+func (c *APIContext) MessageHandle(f func(s string)) {
 	if f != nil {
 		c.msg = f
 	}
 }
 
-func (c *Context) id(ctx *gin.Context) {
+func (c *APIContext) id(ctx *gin.Context) {
 	id, err := c.ID(&core.IDReq{})
 	JSON(ctx, id, err)
 }
 
-func (c *Context) get(ctx *gin.Context) {
+func (c *APIContext) get(ctx *gin.Context) {
 	ctx.Redirect(http.StatusMovedPermanently, ipfsGetURL("api/v0/get"))
 }
 
@@ -210,17 +216,17 @@ func ipfsGetURL(uri string) string {
 	return fmt.Sprintf("%s/%s", config.IPFSAddrHTTP(), uri)
 }
 
-func (c *Context) ping(ctx *gin.Context) {
+func (c *APIContext) ping(ctx *gin.Context) {
 	ping, err := c.Ping(&core.PingReq{})
 	JSON(ctx, ping, err)
 }
 
-func (c *Context) debug(ctx *gin.Context) {
+func (c *APIContext) debug(ctx *gin.Context) {
 	uri := ctx.Query("uri")
 	ctx.Redirect(http.StatusFound, ipfsGetURL(uri))
 }
 
-func (c *Context) query(ctx *gin.Context) {
+func (c *APIContext) query(ctx *gin.Context) {
 	var err error
 	j := struct {
 		No string

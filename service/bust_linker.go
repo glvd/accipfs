@@ -22,6 +22,12 @@ type BustLinker struct {
 	controller *controller.Controller
 }
 
+func apiCB(manager core.NodeManager) func(tag core.RequestTag, v interface{}) error {
+	return func(tag core.RequestTag, v interface{}) error {
+
+	}
+}
+
 // NewBustLinker ...
 func NewBustLinker(cfg *config.Config) (linker *BustLinker, err error) {
 	linker = &BustLinker{
@@ -34,8 +40,9 @@ func NewBustLinker(cfg *config.Config) (linker *BustLinker, err error) {
 		return nil, err
 	}
 	linker.self = selfAcc
-	linker.controller = controller.New(cfg)
-	linker.manager = node.Manager(cfg, linker.controller.GetAPI())
+	context := controller.NewContext(cfg)
+	linker.controller = controller.New(cfg, context)
+	linker.manager = node.Manager(cfg, context)
 	linker.listener = newLinkListener(cfg, linker.manager.Conn)
 
 	return linker, nil

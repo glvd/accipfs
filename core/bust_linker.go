@@ -72,6 +72,8 @@ type AddType int
 
 // AddReq ...
 type AddReq struct {
+	JSNFO string
+	Data  []byte
 }
 
 // AddResp ...

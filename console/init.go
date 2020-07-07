@@ -4,7 +4,10 @@ import (
 	"github.com/glvd/accipfs/account"
 	"github.com/glvd/accipfs/config"
 	"github.com/glvd/accipfs/controller"
+	ipfsCfg "github.com/ipfs/go-ipfs-config"
+	"github.com/ipfs/interface-go-ipfs-core/options"
 	"github.com/spf13/cobra"
+	"os"
 )
 
 func initCmd() *cobra.Command {
@@ -32,7 +35,17 @@ func initCmd() *cobra.Command {
 			if err := c.Initialize(); err != nil {
 				panic(err)
 			}
+			//file, err := os.OpenFile("key", os.O_CREATE|os.O_SYNC|os.O_RDWR|os.O_TRUNC, 0755)
+			//if err != nil {
+			//	panic(err)
+			//}
 
+			identity, err := ipfsCfg.CreateIdentity(os.Stdout, []options.KeyGenerateOption{options.Key.Type("ed25519")})
+			if err != nil {
+				panic(err)
+			}
+			cfg.Identity = identity.PeerID
+			cfg.PrivateKey = identity.PrivKey
 			serverConfig, err := config.LoadIPFSServerConfig(cfg)
 			if err != nil {
 				panic(err)

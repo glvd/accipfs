@@ -15,8 +15,8 @@ const (
 	IndexETH ServiceIndex = iota
 	// IndexIPFS ...
 	IndexIPFS
-	// IndexAPI ...
-	IndexAPI
+	// IndexContext ...
+	IndexContext
 	// IndexMax ...
 	IndexMax
 )
@@ -53,8 +53,8 @@ func New(cfg *config.Config, ctx *APIContext) *Controller {
 		c.ipfsNode = ipfs
 	}
 	c.isRunning = atomic.NewBool(false)
-	c.services[IndexAPI] = api
-	c.ctx = api
+	c.services[IndexContext] = ctx
+	c.ctx = ctx
 	return c
 }
 

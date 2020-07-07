@@ -22,12 +22,6 @@ type BustLinker struct {
 	controller *controller.Controller
 }
 
-func apiCB(manager core.NodeManager) func(tag core.RequestTag, v interface{}) error {
-	return func(tag core.RequestTag, v interface{}) error {
-
-	}
-}
-
 // NewBustLinker ...
 func NewBustLinker(cfg *config.Config) (linker *BustLinker, err error) {
 	linker = &BustLinker{

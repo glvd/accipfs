@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"github.com/glvd/accipfs/config"
 	"github.com/glvd/accipfs/mdns"
 	"github.com/glvd/accipfs/service"
@@ -29,7 +30,7 @@ func daemonCmd() *cobra.Command {
 			}
 			server, e := dns.Server()
 			if e != nil {
-				panic(e)
+				fmt.Printf("multicast group join failed(%v)", e)
 			}
 			defer func() {
 				server.Stop()

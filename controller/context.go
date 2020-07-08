@@ -71,10 +71,15 @@ func (c *APIContext) API(manager core.NodeManager) core.API {
 
 // NodeAddrInfo ...
 func (c *APIContext) NodeAddrInfo(req *core.AddrReq) (*core.AddrResp, error) {
+	//todo
 	if req.ID == "" {
-		return &core.AddrResp{}, nil
+		return &core.AddrResp{
+			AddrInfo: &core.AddrInfo{},
+		}, nil
 	}
-	panic("implement me")
+	return &core.AddrResp{
+		AddrInfo: &core.AddrInfo{},
+	}, nil
 }
 
 // Ping ...

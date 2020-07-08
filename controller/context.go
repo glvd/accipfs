@@ -252,11 +252,8 @@ func (c *APIContext) nodeLink(ctx *gin.Context) {
 // Link ...
 func (c *APIContext) Link(req *core.NodeLinkReq) (*core.NodeLinkResp, error) {
 	for _, addr := range req.Addrs {
-		multiaddr, err := ma.NewMultiaddr(addr)
-		if err != nil {
-			continue
-		}
-		dial, err := mnet.Dial(multiaddr)
+
+		dial, err := mnet.Dial(addr)
 		if err != nil {
 			continue
 		}
@@ -277,7 +274,6 @@ func (c *APIContext) nodeUnlink(ctx *gin.Context) {
 func (c *APIContext) Unlink(req *core.NodeUnlinkReq) (*core.NodeUnlinkResp, error) {
 	panic("implement me")
 }
-
 func (c *APIContext) nodeList(ctx *gin.Context) {
 
 }

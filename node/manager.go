@@ -164,14 +164,14 @@ func (m *manager) loop() {
 }
 
 // Conn ...
-func (m *manager) Conn(c net.Conn) {
+func (m *manager) Conn(c net.Conn) (core.Node, error) {
 	acceptNode, err := CoreNode(c, m.api)
 	if err != nil {
-		return
+		return nil, err
 	}
 
 	m.nodePool.Invoke(acceptNode)
-	return
+	return acceptNode, nil
 }
 
 func (m *manager) poolRun(v interface{}) {

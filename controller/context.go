@@ -258,9 +258,7 @@ func (c *APIContext) Link(req *core.NodeLinkReq) (*core.NodeLinkResp, error) {
 			continue
 		}
 		c.manager.Conn(dial)
-		return &core.NodeLinkResp{
-			Addr: multiaddr.String(),
-		}, nil
+		return &core.NodeLinkResp{}, nil
 	}
 	return &core.NodeLinkResp{}, errors.New("all request was failed")
 }

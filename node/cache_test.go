@@ -5,6 +5,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/akrylysov/pogreb"
 	badger "github.com/dgraph-io/badger/v2"
 	"github.com/emirpasic/gods/maps/hashmap"
 	"github.com/glvd/accipfs/basis"
@@ -196,6 +197,41 @@ func BenchmarkDatabase2Read(b *testing.B) {
 		if err != nil {
 			continue
 		}
+	}
+}
+func BenchmarkDatabase3(b *testing.B) {
+	db, err := pogreb.Open("pogreb.test", nil)
+	if err != nil {
+		log.Fatal(err)
+		return
+	}
+	defer db.Close()
+	var key string
+	for i := 0; i < 10000; i++ {
+		data, value := generateTestData()
+		err = db.Put([]byte(data), []byte(value))
+		if err != nil {
+			continue
+		}
+		key = data
+	}
+	fmt.Println("last key", key)
+}
+func BenchmarkDatabase3Read(b *testing.B) {
+	db, err := pogreb.Open("pogreb.test", nil)
+	if err != nil {
+		log.Fatal(err)
+		return
+	}
+	defer db.Close()
+	key := "a3e465c1-bc35-11ea-aa2c-00155d639067"
+
+	for i := 0; i < 100; i++ {
+		val, err := db.Get([]byte(key))
+		if err != nil {
+			continue
+		}
+		fmt.Println("getted", string(val))
 	}
 }
 func BenchmarkDatabaseMap(b *testing.B) {

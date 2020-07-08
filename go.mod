@@ -3,6 +3,7 @@ module github.com/glvd/accipfs
 go 1.13
 
 require (
+	github.com/akrylysov/pogreb v0.9.1
 	github.com/dgraph-io/badger/v2 v2.0.3
 	github.com/elastic/gosigar v0.10.5 // indirect
 	github.com/emirpasic/gods v1.12.0

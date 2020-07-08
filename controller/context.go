@@ -125,7 +125,7 @@ func (c *APIContext) ID(req *core.IDReq) (*core.IDResp, error) {
 	}
 	pubString := base64.StdEncoding.EncodeToString(bytes)
 	log.Infow("result id", "id", c.cfg.Identity, "public key", pubString)
-	ipfsID, err := c.ipfsNode.ID(context.TODO())
+	ipfsID, err := c.controller.dataNode().ID(context.TODO())
 	if err != nil {
 		return nil, err
 	}
@@ -242,7 +242,7 @@ func (c *APIContext) query(ctx *gin.Context) {
 		JSON(ctx, "", fmt.Errorf("query failed(%w)", err))
 		return
 	}
-	dTag, e := c.ethNode.DTag()
+	dTag, e := c.controller.infoNode().DTag()
 	if e != nil {
 		JSON(ctx, "", fmt.Errorf("query failed(%w)", e))
 		return

@@ -131,6 +131,7 @@ func defaultAPINode(c net.Conn, api core.API) *node {
 	}
 
 	conn.RecvCustomData(func(message *scdt.Message) ([]byte, bool) {
+		fmt.Printf("recv data:%+v", message)
 		switch message.CustomID {
 		case InfoRequest:
 			return n.RecvDataRequest(message)

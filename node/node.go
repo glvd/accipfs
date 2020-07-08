@@ -157,6 +157,7 @@ func (n *node) ID() string {
 func (n *node) Info() (core.NodeInfo, error) {
 	msg, b := n.Connection.SendCustomDataOnWait(InfoRequest, nil)
 	var nodeInfo core.NodeInfo
+	fmt.Printf("recved msg:%v,data:%s", msg, msg.Data)
 	if b {
 		if msg.DataLength != 0 {
 			err := json.Unmarshal(msg.Data, &nodeInfo)

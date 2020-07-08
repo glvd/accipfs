@@ -154,7 +154,7 @@ func (c *APIContext) registerRoutes() {
 
 	v0 := api.Group(c.cfg.API.Version)
 	v0.POST("/id", c.id)
-	v0.POST("/node/nodeLink", c.nodeLink)
+	v0.POST("/node/link", c.nodeLink)
 	v0.POST("/node/unlink", c.nodeUnlink)
 	v0.POST("/node/list", c.nodeList)
 	v0.GET("/get", c.get)

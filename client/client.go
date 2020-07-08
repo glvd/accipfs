@@ -143,7 +143,7 @@ func (c *client) ID(req *core.IDReq) (resp *core.IDResp, err error) {
 // Link ...
 func (c *client) Link(req *core.NodeLinkReq) (resp *core.NodeLinkResp, err error) {
 	resp = new(core.NodeLinkResp)
-	err = c.doPost("/node/nodeLink", req, resp)
+	err = c.doPost("/node/link", req, resp)
 	return
 }
 

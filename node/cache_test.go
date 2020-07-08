@@ -5,9 +5,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/akrylysov/pogreb"
 	badger "github.com/dgraph-io/badger/v2"
-	"github.com/emirpasic/gods/maps/hashmap"
+	//"github.com/emirpasic/gods/maps/hashmap"
 	"github.com/glvd/accipfs/basis"
 	"github.com/glvd/accipfs/config"
 	"github.com/glvd/accipfs/core"
@@ -154,13 +153,15 @@ func generateTestData() (key string, value string) {
 
 func BenchmarkDatabase2(b *testing.B) {
 	opt := badger.DefaultOptions("badger")
+	opt.Truncate = true
+
 	db, err := badger.Open(opt)
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer db.Close()
 	var key string
-	for i := 0; i < 10000; i++ {
+	for i := 0; i < 100000; i++ {
 		data, value := generateTestData()
 		err = db.Update(
 			func(txn *badger.Txn) error {
@@ -180,7 +181,7 @@ func BenchmarkDatabase2Read(b *testing.B) {
 		log.Fatal(err)
 	}
 	defer db.Close()
-	key := "a3e465c1-bc35-11ea-aa2c-00155d639067"
+	key := "81d351bf-c0e9-11ea-becf-00155d639067"
 
 	for i := 0; i < 100; i++ {
 		err := db.View(
@@ -200,68 +201,68 @@ func BenchmarkDatabase2Read(b *testing.B) {
 	}
 }
 func BenchmarkDatabase3(b *testing.B) {
-	db, err := pogreb.Open("pogreb.test", nil)
-	if err != nil {
-		log.Fatal(err)
-		return
-	}
-	defer db.Close()
-	var key string
-	for i := 0; i < 10000; i++ {
-		data, value := generateTestData()
-		err = db.Put([]byte(data), []byte(value))
-		if err != nil {
-			continue
-		}
-		key = data
-	}
-	fmt.Println("last key", key)
+	//db, err := pogreb.Open("pogreb.test", nil)
+	//if err != nil {
+	//	log.Fatal(err)
+	//	return
+	//}
+	//defer db.Close()
+	//var key string
+	//for i := 0; i < 100000; i++ {
+	//	data, value := generateTestData()
+	//	err = db.Put([]byte(data), []byte(value))
+	//	if err != nil {
+	//		continue
+	//	}
+	//	key = data
+	//}
+	//fmt.Println("last key", key)
 }
 func BenchmarkDatabase3Read(b *testing.B) {
-	db, err := pogreb.Open("pogreb.test", nil)
-	if err != nil {
-		log.Fatal(err)
-		return
-	}
-	defer db.Close()
-	key := "a3e465c1-bc35-11ea-aa2c-00155d639067"
-
-	for i := 0; i < 100; i++ {
-		val, err := db.Get([]byte(key))
-		if err != nil {
-			continue
-		}
-		fmt.Println("getted", string(val))
-	}
+	//db, err := pogreb.Open("pogreb.test", nil)
+	//if err != nil {
+	//	log.Fatal(err)
+	//	return
+	//}
+	//defer db.Close()
+	//key := "83afb19b-c0e8-11ea-9ba5-00155d639067"
+	//
+	//for i := 0; i < 100; i++ {
+	//	val, err := db.Get([]byte(key))
+	//	if err != nil {
+	//		continue
+	//	}
+	//	fmt.Println("getted", string(val))
+	//}
 }
 func BenchmarkDatabaseMap(b *testing.B) {
-	v := map[string]string{}
-	key := "a3e465c1-bc35-11ea-aa2c-00155d639067"
-	b.StopTimer()
-	for i := 0; i < 100000; i++ {
-		data, value := generateTestData()
-		v[data] = value
-		key = data
-	}
-	fmt.Println("last key", key)
-	b.StartTimer()
-	for i := 0; i < 100; i++ {
-		fmt.Println(v[key])
-	}
+	//v := map[string]string{}
+	//key := "a3e465c1-bc35-11ea-aa2c-00155d639067"
+	//b.StopTimer()
+	//for i := 0; i < 100000; i++ {
+	//	data, value := generateTestData()
+	//	v[data] = value
+	//	key = data
+	//}
+	//fmt.Println("last key", key)
+	//b.StartTimer()
+	//for i := 0; i < 100; i++ {
+	//	fmt.Println(v[key])
+	//}
 }
 
 func BenchmarkHashMap(b *testing.B) {
-	m := hashmap.New()
-	key := "a3e465c1-bc35-11ea-aa2c-00155d639067"
-	b.StopTimer()
-	for i := 0; i < 100000; i++ {
-		data, value := generateTestData()
-		m.Put(data, value)
-		key = data
-	}
-	fmt.Println("last key", key)
-	b.StartTimer()
-	for i := 0; i < 100; i++ {
-		fmt.Println(m.Get(key))
-	}
+	//m := hashmap.New()
+	//key := "a3e465c1-bc35-11ea-aa2c-00155d639067"
+	//b.StopTimer()
+	//for i := 0; i < 100000; i++ {
+	//	data, value := generateTestData()
+	//	m.Put(data, value)
+	//	key = data
+	//}
+	//fmt.Println("last key", key)
+	//b.StartTimer()
+	//for i := 0; i < 100; i++ {
+	//	fmt.Println(m.Get(key))
+	//}
 }

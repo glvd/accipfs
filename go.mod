@@ -3,10 +3,8 @@ module github.com/glvd/accipfs
 go 1.13
 
 require (
-	github.com/akrylysov/pogreb v0.9.1
 	github.com/dgraph-io/badger/v2 v2.0.3
 	github.com/elastic/gosigar v0.10.5 // indirect
-	github.com/emirpasic/gods v1.12.0
 	github.com/ethereum/go-ethereum v1.9.11
 	github.com/gin-gonic/gin v1.6.2
 	github.com/godcong/scdt v0.0.12

@@ -6,7 +6,6 @@ import (
 	"github.com/glvd/accipfs/client"
 	"github.com/glvd/accipfs/config"
 	"github.com/glvd/accipfs/core"
-	ma "github.com/multiformats/go-multiaddr"
 	"github.com/spf13/cobra"
 )
 
@@ -30,24 +29,15 @@ func nodeConnectCmd() *cobra.Command {
 			config.Initialize()
 			cfg := config.Global()
 			client.InitGlobalClient(&cfg)
-			var addrs []ma.Multiaddr
-			for _, addr := range args {
-				fmt.Printf("connect to [%s]\n", addr)
-				multiaddr, err := ma.NewMultiaddr(addr)
-				if err != nil {
-					fmt.Printf("wrong connect address error: %v\n", err)
-					return
-				}
-				addrs = append(addrs, multiaddr)
-				req := &core.NodeLinkReq{Addrs: addrs}
-				resp, err := client.NodeLink(req)
-				if err != nil {
-					fmt.Printf("connect error: %v\n", err)
-					return
-				}
-				fmt.Println("success:")
-				fmt.Printf("%+v", resp)
+			fmt.Printf("connect to [%v]\n", args)
+			req := &core.NodeLinkReq{Addrs: args}
+			resp, err := client.NodeLink(req)
+			if err != nil {
+				fmt.Printf("connect error: %v\n", err)
+				return
 			}
+			fmt.Println("success:")
+			fmt.Printf("%+v", resp)
 
 			return
 		},

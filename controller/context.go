@@ -245,16 +245,28 @@ func (c *APIContext) query(ctx *gin.Context) {
 }
 
 func (c *APIContext) nodeLink(ctx *gin.Context) {
-	id, err := c.Link(&core.NodeLinkReq{})
+	var req core.NodeLinkReq
+	err := ctx.BindJSON(&req)
+	if err != nil {
+		JSON(ctx, nil, err)
+		return
+	}
+	id, err := c.Link(&req)
 	JSON(ctx, id, err)
 }
 
 // Link ...
 func (c *APIContext) Link(req *core.NodeLinkReq) (*core.NodeLinkResp, error) {
+	fmt.Printf("connect info:%+v", req.Addrs)
 	for _, addr := range req.Addrs {
-
-		dial, err := mnet.Dial(addr)
+		multiaddr, err := ma.NewMultiaddr(addr)
 		if err != nil {
+			fmt.Printf("parse addr(%v) failed(%v)\n", addr, err)
+			continue
+		}
+		dial, err := mnet.Dial(multiaddr)
+		if err != nil {
+			fmt.Printf("link failed(%v)\n", err)
 			continue
 		}
 		conn, err := c.manager.Conn(dial)

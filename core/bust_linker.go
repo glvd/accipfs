@@ -100,7 +100,7 @@ type RequestTag int
 
 // NodeLinkReq ...
 type NodeLinkReq struct {
-	Addrs []ma.Multiaddr
+	Addrs []string
 }
 
 // NodeLinkResp ...

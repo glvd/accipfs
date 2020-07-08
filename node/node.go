@@ -44,16 +44,27 @@ func (n *node) IsClosed() bool {
 
 // IPFSAddrInfo ...
 func (n *node) IPFSAddrInfo() (peer.AddrInfo, error) {
-	return n.addrInfo.IPFSAddrInfo, nil
+	addrInfo, err := n.addrInfoRequest()
+	if err != nil {
+		return peer.AddrInfo{}, err
+	}
+	return addrInfo.IPFSAddrInfo, nil
 }
 
 // Marshal ...
 func (n *node) Marshal() ([]byte, error) {
-	return n.addrInfo.MarshalJSON()
+	addrInfo, err := n.addrInfoRequest()
+	if err != nil {
+		return nil, err
+	}
+	return addrInfo.MarshalJSON()
 }
 
 // Unmarshal ...
 func (n *node) Unmarshal(bytes []byte) error {
+	if n.addrInfo == nil {
+		n.addrInfo = new(core.AddrInfo)
+	}
 	return n.addrInfo.UnmarshalJSON(bytes)
 }
 
@@ -81,7 +92,9 @@ func CoreNode(conn net.Conn, api core.API) (core.Node, error) {
 		return nil, err
 	}
 	n.AppendAddr(netAddr)
-	n.doFirst()
+	if err := n.doFirst(); err != nil {
+		return nil, err
+	}
 	return n, nil
 }
 
@@ -102,6 +115,9 @@ func ConnectNode(addr ma.Multiaddr, bind int, api core.API) (core.Node, error) {
 
 	n := defaultAPINode(conn, api)
 	n.AppendAddr(addr)
+	if err := n.doFirst(); err != nil {
+		return nil, err
+	}
 	return n, nil
 }
 
@@ -121,6 +137,7 @@ func defaultAPINode(c net.Conn, api core.API) *node {
 		}
 		return nil, false
 	})
+
 	return n
 }
 
@@ -158,7 +175,7 @@ func (n *node) ID() string {
 func (n *node) Info() (core.NodeInfo, error) {
 	msg, b := n.Connection.SendCustomDataOnWait(InfoRequest, nil)
 	var nodeInfo core.NodeInfo
-	fmt.Printf("recved msg:%v,data:%s", msg, msg.Data)
+	fmt.Printf("recved msg:%v,data:%s\n", msg, msg.Data)
 	if b {
 		if msg.DataLength != 0 {
 			err := json.Unmarshal(msg.Data, &nodeInfo)
@@ -203,10 +220,8 @@ func (n *node) addrInfoRequest() (*core.AddrInfo, error) {
 }
 
 func (n *node) doFirst() error {
-	info, err := n.api.NodeAPI().NodeAddrInfo(&core.AddrReq{})
-	if err != nil {
+	if _, err := n.addrInfoRequest(); err != nil {
 		return err
 	}
-	n.addrInfo = info.AddrInfo
 	return nil
 }

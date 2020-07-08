@@ -79,7 +79,7 @@ func (ens *ErrNotStringer) Error() string {
 // For structs, the hashing can be controlled using tags. For example:
 //
 //    struct {
-//        Name string
+//        ID string
 //        UUID string `hash:"ignore"`
 //    }
 //

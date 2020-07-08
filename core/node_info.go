@@ -1,5 +1,11 @@
 package core
 
+import (
+	"encoding/json"
+	"github.com/libp2p/go-libp2p-core/peer"
+	ma "github.com/multiformats/go-multiaddr"
+)
+
 const (
 	// NodeUndefined ...
 	NodeUndefined NodeType = 0x00
@@ -76,9 +82,21 @@ type Clique struct {
 
 // NodeInfo ...
 type NodeInfo struct {
-	ID        string
-	PublicKey string
-	Type      NodeType
+	ID              string
+	PublicKey       string
+	Addrs           []ma.Multiaddr
+	IPFSAddrInfo    peer.AddrInfo
+	AgentVersion    string
+	ProtocolVersion string
+}
+
+// JSON ...
+func (v *NodeInfo) JSON() string {
+	marshal, err := json.Marshal(v)
+	if err != nil {
+		return ""
+	}
+	return string(marshal)
 }
 
 // CompareInt ...

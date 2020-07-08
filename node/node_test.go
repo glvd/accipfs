@@ -39,7 +39,7 @@ func (d dummyAPI) Ping(req *core.PingReq) (*core.PingResp, error) {
 
 func (d dummyAPI) ID(req *core.IDReq) (*core.IDResp, error) {
 	return &core.IDResp{
-		Name: d.id,
+		ID: d.id,
 	}, nil
 }
 
@@ -90,7 +90,7 @@ func TestConnectNode(t *testing.T) {
 
 			info, err := toNode.Info()
 
-			fmt.Println("get id", i, "index", j, "id", toNode.ID(), "info", info.String())
+			fmt.Println("get id", i, "index", j, "id", toNode.ID(), "info", info.JSON())
 
 			err = toNode.Close()
 			if err != nil {

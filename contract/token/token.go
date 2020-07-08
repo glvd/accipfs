@@ -358,7 +358,7 @@ func (_DhToken *DhTokenCallerSession) IsOwner() (bool, error) {
 	return _DhToken.Contract.IsOwner(&_DhToken.CallOpts)
 }
 
-// Name is a free data retrieval call binding the contract method 0x06fdde03.
+// ID is a free data retrieval call binding the contract method 0x06fdde03.
 //
 // Solidity: function name() constant returns(string)
 func (_DhToken *DhTokenCaller) Name(opts *bind.CallOpts) (string, error) {
@@ -370,14 +370,14 @@ func (_DhToken *DhTokenCaller) Name(opts *bind.CallOpts) (string, error) {
 	return *ret0, err
 }
 
-// Name is a free data retrieval call binding the contract method 0x06fdde03.
+// ID is a free data retrieval call binding the contract method 0x06fdde03.
 //
 // Solidity: function name() constant returns(string)
 func (_DhToken *DhTokenSession) Name() (string, error) {
 	return _DhToken.Contract.Name(&_DhToken.CallOpts)
 }
 
-// Name is a free data retrieval call binding the contract method 0x06fdde03.
+// ID is a free data retrieval call binding the contract method 0x06fdde03.
 //
 // Solidity: function name() constant returns(string)
 func (_DhToken *DhTokenCallerSession) Name() (string, error) {

@@ -31,7 +31,7 @@ type IDReq struct {
 
 // IDResp ...
 type IDResp struct {
-	Name      string
+	ID        string
 	PublicKey string
 	Addrs     []ma.Multiaddr
 	DataStore DataStoreInfo
@@ -105,8 +105,5 @@ type NodeLinkReq struct {
 
 // NodeLinkResp ...
 type NodeLinkResp struct {
-	Name      string
-	PublicKey string
-	Addrs     []ma.Multiaddr
-	DataStore DataStoreInfo
+	NodeInfo
 }

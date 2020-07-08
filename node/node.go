@@ -99,20 +99,28 @@ func ConnectNode(addr ma.Multiaddr, bind int, api core.API) (core.Node, error) {
 		return nil, err
 	}
 
-	n := defaultNode(conn)
-	n.SetAPI(api)
+	n := defaultAPINode(conn, api)
 	n.AppendAddr(addr)
 	return n, nil
 }
 
-func defaultNode(c net.Conn) *node {
+func defaultAPINode(c net.Conn, api core.API) *node {
 	conn := scdt.Connect(c, func(c *scdt.Config) {
 		c.Timeout = 30 * time.Second
 	})
-	return &node{
-		api:        nil,
+	n := &node{
+		api:        api,
 		Connection: conn,
 	}
+
+	conn.RecvCustomData(func(message *scdt.Message) ([]byte, bool) {
+		switch message.CustomID {
+		case InfoRequest:
+			return n.RecvDataRequest(message)
+		}
+		return nil, false
+	})
+	return n
 }
 
 // AppendAddr ...
@@ -146,19 +154,19 @@ func (n *node) ID() string {
 }
 
 // Info ...
-func (n *node) Info() (peer.AddrInfo, error) {
-	msg, b := n.Connection.SendCustomDataOnWait(InfoRequest, []byte("get info from remote"))
-	var ai peer.AddrInfo
+func (n *node) Info() (core.NodeInfo, error) {
+	msg, b := n.Connection.SendCustomDataOnWait(InfoRequest, nil)
+	var nodeInfo core.NodeInfo
 	if b {
 		if msg.DataLength != 0 {
-			err := json.Unmarshal(msg.Data, &ai)
+			err := json.Unmarshal(msg.Data, &nodeInfo)
 			if err != nil {
-				return ai, nil
+				return nodeInfo, nil
 			}
-			return ai, nil
+			return nodeInfo, nil
 		}
 	}
-	return ai, errors.New("data not found")
+	return nodeInfo, errors.New("data not found")
 }
 
 // GetDataRequest ...
@@ -167,11 +175,26 @@ func (n *node) GetDataRequest() {
 }
 
 // RecvDataRequest ...
-func (n *node) RecvDataRequest(id uint16, cb scdt.RecvCallbackFunc) {
-	switch id {
-	case InfoRequest:
-
+func (n *node) RecvDataRequest(message *scdt.Message) ([]byte, bool) {
+	info, err := n.api.NodeAPI().NodeAddrInfo(&core.AddrReq{})
+	if err != nil {
+		return nil, true
 	}
+	var addrs []ma.Multiaddr
+	for addr := range info.AddrInfo.Addrs {
+		addrs = append(addrs, addr)
+	}
+
+	nodeInfo := &core.NodeInfo{
+		ID:              info.AddrInfo.ID,
+		PublicKey:       info.AddrInfo.PublicKey,
+		Addrs:           addrs,
+		IPFSAddrInfo:    info.AddrInfo.IPFSAddrInfo,
+		AgentVersion:    "", //todo
+		ProtocolVersion: "", //todo
+	}
+	json := nodeInfo.JSON()
+	return []byte(json), true
 }
 
 func (n *node) addrInfoRequest() (*core.AddrInfo, error) {

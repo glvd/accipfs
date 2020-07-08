@@ -119,7 +119,7 @@ func (c *APIContext) ID(req *core.IDReq) (*core.IDResp, error) {
 		multiAddress = append(multiAddress, multiaddr)
 	}
 	return &core.IDResp{
-		Name:      c.cfg.Identity,
+		ID:        c.cfg.Identity,
 		PublicKey: pubString,
 		Addrs:     nil,
 		DataStore: *ipfsID,
@@ -257,8 +257,17 @@ func (c *APIContext) Link(req *core.NodeLinkReq) (*core.NodeLinkResp, error) {
 		if err != nil {
 			continue
 		}
-		c.manager.Conn(dial)
-		return &core.NodeLinkResp{}, nil
+		conn, err := c.manager.Conn(dial)
+		if err != nil {
+			return nil, err
+		}
+		info, err := conn.Info()
+		if err != nil {
+			return nil, err
+		}
+		return &core.NodeLinkResp{
+			NodeInfo: info,
+		}, nil
 	}
 	return &core.NodeLinkResp{}, errors.New("all request was failed")
 }

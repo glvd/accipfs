@@ -13,7 +13,7 @@ type Node interface {
 	ID() string
 	Addrs() []ma.Multiaddr
 	IPFSAddrInfo() (peer.AddrInfo, error)
-	Info() (peer.AddrInfo, error)
+	Info() (NodeInfo, error)
 	Close() (err error)
 	IsClosed() bool
 	AppendAddr(addrs ...ma.Multiaddr)

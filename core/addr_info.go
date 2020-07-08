@@ -10,6 +10,7 @@ import (
 // AddrInfo ...
 type AddrInfo struct {
 	ID           string
+	PublicKey    string
 	Addrs        map[ma.Multiaddr]bool
 	IPFSAddrInfo peer.AddrInfo
 }

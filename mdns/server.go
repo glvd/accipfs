@@ -165,7 +165,7 @@ func (s *server) handleQuery(query *dns.Msg, from net.Addr) error {
 			// 18.12 pertains to questions (handled by handleQuestion)
 			// 18.13 pertains to resource records (handled by handleQuestion)
 
-			// 18.14: Name Compression - responses should be compressed (though see
+			// 18.14: ID Compression - responses should be compressed (though see
 			// caveats in the RFC), so set the Compress bit (part of the dns library
 			// API, not part of the DNS packet) to true.
 			Compress: true,
@@ -262,7 +262,7 @@ func (s *server) Records(q dns.Question) []dns.RR {
 				return nil
 			}
 		}
-		//else if q.Name == "_services._dns-sd._udp."+s.cfg.Domain+"." {
+		//else if q.ID == "_services._dns-sd._udp."+s.cfg.Domain+"." {
 		//	recs = s.dnssdMetaQueryRecords(q)
 		//}
 		//if recs != nil {

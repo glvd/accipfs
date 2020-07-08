@@ -69,10 +69,10 @@ func main() {
 				}
 				//select {
 				//case e := <-entries:
-				//	//if e.Name != "accipfs._foobar._tcp.local." {
+				//	//if e.ID != "accipfs._foobar._tcp.local." {
 				//	//	log.Module("main").Fatalf("bad: %v", e)
 				//	//}
-				//	log.Module("main").Infow("output detail", "name", e.Name, "host", e.Host, "fields", e.InfoFields, "ipv4", e.AddrV4.String(), "ipv6", e.AddrV6.String())
+				//	log.Module("main").Infow("output detail", "name", e.ID, "host", e.Host, "fields", e.InfoFields, "ipv4", e.AddrV4.String(), "ipv6", e.AddrV6.String())
 				//	log.Module("main").Infow("output addr", "addr", e.Addr.String())
 				//	log.Module("main").Infow("output port", "port", e.Port, "want", port)
 				//	log.Module("main").Infow("output info", "info", e.Info, "want", info)

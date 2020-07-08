@@ -81,6 +81,7 @@ func CoreNode(conn net.Conn, api core.API) (core.Node, error) {
 		return nil, err
 	}
 	n.AppendAddr(netAddr)
+	n.doFirst()
 	return n, nil
 }
 
@@ -177,20 +178,11 @@ func (n *node) GetDataRequest() {
 
 // RecvDataRequest ...
 func (n *node) RecvDataRequest(message *scdt.Message) ([]byte, bool) {
-	info, err := n.api.NodeAPI().NodeAddrInfo(&core.AddrReq{})
-	if err != nil {
-		return nil, true
-	}
-	var addrs []ma.Multiaddr
-	for addr := range info.AddrInfo.Addrs {
-		addrs = append(addrs, addr)
-	}
-
 	nodeInfo := &core.NodeInfo{
-		ID:              info.AddrInfo.ID,
-		PublicKey:       info.AddrInfo.PublicKey,
-		Addrs:           addrs,
-		IPFSAddrInfo:    info.AddrInfo.IPFSAddrInfo,
+		ID:              n.addrInfo.ID,
+		PublicKey:       n.addrInfo.PublicKey,
+		Addrs:           n.Addrs(),
+		IPFSAddrInfo:    n.addrInfo.IPFSAddrInfo,
 		AgentVersion:    "", //todo
 		ProtocolVersion: "", //todo
 	}
@@ -208,4 +200,13 @@ func (n *node) addrInfoRequest() (*core.AddrInfo, error) {
 	}
 	n.addrInfo = id.AddrInfo
 	return n.addrInfo, nil
+}
+
+func (n *node) doFirst() error {
+	info, err := n.api.NodeAPI().NodeAddrInfo(&core.AddrReq{})
+	if err != nil {
+		return err
+	}
+	n.addrInfo = info.AddrInfo
+	return nil
 }

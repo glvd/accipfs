@@ -14,11 +14,11 @@ type linkListener struct {
 	protocol string
 	bindPort int
 	port     int
-	cb       func(conn net.Conn)
+	cb       func(conn net.Conn) (core.Node, error)
 }
 
 // newLinkListener listen other client connections
-func newLinkListener(cfg *config.Config, cb func(conn net.Conn)) core.Listener {
+func newLinkListener(cfg *config.Config, cb func(conn net.Conn) (core.Node, error)) core.Listener {
 	l := &linkListener{
 		protocol: "tcp",
 		bindPort: cfg.Node.BindPort,

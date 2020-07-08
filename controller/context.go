@@ -28,9 +28,9 @@ type APIContext struct {
 	serv       *http.Server
 	ready      *atomic.Bool
 	controller *Controller
-	ethNode    *nodeBinETH
-	ipfsNode   *nodeBinIPFS
-	msg        func(s string)
+	//ethNode    *nodeBinETH
+	//ipfsNode   *nodeBinIPFS
+	msg func(s string)
 	//cb         func(tag core.RequestTag, v interface{}) error
 	manager core.NodeManager
 }
@@ -203,6 +203,10 @@ func (c *APIContext) MessageHandle(f func(s string)) {
 	if f != nil {
 		c.msg = f
 	}
+}
+
+func (c *APIContext) setController(controller *Controller) {
+	c.controller = controller
 }
 
 func (c *APIContext) id(ctx *gin.Context) {

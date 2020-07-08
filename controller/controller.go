@@ -55,6 +55,7 @@ func New(cfg *config.Config, ctx *APIContext) *Controller {
 	c.isRunning = atomic.NewBool(false)
 	c.services[IndexContext] = ctx
 	c.ctx = ctx
+	c.ctx.setController(c)
 	return c
 }
 
@@ -107,4 +108,12 @@ func (c *Controller) Stop() (e error) {
 // GetAPI ...
 func (c *Controller) API(manager core.NodeManager) core.API {
 	return c.ctx.API(manager)
+}
+
+func (c *Controller) dataNode() *nodeBinIPFS {
+	return c.ipfsNode
+}
+
+func (c *Controller) infoNode() *nodeBinETH {
+	return c.ethNode
 }

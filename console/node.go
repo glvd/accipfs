@@ -28,7 +28,8 @@ func nodeConnectCmd() *cobra.Command {
 		Long:  "connect a remote node",
 		Run: func(cmd *cobra.Command, args []string) {
 			config.Initialize()
-			url := config.RPCAddr()
+			cfg := config.Global()
+			client.InitGlobalClient(&cfg)
 			var addrs []ma.Multiaddr
 			for _, addr := range args {
 				fmt.Printf("connect to [%s]\n", addr)

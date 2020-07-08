@@ -192,8 +192,8 @@ func (n *nodeBinIPFS) PinAdd(ctx context.Context, hash string) (e error) {
 }
 
 // PinLS ...
-func (n *nodeBinIPFS) PinLS(ctx context.Context) (pins []iface.Pin, e error) {
-	return n.API().Pin().Ls(ctx, options.Pin.Type.Recursive())
+func (n *nodeBinIPFS) PinLS(ctx context.Context) (pins <-chan iface.Pin, e error) {
+	return n.API().Pin().Ls(ctx, options.Pin.Ls.Recursive())
 }
 
 // PinRm ...

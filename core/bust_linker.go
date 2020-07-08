@@ -57,9 +57,24 @@ type ConnectedResp struct {
 	Node
 }
 
+// NodeListReq ...
+type NodeListReq struct {
+}
+
+// NodeListResp ...
+type NodeListResp struct {
+}
+
+// NodeUnlinkReq ...
+type NodeUnlinkReq struct {
+}
+
+// NodeUnlinkResp ...
+type NodeUnlinkResp struct {
+}
+
 // ConnectToReq ...
 type ConnectToReq struct {
-	Addrs []ma.Multiaddr
 }
 
 // ConnectToResp ...
@@ -94,10 +109,13 @@ type RequestTag int
 
 // NodeLinkReq ...
 type NodeLinkReq struct {
-	Addrs []string
+	Addrs []ma.Multiaddr
 }
 
 // NodeLinkResp ...
 type NodeLinkResp struct {
-	Addr string
+	Name      string
+	PublicKey string
+	Addrs     []ma.Multiaddr
+	DataStore DataStoreInfo
 }

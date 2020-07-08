@@ -8,22 +8,6 @@ type API interface {
 	NodeAPI() NodeAPI
 }
 
-// NodeListReq ...
-type NodeListReq struct {
-}
-
-// NodeListResp ...
-type NodeListResp struct {
-}
-
-// NodeUnlinkReq ...
-type NodeUnlinkReq struct {
-}
-
-// NodeUnlinkResp ...
-type NodeUnlinkResp struct {
-}
-
 // NodeAPI ...
 type NodeAPI interface {
 	Link(req *NodeLinkReq) (*NodeLinkResp, error)

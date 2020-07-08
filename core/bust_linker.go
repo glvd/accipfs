@@ -59,7 +59,7 @@ type ConnectedResp struct {
 
 // ConnectToReq ...
 type ConnectToReq struct {
-	Addr string
+	Addrs []ma.Multiaddr
 }
 
 // ConnectToResp ...
@@ -92,12 +92,12 @@ type GetResp struct {
 // RequestTag ...
 type RequestTag int
 
-// LinkReq ...
-type LinkReq struct {
+// NodeLinkReq ...
+type NodeLinkReq struct {
 	Addrs []string
 }
 
-// LinkResp ...
-type LinkResp struct {
+// NodeLinkResp ...
+type NodeLinkResp struct {
 	Addr string
 }

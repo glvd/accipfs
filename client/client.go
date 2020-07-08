@@ -141,8 +141,8 @@ func (c *client) ID(req *core.IDReq) (resp *core.IDResp, err error) {
 }
 
 // Link ...
-func (c *client) Link(req *core.LinkReq) (resp *core.LinkResp, err error) {
-	resp = new(core.LinkResp)
+func (c *client) Link(req *core.NodeLinkReq) (resp *core.NodeLinkResp, err error) {
+	resp = new(core.NodeLinkResp)
 	err = c.doPost("link", req, resp)
 	return
 }
@@ -167,12 +167,8 @@ func (c *client) NodeAddrInfo(req *core.AddrReq) (resp *core.AddrResp, err error
 }
 
 // ConnectTo ...
-func ConnectTo(url string, req *core.ConnectToReq) (*core.ConnectToResp, error) {
-	remoteNode := new(core.ConnectToResp)
-	if err := basis.RPCPost(url, "BustLinker.ConnectTo", req, remoteNode); err != nil {
-		return nil, err
-	}
-	return remoteNode, nil
+func Connect(req *core.ConnectToReq) (resp *core.ConnectToResp, err error) {
+	return DefaultClient.Connect(req)
 }
 
 // Pins ...

@@ -78,7 +78,7 @@ func (c *APIContext) NodeAddrInfo(req *core.AddrReq) (*core.AddrResp, error) {
 }
 
 // Link ...
-func (c *APIContext) Link(req *core.LinkReq) (*core.LinkResp, error) {
+func (c *APIContext) Link(req *core.NodeLinkReq) (*core.NodeLinkResp, error) {
 	for _, addr := range req.Addrs {
 		multiaddr, err := ma.NewMultiaddr(addr)
 		if err != nil {
@@ -89,11 +89,11 @@ func (c *APIContext) Link(req *core.LinkReq) (*core.LinkResp, error) {
 			continue
 		}
 		c.manager.Conn(dial)
-		return &core.LinkResp{
+		return &core.NodeLinkResp{
 			Addr: multiaddr.String(),
 		}, nil
 	}
-	return &core.LinkResp{}, errors.New("all request was failed")
+	return &core.NodeLinkResp{}, errors.New("all request was failed")
 }
 
 // Ping ...

@@ -195,11 +195,15 @@ func (n *node) GetDataRequest() {
 
 // RecvDataRequest ...
 func (n *node) RecvDataRequest(message *scdt.Message) ([]byte, bool) {
+	addrInfo, err := n.addrInfoRequest()
+	if err != nil {
+		return nil, false
+	}
 	nodeInfo := &core.NodeInfo{
-		ID:              n.addrInfo.ID,
-		PublicKey:       n.addrInfo.PublicKey,
+		ID:              addrInfo.ID,
+		PublicKey:       addrInfo.PublicKey,
 		Addrs:           n.Addrs(),
-		IPFSAddrInfo:    n.addrInfo.IPFSAddrInfo,
+		IPFSAddrInfo:    addrInfo.IPFSAddrInfo,
 		AgentVersion:    "", //todo
 		ProtocolVersion: "", //todo
 	}

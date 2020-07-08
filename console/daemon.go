@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"github.com/glvd/accipfs/config"
+	"github.com/glvd/accipfs/log"
 	"github.com/glvd/accipfs/mdns"
 	"github.com/glvd/accipfs/service"
 	"github.com/spf13/cobra"
@@ -15,6 +16,8 @@ func daemonCmd() *cobra.Command {
 		Short: "Run the service as daemon",
 		Long:  "Run all the service with a daemon command",
 		Run: func(cmd *cobra.Command, args []string) {
+			log.InitLog()
+
 			config.Initialize()
 			cfg := config.Global()
 			linker, err := service.NewBustLinker(&cfg)

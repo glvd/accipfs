@@ -19,15 +19,14 @@ func idCmd() *cobra.Command {
 			config.Initialize()
 			cfg := config.Global()
 			client.InitGlobalClient(&cfg)
-			//url := fmt.Sprintf("http://localhost:%d/rpc", cfg.API.Port)
 			id, err := client.ID(&core.IDReq{})
 			if err != nil {
-				fmt.Printf("get local id failed error(%v)", err)
+				fmt.Printf("get local id failed error(%v)\n", err)
 				return
 			}
 			indent, err := json.MarshalIndent(id, "", " ")
 			if err != nil {
-				fmt.Printf("json marshal failed error(%v)", err)
+				fmt.Printf("json marshal failed error(%v)\n", err)
 				return
 			}
 			//output your id info to screen

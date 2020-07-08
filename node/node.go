@@ -178,7 +178,7 @@ func (n *node) addrInfoRequest() (*core.AddrInfo, error) {
 	if n.addrInfo != nil {
 		return n.addrInfo, nil
 	}
-	id, err := n.api.NodeAddrInfo(&core.AddrReq{})
+	id, err := n.api.NodeAPI().NodeAddrInfo(&core.AddrReq{})
 	if err != nil {
 		return nil, err
 	}

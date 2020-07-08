@@ -105,7 +105,7 @@ func (c *Controller) Stop() (e error) {
 	return
 }
 
-// GetAPI ...
+// API ...
 func (c *Controller) API(manager core.NodeManager) core.API {
 	return c.ctx.API(manager)
 }

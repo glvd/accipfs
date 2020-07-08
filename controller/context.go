@@ -77,25 +77,6 @@ func (c *APIContext) NodeAddrInfo(req *core.AddrReq) (*core.AddrResp, error) {
 	panic("implement me")
 }
 
-// Link ...
-func (c *APIContext) Link(req *core.NodeLinkReq) (*core.NodeLinkResp, error) {
-	for _, addr := range req.Addrs {
-		multiaddr, err := ma.NewMultiaddr(addr)
-		if err != nil {
-			continue
-		}
-		dial, err := mnet.Dial(multiaddr)
-		if err != nil {
-			continue
-		}
-		c.manager.Conn(dial)
-		return &core.NodeLinkResp{
-			Addr: multiaddr.String(),
-		}, nil
-	}
-	return &core.NodeLinkResp{}, errors.New("all request was failed")
-}
-
 // Ping ...
 func (c *APIContext) Ping(req *core.PingReq) (*core.PingResp, error) {
 	return &core.PingResp{
@@ -165,14 +146,17 @@ func (c *APIContext) Start() error {
 }
 
 func (c *APIContext) registerRoutes() {
+	c.eng.GET("/ping", c.ping)
 	api := c.eng.Group("/api")
-	api.GET("/ping", c.ping)
 	if c.cfg.Debug {
 		api.GET("/debug", c.debug)
 	}
 
 	v0 := api.Group(c.cfg.API.Version)
 	v0.POST("/id", c.id)
+	v0.POST("/node/nodeLink", c.nodeLink)
+	v0.POST("/node/unlink", c.nodeUnlink)
+	v0.POST("/node/list", c.nodeList)
 	v0.GET("/get", c.get)
 	v0.GET("/query", c.query)
 }
@@ -258,6 +242,54 @@ func (c *APIContext) query(ctx *gin.Context) {
 		return
 	}
 	JSON(ctx, "", nil)
+}
+
+func (c *APIContext) nodeLink(ctx *gin.Context) {
+	id, err := c.Link(&core.NodeLinkReq{})
+	JSON(ctx, id, err)
+}
+
+// Link ...
+func (c *APIContext) Link(req *core.NodeLinkReq) (*core.NodeLinkResp, error) {
+	for _, addr := range req.Addrs {
+		multiaddr, err := ma.NewMultiaddr(addr)
+		if err != nil {
+			continue
+		}
+		dial, err := mnet.Dial(multiaddr)
+		if err != nil {
+			continue
+		}
+		c.manager.Conn(dial)
+		return &core.NodeLinkResp{
+			Addr: multiaddr.String(),
+		}, nil
+	}
+	return &core.NodeLinkResp{}, errors.New("all request was failed")
+}
+
+func (c *APIContext) nodeUnlink(ctx *gin.Context) {
+	id, err := c.Unlink(&core.NodeUnlinkReq{})
+	JSON(ctx, id, err)
+}
+
+// Unlink ...
+func (c *APIContext) Unlink(req *core.NodeUnlinkReq) (*core.NodeUnlinkResp, error) {
+	panic("implement me")
+}
+
+func (c *APIContext) nodeList(ctx *gin.Context) {
+
+}
+
+// List ...
+func (c *APIContext) List(req *core.NodeListReq) (*core.NodeListResp, error) {
+	panic("implement me")
+}
+
+// NodeAPI ...
+func (c *APIContext) NodeAPI() core.NodeAPI {
+	return c
 }
 
 // JSON ...

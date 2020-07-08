@@ -45,7 +45,7 @@ func parseAddrInfo(b []byte, addrInfo *AddrInfo) error {
 }
 
 // MarshalJSON ...
-func (info *AddrInfo) MarshalJSON() ([]byte, error) {
+func (info AddrInfo) MarshalJSON() ([]byte, error) {
 	addrInfo := jsonAddrInfo{
 		ID:    info.ID,
 		Addrs: nil,

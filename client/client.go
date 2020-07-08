@@ -156,7 +156,7 @@ func (c *client) Add(req *core.AddReq) (resp *core.AddResp, err error) {
 
 // NodeAddrInfo ...
 func NodeAddrInfo(req *core.AddrReq) (*core.AddrResp, error) {
-	return DefaultClient.NodeAddrInfo(req)
+	return DefaultClient.NodeAPI().NodeAddrInfo(req)
 }
 
 // NodeAddrInfo ...
@@ -166,9 +166,9 @@ func (c *client) NodeAddrInfo(req *core.AddrReq) (resp *core.AddrResp, err error
 	return
 }
 
-// ConnectTo ...
-func Connect(req *core.ConnectToReq) (resp *core.ConnectToResp, err error) {
-	return DefaultClient.Connect(req)
+// NodeLink ...
+func NodeLink(req *core.NodeLinkReq) (resp *core.NodeLinkResp, err error) {
+	return DefaultClient.NodeAPI().Link(req)
 }
 
 // Pins ...
@@ -228,4 +228,23 @@ func AddPeer(url string, node core.Node) error {
 		return fmt.Errorf("connect failed: %s", basis.RPCAddress(node.Addrs()[0]))
 	}
 	return nil
+}
+
+// NodeAPI ...
+func (c *client) NodeAPI() core.NodeAPI {
+	return c
+}
+
+// Unlink ...
+func (c *client) Unlink(req *core.NodeUnlinkReq) (resp *core.NodeUnlinkResp, err error) {
+	resp = new(core.NodeUnlinkResp)
+	err = c.doPost("node/unlink", req, resp)
+	return
+}
+
+// List ...
+func (c *client) List(req *core.NodeListReq) (resp *core.NodeListResp, err error) {
+	resp = new(core.NodeListResp)
+	err = c.doPost("node/list", req, resp)
+	return
 }

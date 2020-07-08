@@ -38,17 +38,14 @@ func nodeConnectCmd() *cobra.Command {
 					return
 				}
 				addrs = append(addrs, multiaddr)
-				req := &core.ConnectToReq{Addrs: addrs}
-				remote, err := client.Connect(req)
+				req := &core.NodeLinkReq{Addrs: addrs}
+				resp, err := client.NodeLink(req)
 				if err != nil {
 					fmt.Printf("connect error: %v\n", err)
 					return
 				}
-
-				if err := client.AddPeer(url, remote.Node); err != nil {
-					fmt.Printf("add peer error: %v\n", err)
-					return
-				}
+				fmt.Println("success:")
+				fmt.Printf("%+v", resp)
 			}
 
 			return

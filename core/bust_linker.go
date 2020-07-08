@@ -47,16 +47,6 @@ type AddrResp struct {
 	AddrInfo *AddrInfo
 }
 
-// ConnectedReq ...
-type ConnectedReq struct {
-	Node
-}
-
-// ConnectedResp ...
-type ConnectedResp struct {
-	Node
-}
-
 // NodeListReq ...
 type NodeListReq struct {
 }
@@ -67,6 +57,7 @@ type NodeListResp struct {
 
 // NodeUnlinkReq ...
 type NodeUnlinkReq struct {
+	Peers []string
 }
 
 // NodeUnlinkResp ...

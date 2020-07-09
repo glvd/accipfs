@@ -177,11 +177,16 @@ func (n *node) ID() string {
 
 // Info ...
 func (n *node) Info() (core.NodeInfo, error) {
+	return n.GetInfoDataRequest()
+}
+
+// GetDataRequest ...
+func (n *node) GetInfoDataRequest() (core.NodeInfo, error) {
 	msg, b := n.Connection.SendCustomDataOnWait(InfoRequest, nil)
 	var nodeInfo core.NodeInfo
-	fmt.Printf("recved msg:%v", msg)
+	fmt.Printf("recved msg:%v\n", msg)
 	if b && msg.DataLength != 0 {
-		fmt.Printf("msg data:%v", string(msg.Data))
+		fmt.Printf("msg data:%v\n", string(msg.Data))
 		err := json.Unmarshal(msg.Data, &nodeInfo)
 		if err != nil {
 			return nodeInfo, nil
@@ -191,13 +196,9 @@ func (n *node) Info() (core.NodeInfo, error) {
 	return nodeInfo, errors.New("data not found")
 }
 
-// GetDataRequest ...
-func (n *node) GetDataRequest() {
-
-}
-
 // RecvDataRequest ...
 func (n *node) RecvDataRequest(message *scdt.Message) ([]byte, bool) {
+	fmt.Printf("request %v\n", message)
 	addrInfo, err := n.addrInfoRequest()
 	if err != nil {
 		return nil, true

@@ -53,11 +53,6 @@ func (info AddrInfo) MarshalJSON() ([]byte, error) {
 	for multiaddr := range info.Addrs {
 		addrInfo.Addrs = append(addrInfo.Addrs, multiaddr.String())
 	}
-	//_, err := info.IPFSAddrInfo.MarshalJSON()
-	//if err != nil {
-	//	return nil, err
-	//}
-	//addrInfo.IPFSAddrInfo = string(v)
 	return json.Marshal(addrInfo)
 }
 

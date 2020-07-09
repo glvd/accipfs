@@ -262,7 +262,7 @@ func (c *APIContext) nodeLink(ctx *gin.Context) {
 
 // Link ...
 func (c *APIContext) Link(req *core.NodeLinkReq) (*core.NodeLinkResp, error) {
-	fmt.Printf("connect info:%+v", req.Addrs)
+	fmt.Printf("connect info:%+v\n", req.Addrs)
 	for _, addr := range req.Addrs {
 		multiaddr, err := ma.NewMultiaddr(addr)
 		if err != nil {

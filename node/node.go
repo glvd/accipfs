@@ -129,17 +129,19 @@ func defaultAPINode(c net.Conn, api core.API) *node {
 		api:        api,
 		Connection: conn,
 	}
-	conn.Recv(func(message *scdt.Message) ([]byte, bool) {
+	conn.Recv(func(message *scdt.Message) ([]byte, bool, error) {
 		fmt.Printf("recv data:%+v", message)
-		return nil, false
+		return []byte("recv called"), true, errors.New("not data")
 	})
-	conn.RecvCustomData(func(message *scdt.Message) ([]byte, bool) {
+	conn.RecvCustomData(func(message *scdt.Message) ([]byte, bool, error) {
 		fmt.Printf("recv custom data:%+v", message)
 		switch message.CustomID {
 		case InfoRequest:
-			return n.RecvDataRequest(message)
+			request, b, err := n.RecvDataRequest(message)
+			log.Infow("info data", "data", request, "result", b, "err", err)
+			return request, b, err
 		}
-		return nil, false
+		return []byte("recv custom called"), true, errors.New("wrong case")
 	})
 
 	return n
@@ -197,22 +199,23 @@ func (n *node) GetInfoDataRequest() (core.NodeInfo, error) {
 }
 
 // RecvDataRequest ...
-func (n *node) RecvDataRequest(message *scdt.Message) ([]byte, bool) {
+func (n *node) RecvDataRequest(message *scdt.Message) ([]byte, bool, error) {
 	fmt.Printf("request %v\n", message)
 	addrInfo, err := n.addrInfoRequest()
 	if err != nil {
-		return nil, true
+		return nil, true, err
 	}
 	nodeInfo := &core.NodeInfo{
 		ID:              addrInfo.ID,
 		PublicKey:       addrInfo.PublicKey,
-		Addrs:           n.Addrs(),
+		Addrs:           addrInfo.GetAddrs(),
 		IPFSAddrInfo:    addrInfo.IPFSAddrInfo,
 		AgentVersion:    "", //todo
 		ProtocolVersion: "", //todo
 	}
 	json := nodeInfo.JSON()
-	return []byte(json), true
+	log.Infow("node info", "json", json)
+	return []byte(json), true, nil
 }
 
 func (n *node) addrInfoRequest() (*core.AddrInfo, error) {

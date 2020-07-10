@@ -11,7 +11,7 @@ const module = "log"
 var Level = "info"
 
 // Output ...
-var Output = "stderr"
+var Output = "stdout"
 
 var _log *zap.SugaredLogger
 

@@ -174,16 +174,11 @@ func (n *node) ID() string {
 }
 
 // Info ...
-func (n *node) Info() (core.NodeInfo, error) {
+func (n *node) Info() (*core.NodeInfo, error) {
 	if n.remoteNodeInfo != nil {
-		return *n.remoteNodeInfo, nil
+		return n.remoteNodeInfo, nil
 	}
-	var err error
-	n.remoteNodeInfo, err = n.GetInfoDataRequest()
-	if err != nil {
-		return core.NodeInfo{}, err
-	}
-	return *n.remoteNodeInfo, nil
+	return n.GetInfoDataRequest()
 }
 
 // GetDataRequest ...
@@ -199,6 +194,7 @@ func (n *node) GetInfoDataRequest() (*core.NodeInfo, error) {
 		}
 		return &nodeInfo, nil
 	}
+	n.remoteNodeInfo = &nodeInfo
 	return &nodeInfo, errors.New("data not found")
 }
 

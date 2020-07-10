@@ -71,25 +71,17 @@ func (c *APIContext) API(manager core.NodeManager) core.API {
 
 // NodeAddrInfo ...
 func (c *APIContext) NodeAddrInfo(req *core.AddrReq) (*core.AddrResp, error) {
-
-	if req.ID == "" {
-		return &core.AddrResp{
-			AddrInfo: &core.AddrInfo{
-				ID:           "",
-				PublicKey:    "",
-				Addrs:        nil,
-				IPFSAddrInfo: peer.AddrInfo{},
-			},
-		}, nil
+	id, err := c.ID(&core.IDReq{})
+	if err != nil {
+		return nil, err
 	}
+	info := core.NewAddrInfo(id.ID, id.Addrs...)
+	info.PublicKey = id.PublicKey
+	info.DataStore = id.DataStore
 	return &core.AddrResp{
-		AddrInfo: &core.AddrInfo{
-			ID:           "",
-			PublicKey:    "",
-			Addrs:        nil,
-			IPFSAddrInfo: peer.AddrInfo{},
-		},
+		AddrInfo: info,
 	}, nil
+
 }
 
 // Ping ...

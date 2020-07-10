@@ -22,11 +22,12 @@ const (
 
 type node struct {
 	scdt.Connection
-	local    peer.AddrInfo
-	remoteID *atomic.String
-	remote   peer.AddrInfo
-	addrInfo *core.AddrInfo
-	api      core.API
+	local          peer.AddrInfo
+	remoteID       *atomic.String
+	remote         peer.AddrInfo
+	remoteNodeInfo *core.NodeInfo
+	addrInfo       *core.AddrInfo
+	api            core.API
 }
 
 type jsonNode struct {
@@ -174,11 +175,19 @@ func (n *node) ID() string {
 
 // Info ...
 func (n *node) Info() (core.NodeInfo, error) {
-	return n.GetInfoDataRequest()
+	if n.remoteNodeInfo != nil {
+		return *n.remoteNodeInfo, nil
+	}
+	var err error
+	n.remoteNodeInfo, err = n.GetInfoDataRequest()
+	if err != nil {
+		return core.NodeInfo{}, err
+	}
+	return *n.remoteNodeInfo, nil
 }
 
 // GetDataRequest ...
-func (n *node) GetInfoDataRequest() (core.NodeInfo, error) {
+func (n *node) GetInfoDataRequest() (*core.NodeInfo, error) {
 	msg, b := n.Connection.SendCustomDataOnWait(InfoRequest, nil)
 	var nodeInfo core.NodeInfo
 	fmt.Printf("recved msg:%v\n", msg)
@@ -186,11 +195,11 @@ func (n *node) GetInfoDataRequest() (core.NodeInfo, error) {
 		fmt.Printf("msg data:%v\n", string(msg.Data))
 		err := json.Unmarshal(msg.Data, &nodeInfo)
 		if err != nil {
-			return nodeInfo, nil
+			return &nodeInfo, err
 		}
-		return nodeInfo, nil
+		return &nodeInfo, nil
 	}
-	return nodeInfo, errors.New("data not found")
+	return &nodeInfo, errors.New("data not found")
 }
 
 // RecvIndexSyncRequest ...
@@ -211,10 +220,7 @@ func (n *node) RecvDataRequest(message *scdt.Message) ([]byte, bool, error) {
 		return nil, true, err
 	}
 	nodeInfo := &core.NodeInfo{
-		ID:              addrInfo.ID,
-		PublicKey:       addrInfo.PublicKey,
-		Addrs:           addrInfo.GetAddrs(),
-		DataStore:       addrInfo.DataStore,
+		AddrInfo:        *addrInfo,
 		AgentVersion:    "", //todo
 		ProtocolVersion: "", //todo
 	}

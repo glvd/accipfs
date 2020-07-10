@@ -2,7 +2,6 @@ package core
 
 import (
 	"encoding/json"
-	ma "github.com/multiformats/go-multiaddr"
 )
 
 const (
@@ -81,10 +80,7 @@ type Clique struct {
 
 // NodeInfo ...
 type NodeInfo struct {
-	ID              string
-	PublicKey       string
-	Addrs           []ma.Multiaddr
-	DataStore       DataStoreInfo
+	AddrInfo
 	AgentVersion    string
 	ProtocolVersion string
 }

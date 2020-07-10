@@ -1,7 +1,6 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
 	"github.com/glvd/accipfs/client"
 	"github.com/glvd/accipfs/config"
@@ -59,11 +58,10 @@ func nodePeerCmd() *cobra.Command {
 			if err != nil {
 				panic(err)
 			}
-			j, err := json.MarshalIndent(list.Nodes, "", " ")
-			if err != nil {
-				return
+			for id, info := range list.Nodes {
+				fmt.Printf("node:%v\n", id)
+				fmt.Printf("info:%v\n", info.JSON())
 			}
-			fmt.Printf("list:\n%v\n", j)
 			return
 		},
 	}

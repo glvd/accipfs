@@ -325,7 +325,8 @@ func (c *APIContext) Unlink(req *core.NodeUnlinkReq) (*core.NodeUnlinkResp, erro
 	panic("implement me")
 }
 func (c *APIContext) nodeList(ctx *gin.Context) {
-
+	list, err := c.List(&core.NodeListReq{})
+	JSON(ctx, list, err)
 }
 
 // List ...

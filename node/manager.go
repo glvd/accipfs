@@ -175,22 +175,21 @@ func (m *manager) Conn(c net.Conn) (core.Node, error) {
 }
 
 func (m *manager) poolRun(v interface{}) {
-	//todo: do something loop
 	n, b := v.(core.Node)
 	if !b {
 		return
 	}
-	if !n.IsClosed() {
-		m.Push(n)
-	}
-	node, b := m.connectNodes.LoadOrStore(n.ID(), n)
-	if b {
-		nbase := node.(core.Node)
+	store, loaded := m.connectNodes.Load(n.ID())
+	if loaded {
+		nbase := store.(core.Node)
 		if n.Addrs() != nil {
 			nbase.AppendAddr(n.Addrs()...)
 		}
-	} else {
-		//
+		n.Close()
+		return
+	}
+	if !n.IsClosed() {
+		m.Push(n)
 	}
 
 }

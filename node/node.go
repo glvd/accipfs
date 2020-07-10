@@ -193,8 +193,8 @@ func (n *node) GetInfoDataRequest() (core.NodeInfo, error) {
 	return nodeInfo, errors.New("data not found")
 }
 
-// RecvDataSyncRequest ...
-func (n *node) RecvInfoSyncRequest() ([]byte, bool, error) {
+// RecvIndexSyncRequest ...
+func (n *node) RecvIndexSyncRequest() ([]byte, bool, error) {
 	panic("//todo")
 }
 

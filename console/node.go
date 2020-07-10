@@ -37,7 +37,7 @@ func nodeConnectCmd() *cobra.Command {
 				return
 			}
 			fmt.Println("success:")
-			fmt.Printf("%+v", resp)
+			fmt.Printf("%+v\n", resp.JSON())
 
 			return
 		},

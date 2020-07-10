@@ -91,7 +91,7 @@ type NodeInfo struct {
 
 // JSON ...
 func (v *NodeInfo) JSON() string {
-	marshal, err := json.Marshal(v)
+	marshal, err := json.MarshalIndent(v, "", " ")
 	if err != nil {
 		return ""
 	}

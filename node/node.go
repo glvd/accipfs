@@ -174,15 +174,15 @@ func (n *node) ID() string {
 }
 
 // Info ...
-func (n *node) Info() (*core.NodeInfo, error) {
+func (n *node) Info() (core.NodeInfo, error) {
 	if n.remoteNodeInfo != nil {
-		return n.remoteNodeInfo, nil
+		return *n.remoteNodeInfo, nil
 	}
 	return n.GetInfoDataRequest()
 }
 
 // GetDataRequest ...
-func (n *node) GetInfoDataRequest() (*core.NodeInfo, error) {
+func (n *node) GetInfoDataRequest() (core.NodeInfo, error) {
 	msg, b := n.Connection.SendCustomDataOnWait(InfoRequest, nil)
 	var nodeInfo core.NodeInfo
 	fmt.Printf("recved msg:%v\n", msg)
@@ -190,12 +190,12 @@ func (n *node) GetInfoDataRequest() (*core.NodeInfo, error) {
 		fmt.Printf("msg data:%v\n", string(msg.Data))
 		err := json.Unmarshal(msg.Data, &nodeInfo)
 		if err != nil {
-			return &nodeInfo, err
+			return nodeInfo, err
 		}
-		return &nodeInfo, nil
+		return nodeInfo, nil
 	}
 	n.remoteNodeInfo = &nodeInfo
-	return &nodeInfo, errors.New("data not found")
+	return nodeInfo, errors.New("data not found")
 }
 
 // RecvIndexSyncRequest ...

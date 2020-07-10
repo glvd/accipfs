@@ -42,13 +42,13 @@ func (n *node) IsClosed() bool {
 	return n.Connection.IsClosed()
 }
 
-// IPFSAddrInfo ...
-func (n *node) IPFSAddrInfo() (peer.AddrInfo, error) {
+// DataStoreInfo ...
+func (n *node) DataStoreInfo() (core.DataStoreInfo, error) {
 	addrInfo, err := n.addrInfoRequest()
 	if err != nil {
-		return peer.AddrInfo{}, err
+		return core.DataStoreInfo{}, err
 	}
-	return addrInfo.IPFSAddrInfo, nil
+	return addrInfo.DataStore, nil
 }
 
 // Marshal ...
@@ -83,10 +83,7 @@ func (n *node) Verify() bool {
 
 // CoreNode ...
 func CoreNode(conn net.Conn, api core.API) (core.Node, error) {
-	n := &node{
-		api:        api,
-		Connection: scdt.Connect(conn),
-	}
+	n := defaultAPINode(conn, api, 30*time.Second)
 	netAddr, err := mnet.FromNetAddr(conn.RemoteAddr())
 	if err != nil {
 		return nil, err
@@ -113,7 +110,7 @@ func ConnectNode(addr ma.Multiaddr, bind int, api core.API) (core.Node, error) {
 		return nil, err
 	}
 
-	n := defaultAPINode(conn, api)
+	n := defaultAPINode(conn, api, 0)
 	n.AppendAddr(addr)
 	if err := n.doFirst(); err != nil {
 		return nil, err
@@ -121,9 +118,9 @@ func ConnectNode(addr ma.Multiaddr, bind int, api core.API) (core.Node, error) {
 	return n, nil
 }
 
-func defaultAPINode(c net.Conn, api core.API) *node {
+func defaultAPINode(c net.Conn, api core.API, duration time.Duration) *node {
 	conn := scdt.Connect(c, func(c *scdt.Config) {
-		c.Timeout = 30 * time.Second
+		c.Timeout = duration
 	})
 	n := &node{
 		api:        api,
@@ -138,7 +135,6 @@ func defaultAPINode(c net.Conn, api core.API) *node {
 		switch message.CustomID {
 		case InfoRequest:
 			request, b, err := n.RecvDataRequest(message)
-			log.Infow("info data", "data", request, "result", b, "err", err)
 			return request, b, err
 		}
 		return []byte("recv custom called"), true, errors.New("wrong case")
@@ -209,7 +205,7 @@ func (n *node) RecvDataRequest(message *scdt.Message) ([]byte, bool, error) {
 		ID:              addrInfo.ID,
 		PublicKey:       addrInfo.PublicKey,
 		Addrs:           addrInfo.GetAddrs(),
-		IPFSAddrInfo:    addrInfo.IPFSAddrInfo,
+		DataStore:       addrInfo.DataStore,
 		AgentVersion:    "", //todo
 		ProtocolVersion: "", //todo
 	}
@@ -222,6 +218,14 @@ func (n *node) addrInfoRequest() (*core.AddrInfo, error) {
 	if n.addrInfo != nil {
 		return n.addrInfo, nil
 	}
+	//resp, err := n.api.ID(&core.IDReq{})
+	//if err != nil {
+	//	return nil, err
+	//}
+	//n.addrInfo = core.NewAddrInfo(resp.ID, resp.Addrs...)
+	//n.addrInfo.PublicKey = resp.PublicKey
+	//
+	//n.addrInfo.IPFSAddrInfo =
 	id, err := n.api.NodeAPI().NodeAddrInfo(&core.AddrReq{})
 	if err != nil {
 		return nil, err

@@ -1,7 +1,6 @@
 package core
 
 import (
-	"github.com/libp2p/go-libp2p-core/peer"
 	ma "github.com/multiformats/go-multiaddr"
 )
 
@@ -12,7 +11,7 @@ type RecvCBFunc func(id string, v interface{}) ([]byte, error)
 type Node interface {
 	ID() string
 	Addrs() []ma.Multiaddr
-	IPFSAddrInfo() (peer.AddrInfo, error)
+	DataStoreInfo() (DataStoreInfo, error)
 	Info() (NodeInfo, error)
 	Close() (err error)
 	IsClosed() bool

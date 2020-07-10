@@ -3,25 +3,26 @@ package core
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/libp2p/go-libp2p-core/peer"
 	ma "github.com/multiformats/go-multiaddr"
 )
 
 // AddrInfo ...
 type AddrInfo struct {
-	ID           string
-	PublicKey    string
-	Addrs        map[ma.Multiaddr]bool
-	IPFSAddrInfo peer.AddrInfo
+	ID        string
+	PublicKey string
+	Addrs     map[ma.Multiaddr]bool
+	DataStore DataStoreInfo
+	//IPFSAddrInfo peer.AddrInfo
 }
 type jsonIPFSAddrInfo struct {
 	ID    string   `json:"id"`
 	Addrs []string `json:"addrs"`
 }
 type jsonAddrInfo struct {
-	ID           string        `json:"id"`
-	Addrs        []string      `json:"addrs"`
-	IPFSAddrInfo peer.AddrInfo `json:"ipfs_addr_info"`
+	ID        string        `json:"id"`
+	Addrs     []string      `json:"addrs"`
+	DataStore DataStoreInfo `json:"data_store"`
+	//IPFSAddrInfo peer.AddrInfo `json:"ipfs_addr_info"`
 }
 
 func parseAddrInfo(b []byte, addrInfo *AddrInfo) error {
@@ -73,9 +74,9 @@ func NewAddrInfo(id string, addrs ...ma.Multiaddr) *AddrInfo {
 	}
 }
 
-// SetIPFSAddrInfo ...
-func (info *AddrInfo) SetIPFSAddrInfo(ipfsAddrInfo peer.AddrInfo) {
-	info.IPFSAddrInfo = ipfsAddrInfo
+// SetDataStoreInfo ...
+func (info *AddrInfo) SetDataStoreInfo(dataStoreInfo DataStoreInfo) {
+	info.DataStore = dataStoreInfo
 }
 
 // SetID ...

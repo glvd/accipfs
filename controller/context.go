@@ -71,14 +71,24 @@ func (c *APIContext) API(manager core.NodeManager) core.API {
 
 // NodeAddrInfo ...
 func (c *APIContext) NodeAddrInfo(req *core.AddrReq) (*core.AddrResp, error) {
-	//todo
+
 	if req.ID == "" {
 		return &core.AddrResp{
-			AddrInfo: &core.AddrInfo{},
+			AddrInfo: &core.AddrInfo{
+				ID:           "",
+				PublicKey:    "",
+				Addrs:        nil,
+				IPFSAddrInfo: peer.AddrInfo{},
+			},
 		}, nil
 	}
 	return &core.AddrResp{
-		AddrInfo: &core.AddrInfo{},
+		AddrInfo: &core.AddrInfo{
+			ID:           "",
+			PublicKey:    "",
+			Addrs:        nil,
+			IPFSAddrInfo: peer.AddrInfo{},
+		},
 	}, nil
 }
 
@@ -87,6 +97,30 @@ func (c *APIContext) Ping(req *core.PingReq) (*core.PingResp, error) {
 	return &core.PingResp{
 		Data: "pong",
 	}, nil
+}
+
+func (c *APIContext) nodeID() (string, string, error) {
+	fromStringID, err := peer.Decode(c.cfg.Identity)
+	if err != nil {
+		return "", "", err
+	}
+	log.Infow("get id", "id", fromStringID.String())
+	pkb, err := base64.StdEncoding.DecodeString(c.cfg.PrivateKey)
+	if err != nil {
+		return "", "", err
+	}
+	privateKey, err := ic.UnmarshalPrivateKey(pkb)
+	if err != nil {
+		return "", "", err
+	}
+	publicKey := privateKey.GetPublic()
+	bytes, err := publicKey.Bytes()
+	if err != nil {
+		return "", "", err
+	}
+	pubString := base64.StdEncoding.EncodeToString(bytes)
+	log.Infow("result id", "id", c.cfg.Identity, "public key", pubString)
+	return fromStringID.Pretty(), pubString, nil
 }
 
 // ID ...

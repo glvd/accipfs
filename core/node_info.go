@@ -2,7 +2,6 @@ package core
 
 import (
 	"encoding/json"
-	"github.com/libp2p/go-libp2p-core/peer"
 	ma "github.com/multiformats/go-multiaddr"
 )
 
@@ -85,7 +84,7 @@ type NodeInfo struct {
 	ID              string
 	PublicKey       string
 	Addrs           []ma.Multiaddr
-	IPFSAddrInfo    peer.AddrInfo
+	DataStore       DataStoreInfo
 	AgentVersion    string
 	ProtocolVersion string
 }

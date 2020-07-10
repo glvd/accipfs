@@ -1,8 +1,8 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
-	"github.com/glvd/accipfs/basis"
 	"github.com/glvd/accipfs/client"
 	"github.com/glvd/accipfs/config"
 	"github.com/glvd/accipfs/core"
@@ -47,21 +47,23 @@ func nodeConnectCmd() *cobra.Command {
 
 func nodePeerCmd() *cobra.Command {
 	peers := &cobra.Command{
-		Use:   "peers",
-		Short: "peers run",
-		Long:  "show the local node peers",
+		Use:   "list",
+		Short: "list run",
+		Long:  "show the local node list",
 		Run: func(cmd *cobra.Command, args []string) {
 			config.Initialize()
 			cfg := config.Global()
-			url := fmt.Sprintf("http://localhost:%d/rpc", cfg.API.Port)
-			reply := new([]*core.Node)
-			node := new(core.Node)
-			if err := basis.RPCPost(url, "BustLinker.Peers", node, reply); err != nil {
-				fmt.Println("peers error:", err.Error())
+			client.InitGlobalClient(&cfg)
+
+			list, err := client.List(&core.NodeListReq{})
+			if err != nil {
+				panic(err)
 			}
-			for _, info := range *reply {
-				fmt.Println("Peer:", info)
+			j, err := json.MarshalIndent(list.Nodes, "", " ")
+			if err != nil {
+				return
 			}
+			fmt.Printf("list:\n%v\n", j)
 			return
 		},
 	}

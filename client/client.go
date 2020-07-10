@@ -166,6 +166,11 @@ func (c *client) NodeAddrInfo(req *core.AddrReq) (resp *core.AddrResp, err error
 	return
 }
 
+// List ...
+func List(req *core.NodeListReq) (resp *core.NodeListResp, err error) {
+	return DefaultClient.NodeAPI().List(req)
+}
+
 // NodeLink ...
 func NodeLink(req *core.NodeLinkReq) (resp *core.NodeLinkResp, err error) {
 	return DefaultClient.NodeAPI().Link(req)

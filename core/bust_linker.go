@@ -53,6 +53,7 @@ type NodeListReq struct {
 
 // NodeListResp ...
 type NodeListResp struct {
+	Nodes map[string]NodeInfo
 }
 
 // NodeUnlinkReq ...

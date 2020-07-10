@@ -330,7 +330,16 @@ func (c *APIContext) nodeList(ctx *gin.Context) {
 
 // List ...
 func (c *APIContext) List(req *core.NodeListReq) (*core.NodeListResp, error) {
-	panic("implement me")
+	nodes := make(map[string]core.NodeInfo)
+	c.manager.Range(func(key string, node core.Node) bool {
+		info, err := node.Info()
+		if err != nil {
+			return true
+		}
+		nodes[key] = info
+		return true
+	})
+	return &core.NodeListResp{Nodes: nodes}, nil
 }
 
 // NodeAPI ...

@@ -109,7 +109,6 @@ func ConnectNode(addr ma.Multiaddr, bind int, api core.API) (core.Node, error) {
 	if err != nil {
 		return nil, err
 	}
-
 	n := defaultAPINode(conn, api, 0)
 	n.AppendAddr(addr)
 	if err := n.doFirst(); err != nil {
@@ -218,14 +217,6 @@ func (n *node) addrInfoRequest() (*core.AddrInfo, error) {
 	if n.addrInfo != nil {
 		return n.addrInfo, nil
 	}
-	//resp, err := n.api.ID(&core.IDReq{})
-	//if err != nil {
-	//	return nil, err
-	//}
-	//n.addrInfo = core.NewAddrInfo(resp.ID, resp.Addrs...)
-	//n.addrInfo.PublicKey = resp.PublicKey
-	//
-	//n.addrInfo.IPFSAddrInfo =
 	id, err := n.api.NodeAPI().NodeAddrInfo(&core.AddrReq{})
 	if err != nil {
 		return nil, err

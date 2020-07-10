@@ -105,5 +105,6 @@ type NodeLinkReq struct {
 
 // NodeLinkResp ...
 type NodeLinkResp struct {
+	Err error
 	NodeInfo
 }

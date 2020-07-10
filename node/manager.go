@@ -25,6 +25,7 @@ type manager struct {
 	path            string
 	expPath         string
 	api             core.API
+	local           *core.NodeInfo
 	nodePool        *ants.PoolWithFunc
 	connectNodes    sync.Map
 	disconnectNodes sync.Map
@@ -48,6 +49,7 @@ func Manager(cfg *config.Config, ctx *controller.APIContext) core.NodeManager {
 		t:        time.NewTicker(cfg.Node.BackupSeconds),
 	}
 	m.api = ctx.API(m)
+
 	m.nodePool = mustPool(ants.DefaultAntsPoolSize, m.poolRun)
 	go m.loop()
 
@@ -89,7 +91,7 @@ func (m *manager) Load() error {
 			log.Errorw("load addr info failed", "err", err)
 		}
 		for multiaddr := range addrInfo.Addrs {
-			connectNode, err := ConnectNode(multiaddr, 0, m.api)
+			connectNode, err := ConnectNode(multiaddr, 0, *m.local, m.api)
 			if err != nil {
 				continue
 			}
@@ -165,7 +167,7 @@ func (m *manager) loop() {
 
 // Conn ...
 func (m *manager) Conn(c net.Conn) (core.Node, error) {
-	acceptNode, err := CoreNode(c, m.api)
+	acceptNode, err := CoreNode(c, *m.local, m.api)
 	if err != nil {
 		return nil, err
 	}
@@ -200,9 +202,17 @@ func decodeNode(m core.NodeManager, b []byte, api core.API) error {
 	if err != nil {
 		return err
 	}
+	info, err := api.NodeAPI().NodeAddrInfo(&core.AddrReq{})
+	if err != nil {
+		return err
+	}
 	for _, nodes := range nodes {
 		for _, addr := range nodes.Addrs {
-			connectNode, err := ConnectNode(addr, 0, api)
+			connectNode, err := ConnectNode(addr, 0, core.NodeInfo{
+				AddrInfo:        *info.AddrInfo,
+				AgentVersion:    "",
+				ProtocolVersion: "",
+			}, api)
 			if err != nil {
 				continue
 			}

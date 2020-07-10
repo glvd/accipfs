@@ -22,7 +22,7 @@ const (
 
 type node struct {
 	scdt.Connection
-	local          peer.AddrInfo
+	local          core.NodeInfo
 	remoteID       *atomic.String
 	remote         peer.AddrInfo
 	remoteNodeInfo *core.NodeInfo
@@ -83,12 +83,13 @@ func (n *node) Verify() bool {
 }
 
 // CoreNode ...
-func CoreNode(conn net.Conn, api core.API) (core.Node, error) {
-	n := defaultAPINode(conn, api, 30*time.Second)
+func CoreNode(conn net.Conn, local core.NodeInfo, api core.API) (core.Node, error) {
+	n := defaultAPINode(conn, local, api, 30*time.Second)
 	netAddr, err := mnet.FromNetAddr(conn.RemoteAddr())
 	if err != nil {
 		return nil, err
 	}
+
 	n.AppendAddr(netAddr)
 	if err := n.doFirst(); err != nil {
 		return nil, err
@@ -97,7 +98,7 @@ func CoreNode(conn net.Conn, api core.API) (core.Node, error) {
 }
 
 // ConnectNode ...
-func ConnectNode(addr ma.Multiaddr, bind int, api core.API) (core.Node, error) {
+func ConnectNode(addr ma.Multiaddr, bind int, local core.NodeInfo, api core.API) (core.Node, error) {
 	localAddr, err := ma.NewMultiaddr(fmt.Sprintf("/ip4/0.0.0.0/tcp/%d", bind))
 	if err != nil {
 		return nil, err
@@ -110,7 +111,7 @@ func ConnectNode(addr ma.Multiaddr, bind int, api core.API) (core.Node, error) {
 	if err != nil {
 		return nil, err
 	}
-	n := defaultAPINode(conn, api, 0)
+	n := defaultAPINode(conn, local, api, 0)
 	n.AppendAddr(addr)
 	if err := n.doFirst(); err != nil {
 		return nil, err
@@ -118,14 +119,19 @@ func ConnectNode(addr ma.Multiaddr, bind int, api core.API) (core.Node, error) {
 	return n, nil
 }
 
-func defaultAPINode(c net.Conn, api core.API, duration time.Duration) *node {
+func defaultAPINode(c net.Conn, local core.NodeInfo, api core.API, duration time.Duration) *node {
 	conn := scdt.Connect(c, func(c *scdt.Config) {
 		c.Timeout = duration
+		c.CustomIDer = func() string {
+			return local.ID
+		}
 	})
 	n := &node{
 		api:        api,
+		local:      local,
 		Connection: conn,
 	}
+
 	conn.Recv(func(message *scdt.Message) ([]byte, bool, error) {
 		fmt.Printf("recv data:%+v", message)
 		return []byte("recv called"), true, errors.New("not data")

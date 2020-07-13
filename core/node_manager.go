@@ -30,11 +30,6 @@ func (l *LocalData) Unmarshal(bytes []byte) error {
 	return json.Unmarshal(bytes, l)
 }
 
-// Verify ...
-func (l *LocalData) Verify(s string) bool {
-	panic("implement me")
-}
-
 // JSON ...
 func (l *LocalData) JSON() string {
 	marshal, err := json.Marshal(l)

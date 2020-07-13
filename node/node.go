@@ -22,7 +22,7 @@ const (
 
 type node struct {
 	scdt.Connection
-	local          *core.LocalData
+	local          core.SafeLocalData
 	remoteID       *atomic.String
 	remote         peer.AddrInfo
 	remoteNodeInfo *core.NodeInfo
@@ -76,7 +76,7 @@ func (n *node) Verify() bool {
 }
 
 // CoreNode ...
-func CoreNode(conn net.Conn, local *core.LocalData) (core.Node, error) {
+func CoreNode(conn net.Conn, local core.SafeLocalData) (core.Node, error) {
 	n := defaultAPINode(conn, local, 30*time.Second)
 	netAddr, err := mnet.FromNetAddr(conn.RemoteAddr())
 	if err != nil {
@@ -91,7 +91,7 @@ func CoreNode(conn net.Conn, local *core.LocalData) (core.Node, error) {
 }
 
 // ConnectNode ...
-func ConnectNode(addr ma.Multiaddr, bind int, local *core.LocalData) (core.Node, error) {
+func ConnectNode(addr ma.Multiaddr, bind int, local core.SafeLocalData) (core.Node, error) {
 	localAddr, err := ma.NewMultiaddr(fmt.Sprintf("/ip4/0.0.0.0/tcp/%d", bind))
 	if err != nil {
 		return nil, err
@@ -112,11 +112,11 @@ func ConnectNode(addr ma.Multiaddr, bind int, local *core.LocalData) (core.Node,
 	return n, nil
 }
 
-func defaultAPINode(c net.Conn, local *core.LocalData, duration time.Duration) *node {
+func defaultAPINode(c net.Conn, local core.SafeLocalData, duration time.Duration) *node {
 	conn := scdt.Connect(c, func(c *scdt.Config) {
 		c.Timeout = duration
 		c.CustomIDer = func() string {
-			return local.Node.ID
+			return local.Data().Node.ID
 		}
 	})
 	n := &node{
@@ -219,7 +219,8 @@ func (n *node) RecvDataRequest(message *scdt.Message) ([]byte, bool, error) {
 }
 
 func (n *node) addrInfoRequest() (*core.AddrInfo, error) {
-	return &n.local.Node.AddrInfo, nil
+	data := n.local.Data()
+	return &data.Node.AddrInfo, nil
 	//if n.addrInfo != nil {
 	//	return n.addrInfo, nil
 	//}

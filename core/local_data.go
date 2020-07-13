@@ -5,8 +5,16 @@ import (
 	"sync"
 )
 
-// LocalDataLocker ...
-type LocalDataLocker struct {
+// SafeLocalData ...
+type SafeLocalData interface {
+	JSONer
+	JSON() string
+	Update(f func(data *LocalData))
+	Data() (data LocalData)
+}
+
+// SafeLocalData ...
+type safeLocalData struct {
 	lock sync.RWMutex
 	data LocalData
 }
@@ -17,7 +25,7 @@ type LocalData struct {
 }
 
 // Marshal ...
-func (l *LocalDataLocker) Marshal() ([]byte, error) {
+func (l *safeLocalData) Marshal() ([]byte, error) {
 	l.lock.RLock()
 	marshal, err := json.Marshal(l.data)
 	l.lock.Unlock()
@@ -28,7 +36,7 @@ func (l *LocalDataLocker) Marshal() ([]byte, error) {
 }
 
 // Unmarshal ...
-func (l *LocalDataLocker) Unmarshal(bytes []byte) (err error) {
+func (l *safeLocalData) Unmarshal(bytes []byte) (err error) {
 	l.lock.Lock()
 	err = json.Unmarshal(bytes, &l.data)
 	l.lock.Unlock()
@@ -36,7 +44,7 @@ func (l *LocalDataLocker) Unmarshal(bytes []byte) (err error) {
 }
 
 // JSON ...
-func (l *LocalDataLocker) JSON() string {
+func (l *safeLocalData) JSON() string {
 	marshal, err := l.Marshal()
 	if err != nil {
 		return ""
@@ -45,16 +53,24 @@ func (l *LocalDataLocker) JSON() string {
 }
 
 // Update ...
-func (l *LocalDataLocker) Update(f func(data *LocalData)) {
+func (l *safeLocalData) Update(f func(data *LocalData)) {
 	l.lock.Lock()
 	f(&l.data)
 	l.lock.Unlock()
 }
 
 // Data ...
-func (l *LocalDataLocker) Data() (data LocalData) {
+func (l *safeLocalData) Data() (data LocalData) {
 	l.lock.Lock()
 	data = l.data
 	l.lock.Unlock()
 	return
+}
+
+// Safe ...
+func (l LocalData) Safe() SafeLocalData {
+	return &safeLocalData{
+		lock: sync.RWMutex{},
+		data: l,
+	}
 }

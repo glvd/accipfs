@@ -122,7 +122,13 @@ func (m *manager) Link(req *core.NodeLinkReq) (*core.NodeLinkResp, error) {
 
 // Unlink ...
 func (m *manager) Unlink(req *core.NodeUnlinkReq) (*core.NodeUnlinkResp, error) {
-	panic("implement me")
+	if len(req.Peers) == 0 {
+		return &core.NodeUnlinkResp{}, nil
+	}
+	for i := range req.Peers {
+		m.connectNodes.Delete(req.Peers[i])
+	}
+	return &core.NodeUnlinkResp{}, nil
 }
 
 // NodeAddrInfo ...

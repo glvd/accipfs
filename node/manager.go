@@ -139,7 +139,9 @@ func (m *manager) NodeAddrInfo(req *core.AddrReq) (*core.AddrResp, error) {
 	if !b {
 		return &core.AddrResp{}, fmt.Errorf("transfer to node failed id(%s)", req.ID)
 	}
-	v.
+	panic("//todo")
+	fmt.Print(v)
+	return nil, nil
 }
 
 // List ...

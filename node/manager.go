@@ -44,7 +44,7 @@ func InitManager(cfg *config.Config) (core.NodeManager, error) {
 	if cfg.Node.BackupSeconds == 0 {
 		cfg.Node.BackupSeconds = 30 * time.Second
 	}
-
+	data := core.LocalData{}
 	m := &manager{
 		cfg:      cfg,
 		initLoad: atomic.NewBool(false),
@@ -52,6 +52,7 @@ func InitManager(cfg *config.Config) (core.NodeManager, error) {
 		expPath:  filepath.Join(cfg.Path, _expNodes),
 		nodes:    nodeCacher(cfg),
 		hashes:   hashCacher(cfg),
+		local:    data.Safe(),
 		t:        time.NewTicker(cfg.Node.BackupSeconds),
 	}
 	m.nodePool = mustPool(ants.DefaultAntsPoolSize, m.poolRun)

@@ -8,10 +8,10 @@ import (
 
 // AddrInfo ...
 type AddrInfo struct {
-	ID        string
-	PublicKey string
-	Addrs     map[ma.Multiaddr]bool
-	DataStore DataStoreInfo
+	ID        string                `json:"id"`
+	PublicKey string                `json:"public_key"`
+	Addrs     map[ma.Multiaddr]bool `json:"addrs"`
+	DataStore DataStoreInfo         `json:"data_store"`
 	//IPFSAddrInfo peer.AddrInfo
 }
 type jsonIPFSAddrInfo struct {
@@ -20,6 +20,7 @@ type jsonIPFSAddrInfo struct {
 }
 type jsonAddrInfo struct {
 	ID        string        `json:"id"`
+	PublicKey string        `json:"public_key"`
 	Addrs     []string      `json:"addrs"`
 	DataStore DataStoreInfo `json:"data_store"`
 	//IPFSAddrInfo peer.AddrInfo `json:"ipfs_addr_info"`
@@ -33,6 +34,7 @@ func parseAddrInfo(b []byte, addrInfo *AddrInfo) error {
 
 	}
 	addrInfo.ID = info.ID
+	addrInfo.PublicKey = info.PublicKey
 	addrs := make(map[ma.Multiaddr]bool, len(info.Addrs))
 	for i := range info.Addrs {
 		multiaddr, err := ma.NewMultiaddr(info.Addrs[i])
@@ -48,8 +50,9 @@ func parseAddrInfo(b []byte, addrInfo *AddrInfo) error {
 // MarshalJSON ...
 func (info AddrInfo) MarshalJSON() ([]byte, error) {
 	addrInfo := jsonAddrInfo{
-		ID:    info.ID,
-		Addrs: nil,
+		ID:        info.ID,
+		PublicKey: info.PublicKey,
+		Addrs:     nil,
 	}
 	for multiaddr := range info.Addrs {
 		addrInfo.Addrs = append(addrInfo.Addrs, multiaddr.String())

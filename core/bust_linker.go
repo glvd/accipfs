@@ -44,7 +44,7 @@ type AddrReq struct {
 
 // AddrResp ...
 type AddrResp struct {
-	AddrInfo *AddrInfo
+	AddrInfo AddrInfo
 }
 
 // NodeListReq ...

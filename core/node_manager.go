@@ -39,13 +39,6 @@ func (l *LocalData) JSON() string {
 	return string(marshal)
 }
 
-// Sync ...
-func (l *LocalData) Sync(data *LocalData) {
-	l.lock.Lock()
-	defer l.lock.Unlock()
-	l.Node = data.Node
-}
-
 // NodeManager ...
 type NodeManager interface {
 	NodeAPI

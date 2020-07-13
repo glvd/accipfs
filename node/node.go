@@ -54,19 +54,12 @@ func (n *node) DataStoreInfo() (core.DataStoreInfo, error) {
 
 // Marshal ...
 func (n *node) Marshal() ([]byte, error) {
-	addrInfo, err := n.addrInfoRequest()
-	if err != nil {
-		return nil, err
-	}
-	return addrInfo.MarshalJSON()
+	return n.local.Marshal()
 }
 
 // Unmarshal ...
 func (n *node) Unmarshal(bytes []byte) error {
-	if n.addrInfo == nil {
-		n.addrInfo = new(core.AddrInfo)
-	}
-	return n.addrInfo.UnmarshalJSON(bytes)
+	return n.local.Unmarshal(bytes)
 }
 
 // Close ...
@@ -226,16 +219,16 @@ func (n *node) RecvDataRequest(message *scdt.Message) ([]byte, bool, error) {
 }
 
 func (n *node) addrInfoRequest() (*core.AddrInfo, error) {
-	if n.addrInfo != nil {
-		return n.addrInfo, nil
-	}
-	id, err := n.api.NodeAPI().NodeAddrInfo(&core.AddrReq{})
-	if err != nil {
-		return nil, err
-	}
+	return &n.local.Node.AddrInfo, nil
+	//if n.addrInfo != nil {
+	//	return n.addrInfo, nil
+	//}
+	//id, err := n.api.NodeAPI().NodeAddrInfo(&core.AddrReq{})
+	//if err != nil {
+	//	return nil, err
+	//}
 	//n.addrInfo = id.AddrInfo
-	return &n.local.Node.AddrInfo
-	return n.addrInfo, nil
+	//return &n.local.Node.AddrInfo
 }
 
 func (n *node) doFirst() error {
@@ -246,6 +239,5 @@ func (n *node) doFirst() error {
 }
 
 // Sync ...
-func (n *node) Sync(info core.LocalData) {
-
+func (n *node) SyncLocalData(info *core.LocalData) {
 }

@@ -4,10 +4,8 @@ import (
 	"context"
 	"encoding/base64"
 	"encoding/json"
-	"errors"
 	"fmt"
 	ma "github.com/multiformats/go-multiaddr"
-	mnet "github.com/multiformats/go-multiaddr-net"
 	"net"
 	"net/http"
 
@@ -28,11 +26,7 @@ type APIContext struct {
 	serv       *http.Server
 	ready      *atomic.Bool
 	controller *Controller
-	//ethNode    *nodeBinETH
-	//ipfsNode   *nodeBinIPFS
-	msg func(s string)
-	//cb         func(tag core.RequestTag, v interface{}) error
-	manager core.NodeManager
+	msg        func(s string)
 }
 
 // Add ...
@@ -64,8 +58,7 @@ func NewContext(cfg *config.Config) *APIContext {
 }
 
 // API ...
-func (c *APIContext) API(manager core.NodeManager) core.API {
-	c.manager = manager
+func (c *APIContext) API() core.API {
 	return c
 }
 
@@ -185,9 +178,9 @@ func (c *APIContext) registerRoutes() {
 
 	v0 := api.Group(c.cfg.API.Version)
 	v0.POST("/id", c.id)
-	v0.POST("/node/link", c.nodeLink)
-	v0.POST("/node/unlink", c.nodeUnlink)
-	v0.POST("/node/list", c.nodeList)
+	//v0.POST("/node/link", c.nodeLink())
+	//v0.POST("/node/unlink", c.nodeUnlink)
+	//v0.POST("/node/list", c.nodeList())
 	v0.GET("/get", c.get)
 	v0.GET("/query", c.query)
 }
@@ -275,44 +268,18 @@ func (c *APIContext) query(ctx *gin.Context) {
 	JSON(ctx, "", nil)
 }
 
-func (c *APIContext) nodeLink(ctx *gin.Context) {
-	var req core.NodeLinkReq
-	err := ctx.BindJSON(&req)
-	if err != nil {
-		JSON(ctx, nil, err)
-		return
+func (c *APIContext) nodeLink(manager core.NodeManager) func(ctx *gin.Context) {
+	return func(ctx *gin.Context) {
+		var req core.NodeLinkReq
+		err := ctx.BindJSON(&req)
+		if err != nil {
+			JSON(ctx, nil, err)
+			return
+		}
+		id, err := manager.NodeAPI().Link(&req)
+		JSON(ctx, id, err)
 	}
-	id, err := c.Link(&req)
-	JSON(ctx, id, err)
-}
 
-// Link ...
-func (c *APIContext) Link(req *core.NodeLinkReq) (*core.NodeLinkResp, error) {
-	fmt.Printf("connect info:%+v\n", req.Addrs)
-	for _, addr := range req.Addrs {
-		multiaddr, err := ma.NewMultiaddr(addr)
-		if err != nil {
-			fmt.Printf("parse addr(%v) failed(%v)\n", addr, err)
-			continue
-		}
-		dial, err := mnet.Dial(multiaddr)
-		if err != nil {
-			fmt.Printf("link failed(%v)\n", err)
-			continue
-		}
-		conn, err := c.manager.Conn(dial)
-		if err != nil {
-			return nil, err
-		}
-		info, err := conn.Info()
-		if err != nil {
-			return nil, err
-		}
-		return &core.NodeLinkResp{
-			NodeInfo: info,
-		}, nil
-	}
-	return &core.NodeLinkResp{}, errors.New("all request was failed")
 }
 
 func (c *APIContext) nodeUnlink(ctx *gin.Context) {
@@ -324,28 +291,12 @@ func (c *APIContext) nodeUnlink(ctx *gin.Context) {
 func (c *APIContext) Unlink(req *core.NodeUnlinkReq) (*core.NodeUnlinkResp, error) {
 	panic("implement me")
 }
-func (c *APIContext) nodeList(ctx *gin.Context) {
-	list, err := c.List(&core.NodeListReq{})
-	JSON(ctx, list, err)
-}
+func (c *APIContext) nodeList(manager core.NodeManager) func(ctx *gin.Context) {
+	return func(ctx *gin.Context) {
+		list, err := manager.NodeAPI().List(&core.NodeListReq{})
+		JSON(ctx, list, err)
+	}
 
-// List ...
-func (c *APIContext) List(req *core.NodeListReq) (*core.NodeListResp, error) {
-	nodes := make(map[string]core.NodeInfo)
-	c.manager.Range(func(key string, node core.Node) bool {
-		info, err := node.Info()
-		if err != nil {
-			return true
-		}
-		nodes[key] = info
-		return true
-	})
-	return &core.NodeListResp{Nodes: nodes}, nil
-}
-
-// NodeAPI ...
-func (c *APIContext) NodeAPI() core.NodeAPI {
-	return c
 }
 
 // JSON ...

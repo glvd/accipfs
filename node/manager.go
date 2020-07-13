@@ -2,10 +2,13 @@ package node
 
 import (
 	"encoding/json"
+	"errors"
+	"fmt"
 	"github.com/glvd/accipfs/config"
-	"github.com/glvd/accipfs/controller"
 	"github.com/glvd/accipfs/core"
 	"github.com/godcong/scdt"
+	ma "github.com/multiformats/go-multiaddr"
+	mnet "github.com/multiformats/go-multiaddr-net"
 	"github.com/panjf2000/ants/v2"
 	"go.uber.org/atomic"
 	"net"
@@ -37,8 +40,11 @@ var _nodes = "bl.nodes"
 var _expNodes = "exp.nodes"
 var _ core.NodeManager = &manager{}
 
-// Manager ...
-func Manager(cfg *config.Config, ctx *controller.APIContext) core.NodeManager {
+// GlobalManager ...
+var GlobalManager core.NodeManager
+
+// InitManager ...
+func InitManager(cfg *config.Config) core.NodeManager {
 	if cfg.Node.BackupSeconds == 0 {
 		cfg.Node.BackupSeconds = 30 * time.Second
 	}
@@ -52,23 +58,14 @@ func Manager(cfg *config.Config, ctx *controller.APIContext) core.NodeManager {
 		hashes:   hashCacher(cfg),
 		t:        time.NewTicker(cfg.Node.BackupSeconds),
 	}
-	m.api = ctx.API(m)
-
 	m.nodePool = mustPool(ants.DefaultAntsPoolSize, m.poolRun)
-
-	//todo
-	info, err := m.api.NodeAPI().NodeAddrInfo(&core.AddrReq{})
-	if err != nil {
-		return nil
-	}
-	m.local = core.NodeInfo{
-		AddrInfo:        *info.AddrInfo,
-		AgentVersion:    "",
-		ProtocolVersion: "",
-	}
-
 	go m.loop()
+	GlobalManager = m
+	return m
+}
 
+// NodeAPI ...
+func (m *manager) NodeAPI() core.NodeAPI {
 	return m
 }
 
@@ -96,6 +93,67 @@ func (m *manager) Store() (err error) {
 	})
 	//return the last err
 	return
+}
+
+// Link ...
+func (m *manager) Link(req *core.NodeLinkReq) (*core.NodeLinkResp, error) {
+	fmt.Printf("connect info:%+v\n", req.Addrs)
+	for _, addr := range req.Addrs {
+		multiaddr, err := ma.NewMultiaddr(addr)
+		if err != nil {
+			fmt.Printf("parse addr(%v) failed(%v)\n", addr, err)
+			continue
+		}
+		dial, err := mnet.Dial(multiaddr)
+		if err != nil {
+			fmt.Printf("link failed(%v)\n", err)
+			continue
+		}
+		conn, err := m.Conn(dial)
+		if err != nil {
+			return nil, err
+		}
+		info, err := conn.Info()
+		if err != nil {
+			return nil, err
+		}
+		return &core.NodeLinkResp{
+			NodeInfo: info,
+		}, nil
+	}
+	return &core.NodeLinkResp{}, errors.New("all request was failed")
+}
+
+// Unlink ...
+func (m *manager) Unlink(req *core.NodeUnlinkReq) (*core.NodeUnlinkResp, error) {
+	panic("implement me")
+}
+
+// NodeAddrInfo ...
+func (m *manager) NodeAddrInfo(req *core.AddrReq) (*core.AddrResp, error) {
+	load, ok := m.connectNodes.Load(req.ID)
+	if !ok {
+		return &core.AddrResp{}, fmt.Errorf("node not found id(%s)", req.ID)
+	}
+	v, b := load.(core.Node)
+	if !b {
+		return &core.AddrResp{}, fmt.Errorf("transfer to node failed id(%s)", req.ID)
+	}
+	v.
+}
+
+// List ...
+func (m *manager) List(req *core.NodeListReq) (*core.NodeListResp, error) {
+	nodes := make(map[string]core.NodeInfo)
+	m.Range(func(key string, node core.Node) bool {
+		info, err := node.Info()
+		if err != nil {
+			return true
+		}
+		nodes[key] = info
+		return true
+	})
+	return &core.NodeListResp{Nodes: nodes}, nil
 }
 
 // Load ...

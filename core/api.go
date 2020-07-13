@@ -5,7 +5,7 @@ type API interface {
 	Ping(req *PingReq) (*PingResp, error)
 	ID(req *IDReq) (*IDResp, error)
 	Add(req *AddReq) (*AddResp, error)
-	NodeAPI() NodeAPI
+	//NodeAPI() NodeAPI
 }
 
 // NodeAPI ...

@@ -10,4 +10,5 @@ type NodeManager interface {
 	Conn(c net.Conn) (Node, error)
 	Store() error
 	Load() error
+	NodeAPI() NodeAPI
 }

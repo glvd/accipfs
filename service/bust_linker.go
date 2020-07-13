@@ -36,6 +36,18 @@ func NewBustLinker(cfg *config.Config) (linker *BustLinker, err error) {
 	linker.self = selfAcc
 	context := controller.NewContext(cfg)
 	linker.controller = controller.New(cfg, context)
+
+	////todo
+	//info, err := context.NodeAddrInfo(&core.AddrReq{})
+	//if err != nil {
+	//	return nil
+	//}
+	//m.local = core.NodeInfo{
+	//	AddrInfo:        *info.AddrInfo,
+	//	AgentVersion:    "",
+	//	ProtocolVersion: "",
+	//}
+
 	linker.manager = node.Manager(cfg, context)
 	linker.listener = newLinkListener(cfg, linker.manager.Conn)
 

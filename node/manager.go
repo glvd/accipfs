@@ -39,6 +39,10 @@ var _ core.NodeManager = &manager{}
 
 // Manager ...
 func Manager(cfg *config.Config, ctx *controller.APIContext) core.NodeManager {
+	if cfg.Node.BackupSeconds == 0 {
+		cfg.Node.BackupSeconds = 30 * time.Second
+	}
+
 	m := &manager{
 		cfg:      cfg,
 		initLoad: atomic.NewBool(false),

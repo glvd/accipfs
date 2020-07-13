@@ -27,8 +27,7 @@ type manager struct {
 	currentNodes    *atomic.Uint64
 	path            string
 	expPath         string
-	api             core.API
-	local           core.NodeInfo
+	local           LocalDataInfo
 	nodePool        *ants.PoolWithFunc
 	connectNodes    sync.Map
 	disconnectNodes sync.Map
@@ -41,7 +40,7 @@ var _expNodes = "exp.nodes"
 var _ core.NodeManager = &manager{}
 
 // InitManager ...
-func InitManager(cfg *config.Config) core.NodeManager {
+func InitManager(cfg *config.Config) (core.NodeManager, error) {
 	if cfg.Node.BackupSeconds == 0 {
 		cfg.Node.BackupSeconds = 30 * time.Second
 	}
@@ -57,8 +56,8 @@ func InitManager(cfg *config.Config) core.NodeManager {
 	}
 	m.nodePool = mustPool(ants.DefaultAntsPoolSize, m.poolRun)
 	go m.loop()
-	//GlobalManager = m
-	return m
+
+	return m, nil
 }
 
 // NodeAPI ...
@@ -164,7 +163,7 @@ func (m *manager) Load() error {
 			log.Errorw("load addr info failed", "err", err)
 		}
 		for multiaddr := range addrInfo.Addrs {
-			connectNode, err := ConnectNode(multiaddr, 0, m.local, m.api)
+			connectNode, err := ConnectNode(multiaddr, 0, m.local)
 			if err != nil {
 				continue
 			}
@@ -240,7 +239,7 @@ func (m *manager) loop() {
 
 // Conn ...
 func (m *manager) Conn(c net.Conn) (core.Node, error) {
-	acceptNode, err := CoreNode(c, m.local, m.api)
+	acceptNode, err := CoreNode(c, m.local)
 	if err != nil {
 		return nil, err
 	}
@@ -275,17 +274,13 @@ func decodeNode(m core.NodeManager, b []byte, api core.API) error {
 	if err != nil {
 		return err
 	}
-	info, err := m.NodeAPI().NodeAddrInfo(&core.AddrReq{})
+	info, err := m.NodeAddrInfo(&core.AddrReq{})
 	if err != nil {
 		return err
 	}
 	for _, nodes := range nodes {
 		for _, addr := range nodes.Addrs {
-			connectNode, err := ConnectNode(addr, 0, core.NodeInfo{
-				AddrInfo:        *info.AddrInfo,
-				AgentVersion:    "",
-				ProtocolVersion: "",
-			}, api)
+			connectNode, err := ConnectNode(addr, 0)
 			if err != nil {
 				continue
 			}

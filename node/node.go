@@ -22,7 +22,7 @@ const (
 
 type node struct {
 	scdt.Connection
-	local          core.NodeInfo
+	local          core.LocalDataInfo
 	remoteID       *atomic.String
 	remote         peer.AddrInfo
 	remoteNodeInfo *core.NodeInfo
@@ -83,8 +83,8 @@ func (n *node) Verify() bool {
 }
 
 // CoreNode ...
-func CoreNode(conn net.Conn, local core.NodeInfo, api core.API) (core.Node, error) {
-	n := defaultAPINode(conn, local, api, 30*time.Second)
+func CoreNode(conn net.Conn, local core.LocalDataInfo) (core.Node, error) {
+	n := defaultAPINode(conn, local, 30*time.Second)
 	netAddr, err := mnet.FromNetAddr(conn.RemoteAddr())
 	if err != nil {
 		return nil, err
@@ -98,7 +98,7 @@ func CoreNode(conn net.Conn, local core.NodeInfo, api core.API) (core.Node, erro
 }
 
 // ConnectNode ...
-func ConnectNode(addr ma.Multiaddr, bind int, local core.NodeInfo, api core.API) (core.Node, error) {
+func ConnectNode(addr ma.Multiaddr, bind int, local core.LocalDataInfo) (core.Node, error) {
 	localAddr, err := ma.NewMultiaddr(fmt.Sprintf("/ip4/0.0.0.0/tcp/%d", bind))
 	if err != nil {
 		return nil, err
@@ -111,7 +111,7 @@ func ConnectNode(addr ma.Multiaddr, bind int, local core.NodeInfo, api core.API)
 	if err != nil {
 		return nil, err
 	}
-	n := defaultAPINode(conn, local, api, 0)
+	n := defaultAPINode(conn, local, 0)
 	n.AppendAddr(addr)
 	if err := n.doFirst(); err != nil {
 		return nil, err
@@ -119,15 +119,14 @@ func ConnectNode(addr ma.Multiaddr, bind int, local core.NodeInfo, api core.API)
 	return n, nil
 }
 
-func defaultAPINode(c net.Conn, local core.NodeInfo, api core.API, duration time.Duration) *node {
+func defaultAPINode(c net.Conn, local core.LocalDataInfo, duration time.Duration) *node {
 	conn := scdt.Connect(c, func(c *scdt.Config) {
 		c.Timeout = duration
 		c.CustomIDer = func() string {
-			return local.ID
+			return local.Node.ID
 		}
 	})
 	n := &node{
-		api:        api,
 		local:      local,
 		Connection: conn,
 	}

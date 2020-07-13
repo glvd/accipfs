@@ -59,6 +59,7 @@ func NewBustLinker(cfg *config.Config) (linker *BustLinker, err error) {
 // Start ...
 func (l *BustLinker) Start() {
 	l.controller.Run()
+	go l.api.Start()
 	go l.listener.Listen()
 }
 

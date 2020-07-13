@@ -30,8 +30,8 @@ func initCmd() *cobra.Command {
 			if err := cfg.Init(); err != nil {
 				panic(err)
 			}
-			context := controller.NewContext(cfg)
-			c := controller.New(cfg, context)
+			//context := service.NewAPIContext(cfg)
+			c := controller.New(cfg)
 			if err := c.Initialize(); err != nil {
 				panic(err)
 			}

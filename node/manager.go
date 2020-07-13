@@ -40,9 +40,6 @@ var _nodes = "bl.nodes"
 var _expNodes = "exp.nodes"
 var _ core.NodeManager = &manager{}
 
-// GlobalManager ...
-var GlobalManager core.NodeManager
-
 // InitManager ...
 func InitManager(cfg *config.Config) core.NodeManager {
 	if cfg.Node.BackupSeconds == 0 {
@@ -60,7 +57,7 @@ func InitManager(cfg *config.Config) core.NodeManager {
 	}
 	m.nodePool = mustPool(ants.DefaultAntsPoolSize, m.poolRun)
 	go m.loop()
-	GlobalManager = m
+	//GlobalManager = m
 	return m
 }
 

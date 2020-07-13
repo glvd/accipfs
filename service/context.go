@@ -1,10 +1,11 @@
-package controller
+package service
 
 import (
 	"context"
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
+	"github.com/glvd/accipfs/controller"
 	ma "github.com/multiformats/go-multiaddr"
 	"net"
 	"net/http"
@@ -14,19 +15,20 @@ import (
 	"github.com/glvd/accipfs/config"
 	"github.com/glvd/accipfs/core"
 	ic "github.com/libp2p/go-libp2p-core/crypto"
-	peer "github.com/libp2p/go-libp2p-core/peer"
+	"github.com/libp2p/go-libp2p-core/peer"
 	"go.uber.org/atomic"
 )
 
 // APIContext ...
 type APIContext struct {
-	cfg        *config.Config
-	eng        *gin.Engine
-	listener   net.Listener
-	serv       *http.Server
-	ready      *atomic.Bool
-	controller *Controller
-	msg        func(s string)
+	cfg      *config.Config
+	eng      *gin.Engine
+	listener net.Listener
+	serv     *http.Server
+	ready    *atomic.Bool
+	c        *controller.Controller
+	m        core.NodeManager
+	msg      func(s string)
 }
 
 // Add ...
@@ -41,17 +43,18 @@ func (c *APIContext) Add(req *core.AddReq) (*core.AddResp, error) {
 
 var _ core.API = &APIContext{}
 
-// NewContext ...
-func NewContext(cfg *config.Config, c *Controller) *APIContext {
+// NewAPIContext ...
+func NewAPIContext(cfg *config.Config, m core.NodeManager, c *controller.Controller) *APIContext {
 	if !cfg.Debug {
 		gin.SetMode(gin.ReleaseMode)
 	}
 	eng := gin.Default()
 	return &APIContext{
-		cfg:        cfg,
-		eng:        eng,
-		controller: c,
-		ready:      atomic.NewBool(false),
+		cfg:   cfg,
+		eng:   eng,
+		m:     m,
+		c:     c,
+		ready: atomic.NewBool(false),
 		serv: &http.Server{
 			Handler: eng,
 		},
@@ -131,7 +134,7 @@ func (c *APIContext) ID(req *core.IDReq) (*core.IDResp, error) {
 	}
 	pubString := base64.StdEncoding.EncodeToString(bytes)
 	log.Infow("result id", "id", c.cfg.Identity, "public key", pubString)
-	ipfsID, err := c.controller.ID(context.TODO())
+	ipfsID, err := c.c.ID(context.TODO())
 	if err != nil {
 		return nil, err
 	}
@@ -214,8 +217,8 @@ func (c *APIContext) MessageHandle(f func(s string)) {
 	}
 }
 
-func (c *APIContext) setController(controller *Controller) {
-	c.controller = controller
+func (c *APIContext) setController(controller *controller.Controller) {
+	c.c = controller
 }
 
 func (c *APIContext) id(ctx *gin.Context) {
@@ -251,7 +254,7 @@ func (c *APIContext) query(ctx *gin.Context) {
 		JSON(ctx, "", fmt.Errorf("query failed(%w)", err))
 		return
 	}
-	dTag, e := c.controller.DTag()
+	dTag, e := c.c.DTag()
 	if e != nil {
 		JSON(ctx, "", fmt.Errorf("query failed(%w)", e))
 		return
@@ -269,7 +272,7 @@ func (c *APIContext) query(ctx *gin.Context) {
 	JSON(ctx, "", nil)
 }
 
-func (c *APIContext) nodeLink(manager core.NodeManager) func(ctx *gin.Context) {
+func (c *APIContext) nodeLink() func(ctx *gin.Context) {
 	return func(ctx *gin.Context) {
 		var req core.NodeLinkReq
 		err := ctx.BindJSON(&req)
@@ -277,27 +280,28 @@ func (c *APIContext) nodeLink(manager core.NodeManager) func(ctx *gin.Context) {
 			JSON(ctx, nil, err)
 			return
 		}
-		id, err := manager.NodeAPI().Link(&req)
+		id, err := c.m.NodeAPI().Link(&req)
 		JSON(ctx, id, err)
 	}
 
 }
 
-func (c *APIContext) nodeUnlink(ctx *gin.Context) {
-	id, err := c.Unlink(&core.NodeUnlinkReq{})
-	JSON(ctx, id, err)
+func (c *APIContext) nodeUnlink() func(ctx *gin.Context) {
+	return func(ctx *gin.Context) {
+		id, err := c.Unlink(&core.NodeUnlinkReq{})
+		JSON(ctx, id, err)
+	}
 }
 
 // Unlink ...
 func (c *APIContext) Unlink(req *core.NodeUnlinkReq) (*core.NodeUnlinkResp, error) {
 	panic("implement me")
 }
-func (c *APIContext) nodeList(manager core.NodeManager) func(ctx *gin.Context) {
+func (c *APIContext) nodeList() func(ctx *gin.Context) {
 	return func(ctx *gin.Context) {
-		list, err := manager.NodeAPI().List(&core.NodeListReq{})
+		list, err := c.m.NodeAPI().List(&core.NodeListReq{})
 		JSON(ctx, list, err)
 	}
-
 }
 
 // JSON ...

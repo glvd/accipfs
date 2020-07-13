@@ -20,6 +20,7 @@ type BustLinker struct {
 	cfg        *config.Config
 	listener   core.Listener
 	controller *controller.Controller
+	api        *APIContext
 }
 
 // NewBustLinker ...
@@ -34,9 +35,11 @@ func NewBustLinker(cfg *config.Config) (linker *BustLinker, err error) {
 		return nil, err
 	}
 	linker.self = selfAcc
-	context := controller.NewContext(cfg)
 
 	linker.controller = controller.New(cfg)
+	linker.manager = node.InitManager(cfg)
+
+	linker.api = NewAPIContext(cfg, linker.manager, linker.controller)
 
 	////todo
 	//info, err := context.NodeAddrInfo(&core.AddrReq{})
@@ -49,9 +52,7 @@ func NewBustLinker(cfg *config.Config) (linker *BustLinker, err error) {
 	//	ProtocolVersion: "",
 	//}
 
-	linker.manager = node.InitManager(cfg)
 	linker.listener = newLinkListener(cfg, linker.manager.Conn)
-
 	return linker, nil
 }
 

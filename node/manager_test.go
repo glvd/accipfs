@@ -23,7 +23,7 @@ func init() {
 
 func TestManager_Store(t *testing.T) {
 	cfg := config.Default()
-	context := NewContext(cfg)
+	context := controller.NewContext(cfg)
 	controller.New(cfg, context)
 	nodeManager := Manager(cfg, context)
 	multiaddr, err := ma.NewMultiaddr("/ip4/127.0.0.1/tcp/12345")
@@ -83,7 +83,7 @@ func load(wg *sync.WaitGroup, nodeManager core.NodeManager) {
 
 func TestManager_Load(t *testing.T) {
 	cfg := config.Default()
-	ctx := NewContext(cfg)
+	ctx := controller.NewContext(cfg)
 	controller.New(cfg, ctx)
 	nodeManager := Manager(cfg, ctx)
 	defer nodeManager.Close()

@@ -34,8 +34,9 @@ func NewBustLinker(cfg *config.Config) (linker *BustLinker, err error) {
 		return nil, err
 	}
 	linker.self = selfAcc
-	context := node.NewContext(cfg)
-	linker.controller = controller.New(cfg, context)
+	context := controller.NewContext(cfg)
+
+	linker.controller = controller.New(cfg)
 
 	////todo
 	//info, err := context.NodeAddrInfo(&core.AddrReq{})
@@ -48,7 +49,7 @@ func NewBustLinker(cfg *config.Config) (linker *BustLinker, err error) {
 	//	ProtocolVersion: "",
 	//}
 
-	linker.manager = node.Manager(cfg, context)
+	linker.manager = node.InitManager(cfg)
 	linker.listener = newLinkListener(cfg, linker.manager.Conn)
 
 	return linker, nil

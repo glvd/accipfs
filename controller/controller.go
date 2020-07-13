@@ -5,7 +5,6 @@ import (
 	"github.com/glvd/accipfs/config"
 	"github.com/glvd/accipfs/contract/dtag"
 	"github.com/glvd/accipfs/core"
-	"github.com/glvd/accipfs/node"
 	"go.uber.org/atomic"
 	"sync"
 )
@@ -27,14 +26,16 @@ const (
 type Controller struct {
 	isRunning *atomic.Bool
 	services  []core.ControllerService
-	ctx       *node.APIContext
+	ctx       *APIContext
 	ethNode   *nodeBinETH
 	ipfsNode  *nodeBinIPFS
+	cfg       *config.Config
 }
 
 // New ...
 func New(cfg *config.Config) *Controller {
 	c := &Controller{
+		cfg:      cfg,
 		services: make([]core.ControllerService, IndexMax),
 	}
 
@@ -120,4 +121,9 @@ func (c *Controller) ID(ctx context.Context) (*core.DataStoreInfo, error) {
 // DTag ...
 func (c *Controller) DTag() (*dtag.DTag, error) {
 	return c.infoNode().DTag()
+}
+
+// API ...
+func (c *Controller) API() core.API {
+	return NewContext(c.cfg)
 }

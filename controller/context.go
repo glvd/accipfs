@@ -1,11 +1,10 @@
-package node
+package controller
 
 import (
 	"context"
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
-	controller2 "github.com/glvd/accipfs/controller"
 	ma "github.com/multiformats/go-multiaddr"
 	"net"
 	"net/http"
@@ -26,7 +25,7 @@ type APIContext struct {
 	listener   net.Listener
 	serv       *http.Server
 	ready      *atomic.Bool
-	controller *controller2.Controller
+	controller *Controller
 	msg        func(s string)
 }
 
@@ -214,7 +213,7 @@ func (c *APIContext) MessageHandle(f func(s string)) {
 	}
 }
 
-func (c *APIContext) setController(controller *controller2.Controller) {
+func (c *APIContext) setController(controller *Controller) {
 	c.controller = controller
 }
 

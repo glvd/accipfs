@@ -22,12 +22,12 @@ const (
 
 type node struct {
 	scdt.Connection
-	local          core.LocalDataInfo
+	local          core.LocalData
 	remoteID       *atomic.String
 	remote         peer.AddrInfo
 	remoteNodeInfo *core.NodeInfo
-	addrInfo       *core.AddrInfo
-	api            core.API
+	//addrInfo       *core.AddrInfo
+	//api            core.API
 }
 
 type jsonNode struct {
@@ -83,7 +83,7 @@ func (n *node) Verify() bool {
 }
 
 // CoreNode ...
-func CoreNode(conn net.Conn, local core.LocalDataInfo) (core.Node, error) {
+func CoreNode(conn net.Conn, local core.LocalData) (core.Node, error) {
 	n := defaultAPINode(conn, local, 30*time.Second)
 	netAddr, err := mnet.FromNetAddr(conn.RemoteAddr())
 	if err != nil {
@@ -98,7 +98,7 @@ func CoreNode(conn net.Conn, local core.LocalDataInfo) (core.Node, error) {
 }
 
 // ConnectNode ...
-func ConnectNode(addr ma.Multiaddr, bind int, local core.LocalDataInfo) (core.Node, error) {
+func ConnectNode(addr ma.Multiaddr, bind int, local core.LocalData) (core.Node, error) {
 	localAddr, err := ma.NewMultiaddr(fmt.Sprintf("/ip4/0.0.0.0/tcp/%d", bind))
 	if err != nil {
 		return nil, err
@@ -119,7 +119,7 @@ func ConnectNode(addr ma.Multiaddr, bind int, local core.LocalDataInfo) (core.No
 	return n, nil
 }
 
-func defaultAPINode(c net.Conn, local core.LocalDataInfo, duration time.Duration) *node {
+func defaultAPINode(c net.Conn, local core.LocalData, duration time.Duration) *node {
 	conn := scdt.Connect(c, func(c *scdt.Config) {
 		c.Timeout = duration
 		c.CustomIDer = func() string {
@@ -153,11 +153,6 @@ func (n *node) AppendAddr(addrs ...ma.Multiaddr) {
 	if addrs != nil {
 		n.remote.Addrs = append(n.remote.Addrs, addrs...)
 	}
-}
-
-// SetAPI ...
-func (n *node) SetAPI(api core.API) {
-	n.api = api
 }
 
 // Addrs ...
@@ -238,7 +233,8 @@ func (n *node) addrInfoRequest() (*core.AddrInfo, error) {
 	if err != nil {
 		return nil, err
 	}
-	n.addrInfo = id.AddrInfo
+	//n.addrInfo = id.AddrInfo
+	return &n.local.Node.AddrInfo
 	return n.addrInfo, nil
 }
 
@@ -247,4 +243,9 @@ func (n *node) doFirst() error {
 		return err
 	}
 	return nil
+}
+
+// Sync ...
+func (n *node) Sync(info core.LocalData) {
+
 }

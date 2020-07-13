@@ -36,6 +36,7 @@ func parseAddrInfo(b []byte, addrInfo *AddrInfo) error {
 	}
 	addrInfo.ID = info.ID
 	addrInfo.PublicKey = info.PublicKey
+	addrInfo.DataStore = info.DataStore
 	addrs := make(map[ma.Multiaddr]bool, len(info.Addrs))
 	for i := range info.Addrs {
 		multiaddr, err := ma.NewMultiaddr(info.Addrs[i])
@@ -54,6 +55,7 @@ func (info AddrInfo) MarshalJSON() ([]byte, error) {
 		ID:        info.ID,
 		PublicKey: info.PublicKey,
 		Addrs:     nil,
+		DataStore: info.DataStore,
 	}
 	for multiaddr := range info.Addrs {
 		addrInfo.Addrs = append(addrInfo.Addrs, multiaddr.String())

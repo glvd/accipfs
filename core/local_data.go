@@ -28,7 +28,7 @@ type LocalData struct {
 func (l *safeLocalData) Marshal() ([]byte, error) {
 	l.lock.RLock()
 	marshal, err := json.Marshal(l.data)
-	l.lock.Unlock()
+	l.lock.RUnlock()
 	if err != nil {
 		return nil, err
 	}

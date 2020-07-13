@@ -31,6 +31,21 @@ type APIContext struct {
 	msg      func(s string)
 }
 
+// Link ...
+func (c *APIContext) Link(req *core.NodeLinkReq) (*core.NodeLinkResp, error) {
+	return c.m.Link(req)
+}
+
+// List ...
+func (c *APIContext) List(req *core.NodeListReq) (*core.NodeListResp, error) {
+	return c.m.List(req)
+}
+
+// NodeAPI ...
+func (c *APIContext) NodeAPI() core.NodeAPI {
+	return c.m
+}
+
 // Add ...
 func (c *APIContext) Add(req *core.AddReq) (*core.AddResp, error) {
 	var info core.DataInfoV1
@@ -182,9 +197,9 @@ func (c *APIContext) registerRoutes() {
 
 	v0 := api.Group(c.cfg.API.Version)
 	v0.POST("/id", c.id)
-	//v0.POST("/node/link", c.nodeLink())
-	//v0.POST("/node/unlink", c.nodeUnlink)
-	//v0.POST("/node/list", c.nodeList())
+	v0.POST("/node/link", c.nodeLink())
+	v0.POST("/node/unlink", c.nodeUnlink())
+	v0.POST("/node/list", c.nodeList())
 	v0.GET("/get", c.get)
 	v0.GET("/query", c.query)
 }
@@ -280,7 +295,7 @@ func (c *APIContext) nodeLink() func(ctx *gin.Context) {
 			JSON(ctx, nil, err)
 			return
 		}
-		id, err := c.m.NodeAPI().Link(&req)
+		id, err := c.Link(&req)
 		JSON(ctx, id, err)
 	}
 
@@ -295,11 +310,12 @@ func (c *APIContext) nodeUnlink() func(ctx *gin.Context) {
 
 // Unlink ...
 func (c *APIContext) Unlink(req *core.NodeUnlinkReq) (*core.NodeUnlinkResp, error) {
-	panic("implement me")
+	return c.m.Unlink(req)
 }
+
 func (c *APIContext) nodeList() func(ctx *gin.Context) {
 	return func(ctx *gin.Context) {
-		list, err := c.m.NodeAPI().List(&core.NodeListReq{})
+		list, err := c.List(&core.NodeListReq{})
 		JSON(ctx, list, err)
 	}
 }

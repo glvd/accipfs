@@ -27,7 +27,7 @@ type manager struct {
 	currentNodes    *atomic.Uint64
 	path            string
 	expPath         string
-	local           LocalDataInfo
+	local           core.LocalDataInfo
 	nodePool        *ants.PoolWithFunc
 	connectNodes    sync.Map
 	disconnectNodes sync.Map
@@ -154,6 +154,11 @@ func (m *manager) List(req *core.NodeListReq) (*core.NodeListResp, error) {
 	return &core.NodeListResp{Nodes: nodes}, nil
 }
 
+// Local ...
+func (m *manager) Local() core.LocalDataInfo {
+	return m.local
+}
+
 // Load ...
 func (m *manager) Load() error {
 	m.nodes.Range(func(hash string, value string) bool {
@@ -274,13 +279,13 @@ func decodeNode(m core.NodeManager, b []byte, api core.API) error {
 	if err != nil {
 		return err
 	}
-	info, err := m.NodeAddrInfo(&core.AddrReq{})
-	if err != nil {
-		return err
-	}
+	//info, err := m.NodeAddrInfo(&core.AddrReq{})
+	//if err != nil {
+	//	return err
+	//}
 	for _, nodes := range nodes {
 		for _, addr := range nodes.Addrs {
-			connectNode, err := ConnectNode(addr, 0)
+			connectNode, err := ConnectNode(addr, 0, m.Local())
 			if err != nil {
 				continue
 			}

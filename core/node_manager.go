@@ -42,7 +42,7 @@ func (l *LocalData) JSON() string {
 // NodeManager ...
 type NodeManager interface {
 	NodeAPI
-	Local() LocalData
+	Local() *LocalData
 	Close()
 	Push(n Node)
 	Range(f func(key string, node Node) bool)

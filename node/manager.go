@@ -51,6 +51,18 @@ func Manager(cfg *config.Config, ctx *controller.APIContext) core.NodeManager {
 	m.api = ctx.API(m)
 
 	m.nodePool = mustPool(ants.DefaultAntsPoolSize, m.poolRun)
+
+	//todo
+	info, err := m.api.NodeAPI().NodeAddrInfo(&core.AddrReq{})
+	if err != nil {
+		return nil
+	}
+	m.local = &core.NodeInfo{
+		AddrInfo:        *info.AddrInfo,
+		AgentVersion:    "",
+		ProtocolVersion: "",
+	}
+
 	go m.loop()
 
 	return m

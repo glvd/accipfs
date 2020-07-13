@@ -1,10 +1,11 @@
-package controller
+package node
 
 import (
 	"context"
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
+	controller2 "github.com/glvd/accipfs/controller"
 	ma "github.com/multiformats/go-multiaddr"
 	"net"
 	"net/http"
@@ -25,7 +26,7 @@ type APIContext struct {
 	listener   net.Listener
 	serv       *http.Server
 	ready      *atomic.Bool
-	controller *Controller
+	controller *controller2.Controller
 	msg        func(s string)
 }
 
@@ -130,7 +131,7 @@ func (c *APIContext) ID(req *core.IDReq) (*core.IDResp, error) {
 	}
 	pubString := base64.StdEncoding.EncodeToString(bytes)
 	log.Infow("result id", "id", c.cfg.Identity, "public key", pubString)
-	ipfsID, err := c.controller.dataNode().ID(context.TODO())
+	ipfsID, err := c.controller.ID(context.TODO())
 	if err != nil {
 		return nil, err
 	}
@@ -213,7 +214,7 @@ func (c *APIContext) MessageHandle(f func(s string)) {
 	}
 }
 
-func (c *APIContext) setController(controller *Controller) {
+func (c *APIContext) setController(controller *controller2.Controller) {
 	c.controller = controller
 }
 
@@ -250,7 +251,7 @@ func (c *APIContext) query(ctx *gin.Context) {
 		JSON(ctx, "", fmt.Errorf("query failed(%w)", err))
 		return
 	}
-	dTag, e := c.controller.infoNode().DTag()
+	dTag, e := c.controller.DTag()
 	if e != nil {
 		JSON(ctx, "", fmt.Errorf("query failed(%w)", e))
 		return

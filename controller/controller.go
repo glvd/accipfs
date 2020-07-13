@@ -1,8 +1,11 @@
 package controller
 
 import (
+	"context"
 	"github.com/glvd/accipfs/config"
+	"github.com/glvd/accipfs/contract/dtag"
 	"github.com/glvd/accipfs/core"
+	"github.com/glvd/accipfs/node"
 	"go.uber.org/atomic"
 	"sync"
 )
@@ -15,8 +18,7 @@ const (
 	IndexETH ServiceIndex = iota
 	// IndexIPFS ...
 	IndexIPFS
-	// IndexContext ...
-	IndexContext
+
 	// IndexMax ...
 	IndexMax
 )
@@ -25,13 +27,13 @@ const (
 type Controller struct {
 	isRunning *atomic.Bool
 	services  []core.ControllerService
-	ctx       *APIContext
+	ctx       *node.APIContext
 	ethNode   *nodeBinETH
 	ipfsNode  *nodeBinIPFS
 }
 
 // New ...
-func New(cfg *config.Config, ctx *APIContext) *Controller {
+func New(cfg *config.Config) *Controller {
 	c := &Controller{
 		services: make([]core.ControllerService, IndexMax),
 	}
@@ -53,9 +55,6 @@ func New(cfg *config.Config, ctx *APIContext) *Controller {
 		c.ipfsNode = ipfs
 	}
 	c.isRunning = atomic.NewBool(false)
-	c.services[IndexContext] = ctx
-	c.ctx = ctx
-	c.ctx.setController(c)
 	return c
 }
 
@@ -105,15 +104,20 @@ func (c *Controller) Stop() (e error) {
 	return
 }
 
-// API ...
-func (c *Controller) API(manager core.NodeManager) core.API {
-	return c.ctx.API(manager)
-}
-
 func (c *Controller) dataNode() *nodeBinIPFS {
 	return c.ipfsNode
 }
 
 func (c *Controller) infoNode() *nodeBinETH {
 	return c.ethNode
+}
+
+// ID ...
+func (c *Controller) ID(ctx context.Context) (*core.DataStoreInfo, error) {
+	return c.dataNode().ID(ctx)
+}
+
+// DTag ...
+func (c *Controller) DTag() (*dtag.DTag, error) {
+	return c.infoNode().DTag()
 }

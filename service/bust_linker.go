@@ -34,7 +34,7 @@ func NewBustLinker(cfg *config.Config) (linker *BustLinker, err error) {
 		return nil, err
 	}
 	linker.self = selfAcc
-	context := controller.NewContext(cfg)
+	context := node.NewContext(cfg)
 	linker.controller = controller.New(cfg, context)
 
 	////todo

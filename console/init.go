@@ -4,6 +4,7 @@ import (
 	"github.com/glvd/accipfs/account"
 	"github.com/glvd/accipfs/config"
 	"github.com/glvd/accipfs/controller"
+	"github.com/glvd/accipfs/node"
 	ipfsCfg "github.com/ipfs/go-ipfs-config"
 	"github.com/ipfs/interface-go-ipfs-core/options"
 	"github.com/spf13/cobra"
@@ -30,7 +31,7 @@ func initCmd() *cobra.Command {
 			if err := cfg.Init(); err != nil {
 				panic(err)
 			}
-			context := controller.NewContext(cfg)
+			context := node.NewContext(cfg)
 			c := controller.New(cfg, context)
 			if err := c.Initialize(); err != nil {
 				panic(err)

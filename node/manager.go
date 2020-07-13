@@ -27,7 +27,7 @@ type manager struct {
 	currentNodes    *atomic.Uint64
 	path            string
 	expPath         string
-	local           *core.LocalData
+	local           core.SafeLocalData
 	nodePool        *ants.PoolWithFunc
 	connectNodes    sync.Map
 	disconnectNodes sync.Map
@@ -155,7 +155,7 @@ func (m *manager) List(req *core.NodeListReq) (*core.NodeListResp, error) {
 }
 
 // Local ...
-func (m *manager) Local() *core.LocalData {
+func (m *manager) Local() core.SafeLocalData {
 	return m.local
 }
 

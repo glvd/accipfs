@@ -7,7 +7,7 @@ import (
 // NodeManager ...
 type NodeManager interface {
 	NodeAPI
-	Local() *LocalData
+	Local() SafeLocalData
 	Close()
 	Push(n Node)
 	Range(f func(key string, node Node) bool)

@@ -278,7 +278,7 @@ func decodeNode(m core.NodeManager, b []byte, api core.API) error {
 	if err != nil {
 		return err
 	}
-	info, err := api.NodeAPI().NodeAddrInfo(&core.AddrReq{})
+	info, err := m.NodeAPI().NodeAddrInfo(&core.AddrReq{})
 	if err != nil {
 		return err
 	}

@@ -125,5 +125,5 @@ func (c *Controller) DTag() (*dtag.DTag, error) {
 
 // API ...
 func (c *Controller) API() core.API {
-	return NewContext(c.cfg)
+	return NewContext(c.cfg, c)
 }

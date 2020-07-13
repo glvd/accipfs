@@ -42,15 +42,16 @@ func (c *APIContext) Add(req *core.AddReq) (*core.AddResp, error) {
 var _ core.API = &APIContext{}
 
 // NewContext ...
-func NewContext(cfg *config.Config) *APIContext {
+func NewContext(cfg *config.Config, c *Controller) *APIContext {
 	if !cfg.Debug {
 		gin.SetMode(gin.ReleaseMode)
 	}
 	eng := gin.Default()
 	return &APIContext{
-		cfg:   cfg,
-		eng:   eng,
-		ready: atomic.NewBool(false),
+		cfg:        cfg,
+		eng:        eng,
+		controller: c,
+		ready:      atomic.NewBool(false),
 		serv: &http.Server{
 			Handler: eng,
 		},

@@ -25,7 +25,7 @@ type manager struct {
 	path            string
 	expPath         string
 	api             core.API
-	local           *core.NodeInfo
+	local           core.NodeInfo
 	nodePool        *ants.PoolWithFunc
 	connectNodes    sync.Map
 	disconnectNodes sync.Map
@@ -57,7 +57,7 @@ func Manager(cfg *config.Config, ctx *controller.APIContext) core.NodeManager {
 	if err != nil {
 		return nil
 	}
-	m.local = &core.NodeInfo{
+	m.local = core.NodeInfo{
 		AddrInfo:        *info.AddrInfo,
 		AgentVersion:    "",
 		ProtocolVersion: "",
@@ -103,7 +103,7 @@ func (m *manager) Load() error {
 			log.Errorw("load addr info failed", "err", err)
 		}
 		for multiaddr := range addrInfo.Addrs {
-			connectNode, err := ConnectNode(multiaddr, 0, *m.local, m.api)
+			connectNode, err := ConnectNode(multiaddr, 0, m.local, m.api)
 			if err != nil {
 				continue
 			}
@@ -179,7 +179,7 @@ func (m *manager) loop() {
 
 // Conn ...
 func (m *manager) Conn(c net.Conn) (core.Node, error) {
-	acceptNode, err := CoreNode(c, *m.local, m.api)
+	acceptNode, err := CoreNode(c, m.local, m.api)
 	if err != nil {
 		return nil, err
 	}

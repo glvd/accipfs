@@ -8,7 +8,7 @@ import (
 // LocalDataLocker ...
 type LocalDataLocker struct {
 	lock sync.RWMutex
-	LocalData
+	data LocalData
 }
 
 // LocalData ...
@@ -19,7 +19,7 @@ type LocalData struct {
 // Marshal ...
 func (l *LocalDataLocker) Marshal() ([]byte, error) {
 	l.lock.RLock()
-	marshal, err := json.Marshal(l.LocalData)
+	marshal, err := json.Marshal(l.data)
 	l.lock.Unlock()
 	if err != nil {
 		return nil, err
@@ -30,7 +30,7 @@ func (l *LocalDataLocker) Marshal() ([]byte, error) {
 // Unmarshal ...
 func (l *LocalDataLocker) Unmarshal(bytes []byte) (err error) {
 	l.lock.Lock()
-	err = json.Unmarshal(bytes, &l.LocalData)
+	err = json.Unmarshal(bytes, &l.data)
 	l.lock.Unlock()
 	return
 }
@@ -47,6 +47,14 @@ func (l *LocalDataLocker) JSON() string {
 // Update ...
 func (l *LocalDataLocker) Update(f func(data *LocalData)) {
 	l.lock.Lock()
-	f(&l.LocalData)
+	f(&l.data)
 	l.lock.Unlock()
+}
+
+// Data ...
+func (l *LocalDataLocker) Data() (data LocalData) {
+	l.lock.Lock()
+	data = l.data
+	l.lock.Unlock()
+	return
 }

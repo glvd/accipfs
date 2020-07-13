@@ -279,10 +279,7 @@ func decodeNode(m core.NodeManager, b []byte, api core.API) error {
 	if err != nil {
 		return err
 	}
-	//info, err := m.NodeAddrInfo(&core.AddrReq{})
-	//if err != nil {
-	//	return err
-	//}
+
 	for _, nodes := range nodes {
 		for _, addr := range nodes.Addrs {
 			connectNode, err := ConnectNode(addr, 0, m.Local())

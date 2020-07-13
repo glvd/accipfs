@@ -48,7 +48,7 @@ func TestAcceptNode(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	listener.ID(func() string {
+	listener.SetGlobalID(func() string {
 		return basis.UUID()
 	})
 	listener.HandleRecv(func(id string, message *scdt.Message) ([]byte, bool) {
@@ -73,7 +73,7 @@ func TestConnectNode(t *testing.T) {
 		wg.Add(1)
 		go func(i int) {
 			defer wg.Done()
-			toNode, err := ConnectNode(multiaddr, 0, &dummyAPI{
+			toNode, err := ConnectNode(multiaddr, 0, core.NodeInfo{}, &dummyAPI{
 				id: fmt.Sprintf("id(%v),client request", 0),
 			})
 			if err != nil {

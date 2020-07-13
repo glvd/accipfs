@@ -23,15 +23,16 @@ func init() {
 
 func TestManager_Store(t *testing.T) {
 	cfg := config.Default()
-	context := controller.NewContext(cfg)
-	controller.New(cfg, context)
-	nodeManager := Manager(cfg, context)
+	//context := controller.NewContext(cfg)
+	//c := controller.New(cfg)
+	//c.API()
+	nodeManager := InitManager(cfg)
 	multiaddr, err := ma.NewMultiaddr("/ip4/127.0.0.1/tcp/12345")
 	if err != nil {
 		panic(err)
 	}
 	for i := 0; i < 100; i++ {
-		connectNode, err := ConnectNode(multiaddr, 0, &dummyAPI{})
+		connectNode, err := ConnectNode(multiaddr, 0, core.NodeInfo{}, &dummyAPI{})
 		if err != nil {
 			continue
 		}
@@ -50,7 +51,7 @@ func store(wg *sync.WaitGroup, nodeManager core.NodeManager) {
 		panic(err)
 	}
 	for i := 0; i < 1000; i++ {
-		connectNode, err := ConnectNode(multiaddr, 0, &dummyAPI{
+		connectNode, err := ConnectNode(multiaddr, 0, core.NodeInfo{}, &dummyAPI{
 			id: basis.UUID(),
 		})
 
@@ -83,13 +84,13 @@ func load(wg *sync.WaitGroup, nodeManager core.NodeManager) {
 
 func TestManager_Load(t *testing.T) {
 	cfg := config.Default()
-	ctx := controller.NewContext(cfg)
-	controller.New(cfg, ctx)
-	nodeManager := Manager(cfg, ctx)
-	defer nodeManager.Close()
+	controller.New(cfg)
+	InitManager(cfg)
+	//nodeManager := Manager(cfg, ctx)
+	defer GlobalManager.Close()
 	wg := &sync.WaitGroup{}
 	wg.Add(2)
-	go load(wg, nodeManager)
-	store(wg, nodeManager)
+	go load(wg, GlobalManager)
+	store(wg, GlobalManager)
 	wg.Done()
 }

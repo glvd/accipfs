@@ -90,8 +90,7 @@ func (c *APIContext) NodeAddrInfo(req *core.AddrReq) (*core.AddrResp, error) {
 	info := core.NewAddrInfo(id.ID, id.Addrs...)
 	info.PublicKey = id.PublicKey
 	info.DataStore = id.DataStore
-	info.DataStore.ID = id.DataStore.ID
-	log.Infow("node addr", "info", info, "data", id.DataStore)
+	//log.Infow("node addr", "info", info.DataStore, "data", id.DataStore)
 	return &core.AddrResp{
 		AddrInfo: *info,
 	}, nil
@@ -163,7 +162,7 @@ func (c *APIContext) ID(req *core.IDReq) (*core.IDResp, error) {
 		}
 		multiAddress = append(multiAddress, multiaddr)
 	}
-	log.Infow("result id", "id", c.cfg.Identity, "public key", pubString, "datastore", ipfsID)
+	//log.Infow("result id", "id", c.cfg.Identity, "public key", pubString, "datastore", ipfsID)
 	return &core.IDResp{
 		ID:        c.cfg.Identity,
 		PublicKey: pubString,

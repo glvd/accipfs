@@ -12,12 +12,13 @@ type AddrInfo struct {
 	PublicKey string                `json:"public_key"`
 	Addrs     map[ma.Multiaddr]bool `json:"addrs"`
 	DataStore DataStoreInfo         `json:"data_store"`
-	//IPFSAddrInfo peer.AddrInfo
 }
+
 type jsonIPFSAddrInfo struct {
 	ID    string   `json:"id"`
 	Addrs []string `json:"addrs"`
 }
+
 type jsonAddrInfo struct {
 	ID        string        `json:"id"`
 	PublicKey string        `json:"public_key"`

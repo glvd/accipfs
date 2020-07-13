@@ -79,6 +79,6 @@ func (l *BustLinker) afterStart() {
 
 	l.manager.Local().Update(func(data *core.LocalData) {
 		data.Node.AddrInfo = info.AddrInfo
-		log.Infow("debug", "data", data, "info", info)
+		//log.Infow("debug", "data", data.Node.DataStore, "info", info.AddrInfo.DataStore)
 	})
 }

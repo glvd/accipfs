@@ -28,7 +28,7 @@ func pinLsCmd() *cobra.Command {
 			cfg := config.Global()
 			client.InitGlobalClient(&cfg)
 
-			pins, err := client.Pins(&core.DataStoreReq{})
+			pins, err := client.PinLs(&core.DataStoreReq{})
 			if err != nil {
 				panic(err)
 			}

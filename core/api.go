@@ -132,5 +132,5 @@ type NodeAPI interface {
 
 // DataStoreAPI ...
 type DataStoreAPI interface {
-	Pins(req *DataStoreReq) (*DataStoreResp, error)
+	PinLs(req *DataStoreReq) (*DataStoreResp, error)
 }

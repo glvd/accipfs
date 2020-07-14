@@ -180,9 +180,9 @@ func NodeLink(req *core.NodeLinkReq) (resp *core.NodeLinkResp, err error) {
 	return DefaultClient.NodeAPI().Link(req)
 }
 
-// Pins ...
-func Pins(req *core.DataStoreReq) (*core.DataStoreResp, error) {
-	return DefaultClient.DataStoreAPI().Pins(req)
+// PinLs ...
+func PinLs(req *core.DataStoreReq) (*core.DataStoreResp, error) {
+	return DefaultClient.DataStoreAPI().PinLs(req)
 }
 
 // PinVideo ...
@@ -246,14 +246,14 @@ func (c *client) List(req *core.NodeListReq) (resp *core.NodeListResp, err error
 	return
 }
 
-// DataStorePins ...
-func DataStorePins(req *core.DataStoreReq) (resp *core.DataStoreResp, err error) {
-	return DefaultClient.DataStoreAPI().Pins(req)
+// DataStorePinLs ...
+func DataStorePinLs(req *core.DataStoreReq) (resp *core.DataStoreResp, err error) {
+	return DefaultClient.DataStoreAPI().PinLs(req)
 }
 
-// Pins ...
-func (c *client) Pins(req *core.DataStoreReq) (resp *core.DataStoreResp, err error) {
+// PinLs ...
+func (c *client) PinLs(req *core.DataStoreReq) (resp *core.DataStoreResp, err error) {
 	resp = new(core.DataStoreResp)
-	err = c.doPost("datastore/pins", req, resp)
+	err = c.doPost("datastore/pin/ls", req, resp)
 	return
 }

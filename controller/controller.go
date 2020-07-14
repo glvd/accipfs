@@ -31,8 +31,9 @@ type Controller struct {
 	cfg       *config.Config
 }
 
-// Pins ...
-func (c *Controller) Pins(req *core.DataStoreReq) (*core.DataStoreResp, error) {
+// PinLs ...
+func (c *Controller) PinLs(req *core.DataStoreReq) (*core.DataStoreResp, error) {
+	log.Infow("pin list request")
 	ls, err := c.dataNode().PinLS(context.TODO())
 	if err != nil {
 		return nil, err
@@ -40,6 +41,7 @@ func (c *Controller) Pins(req *core.DataStoreReq) (*core.DataStoreResp, error) {
 
 	var pins []string
 	for v := range ls {
+		log.Infow("show pins", "data", v.Path().String())
 		pins = append(pins, v.Path().String())
 	}
 	return &core.DataStoreResp{Pins: pins}, nil

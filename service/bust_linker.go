@@ -76,13 +76,13 @@ func (l *BustLinker) afterStart() {
 	if err != nil {
 		return
 	}
-	pins, err := l.controller.PinLs()
+	pins, err := l.api.DataStoreAPI().PinLs(&core.DataStoreReq{})
 	if err != nil {
 		return
 	}
 	l.manager.Local().Update(func(data *core.LocalData) {
 		data.Node.AddrInfo = info.AddrInfo
-		data.LDs = pins
+		data.LDs = pins.Pins
 	})
 
 }

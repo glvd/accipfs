@@ -31,9 +31,9 @@ type APIContext struct {
 	msg      func(s string)
 }
 
-// Pins ...
-func (c *APIContext) Pins(req *core.DataStoreReq) (*core.DataStoreResp, error) {
-	return c.DataStoreAPI().Pins(req)
+// PinLs ...
+func (c *APIContext) PinLs(req *core.DataStoreReq) (*core.DataStoreResp, error) {
+	return c.DataStoreAPI().PinLs(req)
 }
 
 // DataStoreAPI ...
@@ -212,7 +212,7 @@ func (c *APIContext) registerRoutes() {
 	v0.POST("/node/link", c.nodeLink())
 	v0.POST("/node/unlink", c.nodeUnlink())
 	v0.POST("/node/list", c.nodeList())
-	v0.POST("/datastore/pins", c.datastorePins())
+	v0.POST("/datastore/pin/ls", c.datastorePinLs())
 	v0.GET("/get", c.get)
 	v0.GET("/query", c.query)
 }
@@ -333,9 +333,9 @@ func (c *APIContext) nodeList() func(ctx *gin.Context) {
 	}
 }
 
-func (c *APIContext) datastorePins() gin.HandlerFunc {
+func (c *APIContext) datastorePinLs() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-		list, err := c.Pins(&core.DataStoreReq{})
+		list, err := c.PinLs(&core.DataStoreReq{})
 		JSON(ctx, list, err)
 	}
 }

@@ -20,6 +20,8 @@ const (
 	AlreadyConnectedRequest = iota + 1
 	// InfoRequest ...
 	InfoRequest
+	// LDsRequest ...
+	LDsRequest
 	// PeerGetRequest ...
 	PeerGetRequest
 )
@@ -162,6 +164,9 @@ func defaultAPINode(c net.Conn, local core.SafeLocalData, duration time.Duration
 		case PeerGetRequest:
 			request, b, err := n.RecvPeerGetRequest(message)
 			return request, b, err
+		case LDsRequest:
+			request, b, err := n.RecvLDsRequest(message)
+			return request, b, err
 		case AlreadyConnectedRequest:
 			conn.Close()
 		}
@@ -281,8 +286,19 @@ func (n *node) doFirst() error {
 
 // RecvPeerGetRequest ...
 func (n *node) RecvPeerGetRequest(message *scdt.Message) ([]byte, bool, error) {
-	peers := n.local.Data().Peers
-	marshal, err := json.Marshal(peers)
+	//peers := n.local.Data().
+	//marshal, err := json.Marshal(peers)
+	//if err != nil {
+	//	return nil, false, err
+	//}
+	//return marshal, true, nil
+	return nil, false, nil
+}
+
+// RecvLDsRequest ...
+func (n *node) RecvLDsRequest(message *scdt.Message) ([]byte, bool, error) {
+	lds := n.local.Data().LDs
+	marshal, err := json.Marshal(lds)
 	if err != nil {
 		return nil, false, err
 	}

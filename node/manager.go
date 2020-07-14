@@ -361,14 +361,14 @@ func (m *manager) AllNodes() (map[string]core.Node, int, error) {
 }
 
 // AllLDs ...
-func (m *manager) AllLDs() ([]string, error) {
-	if m.RequestLD != nil {
-		return m.RequestLD()
-	}
-	return nil, errors.New("callback not found")
-}
+//func (m *manager) AllLDs() ([]string, error) {
+//	if m.RequestLD != nil {
+//		return m.RequestLD()
+//	}
+//	return nil, errors.New("callback not found")
+//}
 
-// RegisterLDRequest ...
-func (m *manager) RegisterLDRequest(f func() ([]string, error)) {
-	m.RequestLD = f
-}
+//// RegisterLDRequest ...
+//func (m *manager) RegisterLDRequest(f func() ([]string, error)) {
+//	m.RequestLD = f
+//}

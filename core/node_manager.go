@@ -14,6 +14,6 @@ type NodeManager interface {
 	Conn(c net.Conn) (Node, error)
 	Store() error
 	Load() error
-	RegisterLDRequest(func() ([]string, error))
-	RegisterAddrRequest(f func() ([]string, error))
+	//RegisterLDRequest(func() ([]string, error))
+	//RegisterAddrRequest(f func() ([]string, error))
 }

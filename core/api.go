@@ -8,6 +8,7 @@ type DataStoreReq struct {
 
 // DataStoreResp ...
 type DataStoreResp struct {
+	Pins []string
 }
 
 // PingReq ...

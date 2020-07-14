@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/glvd/accipfs/client"
 	"github.com/glvd/accipfs/config"
+	"github.com/glvd/accipfs/core"
 	"github.com/spf13/cobra"
 )
 
@@ -14,12 +15,16 @@ func pinCmd() *cobra.Command {
 		Long:  "pin a video to local for sharing",
 		Run: func(cmd *cobra.Command, args []string) {
 			config.Initialize()
-			for _, no := range args {
-				err := client.PinVideo(config.RPCAddr(), no)
-				if err != nil {
-					fmt.Printf("failed to pin (%s) with error(%v)\n", no, err.Error())
-					return
-				}
+			cfg := config.Global()
+			client.InitGlobalClient(&cfg)
+
+			pins, err := client.Pins(&core.DataStoreReq{})
+			if err != nil {
+				return
+			}
+			fmt.Println("show pin list:")
+			for _, v := range pins.Pins {
+				fmt.Println(v)
 			}
 		},
 	}

@@ -33,17 +33,17 @@ type APIContext struct {
 
 // Link ...
 func (c *APIContext) Link(req *core.NodeLinkReq) (*core.NodeLinkResp, error) {
-	return c.m.Link(req)
+	return c.m.NodeAPI().Link(req)
 }
 
 // List ...
 func (c *APIContext) List(req *core.NodeListReq) (*core.NodeListResp, error) {
-	return c.m.List(req)
+	return c.m.NodeAPI().List(req)
 }
 
 // NodeAPI ...
 func (c *APIContext) NodeAPI() core.NodeAPI {
-	return c.m
+	return c.m.NodeAPI()
 }
 
 // Add ...
@@ -312,7 +312,7 @@ func (c *APIContext) nodeUnlink() func(ctx *gin.Context) {
 
 // Unlink ...
 func (c *APIContext) Unlink(req *core.NodeUnlinkReq) (*core.NodeUnlinkResp, error) {
-	return c.m.Unlink(req)
+	return c.m.NodeAPI().Unlink(req)
 }
 
 func (c *APIContext) nodeList() func(ctx *gin.Context) {

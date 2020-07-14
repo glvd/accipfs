@@ -6,7 +6,7 @@ import (
 
 // NodeManager ...
 type NodeManager interface {
-	NodeAPI
+	NodeAPI() NodeAPI
 	Local() SafeLocalData
 	Close()
 	Push(n Node)

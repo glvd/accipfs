@@ -38,6 +38,11 @@ type jsonNode struct {
 
 var _ core.Node = &node{}
 
+// SendClose ...
+func (n *node) SendClose() {
+	n.Connection.SendClose([]byte("connected"))
+}
+
 // IsClosed ...
 func (n *node) IsClosed() bool {
 	return n.Connection.IsClosed()

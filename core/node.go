@@ -16,4 +16,5 @@ type Node interface {
 	Close() (err error)
 	IsClosed() bool
 	AppendAddr(addrs ...ma.Multiaddr)
+	SendClose()
 }

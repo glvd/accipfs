@@ -30,7 +30,7 @@ func pinLsCmd() *cobra.Command {
 
 			pins, err := client.Pins(&core.DataStoreReq{})
 			if err != nil {
-				return
+				panic(err)
 			}
 			fmt.Println("show pin list:")
 			for _, v := range pins.Pins {

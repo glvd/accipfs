@@ -38,7 +38,7 @@ func (c *APIContext) Pins(req *core.DataStoreReq) (*core.DataStoreResp, error) {
 
 // DataStoreAPI ...
 func (c *APIContext) DataStoreAPI() core.DataStoreAPI {
-	return c
+	return c.c
 }
 
 // Link ...

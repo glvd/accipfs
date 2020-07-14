@@ -31,6 +31,20 @@ type Controller struct {
 	cfg       *config.Config
 }
 
+// Pins ...
+func (c *Controller) Pins(req *core.DataStoreReq) (*core.DataStoreResp, error) {
+	ls, err := c.dataNode().PinLS(context.TODO())
+	if err != nil {
+		return nil, err
+	}
+
+	var pins []string
+	for v := range ls {
+		pins = append(pins, v.Path().String())
+	}
+	return &core.DataStoreResp{Pins: pins}, nil
+}
+
 // New ...
 func New(cfg *config.Config) *Controller {
 	c := &Controller{
@@ -122,21 +136,7 @@ func (c *Controller) DTag() (*dtag.DTag, error) {
 	return c.infoNode().DTag()
 }
 
-// PinLs ...
-func (c *Controller) PinLs() ([]string, error) {
-	ls, err := c.dataNode().PinLS(context.TODO())
-	if err != nil {
-		return nil, err
-	}
-
-	var pins []string
-	for v := range ls {
-		pins = append(pins, v.Path().String())
-	}
-	return pins, nil
+// DataStoreAPI ...
+func (c *Controller) DataStoreAPI() core.DataStoreAPI {
+	return c
 }
-
-//// API ...
-//func (c *Controller) API() core.API {
-//	return service.NewAPIContext(c.cfg, m, c)
-//}

@@ -25,6 +25,11 @@ type client struct {
 	cli *http.Client
 }
 
+// DataStoreAPI ...
+func (c *client) DataStoreAPI() core.DataStoreAPI {
+	return c
+}
+
 type jsonResp struct {
 	Status  string `json:"status"`
 	Error   string `json:"error"`
@@ -238,5 +243,12 @@ func (c *client) Unlink(req *core.NodeUnlinkReq) (resp *core.NodeUnlinkResp, err
 func (c *client) List(req *core.NodeListReq) (resp *core.NodeListResp, err error) {
 	resp = new(core.NodeListResp)
 	err = c.doPost("node/list", req, resp)
+	return
+}
+
+// Pins ...
+func (c *client) DataStorePins(req *core.DataStoreReq) (resp *core.DataStoreResp, err error) {
+	resp = new(core.DataStoreResp)
+	err = c.doPost("datastore/pins", req, resp)
 	return
 }

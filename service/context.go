@@ -212,6 +212,7 @@ func (c *APIContext) registerRoutes() {
 	v0.POST("/node/link", c.nodeLink())
 	v0.POST("/node/unlink", c.nodeUnlink())
 	v0.POST("/node/list", c.nodeList())
+	v0.POST("/datastore/pins", c.datastorePins())
 	v0.GET("/get", c.get)
 	v0.GET("/query", c.query)
 }
@@ -328,6 +329,13 @@ func (c *APIContext) Unlink(req *core.NodeUnlinkReq) (*core.NodeUnlinkResp, erro
 func (c *APIContext) nodeList() func(ctx *gin.Context) {
 	return func(ctx *gin.Context) {
 		list, err := c.List(&core.NodeListReq{})
+		JSON(ctx, list, err)
+	}
+}
+
+func (c *APIContext) datastorePins() gin.HandlerFunc {
+	return func(ctx *gin.Context) {
+		list, err := c.Pins(&core.DataStoreReq{})
 		JSON(ctx, list, err)
 	}
 }

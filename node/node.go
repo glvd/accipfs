@@ -16,8 +16,10 @@ import (
 )
 
 const (
+	// AlreadyConnectedRequest ...
+	AlreadyConnectedRequest = iota + 1
 	// InfoRequest ...
-	InfoRequest = iota + 1
+	InfoRequest
 )
 
 type node struct {
@@ -145,6 +147,8 @@ func defaultAPINode(c net.Conn, local core.SafeLocalData, duration time.Duration
 		case InfoRequest:
 			request, b, err := n.RecvDataRequest(message)
 			return request, b, err
+		case AlreadyConnectedRequest:
+			conn.Close()
 		}
 		return []byte("recv custom called"), true, errors.New("wrong case")
 	})
@@ -162,6 +166,12 @@ func (n *node) AppendAddr(addrs ...ma.Multiaddr) {
 // Addrs ...
 func (n node) Addrs() []ma.Multiaddr {
 	return n.remote.Addrs
+}
+
+// SendConnected ...
+func (n *node) SendConnected() error {
+	n.SendCustomData(AlreadyConnectedRequest, []byte("connected"))
+	return nil
 }
 
 // ID ...

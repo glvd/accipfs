@@ -57,6 +57,7 @@ func (h *linkListener) Listen() (err error) {
 			if err != nil {
 				log.Errorw("connection err", "err", err)
 			}
+
 			continue
 		}
 		//no callback closed

@@ -110,13 +110,19 @@ func (m *manager) Link(req *core.NodeLinkReq) (*core.NodeLinkResp, error) {
 		if err != nil {
 			return nil, err
 		}
-		info, err := conn.Info()
-		if err != nil {
-			return nil, err
+		id := conn.ID()
+		getNode, b := m.GetNode(id)
+		if b {
+			info, err := getNode.Info()
+			if err != nil {
+				return nil, err
+			}
+			return &core.NodeLinkResp{
+				NodeInfo: info,
+			}, nil
 		}
-		return &core.NodeLinkResp{
-			NodeInfo: info,
-		}, nil
+
+		return &core.NodeLinkResp{}, nil
 	}
 	return &core.NodeLinkResp{}, errors.New("all request was failed")
 }
@@ -265,7 +271,11 @@ func (m *manager) poolRun(v interface{}) {
 	if !b {
 		return
 	}
-	defer n.Close()
+	defer func() {
+		//wait client close itself
+		time.Sleep(500 * time.Millisecond)
+		n.Close()
+	}()
 	id := n.ID()
 	if id == "" {
 		return
@@ -276,8 +286,9 @@ func (m *manager) poolRun(v interface{}) {
 		if n.Addrs() != nil {
 			nbase.AppendAddr(n.Addrs()...)
 		}
-		n.SendClose()
-		time.Sleep(500 * time.Millisecond)
+		//wait client get base info
+		time.Sleep(3 * time.Second)
+		_ = n.SendConnected()
 		return
 	}
 	if !n.IsClosed() {
@@ -323,4 +334,14 @@ func encodeNode(node core.Node) ([]byte, error) {
 // Close ...
 func (m *manager) Close() {
 	m.hashes.Close()
+}
+
+// GetNode ...
+func (m *manager) GetNode(id string) (n core.Node, b bool) {
+	load, ok := m.connectNodes.Load(id)
+	if ok {
+		n, b = load.(core.Node)
+		return
+	}
+	return
 }

@@ -18,4 +18,5 @@ type Node interface {
 	AppendAddr(addrs ...ma.Multiaddr)
 	SendClose()
 	Peers() ([]string, error)
+	SendConnected() error
 }

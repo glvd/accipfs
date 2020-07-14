@@ -33,6 +33,7 @@ type manager struct {
 	disconnectNodes sync.Map
 	nodes           Cacher
 	hashes          Cacher
+	RequestLD       func() ([]string, error)
 }
 
 var _nodes = "bl.nodes"
@@ -356,8 +357,18 @@ func (m *manager) AllNodes() (map[string]core.Node, int, error) {
 		count++
 		return true
 	})
-	m.local.Update(func(data *core.LocalData) {
-		data.Peers = node.
-	})
 	return nodes, count, nil
+}
+
+// AllLDs ...
+func (m *manager) AllLDs() ([]string, error) {
+	if m.RequestLD != nil {
+		return m.RequestLD()
+	}
+	return nil, errors.New("callback not found")
+}
+
+// RegisterLDRequest ...
+func (m *manager) RegisterLDRequest(f func() []string, err error) {
+	m.RequestLD = f
 }

@@ -296,11 +296,11 @@ func (m *manager) poolRun(v interface{}) {
 		m.Push(n)
 	}
 	for !n.IsClosed() {
-		peers, err := n.Peers()
+		lds, err := n.LDs()
 		if err != nil {
 			return
 		}
-		fmt.Println("get peers:", peers)
+		fmt.Println("pin list:", lds)
 	}
 	m.connectNodes.Delete(n.ID())
 }

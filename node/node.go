@@ -70,6 +70,22 @@ func (n *node) Peers() ([]string, error) {
 	return nil, errors.New("no data respond")
 }
 
+// LDs ...
+func (n *node) LDs() ([]string, error) {
+	msg, b := n.Connection.SendCustomDataOnWait(LDsRequest, nil)
+	var s []string
+	if b {
+		if msg.DataLength > 0 {
+			err := json.Unmarshal(msg.Data, &s)
+			if err != nil {
+				return nil, err
+			}
+			return s, nil
+		}
+	}
+	return nil, errors.New("no data respond")
+}
+
 // DataStoreInfo ...
 func (n *node) DataStoreInfo() (core.DataStoreInfo, error) {
 	addrInfo, err := n.addrInfoRequest()

@@ -1,6 +1,8 @@
 package main
 
 import (
+	"github.com/glvd/accipfs/client"
+	"github.com/glvd/accipfs/config"
 	"github.com/spf13/cobra"
 )
 
@@ -12,7 +14,11 @@ func addCmd() *cobra.Command {
 		Short: "add a source to this node",
 		Long:  "add a source to this node for service some users by your self",
 		Run: func(cmd *cobra.Command, args []string) {
-			//add a file with rule to accipfs
+			//add a file with rule to accipf
+			config.Initialize()
+			cfg := config.Global()
+			client.InitGlobalClient(&cfg)
+			client.Pins()
 
 		},
 	}

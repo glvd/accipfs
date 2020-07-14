@@ -6,7 +6,6 @@ import (
 	"errors"
 	"fmt"
 	"github.com/glvd/accipfs/config"
-	mnet "github.com/multiformats/go-multiaddr-net"
 	"io"
 	"net/http"
 	"net/url"
@@ -177,20 +176,8 @@ func NodeLink(req *core.NodeLinkReq) (resp *core.NodeLinkResp, err error) {
 }
 
 // Pins ...
-func Pins(addr core.AddrInfo) (pins []string, err error) {
-	for addr := range addr.Addrs {
-		netAddr, err := mnet.ToNetAddr(addr)
-		if err != nil {
-			continue
-		}
-		url := fmt.Sprintf("http://%s/rpc", netAddr.String())
-		result := new([]string)
-		if err := basis.RPCPost(url, "BustLinker.Pins", core.DummyEmpty(), result); err != nil {
-			return nil, err
-		}
-		return *result, nil
-	}
-	return nil, errors.New("not found")
+func Pins(req *core.DataStoreReq) (*core.DataStoreResp, error) {
+	return DefaultClient.DataStoreAPI().Pins(req)
 }
 
 // PinVideo ...

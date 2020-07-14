@@ -19,4 +19,5 @@ type Node interface {
 	SendClose()
 	Peers() ([]string, error)
 	SendConnected() error
+	LDs() ([]string, error)
 }

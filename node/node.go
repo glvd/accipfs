@@ -20,6 +20,8 @@ const (
 	AlreadyConnectedRequest = iota + 1
 	// InfoRequest ...
 	InfoRequest
+	// PeerGetRequest ...
+	PeerGetRequest
 )
 
 type node struct {
@@ -52,8 +54,18 @@ func (n *node) IsClosed() bool {
 
 // Peers ...
 func (n *node) Peers() ([]string, error) {
-	time.Sleep(5 * time.Second)
-	return []string{"todo"}, nil
+	msg, b := n.Connection.SendCustomDataOnWait(PeerGetRequest, nil)
+	var s []string
+	if b {
+		if msg.DataLength > 0 {
+			err := json.Unmarshal(msg.Data, &s)
+			if err != nil {
+				return nil, err
+			}
+			return s, nil
+		}
+	}
+	return nil, errors.New("no data respond")
 }
 
 // DataStoreInfo ...
@@ -147,6 +159,9 @@ func defaultAPINode(c net.Conn, local core.SafeLocalData, duration time.Duration
 		case InfoRequest:
 			request, b, err := n.RecvDataRequest(message)
 			return request, b, err
+		case PeerGetRequest:
+			request, b, err := n.RecvPeerGetRequest(message)
+			return request, b, err
 		case AlreadyConnectedRequest:
 			conn.Close()
 		}
@@ -199,7 +214,6 @@ func (n *node) Info() (core.NodeInfo, error) {
 func (n *node) GetInfoDataRequest() (core.NodeInfo, error) {
 	msg, b := n.Connection.SendCustomDataOnWait(InfoRequest, nil)
 	var nodeInfo core.NodeInfo
-	//fmt.Printf("recved msg:%v\n", msg)
 	if b && msg.DataLength != 0 {
 		fmt.Printf("msg data:%v\n", string(msg.Data))
 		err := json.Unmarshal(msg.Data, &nodeInfo)
@@ -219,7 +233,12 @@ func (n *node) RecvIndexSyncRequest() ([]byte, bool, error) {
 
 // RecvNodeListRequest ...
 func (n *node) RecvNodeListRequest() ([]byte, bool, error) {
-	panic("//todo")
+	addrs := n.local.Data().Addrs
+	marshal, err := json.Marshal(addrs)
+	if err != nil {
+		return nil, false, err
+	}
+	return marshal, true, nil
 }
 
 // RecvDataRequest ...
@@ -258,4 +277,14 @@ func (n *node) doFirst() error {
 		return err
 	}
 	return nil
+}
+
+// RecvPeerGetRequest ...
+func (n *node) RecvPeerGetRequest(message *scdt.Message) ([]byte, bool, error) {
+	peers := n.local.Data().Peers
+	marshal, err := json.Marshal(peers)
+	if err != nil {
+		return nil, false, err
+	}
+	return marshal, true, nil
 }

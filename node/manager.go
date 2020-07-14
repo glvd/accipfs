@@ -345,3 +345,19 @@ func (m *manager) GetNode(id string) (n core.Node, b bool) {
 	}
 	return
 }
+
+// AllNodes ...
+func (m *manager) AllNodes() (map[string]core.Node, int, error) {
+	nodes := make(map[string]core.Node)
+	count := 0
+	m.Range(func(key string, node core.Node) bool {
+		nodes[key] = node
+		node.Addrs()
+		count++
+		return true
+	})
+	m.local.Update(func(data *core.LocalData) {
+		data.Peers = node.
+	})
+	return nodes, count, nil
+}

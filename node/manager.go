@@ -114,16 +114,17 @@ func (m *manager) Link(req *core.NodeLinkReq) (*core.NodeLinkResp, error) {
 		id := conn.ID()
 		getNode, b := m.GetNode(id)
 		if b {
-			info, err := getNode.Info()
-			if err != nil {
-				return nil, err
-			}
-			return &core.NodeLinkResp{
-				NodeInfo: info,
-			}, nil
+			conn = getNode
+		} else {
+			//use conn
 		}
-
-		return &core.NodeLinkResp{}, nil
+		info, err := conn.Info()
+		if err != nil {
+			return nil, err
+		}
+		return &core.NodeLinkResp{
+			NodeInfo: info,
+		}, nil
 	}
 	return &core.NodeLinkResp{}, errors.New("all request was failed")
 }
@@ -300,7 +301,10 @@ func (m *manager) poolRun(v interface{}) {
 		if err != nil {
 			return
 		}
-		fmt.Println("pin list:", lds)
+		for _, ld := range lds {
+			fmt.Println("from id", n.ID(), "pin list:", ld)
+			time.Sleep(3 * time.Second)
+		}
 	}
 	m.connectNodes.Delete(n.ID())
 }

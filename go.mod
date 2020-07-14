@@ -51,6 +51,6 @@ require (
 )
 
 replace (
-	github.com/ipfs/go-ipfs-http-client v0.0.5 => github.com/godcong/go-ipfs-http-client v0.0.7
+	github.com/ipfs/go-ipfs-http-client v0.0.5 => github.com/godcong/go-ipfs-http-client v0.0.11
 	github.com/libp2p/go-libp2p-core v0.6.0 => git.5gnode.cn/chain/go-libp2p-core v0.6.101
 )

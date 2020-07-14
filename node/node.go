@@ -172,7 +172,7 @@ func defaultAPINode(c net.Conn, local core.SafeLocalData, duration time.Duration
 		return []byte("recv called"), true, errors.New("not data")
 	})
 	conn.RecvCustomData(func(message *scdt.Message) ([]byte, bool, error) {
-		fmt.Printf("recv custom data:%+v", message)
+		fmt.Printf("recv custom data:%+v\n", message)
 		switch message.CustomID {
 		case InfoRequest:
 			request, b, err := n.RecvDataRequest(message)

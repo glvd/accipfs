@@ -41,8 +41,11 @@ func (c *Controller) PinLs(req *core.DataStoreReq) (*core.DataStoreResp, error) 
 
 	var pins []string
 	for v := range ls {
-		log.Infow("show pins", "data", v.Path().String())
-		pins = append(pins, v.Path().String())
+		if v.Err() != nil {
+			return nil, v.Err()
+		}
+		log.Infow("show pins", "data", v.Path().Cid())
+		pins = append(pins, v.Path().Cid().String())
 	}
 	return &core.DataStoreResp{Pins: pins}, nil
 }

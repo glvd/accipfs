@@ -21,9 +21,10 @@ type safeLocalData struct {
 
 // LocalData ...
 type LocalData struct {
-	Node  NodeInfo
-	LDs   []string //ipfs linked data
-	Addrs []string
+	Node       NodeInfo
+	LDs        []string //ipfs linked data
+	Addrs      []string
+	LastUpdate int64
 }
 
 // Marshal ...

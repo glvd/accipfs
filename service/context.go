@@ -31,14 +31,24 @@ type APIContext struct {
 	msg      func(s string)
 }
 
+// Pins ...
+func (c *APIContext) Pins(req *core.DataStoreReq) (*core.DataStoreResp, error) {
+	return c.DataStoreAPI().Pins(req)
+}
+
+// DataStoreAPI ...
+func (c *APIContext) DataStoreAPI() core.DataStoreAPI {
+	return c
+}
+
 // Link ...
 func (c *APIContext) Link(req *core.NodeLinkReq) (*core.NodeLinkResp, error) {
-	return c.m.NodeAPI().Link(req)
+	return c.NodeAPI().Link(req)
 }
 
 // List ...
 func (c *APIContext) List(req *core.NodeListReq) (*core.NodeListResp, error) {
-	return c.m.NodeAPI().List(req)
+	return c.NodeAPI().List(req)
 }
 
 // NodeAPI ...

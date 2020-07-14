@@ -122,6 +122,20 @@ func (c *Controller) DTag() (*dtag.DTag, error) {
 	return c.infoNode().DTag()
 }
 
+// PinLs ...
+func (c *Controller) PinLs() ([]string, error) {
+	ls, err := c.dataNode().PinLS(context.TODO())
+	if err != nil {
+		return nil, err
+	}
+
+	var pins []string
+	for v := range ls {
+		pins = append(pins, v.Path().String())
+	}
+	return pins, nil
+}
+
 //// API ...
 //func (c *Controller) API() core.API {
 //	return service.NewAPIContext(c.cfg, m, c)

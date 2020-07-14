@@ -369,6 +369,6 @@ func (m *manager) AllLDs() ([]string, error) {
 }
 
 // RegisterLDRequest ...
-func (m *manager) RegisterLDRequest(f func() []string, err error) {
+func (m *manager) RegisterLDRequest(f func() ([]string, error)) {
 	m.RequestLD = f
 }

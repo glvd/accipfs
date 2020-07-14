@@ -18,7 +18,6 @@ func addCmd() *cobra.Command {
 			config.Initialize()
 			cfg := config.Global()
 			client.InitGlobalClient(&cfg)
-			client.Pins()
 
 		},
 	}

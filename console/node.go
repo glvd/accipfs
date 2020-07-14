@@ -54,7 +54,7 @@ func nodePeerCmd() *cobra.Command {
 			cfg := config.Global()
 			client.InitGlobalClient(&cfg)
 
-			list, err := client.List(&core.NodeListReq{})
+			list, err := client.NodeList(&core.NodeListReq{})
 			if err != nil {
 				panic(err)
 			}

@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"github.com/glvd/accipfs/config"
 	"io"
 	"net/http"
@@ -13,7 +12,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/glvd/accipfs/basis"
 	"github.com/glvd/accipfs/core"
 )
 
@@ -23,11 +21,6 @@ var DefaultClient core.API
 type client struct {
 	cfg *config.APIConfig
 	cli *http.Client
-}
-
-// DataStoreAPI ...
-func (c *client) DataStoreAPI() core.DataStoreAPI {
-	return c
 }
 
 type jsonResp struct {
@@ -144,13 +137,6 @@ func (c *client) ID(req *core.IDReq) (resp *core.IDResp, err error) {
 	return
 }
 
-// Link ...
-func (c *client) Link(req *core.NodeLinkReq) (resp *core.NodeLinkResp, err error) {
-	resp = new(core.NodeLinkResp)
-	err = c.doPost("/node/link", req, resp)
-	return
-}
-
 // Add ...
 func (c *client) Add(req *core.AddReq) (resp *core.AddResp, err error) {
 	resp = new(core.AddResp)
@@ -167,93 +153,5 @@ func NodeAddrInfo(req *core.AddrReq) (*core.AddrResp, error) {
 func (c *client) NodeAddrInfo(req *core.AddrReq) (resp *core.AddrResp, err error) {
 	resp = new(core.AddrResp)
 	err = c.doPost("info", req, resp)
-	return
-}
-
-// List ...
-func List(req *core.NodeListReq) (resp *core.NodeListResp, err error) {
-	return DefaultClient.NodeAPI().List(req)
-}
-
-// NodeLink ...
-func NodeLink(req *core.NodeLinkReq) (resp *core.NodeLinkResp, err error) {
-	return DefaultClient.NodeAPI().Link(req)
-}
-
-// PinLs ...
-func PinLs(req *core.DataStoreReq) (*core.DataStoreResp, error) {
-	return DefaultClient.DataStoreAPI().PinLs(req)
-}
-
-// PinVideo ...
-func PinVideo(url string, no string) error {
-	logD("pin hash", "hash", no)
-	b := new(bool)
-	err := basis.RPCPost(url, "BustLinker.PinVideo", &no, b)
-	if err != nil {
-		return err
-	}
-	if *b {
-		fmt.Printf("pin (%s) success\n", no)
-	}
-	return nil
-}
-
-// Peers ...
-func Peers(url string, info *core.Node) ([]*core.Node, error) {
-	//pingAddr := strings.Join([]string{info.RemoteAddr, strconv.Itoa(info.Port)}, ":")
-	//url := fmt.Sprintf("http://%s/rpc", pingAddr)
-	result := new([]*core.Node)
-	if err := basis.RPCPost(url, "BustLinker.Peers", info, result); err != nil {
-		return nil, err
-	}
-	//if len(*result) == 0 {
-	//	return nil, fmt.Errorf("no data response")
-	//}
-	return *result, nil
-}
-
-// AddPeer ...
-func AddPeer(url string, node core.Node) error {
-	status := new(bool)
-	if err := basis.RPCPost(url, "BustLinker.AddPeer", node, status); err != nil {
-		logE("remote id error", "error", err.Error())
-		return fmt.Errorf("remote id error: %w", err)
-	}
-
-	if !(*status) {
-		return fmt.Errorf("connect failed: %s", basis.RPCAddress(node.Addrs()[0]))
-	}
-	return nil
-}
-
-// NodeAPI ...
-func (c *client) NodeAPI() core.NodeAPI {
-	return c
-}
-
-// Unlink ...
-func (c *client) Unlink(req *core.NodeUnlinkReq) (resp *core.NodeUnlinkResp, err error) {
-	resp = new(core.NodeUnlinkResp)
-	err = c.doPost("node/unlink", req, resp)
-	return
-}
-
-// List ...
-func (c *client) List(req *core.NodeListReq) (resp *core.NodeListResp, err error) {
-	resp = new(core.NodeListResp)
-	err = c.doPost("node/list", req, resp)
-	return
-}
-
-// DataStorePinLs ...
-func DataStorePinLs(req *core.DataStoreReq) (resp *core.DataStoreResp, err error) {
-	return DefaultClient.DataStoreAPI().PinLs(req)
-}
-
-// PinLs ...
-func (c *client) PinLs(req *core.DataStoreReq) (resp *core.DataStoreResp, err error) {
-	resp = new(core.DataStoreResp)
-	err = c.doPost("datastore/pin/ls", req, resp)
 	return
 }

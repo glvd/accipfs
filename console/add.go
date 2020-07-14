@@ -3,6 +3,7 @@ package main
 import (
 	"github.com/glvd/accipfs/client"
 	"github.com/glvd/accipfs/config"
+	"github.com/glvd/accipfs/core"
 	"github.com/spf13/cobra"
 )
 
@@ -18,6 +19,8 @@ func addCmd() *cobra.Command {
 			config.Initialize()
 			cfg := config.Global()
 			client.InitGlobalClient(&cfg)
+
+			client.Add(&core.AddReq{})
 
 		},
 	}

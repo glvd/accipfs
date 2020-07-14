@@ -48,6 +48,12 @@ func (n *node) IsClosed() bool {
 	return n.Connection.IsClosed()
 }
 
+// Peers ...
+func (n *node) Peers() ([]string, error) {
+	time.Sleep(5 * time.Second)
+	return []string{"todo"}, nil
+}
+
 // DataStoreInfo ...
 func (n *node) DataStoreInfo() (core.DataStoreInfo, error) {
 	addrInfo, err := n.addrInfoRequest()
@@ -183,7 +189,7 @@ func (n *node) Info() (core.NodeInfo, error) {
 func (n *node) GetInfoDataRequest() (core.NodeInfo, error) {
 	msg, b := n.Connection.SendCustomDataOnWait(InfoRequest, nil)
 	var nodeInfo core.NodeInfo
-	fmt.Printf("recved msg:%v\n", msg)
+	//fmt.Printf("recved msg:%v\n", msg)
 	if b && msg.DataLength != 0 {
 		fmt.Printf("msg data:%v\n", string(msg.Data))
 		err := json.Unmarshal(msg.Data, &nodeInfo)

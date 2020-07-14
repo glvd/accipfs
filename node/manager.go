@@ -265,9 +265,9 @@ func (m *manager) poolRun(v interface{}) {
 	if !b {
 		return
 	}
+	defer n.Close()
 	id := n.ID()
 	if id == "" {
-		n.Close()
 		return
 	}
 	store, loaded := m.connectNodes.Load(id)
@@ -277,13 +277,20 @@ func (m *manager) poolRun(v interface{}) {
 			nbase.AppendAddr(n.Addrs()...)
 		}
 		n.SendClose()
-		n.Close()
+		time.Sleep(500 * time.Millisecond)
 		return
 	}
 	if !n.IsClosed() {
 		m.Push(n)
 	}
-
+	for !n.IsClosed() {
+		peers, err := n.Peers()
+		if err != nil {
+			return
+		}
+		fmt.Println("get peers:", peers)
+	}
+	m.connectNodes.Delete(n.ID())
 }
 
 func decodeNode(m core.NodeManager, b []byte, api core.API) error {

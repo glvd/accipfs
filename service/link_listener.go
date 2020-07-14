@@ -52,7 +52,11 @@ func (h *linkListener) Listen() (err error) {
 			continue
 		}
 		if h.cb != nil {
-			h.cb(conn)
+			log.Infow("received new connection")
+			_, err := h.cb(conn)
+			if err != nil {
+				log.Errorw("connection err", "err", err)
+			}
 			continue
 		}
 		//no callback closed

@@ -246,8 +246,13 @@ func (c *client) List(req *core.NodeListReq) (resp *core.NodeListResp, err error
 	return
 }
 
+// DataStorePins ...
+func DataStorePins(req *core.DataStoreReq) (resp *core.DataStoreResp, err error) {
+	return DefaultClient.DataStoreAPI().Pins(req)
+}
+
 // Pins ...
-func (c *client) DataStorePins(req *core.DataStoreReq) (resp *core.DataStoreResp, err error) {
+func (c *client) Pins(req *core.DataStoreReq) (resp *core.DataStoreResp, err error) {
 	resp = new(core.DataStoreResp)
 	err = c.doPost("datastore/pins", req, resp)
 	return

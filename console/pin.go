@@ -11,8 +11,18 @@ import (
 func pinCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "pin",
-		Short: "pin a video to local",
-		Long:  "pin a video to local for sharing",
+		Short: "show some pin info",
+		Long:  "show the video information of pins with local server",
+	}
+	cmd.AddCommand(pinLsCmd())
+	return cmd
+}
+
+func pinLsCmd() *cobra.Command {
+	return &cobra.Command{
+		Use:   "ls",
+		Short: "pin list",
+		Long:  "show all pins list",
 		Run: func(cmd *cobra.Command, args []string) {
 			config.Initialize()
 			cfg := config.Global()
@@ -28,10 +38,4 @@ func pinCmd() *cobra.Command {
 			}
 		},
 	}
-	return cmd
-}
-
-func pinHashCmd() *cobra.Command {
-	cmd := &cobra.Command{}
-	return cmd
 }

@@ -1,6 +1,7 @@
 package core
 
 import (
+	"github.com/ipfs/interface-go-ipfs-core/options"
 	ma "github.com/multiformats/go-multiaddr"
 )
 
@@ -99,13 +100,24 @@ type AddReq struct {
 	Type  AddType
 	JSNFO string
 	Data  []byte
-	Path  string
+	Hash  string
 }
 
 // AddResp ...
 type AddResp struct {
 	IsSuccess bool
 	Hash      string
+}
+
+// UploadReq ...
+type UploadReq struct {
+	Path   string
+	Option options.UnixfsAddOption
+}
+
+// UploadResp ...
+type UploadResp struct {
+	Hash string
 }
 
 // GetReq ...

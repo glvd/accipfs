@@ -5,6 +5,8 @@ import (
 	"encoding/json"
 	"errors"
 	"github.com/glvd/accipfs/config"
+	httpapi "github.com/ipfs/go-ipfs-http-client"
+	"github.com/multiformats/go-multiaddr"
 	"io"
 	"net/http"
 	"net/url"
@@ -20,6 +22,7 @@ var DefaultClient core.API
 
 type client struct {
 	cfg *config.APIConfig
+	ds  *httpapi.HttpApi
 	cli *http.Client
 }
 
@@ -65,7 +68,16 @@ func InitGlobalClient(cfg *config.Config) {
 func New(cfg *config.APIConfig) core.API {
 	c := &http.Client{}
 	c.Timeout = cfg.Timeout * time.Minute
+	ma, err := multiaddr.NewMultiaddr(config.IPFSAddr())
+	if err != nil {
+		panic(err)
+	}
+	api, e := httpapi.NewApi(ma)
+	if e != nil {
+		panic(e)
+	}
 	return &client{
+		ds:  api,
 		cli: c,
 		cfg: cfg,
 	}
@@ -159,4 +171,9 @@ func (c *client) NodeAddrInfo(req *core.AddrReq) (resp *core.AddrResp, err error
 // Add ...
 func Add(req *core.AddReq) (resp *core.AddResp, err error) {
 	return DefaultClient.Add(req)
+}
+
+// UploadFile ...
+func UploadFile(req *core.UploadReq) (resp *core.UploadResp, err error) {
+	return DefaultClient
 }

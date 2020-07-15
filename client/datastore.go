@@ -1,6 +1,11 @@
 package client
 
-import "github.com/glvd/accipfs/core"
+import (
+	"context"
+	"github.com/glvd/accipfs/core"
+	files "github.com/ipfs/go-ipfs-files"
+	"os"
+)
 
 // DataStoreAPI ...
 func (c *client) DataStoreAPI() core.DataStoreAPI {
@@ -15,6 +20,36 @@ func DataStorePinLs(req *core.DataStoreReq) (resp *core.DataStoreResp, err error
 // PinLs ...
 func (c *client) PinLs(req *core.DataStoreReq) (resp *core.DataStoreResp, err error) {
 	resp = new(core.DataStoreResp)
-	err = c.doPost("datastore/pin/ls", req, resp)
+	err = c.doPost("ds/pin/ls", req, resp)
 	return
+}
+
+// UploadFile ...
+func (c *client) UploadFile(req *core.UploadReq) (resp *core.UploadResp, err error) {
+	stat, e := os.Stat(req.Path)
+	if e != nil {
+		return &core.UploadResp{}, e
+	}
+	var node files.Node
+	//var err error
+	if !stat.IsDir() {
+		file, e := os.Open(req.Path)
+		if e != nil {
+			return &core.UploadResp{}, e
+		}
+		node = files.NewReaderFile(file)
+	} else {
+		sf, e := files.NewSerialFile(req.Path, false, stat)
+		if e != nil {
+			return &core.UploadResp{}, e
+		}
+		node = sf
+	}
+	resolved, e := c.ds.Unixfs().Add(context.TODO(), node, req.Option)
+	if e != nil {
+		return &core.UploadResp{}, e
+	}
+	return &core.UploadResp{
+		Hash: resolved.Cid().String(),
+	}, nil
 }

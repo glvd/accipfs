@@ -5,7 +5,6 @@ import (
 	"github.com/glvd/accipfs/config"
 	"github.com/glvd/accipfs/contract/dtag"
 	"github.com/glvd/accipfs/core"
-	"github.com/ipfs/interface-go-ipfs-core/options"
 	"go.uber.org/atomic"
 	"sync"
 )
@@ -34,16 +33,16 @@ type Controller struct {
 
 // Add ...
 func (c *Controller) Add(req *core.AddReq) (*core.AddResp, error) {
-	add, err := c.dataNode().FileAdd(context.TODO(), req.Path, func(settings *options.UnixfsAddSettings) error {
-		settings.Pin = true
-		return nil
-	})
-	if err != nil {
-		return &core.AddResp{IsSuccess: false}, err
-	}
+	//add, err := c.dataNode().FileAdd(context.TODO(), req.Path, func(settings *options.UnixfsAddSettings) error {
+	//	settings.Pin = true
+	//	return nil
+	//})
+	//if err != nil {
+	//	return &core.AddResp{IsSuccess: false}, err
+	//}
 	return &core.AddResp{
 		IsSuccess: true,
-		Hash:      add,
+		Hash:      req.Hash,
 	}, nil
 }
 

@@ -189,7 +189,7 @@ func (n *nodeBinIPFS) ID(ctx context.Context) (pid *core.DataStoreInfo, e error)
 }
 
 // PinAdd ...
-func (n *nodeBinIPFS) FileAdd(ctx context.Context, filename string, option options.UnixfsAddOption) (hash string, e error) {
+func (n *nodeBinIPFS) AddFile(ctx context.Context, filename string, option options.UnixfsAddOption) (hash string, e error) {
 	stat, e := os.Stat(filename)
 	if e != nil {
 		return "", e

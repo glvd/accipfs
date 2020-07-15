@@ -6,7 +6,6 @@ import (
 	"github.com/glvd/accipfs/config"
 	"github.com/glvd/accipfs/core"
 	"github.com/spf13/cobra"
-	"os"
 )
 
 func addCmd() *cobra.Command {
@@ -21,9 +20,18 @@ func addCmd() *cobra.Command {
 			config.Initialize()
 			cfg := config.Global()
 			client.InitGlobalClient(&cfg)
+			if len(args) <= 0 {
+				return
+			}
 
+			file, err := client.UploadFile(&core.UploadReq{
+				Path: args[0],
+			})
+			if err != nil {
+				panic(err)
+			}
 			add, err := client.Add(&core.AddReq{
-				Path: os.Args[0],
+				Hash: file.Hash,
 			})
 			if err != nil {
 				panic(err)

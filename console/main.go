@@ -38,6 +38,7 @@ func main() {
 	rootCmd.PersistentFlags().StringVar(&log.Output, "log-output", "stdout", "set the output log name")
 	rootCmd.PersistentFlags().StringVar(&log.Level, "log-level", "info", "set the log level(info,debug,warn,error,dpanic,panic,fatal)")
 	rootCmd.PersistentPreRun = func(cmd *cobra.Command, args []string) {
+		fmt.Println("log init")
 		log.InitLog()
 	}
 	if err := rootCmd.Execute(); err != nil {

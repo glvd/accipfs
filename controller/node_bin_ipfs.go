@@ -58,7 +58,7 @@ func (n *nodeBinIPFS) Start() error {
 		return err2
 	}
 	m := io.MultiReader(pipe, stdoutPipe)
-	if n.cfg.ETH.LogOutput {
+	if n.cfg.IPFS.LogOutput {
 		go basis.PipeReader(n.ctx, m, n.msg)
 	}
 	//else {
@@ -86,33 +86,35 @@ func (n *nodeBinIPFS) Initialize() error {
 	_, err := os.Stat(config.DataDirIPFS())
 	if err != nil && os.IsNotExist(err) {
 		_ = os.MkdirAll(config.DataDirIPFS(), 0755)
-	}
-	//os.Setenv("IPFS_PATH", filepath.Join(n.cfg.Path, config.DataDirIPFS()))
-	cmd := exec.Command(n.name, "init", "--profile", "badgerds")
-	out, err := cmd.CombinedOutput()
-	if err != nil {
-		return fmt.Errorf("init:%w", err)
-	}
-	version := n.getVersion()
-	logI("ipfs init", "log", string(out), "version", version)
-	n.Msg(string(out))
-	if version[1] < 5 {
-		cmd = exec.Command(n.name, "config", "Swarm.EnableAutoNATService", "--bool", "true")
+
+		//os.Setenv("IPFS_PATH", filepath.Join(n.cfg.Path, config.DataDirIPFS()))
+		cmd := exec.Command(n.name, "init", "--profile", "badgerds")
+		out, err := cmd.CombinedOutput()
+		if err != nil {
+			return fmt.Errorf("init:%w", err)
+		}
+
+		version := n.getVersion()
+		logI("ipfs init", "log", string(out), "version", version)
+		n.Msg(string(out))
+		if version[1] < 5 {
+			cmd = exec.Command(n.name, "config", "Swarm.EnableAutoNATService", "--bool", "true")
+			out, err = cmd.CombinedOutput()
+			if err != nil {
+				return fmt.Errorf("config(nat):%w", err)
+			}
+		}
+		n.Msg(string(out))
+		logI("ipfs init config set", "log", string(out))
+		cmd = exec.Command(n.name, "config", "Swarm.EnableRelayHop", "--bool", "true")
 		out, err = cmd.CombinedOutput()
 		if err != nil {
-			return fmt.Errorf("config(nat):%w", err)
+			return fmt.Errorf("config(relay):%w", err)
 		}
+		n.Msg(string(out))
+		logI("ipfs init config set", "log", string(out))
+		logI("ipfs init end")
 	}
-	n.Msg(string(out))
-	logI("ipfs init config set", "log", string(out))
-	cmd = exec.Command(n.name, "config", "Swarm.EnableRelayHop", "--bool", "true")
-	out, err = cmd.CombinedOutput()
-	if err != nil {
-		return fmt.Errorf("config(relay):%w", err)
-	}
-	n.Msg(string(out))
-	logI("ipfs init config set", "log", string(out))
-	logI("ipfs init end")
 	return nil
 }
 

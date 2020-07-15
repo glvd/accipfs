@@ -50,7 +50,9 @@ func (l *BustLinker) Start() {
 	l.controller.Run()
 	l.api.Start()
 	go l.listener.Listen()
-	l.afterStart()
+
+	err := l.afterStart()
+	log.Infow("after start info", "err", err)
 }
 
 // Run ...
@@ -71,18 +73,22 @@ func (l *BustLinker) WaitingForReady() {
 func (l *BustLinker) Stop() {
 }
 
-func (l *BustLinker) afterStart() {
+func (l *BustLinker) afterStart() error {
 	info, err := l.api.NodeAddrInfo(&core.AddrReq{})
 	if err != nil {
-		return
-	}
-	pins, err := l.api.DataStoreAPI().PinLs(&core.DataStoreReq{})
-	if err != nil {
-		return
+		return err
 	}
 	l.manager.Local().Update(func(data *core.LocalData) {
+		log.Infow("update node info", "info", info.AddrInfo)
 		data.Node.AddrInfo = info.AddrInfo
+	})
+	pins, err := l.api.DataStoreAPI().PinLs(&core.DataStoreReq{})
+	if err != nil {
+		return err
+	}
+	l.manager.Local().Update(func(data *core.LocalData) {
+		log.Infow("update links info", "info", pins.Pins)
 		data.LDs = pins.Pins
 	})
-
+	return nil
 }

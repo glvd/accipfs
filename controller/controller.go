@@ -47,25 +47,6 @@ func (c *Controller) Add(req *core.AddReq) (*core.AddResp, error) {
 	}, nil
 }
 
-// PinLs ...
-func (c *Controller) PinLs(req *core.DataStoreReq) (*core.DataStoreResp, error) {
-	log.Infow("pin list request")
-	ls, err := c.dataNode().PinLS(context.TODO())
-	if err != nil {
-		return nil, err
-	}
-
-	var pins []string
-	for v := range ls {
-		if v.Err() != nil {
-			return nil, v.Err()
-		}
-		log.Infow("show pins", "data", v.Path().Cid())
-		pins = append(pins, v.Path().Cid().String())
-	}
-	return &core.DataStoreResp{Pins: pins}, nil
-}
-
 // New ...
 func New(cfg *config.Config) *Controller {
 	c := &Controller{
@@ -76,7 +57,8 @@ func New(cfg *config.Config) *Controller {
 	if cfg.ETH.Enable {
 		eth := newNodeBinETH(cfg)
 		eth.MessageHandle(func(s string) {
-			log.Infow(s, "tag", "eth")
+			output("[info]", s)
+			//log.Infow(s, "tag", "eth")
 		})
 		c.services[IndexETH] = eth
 		c.ethNode = eth
@@ -84,7 +66,8 @@ func New(cfg *config.Config) *Controller {
 	if cfg.IPFS.Enable {
 		ipfs := newNodeBinIPFS(cfg)
 		ipfs.MessageHandle(func(s string) {
-			log.Infow(s, "tag", "ipfs")
+			output("[datastore]", s)
+			//log.Infow(s, "tag", "ipfs")
 		})
 		c.services[IndexIPFS] = ipfs
 		c.ipfsNode = ipfs
@@ -160,4 +143,23 @@ func (c *Controller) DTag() (*dtag.DTag, error) {
 // DataStoreAPI ...
 func (c *Controller) DataStoreAPI() core.DataStoreAPI {
 	return c
+}
+
+// PinLs ...
+func (c *Controller) PinLs(req *core.DataStoreReq) (*core.DataStoreResp, error) {
+	log.Infow("pin list request")
+	ls, err := c.dataNode().PinLS(context.TODO())
+	if err != nil {
+		return nil, err
+	}
+
+	var pins []string
+	for v := range ls {
+		if v.Err() != nil {
+			return nil, v.Err()
+		}
+		log.Infow("show pins", "data", v.Path().Cid())
+		pins = append(pins, v.Path().Cid().String())
+	}
+	return &core.DataStoreResp{Pins: pins}, nil
 }

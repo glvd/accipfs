@@ -7,6 +7,7 @@ import (
 	"github.com/glvd/accipfs/config"
 	"github.com/glvd/accipfs/core"
 	"github.com/goextension/io"
+	files "github.com/ipfs/go-ipfs-files"
 	httpapi "github.com/ipfs/go-ipfs-http-client"
 	iface "github.com/ipfs/interface-go-ipfs-core"
 	"github.com/ipfs/interface-go-ipfs-core/options"
@@ -183,6 +184,34 @@ func (n *nodeBinIPFS) ID(ctx context.Context) (pid *core.DataStoreInfo, e error)
 		return nil, e
 	}
 	return pid, nil
+}
+
+// PinAdd ...
+func (n *nodeBinIPFS) FileAdd(ctx context.Context, filename string, option options.UnixfsAddOption) (hash string, e error) {
+	stat, e := os.Stat(filename)
+	if e != nil {
+		return "", e
+	}
+	var node files.Node
+	//var err error
+	if !stat.IsDir() {
+		file, e := os.Open(filename)
+		if e != nil {
+			return "", e
+		}
+		node = files.NewReaderFile(file)
+	} else {
+		sf, e := files.NewSerialFile(filename, false, stat)
+		if e != nil {
+			return "", e
+		}
+		node = sf
+	}
+	resolved, e := n.API().Unixfs().Add(ctx, node, option)
+	if e != nil {
+		return "", e
+	}
+	return resolved.Cid().String(), nil
 }
 
 // PinAdd ...

@@ -63,6 +63,7 @@ func (c *APIContext) Add(req *core.AddReq) (*core.AddResp, error) {
 	if err != nil {
 		return nil, err
 	}
+	return c.DataStoreAPI().Add(req)
 	return &core.AddResp{}, nil
 }
 
@@ -209,6 +210,7 @@ func (c *APIContext) registerRoutes() {
 
 	v0 := api.Group(c.cfg.API.Version)
 	v0.POST("/id", c.id)
+	v0.POST("add", c.add())
 	v0.POST("/node/link", c.nodeLink())
 	v0.POST("/node/unlink", c.nodeUnlink())
 	v0.POST("/node/list", c.nodeList())
@@ -337,6 +339,23 @@ func (c *APIContext) datastorePinLs() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		list, err := c.PinLs(&core.DataStoreReq{})
 		JSON(ctx, list, err)
+	}
+}
+
+func (c *APIContext) add() gin.HandlerFunc {
+	return func(ctx *gin.Context) {
+		var req core.AddReq
+		err := ctx.BindJSON(&req)
+		if err != nil {
+			JSON(ctx, nil, err)
+			return
+		}
+		add, err := c.Add(&req)
+		if err != nil {
+			JSON(ctx, nil, err)
+			return
+		}
+		JSON(ctx, add, nil)
 	}
 }
 

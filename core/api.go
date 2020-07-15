@@ -1,7 +1,6 @@
 package core
 
 import (
-	"github.com/ipfs/interface-go-ipfs-core/options"
 	ma "github.com/multiformats/go-multiaddr"
 )
 
@@ -96,15 +95,17 @@ const (
 
 // AddReq ...
 type AddReq struct {
-	Setting options.UnixfsAddSettings
-	Type    AddType
-	JSNFO   string
-	Data    []byte
+	//Setting options.UnixfsAddSettings
+	Type  AddType
+	JSNFO string
+	Data  []byte
+	Path  string
 }
 
 // AddResp ...
 type AddResp struct {
 	IsSuccess bool
+	Hash      string
 }
 
 // GetReq ...
@@ -149,4 +150,5 @@ type NodeAPI interface {
 // DataStoreAPI ...
 type DataStoreAPI interface {
 	PinLs(req *DataStoreReq) (*DataStoreResp, error)
+	Add(req *AddReq) (*AddResp, error)
 }

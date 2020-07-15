@@ -58,13 +58,12 @@ func (c *APIContext) NodeAPI() core.NodeAPI {
 
 // Add ...
 func (c *APIContext) Add(req *core.AddReq) (*core.AddResp, error) {
-	var info core.DataInfoV1
-	err := info.Unmarshal([]byte(req.JSNFO))
-	if err != nil {
-		return nil, err
-	}
+	//var info core.DataInfoV1
+	//err := info.Unmarshal([]byte(req.JSNFO))
+	//if err != nil {
+	//	return nil, err
+	//}
 	return c.DataStoreAPI().Add(req)
-	return &core.AddResp{}, nil
 }
 
 var _ core.API = &APIContext{}

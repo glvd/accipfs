@@ -6,6 +6,7 @@ import (
 	"github.com/glvd/accipfs/config"
 	"github.com/glvd/accipfs/core"
 	"github.com/spf13/cobra"
+	"os"
 )
 
 func addCmd() *cobra.Command {
@@ -21,11 +22,14 @@ func addCmd() *cobra.Command {
 			cfg := config.Global()
 			client.InitGlobalClient(&cfg)
 
-			add, err := client.Add(&core.AddReq{})
+			add, err := client.Add(&core.AddReq{
+				Path: os.Args[0],
+			})
 			if err != nil {
-				return
+				panic(err)
 			}
 			fmt.Println("success", add.IsSuccess)
+			fmt.Println("result hash:", add.Hash)
 
 		},
 	}

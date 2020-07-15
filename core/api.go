@@ -163,4 +163,5 @@ type NodeAPI interface {
 type DataStoreAPI interface {
 	PinLs(req *DataStoreReq) (*DataStoreResp, error)
 	Add(req *AddReq) (*AddResp, error)
+	UploadFile(req *UploadReq) (*UploadResp, error)
 }

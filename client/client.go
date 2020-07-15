@@ -175,5 +175,5 @@ func Add(req *core.AddReq) (resp *core.AddResp, err error) {
 
 // UploadFile ...
 func UploadFile(req *core.UploadReq) (resp *core.UploadResp, err error) {
-	return DefaultClient
+	return DefaultClient.DataStoreAPI().UploadFile(req)
 }

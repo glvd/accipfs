@@ -2,6 +2,7 @@ package controller
 
 import (
 	"context"
+	"fmt"
 	"github.com/glvd/accipfs/config"
 	"github.com/glvd/accipfs/contract/dtag"
 	"github.com/glvd/accipfs/core"
@@ -29,6 +30,12 @@ type Controller struct {
 	ethNode   *nodeBinETH
 	ipfsNode  *nodeBinIPFS
 	cfg       *config.Config
+}
+
+// UploadFile ...
+func (c *Controller) UploadFile(req *core.UploadReq) (*core.UploadResp, error) {
+	fmt.Println("dummy:called on client")
+	return &core.UploadResp{}, nil
 }
 
 // Add ...

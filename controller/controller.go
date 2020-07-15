@@ -8,6 +8,7 @@ import (
 	"github.com/glvd/accipfs/core"
 	"go.uber.org/atomic"
 	"sync"
+	"time"
 )
 
 // ServiceIndex ...
@@ -94,6 +95,24 @@ func (c *Controller) Initialize() (e error) {
 		}
 	}
 	return
+}
+
+// AllReady ...
+func (c Controller) AllReady() (b bool) {
+	for {
+	Reset:
+		time.Sleep(3 * time.Second)
+		for _, service := range c.services {
+			if service == nil {
+				continue
+			}
+			if b = service.IsReady(); !b {
+				goto Reset
+			}
+		}
+		break
+	}
+	return true
 }
 
 // Run ...

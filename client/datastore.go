@@ -4,6 +4,7 @@ import (
 	"context"
 	"github.com/glvd/accipfs/core"
 	files "github.com/ipfs/go-ipfs-files"
+	"github.com/ipfs/interface-go-ipfs-core/options"
 	"os"
 )
 
@@ -45,6 +46,13 @@ func (c *client) UploadFile(req *core.UploadReq) (resp *core.UploadResp, err err
 		}
 		node = sf
 	}
+	if req.Option == nil {
+		req.Option = func(settings *options.UnixfsAddSettings) error {
+			settings.Pin = true
+			return nil
+		}
+	}
+
 	resolved, e := c.ds.Unixfs().Add(context.TODO(), node, req.Option)
 	if e != nil {
 		return &core.UploadResp{}, e

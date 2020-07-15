@@ -153,6 +153,7 @@ type API interface {
 
 // NodeAPI ...
 type NodeAPI interface {
+	Add(req *AddReq) (*AddResp, error)
 	Link(req *NodeLinkReq) (*NodeLinkResp, error)
 	Unlink(req *NodeUnlinkReq) (*NodeUnlinkResp, error)
 	List(req *NodeListReq) (*NodeListResp, error)
@@ -162,6 +163,6 @@ type NodeAPI interface {
 // DataStoreAPI ...
 type DataStoreAPI interface {
 	PinLs(req *DataStoreReq) (*DataStoreResp, error)
-	Add(req *AddReq) (*AddResp, error)
+
 	UploadFile(req *UploadReq) (*UploadResp, error)
 }

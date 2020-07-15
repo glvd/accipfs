@@ -39,21 +39,6 @@ func (c *Controller) UploadFile(req *core.UploadReq) (*core.UploadResp, error) {
 	return &core.UploadResp{}, nil
 }
 
-// Add ...
-func (c *Controller) Add(req *core.AddReq) (*core.AddResp, error) {
-	//add, err := c.dataNode().FileAdd(context.TODO(), req.Path, func(settings *options.UnixfsAddSettings) error {
-	//	settings.Pin = true
-	//	return nil
-	//})
-	//if err != nil {
-	//	return &core.AddResp{IsSuccess: false}, err
-	//}
-	return &core.AddResp{
-		IsSuccess: true,
-		Hash:      req.Hash,
-	}, nil
-}
-
 // New ...
 func New(cfg *config.Config) *Controller {
 	c := &Controller{
@@ -97,8 +82,8 @@ func (c *Controller) Initialize() (e error) {
 	return
 }
 
-// AllReady ...
-func (c Controller) AllReady() (b bool) {
+// WaitAllReady ...
+func (c Controller) WaitAllReady() {
 	for {
 	Reset:
 		time.Sleep(3 * time.Second)
@@ -106,13 +91,12 @@ func (c Controller) AllReady() (b bool) {
 			if service == nil {
 				continue
 			}
-			if b = service.IsReady(); !b {
+			if b := service.IsReady(); !b {
 				goto Reset
 			}
 		}
 		break
 	}
-	return true
 }
 
 // Run ...

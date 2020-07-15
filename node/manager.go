@@ -45,7 +45,12 @@ func InitManager(cfg *config.Config) (core.NodeManager, error) {
 	if cfg.Node.BackupSeconds == 0 {
 		cfg.Node.BackupSeconds = 30 * time.Second
 	}
-	data := core.LocalData{}
+	data := core.LocalData{
+		Node:       core.NodeInfo{},
+		LDs:        make(map[string]uint8),
+		Addrs:      nil,
+		LastUpdate: 0,
+	}
 	m := &manager{
 		cfg:      cfg,
 		initLoad: atomic.NewBool(false),
@@ -277,6 +282,7 @@ func (m *manager) poolRun(v interface{}) {
 		//wait client close itself
 		time.Sleep(500 * time.Millisecond)
 		n.Close()
+		m.connectNodes.Delete(n.ID())
 	}()
 	id := n.ID()
 	if id == "" {
@@ -294,11 +300,13 @@ func (m *manager) poolRun(v interface{}) {
 		return
 	}
 	if !n.IsClosed() {
+		fmt.Println("node added:", n.ID())
 		m.Push(n)
 	}
 	for !n.IsClosed() {
 		lds, err := n.LDs()
 		if err != nil {
+			fmt.Println("failed to get link data", err)
 			return
 		}
 		for _, ld := range lds {
@@ -306,7 +314,6 @@ func (m *manager) poolRun(v interface{}) {
 			time.Sleep(3 * time.Second)
 		}
 	}
-	m.connectNodes.Delete(n.ID())
 }
 
 func decodeNode(m core.NodeManager, b []byte, api core.API) error {
@@ -364,15 +371,20 @@ func (m *manager) AllNodes() (map[string]core.Node, int, error) {
 	return nodes, count, nil
 }
 
-// AllLDs ...
-//func (m *manager) AllLDs() ([]string, error) {
-//	if m.RequestLD != nil {
-//		return m.RequestLD()
-//	}
-//	return nil, errors.New("callback not found")
-//}
-
-//// RegisterLDRequest ...
-//func (m *manager) RegisterLDRequest(f func() ([]string, error)) {
-//	m.RequestLD = f
-//}
+// Add ...
+func (m *manager) Add(req *core.AddReq) (*core.AddResp, error) {
+	m.local.Update(func(data *core.LocalData) {
+		data.LDs[req.Hash] = 0
+	})
+	//add, err := c.dataNode().FileAdd(context.TODO(), req.Path, func(settings *options.UnixfsAddSettings) error {
+	//	settings.Pin = true
+	//	return nil
+	//})
+	//if err != nil {
+	//	return &core.AddResp{IsSuccess: false}, err
+	//}
+	return &core.AddResp{
+		IsSuccess: true,
+		Hash:      req.Hash,
+	}, nil
+}

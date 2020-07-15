@@ -51,6 +51,7 @@ func (l *BustLinker) Start() {
 	l.api.Start()
 	go l.listener.Listen()
 
+	l.controller.WaitAllReady()
 	err := l.afterStart()
 	log.Infow("after start info", "err", err)
 }
@@ -88,7 +89,10 @@ func (l *BustLinker) afterStart() error {
 	}
 	l.manager.Local().Update(func(data *core.LocalData) {
 		log.Infow("update links info", "info", pins.Pins)
-		data.LDs = pins.Pins
+		for _, v := range pins.Pins {
+			data.LDs[v] = 0
+		}
+
 	})
 	return nil
 }

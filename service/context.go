@@ -99,7 +99,7 @@ func (c *APIContext) NodeAPI() core.NodeAPI {
 
 // Add ...
 func (c *APIContext) Add(req *core.AddReq) (*core.AddResp, error) {
-	return c.DataStoreAPI().Add(req)
+	return c.NodeAPI().Add(req)
 }
 
 // Ping ...

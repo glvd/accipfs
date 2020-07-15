@@ -31,41 +31,6 @@ type APIContext struct {
 	msg      func(s string)
 }
 
-// PinLs ...
-func (c *APIContext) PinLs(req *core.DataStoreReq) (*core.DataStoreResp, error) {
-	return c.DataStoreAPI().PinLs(req)
-}
-
-// DataStoreAPI ...
-func (c *APIContext) DataStoreAPI() core.DataStoreAPI {
-	return c.c
-}
-
-// Link ...
-func (c *APIContext) Link(req *core.NodeLinkReq) (*core.NodeLinkResp, error) {
-	return c.NodeAPI().Link(req)
-}
-
-// List ...
-func (c *APIContext) List(req *core.NodeListReq) (*core.NodeListResp, error) {
-	return c.NodeAPI().List(req)
-}
-
-// NodeAPI ...
-func (c *APIContext) NodeAPI() core.NodeAPI {
-	return c.m.NodeAPI()
-}
-
-// Add ...
-func (c *APIContext) Add(req *core.AddReq) (*core.AddResp, error) {
-	//var info core.DataInfoV1
-	//err := info.Unmarshal([]byte(req.JSNFO))
-	//if err != nil {
-	//	return nil, err
-	//}
-	return c.DataStoreAPI().Add(req)
-}
-
 var _ core.API = &APIContext{}
 
 // NewAPIContext ...
@@ -105,6 +70,36 @@ func (c *APIContext) NodeAddrInfo(req *core.AddrReq) (*core.AddrResp, error) {
 		AddrInfo: *info,
 	}, nil
 
+}
+
+// PinLs ...
+func (c *APIContext) PinLs(req *core.DataStoreReq) (*core.DataStoreResp, error) {
+	return c.DataStoreAPI().PinLs(req)
+}
+
+// DataStoreAPI ...
+func (c *APIContext) DataStoreAPI() core.DataStoreAPI {
+	return c.c
+}
+
+// Link ...
+func (c *APIContext) Link(req *core.NodeLinkReq) (*core.NodeLinkResp, error) {
+	return c.NodeAPI().Link(req)
+}
+
+// List ...
+func (c *APIContext) List(req *core.NodeListReq) (*core.NodeListResp, error) {
+	return c.NodeAPI().List(req)
+}
+
+// NodeAPI ...
+func (c *APIContext) NodeAPI() core.NodeAPI {
+	return c.m.NodeAPI()
+}
+
+// Add ...
+func (c *APIContext) Add(req *core.AddReq) (*core.AddResp, error) {
+	return c.DataStoreAPI().Add(req)
 }
 
 // Ping ...

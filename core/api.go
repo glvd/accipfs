@@ -1,6 +1,9 @@
 package core
 
-import ma "github.com/multiformats/go-multiaddr"
+import (
+	"github.com/ipfs/interface-go-ipfs-core/options"
+	ma "github.com/multiformats/go-multiaddr"
+)
 
 // DataStoreReq ...
 type DataStoreReq struct {
@@ -80,10 +83,23 @@ type ConnectToResp struct {
 // AddType ...
 type AddType int
 
+const (
+	// AddNone ...
+	AddNone AddType = iota
+	// AddOnlyInfo ...
+	AddOnlyInfo
+	// AddOnlyFile ...
+	AddOnlyFile
+	// AddBoth ...
+	AddBoth
+)
+
 // AddReq ...
 type AddReq struct {
-	JSNFO string
-	Data  []byte
+	Setting options.UnixfsAddSettings
+	Type    AddType
+	JSNFO   string
+	Data    []byte
 }
 
 // AddResp ...

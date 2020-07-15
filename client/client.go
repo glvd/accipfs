@@ -155,3 +155,8 @@ func (c *client) NodeAddrInfo(req *core.AddrReq) (resp *core.AddrResp, err error
 	err = c.doPost("info", req, resp)
 	return
 }
+
+// Add ...
+func Add(req *core.AddReq) (resp *core.AddResp, err error) {
+	return DefaultClient.Add(req)
+}

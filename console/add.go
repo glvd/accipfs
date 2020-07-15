@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"github.com/glvd/accipfs/client"
 	"github.com/glvd/accipfs/config"
 	"github.com/glvd/accipfs/core"
@@ -20,7 +21,11 @@ func addCmd() *cobra.Command {
 			cfg := config.Global()
 			client.InitGlobalClient(&cfg)
 
-			client.Add(&core.AddReq{})
+			add, err := client.Add(&core.AddReq{})
+			if err != nil {
+				return
+			}
+			fmt.Println("success", add.IsSuccess)
 
 		},
 	}

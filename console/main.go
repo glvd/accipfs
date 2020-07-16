@@ -60,7 +60,7 @@ func versionCmd() *cobra.Command {
 	return cmd
 }
 
-func waitForSignal() {
+func waitingInterruptSignal() {
 	sigs := make(chan os.Signal)
 	signal.Notify(sigs, os.Interrupt)
 	<-sigs

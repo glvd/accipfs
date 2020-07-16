@@ -42,7 +42,7 @@ func daemonCmd() *cobra.Command {
 				linker.Stop()
 			}()
 			linker.Start()
-			waitForSignal()
+			waitingInterruptSignal()
 		},
 	}
 }

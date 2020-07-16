@@ -318,6 +318,7 @@ func (m *manager) poolRun(v interface{}) {
 		m.Push(n)
 	}
 	for !n.IsClosed() {
+		n.Addrs()
 		lds, err := n.LDs()
 		if err != nil {
 			fmt.Println("failed to get link data", err)

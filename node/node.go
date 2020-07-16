@@ -172,7 +172,7 @@ func defaultAPINode(c net.Conn, local core.SafeLocalData, duration time.Duration
 		//fmt.Printf("recv custom data:%+v\n", message)
 		switch message.CustomID {
 		case InfoRequest:
-			request, b, err := n.RecvDataRequest(message)
+			request, b, err := n.RecvInfoRequest(message)
 			return request, b, err
 		case PeerGetRequest:
 			request, b, err := n.RecvPeerGetRequest(message)
@@ -259,8 +259,8 @@ func (n *node) RecvNodeListRequest() ([]byte, bool, error) {
 	return marshal, true, nil
 }
 
-// RecvDataRequest ...
-func (n *node) RecvDataRequest(message *scdt.Message) ([]byte, bool, error) {
+// RecvInfoRequest ...
+func (n *node) RecvInfoRequest(message *scdt.Message) ([]byte, bool, error) {
 	//fmt.Printf("request %v\n", message)
 	addrInfo, err := n.addrInfoRequest()
 	if err != nil {

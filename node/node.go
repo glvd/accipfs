@@ -4,15 +4,14 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/glvd/accipfs/core"
+	"github.com/godcong/scdt"
 	"github.com/libp2p/go-libp2p-core/peer"
+	ma "github.com/multiformats/go-multiaddr"
+	mnet "github.com/multiformats/go-multiaddr-net"
 	"go.uber.org/atomic"
 	"net"
 	"time"
-
-	"github.com/glvd/accipfs/core"
-	"github.com/godcong/scdt"
-	ma "github.com/multiformats/go-multiaddr"
-	mnet "github.com/multiformats/go-multiaddr-net"
 )
 
 const (
@@ -298,10 +297,14 @@ func (n *node) addrInfoRequest() (*core.AddrInfo, error) {
 }
 
 func (n *node) doFirst() error {
-	if _, err := n.addrInfoRequest(); err != nil {
-		return err
+	for i := 0; i < 3; i++ {
+		if !n.local.Data().Initialized {
+			time.Sleep(3 * time.Second)
+			continue
+		}
+		return nil
 	}
-	return nil
+	return errors.New("first init error")
 }
 
 // RecvPeerGetRequest ...

@@ -93,5 +93,12 @@ func (l *BustLinker) afterStart() error {
 			data.LDs[v] = 0
 		}
 	})
+
+	//do something
+	//end:
+	l.manager.Local().Update(func(data *core.LocalData) {
+		data.Initialized = true
+	})
+
 	return nil
 }

@@ -114,7 +114,7 @@ func (m *manager) Link(req *core.NodeLinkReq) (*core.NodeLinkResp, error) {
 		}
 		conn, err := m.Conn(dial)
 		if err != nil {
-			return nil, err
+			return &core.NodeLinkResp{}, err
 		}
 		id := conn.ID()
 		getNode, b := m.GetNode(id)
@@ -125,7 +125,7 @@ func (m *manager) Link(req *core.NodeLinkReq) (*core.NodeLinkResp, error) {
 		}
 		info, err := conn.Info()
 		if err != nil {
-			return nil, err
+			return &core.NodeLinkResp{}, err
 		}
 		return &core.NodeLinkResp{
 			NodeInfo: info,
@@ -291,6 +291,9 @@ func (m *manager) poolRun(v interface{}) {
 	id := n.ID()
 	fmt.Println("user connect:", id)
 	if id == "" {
+		//wait client get base info
+		time.Sleep(3 * time.Second)
+		_ = n.SendConnected()
 		return
 	}
 	old, loaded := m.connectNodes.Load(id)

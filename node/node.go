@@ -21,8 +21,8 @@ const (
 	InfoRequest
 	// LDsRequest ...
 	LDsRequest
-	// PeerGetRequest ...
-	PeerGetRequest
+	// PeerRequest ...
+	PeerRequest
 )
 
 type node struct {
@@ -58,7 +58,23 @@ func (n *node) IsClosed() bool {
 
 // Peers ...
 func (n *node) Peers() ([]string, error) {
-	msg, b := n.Connection.SendCustomDataOnWait(PeerGetRequest, nil)
+	msg, b := n.Connection.SendCustomDataOnWait(PeerRequest, nil)
+	var s []string
+	if b {
+		if msg.DataLength > 0 {
+			err := json.Unmarshal(msg.Data, &s)
+			if err != nil {
+				return nil, err
+			}
+			return s, nil
+		}
+	}
+	return nil, ErrNoData
+}
+
+// SendPeerRequest ...
+func (n *node) SendPeerRequest(last uint64) ([]string, error) {
+	msg, b := n.Connection.SendCustomDataOnWait(PeerRequest, nil)
 	var s []string
 	if b {
 		if msg.DataLength > 0 {
@@ -168,14 +184,15 @@ func defaultAPINode(c net.Conn, local core.SafeLocalData, duration time.Duration
 		fmt.Printf("recv data:%+v", message)
 		return []byte("recv called"), true, errors.New("not data")
 	})
+
 	conn.RecvCustomData(func(message *scdt.Message) ([]byte, bool, error) {
 		//fmt.Printf("recv custom data:%+v\n", message)
 		switch message.CustomID {
 		case InfoRequest:
 			request, b, err := n.RecvInfoRequest(message)
 			return request, b, err
-		case PeerGetRequest:
-			request, b, err := n.RecvPeerGetRequest(message)
+		case PeerRequest:
+			request, b, err := n.RecvPeerRequest(message)
 			return request, b, err
 		case LDsRequest:
 			request, b, err := n.RecvLDsRequest(message)
@@ -261,7 +278,6 @@ func (n *node) RecvNodeListRequest() ([]byte, bool, error) {
 
 // RecvInfoRequest ...
 func (n *node) RecvInfoRequest(message *scdt.Message) ([]byte, bool, error) {
-	//fmt.Printf("request %v\n", message)
 	addrInfo, err := n.addrInfoRequest()
 	if err != nil {
 		return nil, true, err
@@ -301,8 +317,8 @@ func (n *node) doFirst() error {
 	return errors.New("first init error")
 }
 
-// RecvPeerGetRequest ...
-func (n *node) RecvPeerGetRequest(message *scdt.Message) ([]byte, bool, error) {
+// RecvPeerRequest ...
+func (n *node) RecvPeerRequest(message *scdt.Message) ([]byte, bool, error) {
 	//peers := n.local.Data().
 	//marshal, err := json.Marshal(peers)
 	//if err != nil {

@@ -7,7 +7,6 @@ import (
 	"github.com/glvd/accipfs/mdns"
 	"github.com/glvd/accipfs/service"
 	"github.com/spf13/cobra"
-	"time"
 )
 
 func daemonCmd() *cobra.Command {
@@ -43,7 +42,7 @@ func daemonCmd() *cobra.Command {
 				linker.Stop()
 			}()
 			linker.Start()
-			time.Sleep(30 * time.Minute)
+			waitForSignal()
 		},
 	}
 }

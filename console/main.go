@@ -8,6 +8,8 @@ import (
 	"github.com/glvd/accipfs/config"
 	"github.com/glvd/accipfs/log"
 	"github.com/spf13/cobra"
+	"os"
+	"os/signal"
 	"path/filepath"
 )
 
@@ -56,4 +58,10 @@ func versionCmd() *cobra.Command {
 		},
 	}
 	return cmd
+}
+
+func waitForSignal() {
+	sigs := make(chan os.Signal)
+	signal.Notify(sigs, os.Interrupt)
+	<-sigs
 }

@@ -130,9 +130,6 @@ func CoreNode(conn net.Conn, local core.SafeLocalData) (core.Node, error) {
 	}
 
 	n.AppendAddr(netAddr)
-	if err := n.doFirst(); err != nil {
-		return nil, err
-	}
 	return n, nil
 }
 
@@ -152,9 +149,6 @@ func ConnectNode(addr ma.Multiaddr, bind int, local core.SafeLocalData) (core.No
 	}
 	n := defaultAPINode(conn, local, 0)
 	n.AppendAddr(addr)
-	if err := n.doFirst(); err != nil {
-		return nil, err
-	}
 	return n, nil
 }
 

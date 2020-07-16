@@ -101,6 +101,9 @@ func (m *manager) Store() (err error) {
 // Link ...
 func (m *manager) Link(req *core.NodeLinkReq) (*core.NodeLinkResp, error) {
 	fmt.Printf("connect info:%+v\n", req.Addrs)
+	if !m.local.Data().Initialized {
+		return &core.NodeLinkResp{}, errors.New("you are not ready for connection")
+	}
 	for _, addr := range req.Addrs {
 		multiaddr, err := ma.NewMultiaddr(addr)
 		if err != nil {
@@ -112,7 +115,7 @@ func (m *manager) Link(req *core.NodeLinkReq) (*core.NodeLinkResp, error) {
 			fmt.Printf("link failed(%v)\n", err)
 			continue
 		}
-		conn, err := m.Conn(dial)
+		conn, err := m.newConn(dial)
 		if err != nil {
 			return &core.NodeLinkResp{}, err
 		}
@@ -262,8 +265,8 @@ func (m *manager) loop() {
 	}
 }
 
-// Conn ...
-func (m *manager) Conn(c net.Conn) (core.Node, error) {
+// newConn ...
+func (m *manager) newConn(c net.Conn) (core.Node, error) {
 	acceptNode, err := CoreNode(c, m.local)
 	if err != nil {
 		return nil, err
@@ -394,4 +397,9 @@ func (m *manager) Add(req *core.AddReq) (*core.AddResp, error) {
 		IsSuccess: true,
 		Hash:      req.Hash,
 	}, nil
+}
+
+// Conn ...
+func (m *manager) Conn(c net.Conn) (core.Node, error) {
+	return m.newConn(c)
 }

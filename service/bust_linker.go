@@ -49,11 +49,14 @@ func NewBustLinker(cfg *config.Config) (linker *BustLinker, err error) {
 func (l *BustLinker) Start() {
 	l.controller.Run()
 	l.api.Start()
-	go l.listener.Listen()
 
 	l.controller.WaitAllReady()
 	err := l.afterStart()
 	log.Infow("after start info", "err", err)
+
+	//start handle
+	go l.listener.Listen()
+
 }
 
 // Run ...

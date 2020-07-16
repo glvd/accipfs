@@ -321,7 +321,7 @@ func (m *manager) poolRun(v interface{}) {
 			return
 		}
 		for _, ld := range lds {
-			fmt.Println("from id", n.ID(), "pin list:", ld)
+			fmt.Println("from:", n.ID(), "list:", ld)
 			time.Sleep(3 * time.Second)
 		}
 	}

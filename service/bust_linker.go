@@ -92,7 +92,6 @@ func (l *BustLinker) afterStart() error {
 		for _, v := range pins.Pins {
 			data.LDs[v] = 0
 		}
-
 	})
 	return nil
 }

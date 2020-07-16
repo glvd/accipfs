@@ -278,11 +278,15 @@ func (m *manager) poolRun(v interface{}) {
 	if !b {
 		return
 	}
+	pushed := false
 	defer func() {
+		fmt.Println("id", n.ID(), "was exit")
 		//wait client close itself
 		time.Sleep(500 * time.Millisecond)
 		n.Close()
-		m.connectNodes.Delete(n.ID())
+		if pushed {
+			m.connectNodes.Delete(n.ID())
+		}
 	}()
 	id := n.ID()
 	fmt.Println("user connect:", id)
@@ -304,6 +308,7 @@ func (m *manager) poolRun(v interface{}) {
 
 	if !n.IsClosed() {
 		fmt.Println("node added:", n.ID())
+		pushed = true
 		m.Push(n)
 	}
 	for !n.IsClosed() {

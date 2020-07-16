@@ -44,6 +44,9 @@ type jsonNode struct {
 
 var _ core.Node = &node{}
 
+// ErrNoData ...
+var ErrNoData = errors.New("no data respond")
+
 // SendClose ...
 func (n *node) SendClose() {
 	n.Connection.SendClose([]byte("connected"))
@@ -67,7 +70,7 @@ func (n *node) Peers() ([]string, error) {
 			return s, nil
 		}
 	}
-	return nil, errors.New("no data respond")
+	return nil, ErrNoData
 }
 
 // LDs ...
@@ -76,6 +79,7 @@ func (n *node) LDs() ([]string, error) {
 	var s []string
 	if b {
 		if msg.DataLength > 0 {
+			fmt.Println("recv lds", string(msg.Data))
 			err := json.Unmarshal(msg.Data, &s)
 			if err != nil {
 				return nil, err
@@ -83,7 +87,7 @@ func (n *node) LDs() ([]string, error) {
 			return s, nil
 		}
 	}
-	return nil, errors.New("no data respond")
+	return nil, ErrNoData
 }
 
 // DataStoreInfo ...
@@ -314,7 +318,11 @@ func (n *node) RecvPeerGetRequest(message *scdt.Message) ([]byte, bool, error) {
 // RecvLDsRequest ...
 func (n *node) RecvLDsRequest(message *scdt.Message) ([]byte, bool, error) {
 	lds := n.local.Data().LDs
-	marshal, err := json.Marshal(lds)
+	var ret []string
+	for ld := range lds {
+		ret = append(ret, ld)
+	}
+	marshal, err := json.Marshal(ret)
 	if err != nil {
 		return nil, false, err
 	}

@@ -376,13 +376,6 @@ func (m *manager) Add(req *core.AddReq) (*core.AddResp, error) {
 	m.local.Update(func(data *core.LocalData) {
 		data.LDs[req.Hash] = 0
 	})
-	//add, err := c.dataNode().FileAdd(context.TODO(), req.Path, func(settings *options.UnixfsAddSettings) error {
-	//	settings.Pin = true
-	//	return nil
-	//})
-	//if err != nil {
-	//	return &core.AddResp{IsSuccess: false}, err
-	//}
 	return &core.AddResp{
 		IsSuccess: true,
 		Hash:      req.Hash,

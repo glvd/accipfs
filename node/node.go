@@ -220,16 +220,16 @@ func (n *node) ID() string {
 	return id
 }
 
-// Info ...
-func (n *node) Info() (core.NodeInfo, error) {
+// GetInfo ...
+func (n *node) GetInfo() (core.NodeInfo, error) {
 	if n.remoteNodeInfo != nil {
 		return *n.remoteNodeInfo, nil
 	}
-	return n.GetInfoDataRequest()
+	return n.SendInfoRequest()
 }
 
 // GetDataRequest ...
-func (n *node) GetInfoDataRequest() (core.NodeInfo, error) {
+func (n *node) SendInfoRequest() (core.NodeInfo, error) {
 	msg, b := n.Connection.SendCustomDataOnWait(InfoRequest, nil)
 	var nodeInfo core.NodeInfo
 	if b && msg.DataLength != 0 {

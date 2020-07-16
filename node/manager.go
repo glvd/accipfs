@@ -126,7 +126,7 @@ func (m *manager) Link(req *core.NodeLinkReq) (*core.NodeLinkResp, error) {
 		} else {
 			//use conn
 		}
-		info, err := conn.Info()
+		info, err := conn.GetInfo()
 		if err != nil {
 			return &core.NodeLinkResp{}, err
 		}
@@ -167,7 +167,7 @@ func (m *manager) NodeAddrInfo(req *core.AddrReq) (*core.AddrResp, error) {
 func (m *manager) List(req *core.NodeListReq) (*core.NodeListResp, error) {
 	nodes := make(map[string]core.NodeInfo)
 	m.Range(func(key string, node core.Node) bool {
-		info, err := node.Info()
+		info, err := node.GetInfo()
 		if err != nil {
 			return true
 		}

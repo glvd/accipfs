@@ -12,7 +12,7 @@ type Node interface {
 	ID() string
 	Addrs() []ma.Multiaddr
 	DataStoreInfo() (DataStoreInfo, error)
-	Info() (NodeInfo, error)
+	GetInfo() (NodeInfo, error)
 	Close() (err error)
 	IsClosed() bool
 	AppendAddr(addrs ...ma.Multiaddr)

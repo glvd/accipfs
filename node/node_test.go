@@ -84,11 +84,11 @@ func TestConnectNode(t *testing.T) {
 				toNode.ID()
 			}
 			for ; j < 10; j++ {
-				toNode.Info()
+				toNode.GetInfo()
 
 			}
 
-			info, err := toNode.Info()
+			info, err := toNode.GetInfo()
 
 			fmt.Println("get id", i, "index", j, "id", toNode.ID(), "info", info.JSON())
 

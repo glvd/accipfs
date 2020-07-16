@@ -22,8 +22,8 @@ func accountCmd() *cobra.Command {
 func accountInfoCmd() *cobra.Command {
 	return &cobra.Command{
 		Use:   "info",
-		Short: "Info shows account information",
-		Long:  "Info shows your account information with json format",
+		Short: "GetInfo shows account information",
+		Long:  "GetInfo shows your account information with json format",
 		Run: func(cmd *cobra.Command, args []string) {
 			config.Initialize()
 			cfg := config.Global()

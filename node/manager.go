@@ -24,11 +24,11 @@ type manager struct {
 	t               *time.Ticker
 	currentTS       int64
 	ts              int64
-	currentNodes    *atomic.Uint64
 	path            string
 	expPath         string
 	local           core.SafeLocalData
 	nodePool        *ants.PoolWithFunc
+	currentNodes    *atomic.Uint64
 	connectNodes    sync.Map
 	disconnectNodes sync.Map
 	nodes           Cacher
@@ -61,7 +61,7 @@ func InitManager(cfg *config.Config) (core.NodeManager, error) {
 		local:    data.Safe(),
 		t:        time.NewTicker(cfg.Node.BackupSeconds),
 	}
-	m.nodePool = mustPool(ants.DefaultAntsPoolSize, m.poolRun)
+	m.nodePool = mustPool(cfg.Node.PoolMax, m.poolRun)
 	go m.loop()
 
 	return m, nil

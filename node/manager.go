@@ -285,12 +285,14 @@ func (m *manager) poolRun(v interface{}) {
 		m.connectNodes.Delete(n.ID())
 	}()
 	id := n.ID()
+	fmt.Println("user connect:", id)
 	if id == "" {
 		return
 	}
-	store, loaded := m.connectNodes.Load(id)
+	old, loaded := m.connectNodes.Load(id)
+	log.Infow("new connection", "new", n.ID(), "isload", loaded)
 	if loaded {
-		nbase := store.(core.Node)
+		nbase := old.(core.Node)
 		if n.Addrs() != nil {
 			nbase.AppendAddr(n.Addrs()...)
 		}
@@ -299,6 +301,7 @@ func (m *manager) poolRun(v interface{}) {
 		_ = n.SendConnected()
 		return
 	}
+
 	if !n.IsClosed() {
 		fmt.Println("node added:", n.ID())
 		m.Push(n)
@@ -307,6 +310,9 @@ func (m *manager) poolRun(v interface{}) {
 		lds, err := n.LDs()
 		if err != nil {
 			fmt.Println("failed to get link data", err)
+			if err == ErrNoData {
+				continue
+			}
 			return
 		}
 		for _, ld := range lds {

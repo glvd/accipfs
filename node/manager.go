@@ -328,8 +328,8 @@ func (m *manager) poolRun(v interface{}) {
 		}
 		for _, ld := range lds {
 			fmt.Println("from:", n.ID(), "list:", ld)
-			time.Sleep(3 * time.Second)
 		}
+		time.Sleep(5 * time.Second)
 	}
 }
 

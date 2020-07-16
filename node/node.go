@@ -73,7 +73,7 @@ func (n *node) Peers() ([]string, error) {
 }
 
 // SendPeerRequest ...
-func (n *node) SendPeerRequest(last uint64) ([]string, error) {
+func (n *node) SendPeerRequest() ([]string, error) {
 	msg, b := n.Connection.SendCustomDataOnWait(PeerRequest, nil)
 	var s []string
 	if b {

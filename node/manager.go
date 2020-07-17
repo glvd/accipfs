@@ -467,16 +467,9 @@ func (m *manager) connectMultiAddrs(info core.NodeInfo) {
 			fmt.Printf("link failed(%v)\n", err)
 			continue
 		}
-		conn, err := m.newConn(dial)
+		_, err = m.newConn(dial)
 		if err != nil {
-			return
-		}
-		id := conn.ID()
-		getNode, b := m.GetNode(id)
-		if b {
-			conn = getNode
-		} else {
-			//use conn
+			continue
 		}
 	}
 }

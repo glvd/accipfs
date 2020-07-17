@@ -469,7 +469,7 @@ func (m *manager) connectMultiAddrs(info core.NodeInfo) {
 		}
 		_, err = m.newConn(dial)
 		if err != nil {
-			continue
+			return
 		}
 	}
 }

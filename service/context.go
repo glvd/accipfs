@@ -6,7 +6,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/glvd/accipfs/controller"
-	ma "github.com/multiformats/go-multiaddr"
 	"net"
 	"net/http"
 
@@ -132,26 +131,21 @@ func (c *APIContext) nodeID() (string, string, error) {
 	return fromStringID.Pretty(), pubString, nil
 }
 
-func getLocalAddr(port int) (maddrs []ma.Multiaddr, err error) {
+func getLocalAddr(port int) (maddrs []string, err error) {
 	addrs, err := net.InterfaceAddrs()
 	if err != nil {
 		return nil, err
 	}
 	for i := range addrs {
 		if ipnet, ok := addrs[i].(*net.IPNet); ok && !ipnet.IP.IsLoopback() {
+			var addr string
 			if ipv4 := ipnet.IP.To4(); ipv4 != nil {
-				multiaddr, err := ma.NewMultiaddr(fmt.Sprintf("/tcp4/%s/tcp/%d", ipv4.String(), port))
-				if err != nil {
-					continue
-				}
-				maddrs = append(maddrs, multiaddr)
+				addr = fmt.Sprintf("/ip4/%s/tcp/%d", ipv4.String(), port)
+
 			} else if ipv6 := ipnet.IP.To16(); ipv6 != nil {
-				multiaddr, err := ma.NewMultiaddr(fmt.Sprintf("/tcp6/%s/tcp/%d", ipv6.String(), port))
-				if err != nil {
-					continue
-				}
-				maddrs = append(maddrs, multiaddr)
+				addr = fmt.Sprintf("/ip6/%s/tcp/%d", ipv6.String(), port)
 			}
+			maddrs = append(maddrs, addr)
 		}
 	}
 	return
@@ -183,23 +177,11 @@ func (c *APIContext) ID(req *core.IDReq) (*core.IDResp, error) {
 	if err != nil {
 		return nil, err
 	}
-	//var multiAddress []ma.Multiaddr
-	//for _, addr := range ipfsID.Addresses {
-	//	multiaddr, err := ma.NewMultiaddr(addr)
-	//	if err != nil {
-	//		continue
-	//	}
-	//	multiAddress = append(multiAddress, multiaddr)
-	//}
-	addr, err := getLocalAddr(c.cfg.Node.Port)
-	if err != nil {
-		return nil, err
-	}
 
 	return &core.IDResp{
 		ID:        c.cfg.Identity,
 		PublicKey: pubString,
-		Addrs:     addr,
+		Addrs:     c.m.Local().Data().Addrs,
 		DataStore: *ipfsID,
 	}, nil
 }

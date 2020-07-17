@@ -83,6 +83,14 @@ func (l *BustLinker) afterStart() error {
 		return err
 	}
 	l.manager.Local().Update(func(data *core.LocalData) {
+		addr, err := getLocalAddr(l.cfg.Node.Port)
+		if err != nil {
+			return
+		}
+		data.Addrs = addr
+	})
+
+	l.manager.Local().Update(func(data *core.LocalData) {
 		log.Infow("update node info", "info", info.AddrInfo)
 		data.Node.AddrInfo = info.AddrInfo
 	})

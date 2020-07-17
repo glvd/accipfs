@@ -2,7 +2,6 @@ package core
 
 import (
 	"github.com/ipfs/interface-go-ipfs-core/options"
-	ma "github.com/multiformats/go-multiaddr"
 )
 
 // DataStoreReq ...
@@ -39,7 +38,7 @@ type IDReq struct {
 type IDResp struct {
 	ID        string
 	PublicKey string
-	Addrs     []ma.Multiaddr
+	Addrs     []string
 	DataStore DataStoreInfo
 }
 

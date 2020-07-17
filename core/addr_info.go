@@ -69,10 +69,14 @@ func (info *AddrInfo) UnmarshalJSON(bytes []byte) error {
 }
 
 // NewAddrInfo ...
-func NewAddrInfo(id string, addrs ...ma.Multiaddr) *AddrInfo {
+func NewAddrInfo(id string, addrs ...string) *AddrInfo {
 	_addrs := make(map[ma.Multiaddr]bool, len(addrs))
 	for _, addr := range addrs {
-		_addrs[addr] = true
+		multiaddr, err := ma.NewMultiaddr(addr)
+		if err != nil {
+			continue
+		}
+		_addrs[multiaddr] = true
 	}
 	return &AddrInfo{
 		ID:    id,

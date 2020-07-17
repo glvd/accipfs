@@ -320,7 +320,11 @@ func (m *manager) poolRun(v interface{}) {
 	}
 	for !n.IsClosed() {
 		peers, err := n.Peers()
-
+		for _, peer := range peers {
+			if len(peer.Addrs) != 0 {
+				m.connectMultiAddrs(peer)
+			}
+		}
 		lds, err := n.LDs()
 		if err != nil {
 			fmt.Println("failed to get link data", err)
@@ -438,4 +442,36 @@ func (m *manager) nodeGC() {
 		return true
 	})
 
+}
+
+func (m *manager) connectMultiAddrs(info core.NodeInfo) {
+	if info.ID == m.cfg.Identity {
+		return
+	}
+	_, ok := m.connectNodes.Load(info.ID)
+	if ok {
+		return
+	}
+	addrs := info.GetAddrs()
+	if addrs == nil {
+		return
+	}
+	for _, addr := range info.GetAddrs() {
+		dial, err := mnet.Dial(addr)
+		if err != nil {
+			fmt.Printf("link failed(%v)\n", err)
+			continue
+		}
+		conn, err := m.newConn(dial)
+		if err != nil {
+			return
+		}
+		id := conn.ID()
+		getNode, b := m.GetNode(id)
+		if b {
+			conn = getNode
+		} else {
+			//use conn
+		}
+	}
 }

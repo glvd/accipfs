@@ -57,7 +57,7 @@ func (n *node) IsClosed() bool {
 }
 
 // Peers ...
-func (n *node) Peers() ([]string, error) {
+func (n *node) Peers() ([]core.NodeInfo, error) {
 	msg, b := n.Connection.SendCustomDataOnWait(PeerRequest, nil)
 	var s []string
 	if b {

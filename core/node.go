@@ -18,7 +18,7 @@ type Node interface {
 	IsClosed() bool
 	AppendAddr(addrs ...ma.Multiaddr)
 	SendClose()
-	Peers() ([]string, error)
+	Peers() ([]NodeInfo, error)
 	SendConnected() error
 	LDs() ([]string, error)
 }

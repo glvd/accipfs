@@ -78,10 +78,7 @@ func (l *BustLinker) Stop() {
 }
 
 func (l *BustLinker) afterStart() error {
-	info, err := l.api.NodeAddrInfo(&core.AddrReq{})
-	if err != nil {
-		return err
-	}
+
 	l.manager.Local().Update(func(data *core.LocalData) {
 		addr, err := getLocalAddr(l.cfg.Node.Port)
 		if err != nil {
@@ -90,6 +87,10 @@ func (l *BustLinker) afterStart() error {
 		data.Addrs = addr
 	})
 
+	info, err := l.api.NodeAddrInfo(&core.AddrReq{})
+	if err != nil {
+		return err
+	}
 	l.manager.Local().Update(func(data *core.LocalData) {
 		log.Infow("update node info", "info", info.AddrInfo)
 		data.Node.AddrInfo = info.AddrInfo

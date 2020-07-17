@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/glvd/accipfs/controller"
+	ma "github.com/multiformats/go-multiaddr"
 	"net"
 	"net/http"
 
@@ -64,6 +65,14 @@ func (c *APIContext) NodeAddrInfo(req *core.AddrReq) (*core.AddrResp, error) {
 	info := core.NewAddrInfo(id.ID, id.Addrs...)
 	info.PublicKey = id.PublicKey
 	info.DataStore = id.DataStore
+	info.Addrs = make(map[ma.Multiaddr]bool)
+	for _, addr := range c.m.Local().Data().Addrs {
+		multiaddr, err := ma.NewMultiaddr(addr)
+		if err != nil {
+			continue
+		}
+		info.Addrs[multiaddr] = true
+	}
 	return &core.AddrResp{
 		AddrInfo: *info,
 	}, nil

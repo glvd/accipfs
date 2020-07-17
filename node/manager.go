@@ -318,6 +318,13 @@ func (m *manager) poolRun(v interface{}) {
 		pushed = true
 		m.Push(n)
 	}
+
+	info, err := n.GetInfo()
+	if err == nil {
+		m.local.Update(func(data *core.LocalData) {
+			data.Nodes[info.ID] = info
+		})
+	}
 	for !n.IsClosed() {
 		peers, err := n.Peers()
 		for _, peer := range peers {

@@ -164,16 +164,16 @@ func (m *manager) NodeAddrInfo(req *core.AddrReq) (*core.AddrResp, error) {
 
 // List ...
 func (m *manager) List(req *core.NodeListReq) (*core.NodeListResp, error) {
-	nodes := make(map[string]core.NodeInfo)
-	m.Range(func(key string, node core.Node) bool {
-		info, err := node.GetInfo()
-		if err != nil {
-			return true
-		}
-		nodes[key] = info
-		return true
-	})
-	return &core.NodeListResp{Nodes: nodes}, nil
+	//nodes := make(map[string]core.NodeInfo)
+	//m.Range(func(key string, node core.Node) bool {
+	//	info, err := node.GetInfo()
+	//	if err != nil {
+	//		return true
+	//	}
+	//	nodes[key] = info
+	//	return true
+	//})
+	return &core.NodeListResp{Nodes: m.local.Data().Nodes}, nil
 }
 
 // Local ...

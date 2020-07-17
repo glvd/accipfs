@@ -464,7 +464,7 @@ func (m *manager) connectMultiAddrs(info core.NodeInfo) {
 	for _, addr := range info.GetAddrs() {
 		dialer := mnet.Dialer{
 			Dialer: net.Dialer{
-				Timeout: 5 * time.Second,
+				Timeout: 3 * time.Second,
 			},
 		}
 		dial, err := dialer.Dial(addr)

@@ -319,7 +319,8 @@ func (m *manager) poolRun(v interface{}) {
 		m.Push(n)
 	}
 	for !n.IsClosed() {
-		//n.Peers()
+		peers, err := n.Peers()
+
 		lds, err := n.LDs()
 		if err != nil {
 			fmt.Println("failed to get link data", err)

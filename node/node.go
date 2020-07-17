@@ -73,9 +73,9 @@ func (n *node) Peers() ([]string, error) {
 }
 
 // SendPeerRequest ...
-func (n *node) SendPeerRequest() ([]string, error) {
+func (n *node) SendPeerRequest() ([]core.NodeInfo, error) {
 	msg, b := n.Connection.SendCustomDataOnWait(PeerRequest, nil)
-	var s []string
+	var s []core.NodeInfo
 	if b {
 		if msg.DataLength > 0 {
 			err := json.Unmarshal(msg.Data, &s)
@@ -295,15 +295,6 @@ func (n *node) RecvInfoRequest(message *scdt.Message) ([]byte, bool, error) {
 func (n *node) addrInfoRequest() (*core.AddrInfo, error) {
 	data := n.local.Data()
 	return &data.Node.AddrInfo, nil
-	//if n.addrInfo != nil {
-	//	return n.addrInfo, nil
-	//}
-	//id, err := n.api.NodeAPI().NodeAddrInfo(&core.AddrReq{})
-	//if err != nil {
-	//	return nil, err
-	//}
-	//n.addrInfo = id.AddrInfo
-	//return &n.local.Node.AddrInfo
 }
 
 func (n *node) doFirst() error {
@@ -319,13 +310,12 @@ func (n *node) doFirst() error {
 
 // RecvPeerRequest ...
 func (n *node) RecvPeerRequest(message *scdt.Message) ([]byte, bool, error) {
-	//peers := n.local.Data().
-	//marshal, err := json.Marshal(peers)
-	//if err != nil {
-	//	return nil, false, err
-	//}
-	//return marshal, true, nil
-	return nil, false, nil
+	peers := n.local.Data().Nodes
+	marshal, err := json.Marshal(peers)
+	if err != nil {
+		return nil, false, err
+	}
+	return marshal, true, nil
 }
 
 // RecvLDsRequest ...

@@ -59,7 +59,7 @@ func (n *node) IsClosed() bool {
 // Peers ...
 func (n *node) Peers() ([]core.NodeInfo, error) {
 	msg, b := n.Connection.SendCustomDataOnWait(PeerRequest, nil)
-	var s []string
+	var s []core.NodeInfo
 	if b {
 		if msg.DataLength > 0 {
 			err := json.Unmarshal(msg.Data, &s)
@@ -213,7 +213,7 @@ func (n *node) AppendAddr(addrs ...ma.Multiaddr) {
 	}
 }
 
-// Addrs ...
+// Addresses ...
 func (n node) Addrs() []ma.Multiaddr {
 	return n.remote.Addrs
 }
@@ -310,8 +310,11 @@ func (n *node) doFirst() error {
 
 // RecvPeerRequest ...
 func (n *node) RecvPeerRequest(message *scdt.Message) ([]byte, bool, error) {
-	peers := n.local.Data().Nodes
-	marshal, err := json.Marshal(peers)
+	var infos []core.NodeInfo
+	for _, inf := range n.local.Data().Nodes {
+		infos = append(infos, inf)
+	}
+	marshal, err := json.Marshal(infos)
 	if err != nil {
 		return nil, false, err
 	}

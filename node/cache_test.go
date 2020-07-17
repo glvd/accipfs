@@ -22,7 +22,7 @@ length":"","sample":null,"uncensored":false},"media_uri":"","media_hash":"","med
 ia_index":"","info":{"thumb_hash":"","thumb_uri":"","poster_hash":"","poster_uri
 ":""},"info_uri":"","security":{"key":""},"last_update":1593674915,"version":[0,
 0,0,0]},"addr_info":{"ID":"QmeqN54NuCYSuTxHGZbvG3YoKnLewaECxAiGZUQsXyuXdY","Addr
-s":null,"IPFSAddrInfo":{"Addrs":null,"ID":""}}}`
+s":null,"IPFSAddrInfo":{"Addresses":null,"ID":""}}}`
 
 func TestHashCache_Store(t *testing.T) {
 	root := "QmVq9Du6jAgHBJfyXuhHkP9KHARxJ1RYoYPXTKdVkoN6F4"

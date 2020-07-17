@@ -65,7 +65,6 @@ func (c *APIContext) NodeAddrInfo(req *core.AddrReq) (*core.AddrResp, error) {
 	info := core.NewAddrInfo(id.ID, id.Addrs...)
 	info.PublicKey = id.PublicKey
 	info.DataStore = id.DataStore
-	//log.Infow("node addr", "info", info.DataStore, "data", id.DataStore)
 	return &core.AddrResp{
 		AddrInfo: *info,
 	}, nil
@@ -133,6 +132,31 @@ func (c *APIContext) nodeID() (string, string, error) {
 	return fromStringID.Pretty(), pubString, nil
 }
 
+func getLocalAddr(port int) (maddrs []ma.Multiaddr, err error) {
+	addrs, err := net.InterfaceAddrs()
+	if err != nil {
+		return nil, err
+	}
+	for i := range addrs {
+		if ipnet, ok := addrs[i].(*net.IPNet); ok && !ipnet.IP.IsLoopback() {
+			if ipv4 := ipnet.IP.To4(); ipv4 != nil {
+				multiaddr, err := ma.NewMultiaddr(fmt.Sprintf("/tcp4/%s/tcp/%d", ipv4.String(), port))
+				if err != nil {
+					continue
+				}
+				maddrs = append(maddrs, multiaddr)
+			} else if ipv6 := ipnet.IP.To16(); ipv6 != nil {
+				multiaddr, err := ma.NewMultiaddr(fmt.Sprintf("/tcp6/%s/tcp/%d", ipv6.String(), port))
+				if err != nil {
+					continue
+				}
+				maddrs = append(maddrs, multiaddr)
+			}
+		}
+	}
+	return
+}
+
 // ID ...
 func (c *APIContext) ID(req *core.IDReq) (*core.IDResp, error) {
 	fromStringID, err := peer.Decode(c.cfg.Identity)
@@ -159,19 +183,23 @@ func (c *APIContext) ID(req *core.IDReq) (*core.IDResp, error) {
 	if err != nil {
 		return nil, err
 	}
-	var multiAddress []ma.Multiaddr
-	for _, address := range ipfsID.Addresses {
-		multiaddr, err := ma.NewMultiaddr(address)
-		if err != nil {
-			continue
-		}
-		multiAddress = append(multiAddress, multiaddr)
+	//var multiAddress []ma.Multiaddr
+	//for _, addr := range ipfsID.Addresses {
+	//	multiaddr, err := ma.NewMultiaddr(addr)
+	//	if err != nil {
+	//		continue
+	//	}
+	//	multiAddress = append(multiAddress, multiaddr)
+	//}
+	addr, err := getLocalAddr(c.cfg.Node.Port)
+	if err != nil {
+		return nil, err
 	}
-	//log.Infow("result id", "id", c.cfg.Identity, "public key", pubString, "datastore", ipfsID)
+
 	return &core.IDResp{
 		ID:        c.cfg.Identity,
 		PublicKey: pubString,
-		Addrs:     nil,
+		Addrs:     addr,
 		DataStore: *ipfsID,
 	}, nil
 }

@@ -74,6 +74,9 @@ func (m *manager) NodeAPI() core.NodeAPI {
 }
 
 func mustPool(size int, pf func(v interface{})) *ants.PoolWithFunc {
+	if size == 0 {
+		size = ants.DefaultAntsPoolSize
+	}
 	withFunc, err := ants.NewPoolWithFunc(size, pf)
 	if err != nil {
 		panic(err)

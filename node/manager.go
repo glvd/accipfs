@@ -477,5 +477,6 @@ func (m *manager) connectMultiAddrs(info core.NodeInfo) {
 		if err != nil {
 			return
 		}
+		return
 	}
 }

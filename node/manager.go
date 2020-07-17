@@ -462,7 +462,12 @@ func (m *manager) connectMultiAddrs(info core.NodeInfo) {
 		return
 	}
 	for _, addr := range info.GetAddrs() {
-		dial, err := mnet.Dial(addr)
+		dialer := mnet.Dialer{
+			Dialer: net.Dialer{
+				Timeout: 5 * time.Second,
+			},
+		}
+		dial, err := dialer.Dial(addr)
 		if err != nil {
 			fmt.Printf("link failed(%v)\n", err)
 			continue

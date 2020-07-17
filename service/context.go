@@ -141,7 +141,6 @@ func getLocalAddr(port int) (maddrs []string, err error) {
 			var addr string
 			if ipv4 := ipnet.IP.To4(); ipv4 != nil {
 				addr = fmt.Sprintf("/ip4/%s/tcp/%d", ipv4.String(), port)
-
 			} else if ipv6 := ipnet.IP.To16(); ipv6 != nil {
 				addr = fmt.Sprintf("/ip6/%s/tcp/%d", ipv6.String(), port)
 			}

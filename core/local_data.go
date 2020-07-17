@@ -3,6 +3,7 @@ package core
 import (
 	"encoding/json"
 	"sync"
+	"time"
 )
 
 // SafeLocalData ...
@@ -27,6 +28,15 @@ type LocalData struct {
 	LDs         map[string]uint8 //ipfs linked data
 	Addrs       []string
 	LastUpdate  int64
+}
+
+// DefaultLocalData ...
+func DefaultLocalData() *LocalData {
+	return &LocalData{
+		LDs:        make(map[string]uint8),
+		LastUpdate: time.Now().Unix(),
+		Nodes:      make(map[string]NodeInfo),
+	}
 }
 
 // Marshal ...

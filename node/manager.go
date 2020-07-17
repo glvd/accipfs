@@ -46,12 +46,7 @@ func InitManager(cfg *config.Config) (core.NodeManager, error) {
 	if cfg.Node.BackupSeconds == 0 {
 		cfg.Node.BackupSeconds = 30 * time.Second
 	}
-	data := core.LocalData{
-		Node:       core.NodeInfo{},
-		LDs:        make(map[string]uint8),
-		Addrs:      nil,
-		LastUpdate: 0,
-	}
+	data := core.DefaultLocalData()
 	m := &manager{
 		cfg:      cfg,
 		initLoad: atomic.NewBool(false),

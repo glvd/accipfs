@@ -58,9 +58,9 @@ func nodePeerCmd() *cobra.Command {
 			if err != nil {
 				panic(err)
 			}
-			for id, info := range list.Nodes {
+			for id := range list.Nodes {
 				fmt.Printf("node:%v\n", id)
-				fmt.Printf("info:%v\n", info.JSON())
+				//fmt.Printf("info:%v\n", info.JSON())
 			}
 			return
 		},

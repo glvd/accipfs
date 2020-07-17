@@ -128,6 +128,7 @@ func (c *Controller) Stop() (e error) {
 			e = err
 		}
 	}
+	c.isRunning.Store(false)
 	return
 }
 

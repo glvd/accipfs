@@ -28,12 +28,13 @@ type manager struct {
 	expPath         string
 	local           core.SafeLocalData
 	nodePool        *ants.PoolWithFunc
-	currentNodes    *atomic.Uint64
+	currentNodes    *atomic.Int32
 	connectNodes    sync.Map
 	disconnectNodes sync.Map
 	nodes           Cacher
 	hashes          Cacher
 	RequestLD       func() ([]string, error)
+	gc              *atomic.Bool
 }
 
 var _nodes = "bl.nodes"
@@ -403,4 +404,37 @@ func (m *manager) Add(req *core.AddReq) (*core.AddResp, error) {
 // Conn ...
 func (m *manager) Conn(c net.Conn) (core.Node, error) {
 	return m.newConn(c)
+}
+
+func (m *manager) addNode(n core.Node) (bool, error) {
+	if m.currentNodes.Load() > int32(m.cfg.Node.ConnectMax) {
+		go m.nodeGC()
+	}
+	m.Push(n)
+	return true, nil
+}
+
+func (m *manager) nodeGC() {
+	if !m.gc.CAS(false, true) {
+		return
+	}
+	defer m.gc.Store(false)
+	m.connectNodes.Range(func(key, value interface{}) bool {
+		v, b := value.(core.Node)
+		if !b {
+			m.connectNodes.Delete(key)
+			return true
+		}
+		ping, err := v.Ping()
+		if err != nil {
+			m.connectNodes.Delete(key)
+			return true
+		}
+		if ping != "pong" {
+			m.connectNodes.Delete(key)
+			return true
+		}
+		return true
+	})
+
 }

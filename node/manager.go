@@ -57,7 +57,7 @@ func InitManager(cfg *config.Config) (core.NodeManager, error) {
 		local:    data.Safe(),
 		t:        time.NewTicker(cfg.Node.BackupSeconds),
 	}
-	m.nodePool = mustPool(cfg.Node.PoolMax, m.poolRun)
+	m.nodePool = mustPool(cfg.Node.PoolMax, m.mainProc)
 	go m.loop()
 
 	return m, nil
@@ -276,7 +276,7 @@ func (m *manager) newConn(c net.Conn) (core.Node, error) {
 	return acceptNode, nil
 }
 
-func (m *manager) poolRun(v interface{}) {
+func (m *manager) mainProc(v interface{}) {
 	n, b := v.(core.Node)
 	if !b {
 		return

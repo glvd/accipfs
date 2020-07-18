@@ -311,6 +311,7 @@ func (m *manager) mainProc(v interface{}) {
 		_ = n.SendConnected()
 		return
 	}
+	//get remote node info
 	info, err := n.GetInfo()
 	if err == nil {
 		m.local.Update(func(data *core.LocalData) {
@@ -325,25 +326,41 @@ func (m *manager) mainProc(v interface{}) {
 	}
 
 	for !n.IsClosed() {
-		peers, err := n.Peers()
-		for _, peer := range peers {
-			if len(peer.Addrs) != 0 {
-				m.connectMultiAddrs(peer)
-			}
-		}
+		peerDone := m.syncPeers(n)
 		lds, err := n.LDs()
 		if err != nil {
 			fmt.Println("failed to get link data", err)
 			if err == ErrNoData {
 				continue
 			}
+			//close connect when found err?
 			return
 		}
 		for _, ld := range lds {
+			m.hashes.Store(ld, info)
 			fmt.Println("from:", n.ID(), "list:", ld)
 		}
+		//wait something done
+		<-peerDone
 		time.Sleep(5 * time.Second)
 	}
+}
+
+func (m *manager) syncPeers(n core.Node) <-chan bool {
+	done := make(chan bool)
+	go func() {
+		peers, err := n.Peers()
+		if err != nil {
+			done <- false
+		}
+		for _, peer := range peers {
+			if len(peer.Addrs) != 0 {
+				m.connectMultiAddrs(peer)
+			}
+		}
+		done <- true
+	}()
+	return done
 }
 
 func decodeNode(m core.NodeManager, b []byte, api core.API) error {

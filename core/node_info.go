@@ -85,9 +85,19 @@ type NodeInfo struct {
 	ProtocolVersion string
 }
 
+// Unmarshal ...
+func (i *NodeInfo) Unmarshal(bytes []byte) error {
+	return json.Unmarshal(bytes, i)
+}
+
+// Marshal ...
+func (i NodeInfo) Marshal() ([]byte, error) {
+	return json.Marshal(i)
+}
+
 // JSON ...
-func (v *NodeInfo) JSON() string {
-	marshal, err := json.MarshalIndent(v, "", " ")
+func (i *NodeInfo) JSON() string {
+	marshal, err := json.MarshalIndent(i, "", " ")
 	if err != nil {
 		return ""
 	}

@@ -337,7 +337,9 @@ func (m *manager) mainProc(v interface{}) {
 			return
 		}
 		for _, ld := range lds {
-			m.hashes.Store(ld, info)
+			//todo:store hash info
+			//m.hashes.Store(ld, info)
+
 			fmt.Println("from:", n.ID(), "list:", ld)
 		}
 		//wait something done

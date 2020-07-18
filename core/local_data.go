@@ -76,24 +76,26 @@ func (l *safeLocalData) Update(f func(data *LocalData)) {
 
 // Data ...
 func (l *safeLocalData) Data() (data LocalData) {
-	data = LocalData{
-		Initialized: false,
-		Node:        NodeInfo{},
-		Nodes:       make(map[string]NodeInfo),
-		LDs:         make(map[string]uint8),
-		Addrs:       nil,
-		LastUpdate:  0,
-	}
+	//data = LocalData{
+	//	Initialized: false,
+	//	Node:        NodeInfo{},
+	//	Nodes:       make(map[string]NodeInfo),
+	//	LDs:         make(map[string]uint8),
+	//	Addrs:       nil,
+	//	LastUpdate:  0,
+	//}
 	l.lock.Lock()
-	if l.data.Addrs != nil {
-		copy(data.Addrs, l.data.Addrs)
-	}
-	for s := range l.data.Nodes {
-		data.Nodes[s] = l.data.Nodes[s]
-	}
-	for s := range l.data.LDs {
-		data.LDs[s] = l.data.LDs[s]
-	}
+	//data.Node = l.data.Node
+	//if l.data.Addrs != nil {
+	//	copy(data.Addrs, l.data.Addrs)
+	//}
+	//for s := range l.data.Nodes {
+	//	data.Nodes[s] = l.data.Nodes[s]
+	//}
+	//for s := range l.data.LDs {
+	//	data.LDs[s] = l.data.LDs[s]
+	//}
+	data = l.data
 	l.lock.Unlock()
 	return
 }

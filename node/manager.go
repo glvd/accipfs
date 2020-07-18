@@ -164,6 +164,7 @@ func (m *manager) NodeAddrInfo(req *core.AddrReq) (*core.AddrResp, error) {
 
 // List ...
 func (m *manager) List(req *core.NodeListReq) (*core.NodeListResp, error) {
+	//todo:need optimization
 	//nodes := make(map[string]core.NodeInfo)
 	//m.Range(func(key string, node core.Node) bool {
 	//	info, err := node.GetInfo()

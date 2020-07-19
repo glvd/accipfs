@@ -107,6 +107,7 @@ func (c *baseCache) Update(hash string, fn func(bytes []byte) (core.Marshaler, e
 					if fn != nil {
 						data, err := fn(val)
 						if err != nil {
+							//do nothing when have err
 							return err
 						}
 						encode, err := data.Marshal()

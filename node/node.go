@@ -41,6 +41,38 @@ type jsonNode struct {
 	peer.AddrInfo
 }
 
+// Nodes ...
+type Nodes struct {
+	n map[string]bool
+}
+
+// NewNodes ...
+func NewNodes() *Nodes {
+	return &Nodes{n: map[string]bool{}}
+}
+
+// Unmarshal ...
+func (n *Nodes) Unmarshal(bytes []byte) error {
+	var nodes []string
+	err := json.Unmarshal(bytes, &nodes)
+	if err != nil {
+		return err
+	}
+	for _, s := range nodes {
+		n.n[s] = true
+	}
+	return nil
+}
+
+// Marshal ...
+func (n Nodes) Marshal() ([]byte, error) {
+	var nodes []string
+	for s := range n.n {
+		nodes = append(nodes, s)
+	}
+	return json.Marshal(nodes)
+}
+
 var _ core.Node = &node{}
 
 // ErrNoData ...

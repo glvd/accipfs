@@ -338,7 +338,18 @@ func (m *manager) mainProc(v interface{}) {
 		}
 		for _, ld := range lds {
 			//todo:store hash info
-			//m.hashes.Store(ld, info)
+			err := m.hashes.Update(ld, func(bytes []byte) (core.Marshaler, error) {
+				nodes := NewNodes()
+				err := nodes.Unmarshal(bytes)
+				if err != nil {
+					return nil, err
+				}
+				nodes.n[ld] = true
+				return nodes, nil
+			})
+			if err != nil {
+				continue
+			}
 			fmt.Println("from:", n.ID(), "list:", ld)
 
 		}

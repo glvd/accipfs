@@ -317,6 +317,10 @@ func (m *manager) mainProc(v interface{}) {
 		m.local.Update(func(data *core.LocalData) {
 			data.Nodes[info.ID] = info
 		})
+		err := m.nodes.Store(info.ID, info)
+		if err != nil {
+			log.Errorw("sotre nodes failed", "err", err)
+		}
 	}
 
 	if !n.IsClosed() {

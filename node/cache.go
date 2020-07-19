@@ -34,6 +34,7 @@ type nodeCache struct {
 type Cacher interface {
 	Load(hash string, data core.Unmarshaler) error
 	Store(hash string, data core.Marshaler) error
+	Update(hash string, fn func(bytes []byte) (core.Marshaler, error)) error
 	Close() error
 	Range(f func(hash string, value string) bool)
 }
@@ -91,6 +92,34 @@ func hashCacher(cfg *config.Config) Cacher {
 			db:           db,
 		},
 	}
+}
+
+// Update ...
+func (c *baseCache) Update(hash string, fn func(bytes []byte) (core.Marshaler, error)) error {
+	return c.db.Update(
+		func(txn *badger.Txn) error {
+			item, err := txn.Get([]byte(hash))
+			if err != nil {
+				return err
+			}
+			if fn != nil {
+				return item.Value(func(val []byte) error {
+					if fn != nil {
+						data, err := fn(val)
+						if err != nil {
+							return err
+						}
+						encode, err := data.Marshal()
+						if err != nil {
+							return err
+						}
+						return txn.Set([]byte(hash), encode)
+					}
+					return nil
+				})
+			}
+			return nil
+		})
 }
 
 // Store ...

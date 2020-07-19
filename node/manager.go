@@ -339,8 +339,8 @@ func (m *manager) mainProc(v interface{}) {
 		for _, ld := range lds {
 			//todo:store hash info
 			//m.hashes.Store(ld, info)
-
 			fmt.Println("from:", n.ID(), "list:", ld)
+
 		}
 		//wait something done
 		<-peerDone
@@ -357,7 +357,7 @@ func (m *manager) syncPeers(n core.Node) <-chan bool {
 		}
 		for _, peer := range peers {
 			if len(peer.Addrs) != 0 {
-				m.connectMultiAddrs(peer)
+				m.connectMultiAddr(peer)
 			}
 		}
 		done <- true
@@ -469,7 +469,7 @@ func (m *manager) nodeGC() {
 
 }
 
-func (m *manager) connectMultiAddrs(info core.NodeInfo) {
+func (m *manager) connectMultiAddr(info core.NodeInfo) {
 	if info.ID == m.cfg.Identity {
 		return
 	}

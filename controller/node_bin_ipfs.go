@@ -165,7 +165,7 @@ func (n *nodeBinIPFS) IsReady() bool {
 // APIContext ...
 func (n *nodeBinIPFS) API() *httpapi.HttpApi {
 	if n.api == nil {
-		ma, err := multiaddr.NewMultiaddr(config.IPFSAddr())
+		ma, err := multiaddr.NewMultiaddr(config.IPFSAPIAddr())
 		if err != nil {
 			panic(err)
 		}

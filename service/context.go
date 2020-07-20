@@ -269,11 +269,12 @@ func (c *APIContext) id(ctx *gin.Context) {
 }
 
 func (c *APIContext) get(ctx *gin.Context) {
-	ctx.Redirect(http.StatusMovedPermanently, ipfsGetURL("api/v0/get"))
+	ctx.
+		ctx.Redirect(http.StatusFound, ipfsGetURL(""))
 }
 
 func ipfsGetURL(uri string) string {
-	return fmt.Sprintf("%s/%s", config.IPFSAddrHTTP(), uri)
+	return fmt.Sprintf("%s/%s", config.IPFSAPIAddr(), uri)
 }
 
 func (c *APIContext) ping(ctx *gin.Context) {

@@ -68,7 +68,7 @@ func InitGlobalClient(cfg *config.Config) {
 func New(cfg *config.APIConfig) core.API {
 	c := &http.Client{}
 	c.Timeout = cfg.Timeout * time.Minute
-	ma, err := multiaddr.NewMultiaddr(config.IPFSAddr())
+	ma, err := multiaddr.NewMultiaddr(config.IPFSAPIAddr())
 	if err != nil {
 		panic(err)
 	}

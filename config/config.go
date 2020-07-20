@@ -34,7 +34,8 @@ type IPFSConfig struct {
 	Enable    bool   `json:"enable" mapstructure:"enable"`
 	LogOutput bool   `json:"log_output" mapstructure:"log_output"` //output log to screen
 	Name      string `json:"name" mapstructure:"name"`
-	Port      int    `json:"port" mapstructure:"port"`
+	API       int    `json:"api" mapstructure:"api"`
+	Gateway   int    `json:"gateway" mapstructure:"gateway"`
 	Timeout   int    `json:"timeout" mapstructure:"timeout"`
 }
 
@@ -277,14 +278,14 @@ func ETHAddr() string {
 	return fmt.Sprintf(_localGateway, Global().ETH.Port)
 }
 
-// IPFSAddr ...
-func IPFSAddr() string {
-	return fmt.Sprintf(_ipfsGateway, Global().IPFS.Port)
+// IPFSAPIAddr ...
+func IPFSAPIAddr() string {
+	return fmt.Sprintf(_localGateway, Global().IPFS.API)
 }
 
-// IPFSAddrHTTP ...
-func IPFSAddrHTTP() string {
-	return fmt.Sprintf(_localGateway, Global().IPFS.Port)
+// IPFSAPIAddr ...
+func IPFSGatewayAddr() string {
+	return fmt.Sprintf(_localGateway, Global().IPFS.Gateway)
 }
 
 // RPCAddr ...

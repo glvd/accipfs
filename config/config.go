@@ -284,7 +284,7 @@ func IPFSAPIAddr() string {
 	return fmt.Sprintf(_localGateway, Global().IPFS.API)
 }
 
-// IPFSAPIAddr ...
+// IPFSGatewayAddr ...
 func IPFSGatewayAddr() string {
 	return fmt.Sprintf(_localGateway, Global().IPFS.Gateway)
 }

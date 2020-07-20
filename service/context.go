@@ -229,6 +229,7 @@ func (c *APIContext) registerRoutes() {
 	v0.POST("/node/unlink", c.nodeUnlink())
 	v0.POST("/node/list", c.nodeList())
 	v0.POST("/datastore/pin/ls", c.datastorePinLs())
+	v0.GET("/get/:hash", c.get)
 	v0.GET("/get/:hash/*endpoint", c.get)
 	v0.GET("/query", c.query)
 }
@@ -271,11 +272,16 @@ func (c *APIContext) id(ctx *gin.Context) {
 }
 
 func (c *APIContext) get(ctx *gin.Context) {
-	url := ipfsGetURL(
-		strings.Join([]string{"ipfs",
-			ctx.Param("hash"),
-			ctx.Param("endpoint")},
-			"/"))
+	uri := []string{"ipfs",
+		ctx.Param("hash"),
+	}
+
+	if ep := ctx.Param("endpoint"); ep != "" {
+		uri = append(uri, ep)
+	}
+
+	url := ipfsGetURL(strings.Join(uri, "/"))
+	log.Infow("visit", "url", url)
 	get, err := http.Get(url)
 	if err != nil {
 		log.Errorw("get source failed", "err", err)

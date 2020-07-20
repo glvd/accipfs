@@ -372,6 +372,7 @@ func (m *manager) connectRemoteDataStore(info core.DataStoreInfo) {
 		for _, address := range info.Addresses {
 			multiaddr, err := ma.NewMultiaddr(address)
 			if err != nil {
+				log.Infow("failed to connect", "addr", address, "err", err)
 				continue
 			}
 			multiAddr = append(multiAddr, multiaddr)

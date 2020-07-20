@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"github.com/glvd/accipfs/controller"
 	ma "github.com/multiformats/go-multiaddr"
+	"io"
 	"net"
 	"net/http"
 
@@ -227,7 +228,7 @@ func (c *APIContext) registerRoutes() {
 	v0.POST("/node/unlink", c.nodeUnlink())
 	v0.POST("/node/list", c.nodeList())
 	v0.POST("/datastore/pin/ls", c.datastorePinLs())
-	v0.GET("/get", c.get)
+	v0.GET("/get/:hash", c.get)
 	v0.GET("/query", c.query)
 }
 
@@ -269,12 +270,23 @@ func (c *APIContext) id(ctx *gin.Context) {
 }
 
 func (c *APIContext) get(ctx *gin.Context) {
-	ctx.
-		ctx.Redirect(http.StatusFound, ipfsGetURL(""))
+	hash := ctx.Param("hash")
+	get, err := http.Get(ipfsGetURL("ipfs/" + hash))
+	if err != nil {
+		ctx.Writer.WriteHeader(http.StatusBadRequest)
+		return
+	}
+	_, err = io.Copy(ctx.Writer, get.Request.Body)
+	if err != nil {
+		log.Infow("copy failed", "err", err)
+		ctx.Writer.WriteHeader(http.StatusBadRequest)
+		return
+	}
+	return
 }
 
 func ipfsGetURL(uri string) string {
-	return fmt.Sprintf("%s/%s", config.IPFSAPIAddr(), uri)
+	return fmt.Sprintf("%s/%s", config.IPFSGatewayAddr(), uri)
 }
 
 func (c *APIContext) ping(ctx *gin.Context) {

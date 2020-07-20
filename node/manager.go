@@ -7,6 +7,7 @@ import (
 	"github.com/glvd/accipfs/config"
 	"github.com/glvd/accipfs/core"
 	"github.com/godcong/scdt"
+	"github.com/libp2p/go-libp2p-core/peer"
 	ma "github.com/multiformats/go-multiaddr"
 	mnet "github.com/multiformats/go-multiaddr-net"
 	"github.com/panjf2000/ants/v2"
@@ -35,6 +36,7 @@ type manager struct {
 	hashes          Cacher
 	RequestLD       func() ([]string, error)
 	gc              *atomic.Bool
+	addrCB          func(info peer.AddrInfo) error
 }
 
 var _nodes = "bl.nodes"
@@ -323,6 +325,8 @@ func (m *manager) mainProc(v interface{}) {
 		}
 	}
 
+	m.connectRemoteDataStore(info.DataStore)
+
 	if !n.IsClosed() {
 		fmt.Println("node added:", n.ID())
 		pushed = true
@@ -359,6 +363,31 @@ func (m *manager) mainProc(v interface{}) {
 		//wait something done
 		<-peerDone
 		time.Sleep(5 * time.Second)
+	}
+}
+
+func (m *manager) connectRemoteDataStore(info core.DataStoreInfo) {
+	if m.addrCB != nil {
+		var multiAddr []ma.Multiaddr
+		for _, address := range info.Addresses {
+			multiaddr, err := ma.NewMultiaddr(address)
+			if err != nil {
+				continue
+			}
+			multiAddr = append(multiAddr, multiaddr)
+		}
+		dcdd, err := peer.Decode(info.ID)
+		if err != nil {
+			log.Infow("decode id failed", "err", err)
+			return
+		}
+		err = m.addrCB(peer.AddrInfo{
+			ID:    dcdd,
+			Addrs: multiAddr,
+		})
+		if err != nil {
+			return
+		}
 	}
 }
 
@@ -513,4 +542,29 @@ func (m *manager) connectMultiAddr(info core.NodeInfo) {
 		}
 		return
 	}
+}
+
+// RegisterAddrCallback ...
+func (m *manager) RegisterAddrCallback(f func(info peer.AddrInfo) error) {
+	m.addrCB = f
+}
+
+// ConnRemoteFromHash ...
+func (m *manager) ConnRemoteFromHash(hash string) error {
+	var nodes Nodes
+	err := m.hashes.Load(hash, &nodes)
+	if err != nil {
+		return err
+	}
+	for s := range nodes.n {
+		addr, err := DialFromStringAddr(s, 0)
+		if err != nil {
+			continue
+		}
+		_, err = m.Conn(addr)
+		if err != nil {
+			continue
+		}
+	}
+	return nil
 }

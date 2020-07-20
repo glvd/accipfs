@@ -181,6 +181,28 @@ func CoreNode(conn net.Conn, local core.SafeLocalData) (core.Node, error) {
 	return n, nil
 }
 
+// DialFromStringAddr ...
+func DialFromStringAddr(addr string, bind int) (net.Conn, error) {
+	localAddr, err := ma.NewMultiaddr(fmt.Sprintf("/ip4/0.0.0.0/tcp/%d", bind))
+	if err != nil {
+		return nil, err
+	}
+
+	multiaddr, err := ma.NewMultiaddr(addr)
+	if err != nil {
+		return nil, err
+	}
+	d := mnet.Dialer{
+		Dialer:    net.Dialer{},
+		LocalAddr: localAddr,
+	}
+	conn, err := d.Dial(multiaddr)
+	if err != nil {
+		return nil, err
+	}
+	return conn, nil
+}
+
 // ConnectNode ...
 func ConnectNode(addr ma.Multiaddr, bind int, local core.SafeLocalData) (core.Node, error) {
 	localAddr, err := ma.NewMultiaddr(fmt.Sprintf("/ip4/0.0.0.0/tcp/%d", bind))

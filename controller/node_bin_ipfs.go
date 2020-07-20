@@ -12,6 +12,7 @@ import (
 	iface "github.com/ipfs/interface-go-ipfs-core"
 	"github.com/ipfs/interface-go-ipfs-core/options"
 	"github.com/ipfs/interface-go-ipfs-core/path"
+	"github.com/libp2p/go-libp2p-core/peer"
 	"github.com/multiformats/go-multiaddr"
 	"os"
 	"os/exec"
@@ -236,4 +237,9 @@ func (n *nodeBinIPFS) PinRm(ctx context.Context, hash string) (e error) {
 // SwarmPeers ...
 func (n *nodeBinIPFS) SwarmPeers(ctx context.Context) ([]iface.ConnectionInfo, error) {
 	return n.API().Swarm().Peers(ctx)
+}
+
+// SwarmPeers ...
+func (n *nodeBinIPFS) SwarmConnect(ctx context.Context, info peer.AddrInfo) error {
+	return n.API().Swarm().Connect(ctx, info)
 }

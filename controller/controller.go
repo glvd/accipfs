@@ -6,6 +6,7 @@ import (
 	"github.com/glvd/accipfs/config"
 	"github.com/glvd/accipfs/contract/dtag"
 	"github.com/glvd/accipfs/core"
+	"github.com/libp2p/go-libp2p-core/peer"
 	"go.uber.org/atomic"
 	"sync"
 	"time"
@@ -172,4 +173,9 @@ func (c *Controller) PinLs(req *core.DataStoreReq) (*core.DataStoreResp, error) 
 		pins = append(pins, v.Path().Cid().String())
 	}
 	return &core.DataStoreResp{Pins: pins}, nil
+}
+
+// HandleSwarm ...
+func (c *Controller) HandleSwarm(info peer.AddrInfo) error {
+	return c.ipfsNode.SwarmConnect(context.TODO(), info)
 }

@@ -38,7 +38,7 @@ func NewBustLinker(cfg *config.Config) (linker *BustLinker, err error) {
 
 	linker.controller = controller.New(cfg)
 	linker.manager, err = node.InitManager(cfg)
-
+	linker.manager.RegisterAddrCallback(linker.controller.HandleSwarm)
 	linker.api = NewAPIContext(cfg, linker.manager, linker.controller)
 
 	linker.listener = newLinkListener(cfg, linker.manager.Conn)

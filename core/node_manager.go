@@ -1,6 +1,7 @@
 package core
 
 import (
+	"github.com/libp2p/go-libp2p-core/peer"
 	"net"
 )
 
@@ -14,6 +15,8 @@ type NodeManager interface {
 	Conn(c net.Conn) (Node, error)
 	Store() error
 	Load() error
+
 	//RegisterLDRequest(func() ([]string, error))
-	//RegisterAddrRequest(f func() ([]string, error))
+	RegisterAddrCallback(f func(info peer.AddrInfo) error)
+	ConnRemoteFromHash(hash string) error
 }

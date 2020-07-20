@@ -272,9 +272,8 @@ func (c *APIContext) id(ctx *gin.Context) {
 }
 
 func (c *APIContext) get(ctx *gin.Context) {
-	uri := []string{"ipfs",
-		ctx.Param("hash"),
-	}
+	hash := ctx.Param("hash")
+	uri := []string{"ipfs", hash}
 
 	if ep := ctx.Param("endpoint"); ep != "" {
 		uri = append(uri, ep)
@@ -292,6 +291,10 @@ func (c *APIContext) get(ctx *gin.Context) {
 		log.Errorw("response body not found", "err", err)
 		ctx.Writer.WriteHeader(http.StatusBadRequest)
 		return
+	}
+	err = c.m.ConnRemoteFromHash(hash)
+	if err != nil {
+		log.Warnw("no accelerator node to connect", "err", err)
 	}
 
 	_, err = io.Copy(ctx.Writer, get.Body)

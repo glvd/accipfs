@@ -387,6 +387,7 @@ func (m *manager) connectRemoteDataStore(info core.DataStoreInfo) {
 			Addrs: multiAddr,
 		})
 		if err != nil {
+			log.Infow("addr callback failed", "err", err)
 			return
 		}
 	}

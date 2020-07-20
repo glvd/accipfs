@@ -21,7 +21,7 @@ const _dataDirIPFS = ".ipfs"
 const _dataDirCache = ".cache"
 const _localGateway = "http://127.0.0.1:%d"
 
-const _ipfsGateway = "/ip4/127.0.0.1/tcp/%d"
+const _ipfsAddr = "/ip4/127.0.0.1/tcp/%d"
 
 // DefaultNodeContractAddr ...
 var DefaultNodeContractAddr = "0xbaEEB7a3AF34a365ACAa1f8464A3374B58ac9889"
@@ -281,11 +281,16 @@ func ETHAddr() string {
 
 // IPFSAPIAddr ...
 func IPFSAPIAddr() string {
+	return fmt.Sprintf(_ipfsAddr, Global().IPFS.API)
+}
+
+// IPFSAPIURL ...
+func IPFSAPIURL() string {
 	return fmt.Sprintf(_localGateway, Global().IPFS.API)
 }
 
-// IPFSGatewayAddr ...
-func IPFSGatewayAddr() string {
+// IPFSGatewayURL ...
+func IPFSGatewayURL() string {
 	return fmt.Sprintf(_localGateway, Global().IPFS.Gateway)
 }
 

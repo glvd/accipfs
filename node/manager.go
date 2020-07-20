@@ -382,12 +382,13 @@ func (m *manager) connectRemoteDataStore(info core.DataStoreInfo) {
 			log.Infow("decode id failed", "err", err)
 			return
 		}
-		err = m.addrCB(peer.AddrInfo{
+		pai := peer.AddrInfo{
 			ID:    dcdd,
 			Addrs: multiAddr,
-		})
+		}
+		err = m.addrCB(pai)
 		if err != nil {
-			log.Infow("addr callback failed", "err", err)
+			log.Infow("addr callback failed", "err", err, "addrinfo", pai)
 			return
 		}
 	}

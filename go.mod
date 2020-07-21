@@ -31,6 +31,7 @@ require (
 	github.com/miekg/dns v1.1.12
 	github.com/mr-tron/base58 v1.2.0 // indirect
 	github.com/multiformats/go-multiaddr v0.2.2
+	github.com/multiformats/go-multiaddr-dns v0.1.0
 	github.com/multiformats/go-multiaddr-net v0.1.5
 	github.com/multiformats/go-multihash v0.0.14 // indirect
 	github.com/opentracing/opentracing-go v1.2.0 // indirect

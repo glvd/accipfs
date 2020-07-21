@@ -1,9 +1,11 @@
 package node
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/glvd/accipfs/basis"
 	"github.com/glvd/accipfs/config"
 	"github.com/glvd/accipfs/core"
 	"github.com/godcong/scdt"
@@ -375,35 +377,27 @@ func (m *manager) mainProc(v interface{}) {
 }
 
 func (m *manager) connectRemoteDataStore(info core.DataStoreInfo) {
-	total := len(info.Addresses)
-	var err error
-	if m.addrCB != nil {
-		for _, address := range info.Addresses {
-			multiaddr, err := ma.NewMultiaddr(address)
-			if err != nil {
-				log.Infow("failed to connect", "addr", address, "err", err)
-				continue
-			}
 
-			dcdd, err := peer.Decode(info.ID)
-			if err != nil {
-				log.Infow("decode id failed", "err", err)
-				return
-			}
-			pai := peer.AddrInfo{
-				ID:    dcdd,
-				Addrs: []ma.Multiaddr{multiaddr},
-			}
-			err = m.addrCB(pai)
+	timeout, cancelFunc := context.WithTimeout(context.TODO(), time.Second*30)
+	defer cancelFunc()
+	if m.addrCB != nil {
+		addresses, err := basis.ParseAddresses(timeout, info.Addresses)
+		if err != nil {
+			return
+		}
+		total := len(addresses)
+		for _, addr := range addresses {
+			err = m.addrCB(addr)
 			if err != nil {
 				total = total - 1
 				continue
 			}
 		}
+		if total <= 0 {
+			log.Infow("addr callback failed", "err", err, "addrinfo", info.Addresses)
+		}
 	}
-	if total <= 0 {
-		log.Infow("addr callback failed", "err", err, "addrinfo", info.Addresses)
-	}
+
 }
 
 func (m *manager) syncPeers(n core.Node) <-chan bool {

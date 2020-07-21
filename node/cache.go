@@ -12,7 +12,7 @@ import (
 
 const (
 	cacheDir = ".cache"
-	hashName = "hashes"
+	hashName = "hashNodes"
 	nodeName = "nodes"
 )
 

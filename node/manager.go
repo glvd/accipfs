@@ -34,8 +34,8 @@ type manager struct {
 	currentNodes    *atomic.Int32
 	connectNodes    sync.Map
 	disconnectNodes sync.Map
-	nodes           Cacher
-	hashes          Cacher
+	nodes           Cacher //all node caches
+	hashNodes       Cacher //hash cache nodes
 	RequestLD       func() ([]string, error)
 	gc              *atomic.Bool
 	addrCB          func(info peer.AddrInfo) error
@@ -52,14 +52,14 @@ func InitManager(cfg *config.Config) (core.NodeManager, error) {
 	}
 	data := core.DefaultLocalData()
 	m := &manager{
-		cfg:      cfg,
-		initLoad: atomic.NewBool(false),
-		path:     filepath.Join(cfg.Path, _nodes),
-		expPath:  filepath.Join(cfg.Path, _expNodes),
-		nodes:    nodeCacher(cfg),
-		hashes:   hashCacher(cfg),
-		local:    data.Safe(),
-		t:        time.NewTicker(cfg.Node.BackupSeconds),
+		cfg:       cfg,
+		initLoad:  atomic.NewBool(false),
+		path:      filepath.Join(cfg.Path, _nodes),
+		expPath:   filepath.Join(cfg.Path, _expNodes),
+		nodes:     nodeCacher(cfg),
+		hashNodes: hashCacher(cfg),
+		local:     data.Safe(),
+		t:         time.NewTicker(cfg.Node.BackupSeconds),
 	}
 	m.nodePool = mustPool(cfg.Node.PoolMax, m.mainProc)
 	go m.loop()
@@ -355,7 +355,7 @@ func (m *manager) mainProc(v interface{}) {
 			return
 		}
 		for _, ld := range lds {
-			err := m.hashes.Update(ld, func(bytes []byte) (core.Marshaler, error) {
+			err := m.hashNodes.Update(ld, func(bytes []byte) (core.Marshaler, error) {
 				nodes := NewNodes()
 				err := nodes.Unmarshal(bytes)
 				if err != nil {
@@ -368,7 +368,6 @@ func (m *manager) mainProc(v interface{}) {
 				continue
 			}
 			fmt.Println("from:", n.ID(), "list:", ld)
-
 		}
 		//wait something done
 		<-peerDone
@@ -446,7 +445,7 @@ func encodeNode(node core.Node) ([]byte, error) {
 
 // Close ...
 func (m *manager) Close() {
-	m.hashes.Close()
+	m.hashNodes.Close()
 }
 
 // GetNode ...
@@ -533,7 +532,7 @@ func (m *manager) connectMultiAddr(info core.NodeInfo) {
 	if addrs == nil {
 		return
 	}
-	for _, addr := range info.GetAddrs() {
+	for _, addr := range addrs {
 		dialer := mnet.Dialer{
 			Dialer: net.Dialer{
 				Timeout: 3 * time.Second,
@@ -561,7 +560,7 @@ func (m *manager) RegisterAddrCallback(f func(info peer.AddrInfo) error) {
 // ConnRemoteFromHash ...
 func (m *manager) ConnRemoteFromHash(hash string) error {
 	var nodes Nodes
-	err := m.hashes.Load(hash, &nodes)
+	err := m.hashNodes.Load(hash, &nodes)
 	if err != nil {
 		return err
 	}

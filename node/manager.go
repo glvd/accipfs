@@ -111,7 +111,15 @@ func (m *manager) Link(req *core.NodeLinkReq) (*core.NodeLinkResp, error) {
 			fmt.Printf("parse addr(%v) failed(%v)\n", addr, err)
 			continue
 		}
-		dial, err := mnet.Dial(multiaddr)
+		if req.Timeout == 0 {
+			req.Timeout = 5 * time.Second
+		}
+		d := mnet.Dialer{
+			Dialer: net.Dialer{
+				Timeout: req.Timeout,
+			},
+		}
+		dial, err := d.Dial(multiaddr)
 		if err != nil {
 			fmt.Printf("link failed(%v)\n", err)
 			continue
@@ -367,30 +375,34 @@ func (m *manager) mainProc(v interface{}) {
 }
 
 func (m *manager) connectRemoteDataStore(info core.DataStoreInfo) {
+	total := len(info.Addresses)
+	var err error
 	if m.addrCB != nil {
-		var multiAddr []ma.Multiaddr
 		for _, address := range info.Addresses {
 			multiaddr, err := ma.NewMultiaddr(address)
 			if err != nil {
 				log.Infow("failed to connect", "addr", address, "err", err)
 				continue
 			}
-			multiAddr = append(multiAddr, multiaddr)
+
+			dcdd, err := peer.Decode(info.ID)
+			if err != nil {
+				log.Infow("decode id failed", "err", err)
+				return
+			}
+			pai := peer.AddrInfo{
+				ID:    dcdd,
+				Addrs: []ma.Multiaddr{multiaddr},
+			}
+			err = m.addrCB(pai)
+			if err != nil {
+				total = total - 1
+				continue
+			}
 		}
-		dcdd, err := peer.Decode(info.ID)
-		if err != nil {
-			log.Infow("decode id failed", "err", err)
-			return
-		}
-		pai := peer.AddrInfo{
-			ID:    dcdd,
-			Addrs: multiAddr,
-		}
-		err = m.addrCB(pai)
-		if err != nil {
-			log.Infow("addr callback failed", "err", err, "addrinfo", pai)
-			return
-		}
+	}
+	if total <= 0 {
+		log.Infow("addr callback failed", "err", err, "addrinfo", info.Addresses)
 	}
 }
 

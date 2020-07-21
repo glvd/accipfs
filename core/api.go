@@ -2,6 +2,7 @@ package core
 
 import (
 	"github.com/ipfs/interface-go-ipfs-core/options"
+	"time"
 )
 
 // DataStoreReq ...
@@ -132,7 +133,8 @@ type RequestTag int
 
 // NodeLinkReq ...
 type NodeLinkReq struct {
-	Addrs []string
+	Addrs   []string
+	Timeout time.Duration
 }
 
 // NodeLinkResp ...

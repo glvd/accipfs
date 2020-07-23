@@ -5,6 +5,11 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"net"
+	"path/filepath"
+	"sync"
+	"time"
+
 	"github.com/glvd/accipfs/basis"
 	"github.com/glvd/accipfs/config"
 	"github.com/glvd/accipfs/core"
@@ -14,10 +19,6 @@ import (
 	mnet "github.com/multiformats/go-multiaddr-net"
 	"github.com/panjf2000/ants/v2"
 	"go.uber.org/atomic"
-	"net"
-	"path/filepath"
-	"sync"
-	"time"
 )
 
 type manager struct {

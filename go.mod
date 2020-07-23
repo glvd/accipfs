@@ -3,7 +3,10 @@ module github.com/glvd/accipfs
 go 1.13
 
 require (
-	github.com/dgraph-io/badger/v2 v2.0.3
+	github.com/DataDog/zstd v1.4.5 // indirect
+	github.com/dgraph-io/badger/v2 v2.0.1-rc1.0.20200722154215-a3db61c854e1
+	github.com/dgraph-io/ristretto v0.0.3 // indirect
+	github.com/dgryski/go-farm v0.0.0-20200201041132-a6ae2369ad13 // indirect
 	github.com/elastic/gosigar v0.10.5 // indirect
 	github.com/ethereum/go-ethereum v1.9.11
 	github.com/gin-gonic/gin v1.6.2
@@ -11,6 +14,7 @@ require (
 	github.com/goextension/extmap v0.0.1
 	github.com/goextension/io v0.0.0-20191016080154-50dbafac3df3
 	github.com/goextension/tool v0.0.2
+	github.com/golang/protobuf v1.4.2 // indirect
 	github.com/google/uuid v1.1.1
 	github.com/gorilla/rpc v1.2.0
 	github.com/ipfs/go-blockservice v0.1.3 // indirect
@@ -46,9 +50,10 @@ require (
 	go.uber.org/zap v1.15.0
 	golang.org/x/crypto v0.0.0-20200709230013-948cd5f35899 // indirect
 	golang.org/x/lint v0.0.0-20200302205851-738671d3881b // indirect
-	golang.org/x/net v0.0.0-20200226121028-0de0cce0169b
-	golang.org/x/sys v0.0.0-20200625212154-ddb9806d33ae // indirect
+	golang.org/x/net v0.0.0-20200707034311-ab3426394381
+	golang.org/x/sys v0.0.0-20200722175500-76b94024e4b6 // indirect
 	golang.org/x/tools v0.0.0-20200702044944-0cc1aa72b347 // indirect
+	google.golang.org/protobuf v1.25.0 // indirect
 	honnef.co/go/tools v0.0.1-2020.1.4 // indirect
 )
 

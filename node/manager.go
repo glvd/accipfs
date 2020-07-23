@@ -361,7 +361,7 @@ func (m *manager) mainProc(v interface{}) {
 				if err != nil {
 					return nil, err
 				}
-				nodes.n[ld] = true
+				nodes.n[n.ID()] = true
 				return nodes, nil
 			})
 			if err != nil {

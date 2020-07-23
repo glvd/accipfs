@@ -334,9 +334,8 @@ func (m *manager) mainProc(v interface{}) {
 		if err != nil {
 			log.Errorw("sotre nodes failed", "err", err)
 		}
+		m.connectRemoteDataStore(info.DataStore)
 	}
-
-	m.connectRemoteDataStore(info.DataStore)
 
 	if !n.IsClosed() {
 		fmt.Println("node added:", n.ID())

@@ -503,7 +503,18 @@ func (m *manager) nodeGC() {
 		return
 	}
 	defer m.gc.Store(false)
-	m.connectNodes.Range(func(key, value interface{}) bool {
+	m.connectNodes.Range(func(key, value interface{}) (deleted bool) {
+		defer func() {
+			keyStr, b := key.(string)
+			if !b {
+				return
+			}
+			if deleted {
+				m.local.Update(func(data *core.LocalData) {
+					delete(data.Nodes, keyStr)
+				})
+			}
+		}()
 		v, b := value.(core.Node)
 		if !b {
 			m.connectNodes.Delete(key)
@@ -516,8 +527,10 @@ func (m *manager) nodeGC() {
 		}
 		if ping != "pong" {
 			m.connectNodes.Delete(key)
+
 			return true
 		}
+
 		return true
 	})
 

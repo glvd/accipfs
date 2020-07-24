@@ -341,14 +341,16 @@ func (m *manager) mainProc(v interface{}) {
 	//get remote node info
 	info, err := n.GetInfo()
 	if err == nil {
-		m.local.Update(func(data *core.LocalData) {
-			data.Nodes[info.ID] = info
-		})
-		//err := m.nodes.Store(info.ID, info)
-		//if err != nil {
-		//	log.Errorw("sotre nodes failed", "err", err)
-		//}
-		m.connectRemoteDataStore(info.DataStore)
+		if m.local.Data().Node.ID != info.ID {
+			m.local.Update(func(data *core.LocalData) {
+				data.Nodes[info.ID] = info
+			})
+			//err := m.nodes.Store(info.ID, info)
+			//if err != nil {
+			//	log.Errorw("sotre nodes failed", "err", err)
+			//}
+			m.connectRemoteDataStore(info.DataStore)
+		}
 	}
 
 	if !n.IsClosed() {
@@ -390,9 +392,6 @@ func (m *manager) mainProc(v interface{}) {
 }
 
 func (m *manager) connectRemoteDataStore(info core.DataStoreInfo) {
-	if m.local.Data().Node.ID == info.ID {
-		return
-	}
 	timeout, cancelFunc := context.WithTimeout(context.TODO(), time.Second*30)
 	defer cancelFunc()
 

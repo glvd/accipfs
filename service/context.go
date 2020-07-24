@@ -12,7 +12,6 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/gin-gonic/gin"
 	"github.com/glvd/accipfs/config"
 	"github.com/glvd/accipfs/core"
@@ -321,31 +320,31 @@ func (c *APIContext) debug(ctx *gin.Context) {
 }
 
 func (c *APIContext) query(ctx *gin.Context) {
-	var err error
-	j := struct {
-		No string
-	}{}
-	err = ctx.BindJSON(&j)
-	if err != nil {
-		JSON(ctx, "", fmt.Errorf("query failed(%w)", err))
-		return
-	}
-	dTag, e := c.c.DTag()
-	if e != nil {
-		JSON(ctx, "", fmt.Errorf("query failed(%w)", e))
-		return
-	}
-	message, e := dTag.GetTagMessage(&bind.CallOpts{Pending: true}, "video", j.No)
-	if e != nil {
-		JSON(ctx, "", fmt.Errorf("query failed(%w)", e))
-		return
-	}
-
-	if message.Size.Int64() > 0 {
-		JSON(ctx, message.Value[0], nil)
-		return
-	}
-	JSON(ctx, "", nil)
+	//var err error
+	//j := struct {
+	//	No string
+	//}{}
+	//err = ctx.BindJSON(&j)
+	//if err != nil {
+	//	JSON(ctx, "", fmt.Errorf("query failed(%w)", err))
+	//	return
+	//}
+	//dTag, e := c.c.DTag()
+	//if e != nil {
+	//	JSON(ctx, "", fmt.Errorf("query failed(%w)", e))
+	//	return
+	//}
+	//message, e := dTag.GetTagMessage(&bind.CallOpts{Pending: true}, "video", j.No)
+	//if e != nil {
+	//	JSON(ctx, "", fmt.Errorf("query failed(%w)", e))
+	//	return
+	//}
+	//
+	//if message.Size.Int64() > 0 {
+	//	JSON(ctx, message.Value[0], nil)
+	//	return
+	//}
+	//JSON(ctx, "", nil)
 }
 
 func (c *APIContext) nodeLink() func(ctx *gin.Context) {

@@ -270,6 +270,7 @@ func (m *manager) loop() {
 	}
 	for {
 		<-m.t.C
+		fmt.Println("store new node")
 		if m.ts != m.currentTS {
 			if err := m.Store(); err != nil {
 				continue

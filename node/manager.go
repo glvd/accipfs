@@ -341,7 +341,7 @@ func (m *manager) mainProc(v interface{}) {
 	//get remote node info
 	info, err := n.GetInfo()
 	if err == nil {
-		if m.local.Data().Node.ID != info.ID {
+		if info.ID != m.cfg.Identity {
 			m.local.Update(func(data *core.LocalData) {
 				data.Nodes[info.ID] = info
 			})
@@ -554,6 +554,7 @@ func (m *manager) connectMultiAddr(info core.NodeInfo) error {
 	if info.ID == m.cfg.Identity {
 		return nil
 	}
+	log.Infow("info", "id", info.ID)
 	_, ok := m.connectNodes.Load(info.ID)
 	if ok {
 		return nil

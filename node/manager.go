@@ -203,6 +203,7 @@ func (m *manager) Load() error {
 		err := json.Unmarshal([]byte(value), &addrInfo)
 		if err != nil {
 			log.Errorw("load addr info failed", "err", err)
+			return true
 		}
 		for multiaddr := range addrInfo.Addrs {
 			fmt.Println("load node from address:", multiaddr.String())

@@ -198,14 +198,14 @@ func (m *manager) Local() core.SafeLocalData {
 // Load ...
 func (m *manager) Load() error {
 	m.nodes.Range(func(hash string, value string) bool {
-		log.Infow("load node", "hash", hash, "value", value)
-		var addrInfo core.AddrInfo
-		err := json.Unmarshal([]byte(value), &addrInfo)
+		log.Infow("range node", "hash", hash, "value", value)
+		var ninfo core.NodeInfo
+		err := json.Unmarshal([]byte(value), &ninfo)
 		if err != nil {
 			log.Errorw("load addr info failed", "err", err)
 			return true
 		}
-		for multiaddr := range addrInfo.Addrs {
+		for multiaddr := range ninfo.Addrs {
 			fmt.Println("load node from address:", multiaddr.String())
 			connectNode, err := ConnectNode(multiaddr, 0, m.local)
 			if err != nil {
@@ -336,10 +336,10 @@ func (m *manager) mainProc(v interface{}) {
 		m.local.Update(func(data *core.LocalData) {
 			data.Nodes[info.ID] = info
 		})
-		err := m.nodes.Store(info.ID, info)
-		if err != nil {
-			log.Errorw("sotre nodes failed", "err", err)
-		}
+		//err := m.nodes.Store(info.ID, info)
+		//if err != nil {
+		//	log.Errorw("sotre nodes failed", "err", err)
+		//}
 		m.connectRemoteDataStore(info.DataStore)
 	}
 
@@ -450,6 +450,7 @@ func encodeNode(node core.Node) ([]byte, error) {
 
 // Close ...
 func (m *manager) Close() {
+	m.nodes.Close()
 	m.hashNodes.Close()
 }
 

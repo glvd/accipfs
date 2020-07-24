@@ -54,7 +54,7 @@ func (l *BustLinker) Start() {
 	err := l.afterStart()
 	log.Infow("after start info", "err", err)
 	err = l.manager.Load()
-	log.Infow("load node", "err", err)
+	log.Infow("manager load node", "err", err)
 	//start handle
 	go l.listener.Listen()
 

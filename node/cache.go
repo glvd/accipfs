@@ -157,7 +157,7 @@ func (c *baseCache) Load(hash string, data core.Unmarshaler) error {
 
 // Range ...
 func (c *baseCache) Range(f func(key, value string) bool) {
-	c.db.View(func(txn *badger.Txn) error {
+	err := c.db.View(func(txn *badger.Txn) error {
 		iter := txn.NewIterator(c.iteratorOpts)
 		defer iter.Close()
 		var item *badger.Item
@@ -167,7 +167,7 @@ func (c *baseCache) Range(f func(key, value string) bool) {
 				return nil
 			}
 			item = iter.Item()
-			return item.Value(func(v []byte) error {
+			err := item.Value(func(v []byte) error {
 				key := item.Key()
 				val, err := item.ValueCopy(v)
 				if err != nil {
@@ -176,9 +176,13 @@ func (c *baseCache) Range(f func(key, value string) bool) {
 				continueFlag = f(string(key), string(val))
 				return nil
 			})
+			if err != nil {
+				return err
+			}
 		}
 		return nil
 	})
+	log.Infow("range data", "err", err)
 }
 
 // Close ...

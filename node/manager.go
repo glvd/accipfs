@@ -198,6 +198,7 @@ func (m *manager) Local() core.SafeLocalData {
 // Load ...
 func (m *manager) Load() error {
 	m.nodes.Range(func(hash string, value string) bool {
+		log.Infow("load node", "hash", hash, "value", value)
 		var addrInfo core.AddrInfo
 		err := json.Unmarshal([]byte(value), &addrInfo)
 		if err != nil {

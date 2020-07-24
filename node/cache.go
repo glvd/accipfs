@@ -2,12 +2,12 @@ package node
 
 import (
 	"encoding/json"
-	"os"
-	"path/filepath"
-
 	"github.com/dgraph-io/badger/v2"
+	"github.com/dgraph-io/badger/v2/options"
 	"github.com/glvd/accipfs/config"
 	"github.com/glvd/accipfs/core"
+	"os"
+	"path/filepath"
 )
 
 const (
@@ -78,7 +78,15 @@ func hashCacher(cfg *config.Config) Cacher {
 		}
 	}
 	opts := badger.DefaultOptions(path)
+	//opts.GcDiscardRatio = 0.2
+	//opts.GcInterval = 15 * time.Minute
+	//opts.GcSleep = 10 * time.Second
+	//opts.Options = badger.LSMOnlyOptions("")
+	opts.CompactL0OnClose = false
 	opts.Truncate = true
+	opts.ValueLogLoadingMode = options.FileIO
+	opts.TableLoadingMode = options.MemoryMap
+	opts.MaxTableSize = 16 << 20
 	db, err := badger.Open(opts)
 	if err != nil {
 		panic(err)
@@ -96,6 +104,7 @@ func hashCacher(cfg *config.Config) Cacher {
 
 // Update ...
 func (c *baseCache) Update(hash string, fn func(bytes []byte) (core.Marshaler, error)) error {
+	defer c.db.RunValueLogGC(0.7)
 	return c.db.Update(
 		func(txn *badger.Txn) error {
 			item, err := txn.Get([]byte(hash))

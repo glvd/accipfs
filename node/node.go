@@ -304,11 +304,11 @@ func (n *node) SendInfoRequest() (core.NodeInfo, error) {
 	msg, b := n.Connection.SendCustomDataOnWait(InfoRequest, nil)
 	var nodeInfo core.NodeInfo
 	if b && msg.DataLength != 0 {
-		fmt.Printf("msg data:%v\n", string(msg.Data))
 		err := json.Unmarshal(msg.Data, &nodeInfo)
 		if err != nil {
 			return nodeInfo, err
 		}
+		//fmt.Printf("msg data id:%v\n", nodeInfo.ID)
 		return nodeInfo, nil
 	}
 	n.remoteNodeInfo = &nodeInfo

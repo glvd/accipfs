@@ -204,6 +204,7 @@ func (m *manager) Load() error {
 			log.Errorw("load addr info failed", "err", err)
 		}
 		for multiaddr := range addrInfo.Addrs {
+			fmt.Println("load node from address:", multiaddr.String())
 			connectNode, err := ConnectNode(multiaddr, 0, m.local)
 			if err != nil {
 				continue
@@ -316,13 +317,15 @@ func (m *manager) mainProc(v interface{}) {
 	log.Infow("new connection", "new", n.ID(), "isload", loaded)
 	if loaded {
 		nbase := old.(core.Node)
-		if n.Addrs() != nil {
-			nbase.AppendAddr(n.Addrs()...)
+		if !nbase.IsClosed() {
+			if n.Addrs() != nil {
+				nbase.AppendAddr(n.Addrs()...)
+			}
+			//wait client get base info
+			time.Sleep(3 * time.Second)
+			_ = n.SendConnected()
+			return
 		}
-		//wait client get base info
-		time.Sleep(3 * time.Second)
-		_ = n.SendConnected()
-		return
 	}
 	//get remote node info
 	info, err := n.GetInfo()

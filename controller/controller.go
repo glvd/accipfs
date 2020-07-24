@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/glvd/accipfs/config"
-	"github.com/glvd/accipfs/contract/dtag"
+	//"github.com/glvd/accipfs/contract/dtag"
 	"github.com/glvd/accipfs/core"
 	"github.com/libp2p/go-libp2p-core/peer"
 	"go.uber.org/atomic"
@@ -144,11 +144,6 @@ func (c *Controller) infoNode() *nodeBinETH {
 // ID ...
 func (c *Controller) ID(ctx context.Context) (*core.DataStoreInfo, error) {
 	return c.dataNode().ID(ctx)
-}
-
-// DTag ...
-func (c *Controller) DTag() (*dtag.DTag, error) {
-	return c.infoNode().DTag()
 }
 
 // DataStoreAPI ...

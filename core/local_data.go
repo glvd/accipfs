@@ -24,8 +24,8 @@ type safeLocalData struct {
 type LocalData struct {
 	Initialized bool
 	Node        NodeInfo
-	Nodes       map[string]NodeInfo
-	LDs         map[string]uint8 //ipfs linked data
+	Nodes       map[string]NodeInfo //readonly
+	LDs         map[string]uint8    //readonly:ipfs linked data
 	Addrs       []string
 	LastUpdate  int64
 }

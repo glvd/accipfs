@@ -95,6 +95,7 @@ func (m *manager) Store() (err error) {
 		}
 		err := m.nodes.Store(keyk, valv)
 		if err != nil {
+			log.Errorw("failed store", "err", err)
 			return false
 		}
 		fmt.Println("node", keyk, "was stored")

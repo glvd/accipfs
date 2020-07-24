@@ -262,7 +262,7 @@ func (m *manager) Push(node core.Node) {
 
 // save nodes
 func (m *manager) loop() {
-	if m.initLoad.Load() {
+	if m.initLoad.CAS(false, true) {
 		err := m.Load()
 		if err != nil {
 			log.Errorw("load node failed", "err", err)

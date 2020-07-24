@@ -24,6 +24,7 @@ import (
 type manager struct {
 	scdt.Listener
 	initLoad        *atomic.Bool
+	loopOnce        *sync.Once
 	cfg             *config.Config
 	t               *time.Ticker
 	currentTS       int64
@@ -54,6 +55,7 @@ func InitManager(cfg *config.Config) (core.NodeManager, error) {
 	data := core.DefaultLocalData()
 	m := &manager{
 		cfg:       cfg,
+		loopOnce:  &sync.Once{},
 		initLoad:  atomic.NewBool(false),
 		path:      filepath.Join(cfg.Path, _nodes),
 		expPath:   filepath.Join(cfg.Path, _expNodes),
@@ -216,6 +218,11 @@ func (m *manager) Load() error {
 		}
 		return true
 	})
+	//start loop after first load
+	m.loopOnce.Do(func() {
+		go m.loop()
+	})
+
 	return nil
 }
 

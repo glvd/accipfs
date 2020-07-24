@@ -78,14 +78,11 @@ func hashCacher(cfg *config.Config) Cacher {
 		}
 	}
 	opts := badger.DefaultOptions(path)
-	//opts.GcDiscardRatio = 0.2
-	//opts.GcInterval = 15 * time.Minute
-	//opts.GcSleep = 10 * time.Second
-	//opts.Options = badger.LSMOnlyOptions("")
 	opts.CompactL0OnClose = false
 	opts.Truncate = true
 	opts.ValueLogLoadingMode = options.FileIO
 	opts.TableLoadingMode = options.MemoryMap
+	//opts.ValueLogFileSize = 1<<28 - 1
 	opts.MaxTableSize = 16 << 20
 	db, err := badger.Open(opts)
 	if err != nil {
@@ -205,7 +202,12 @@ func nodeCacher(cfg *config.Config) Cacher {
 		}
 	}
 	opts := badger.DefaultOptions(path)
+	opts.CompactL0OnClose = false
 	opts.Truncate = true
+	opts.ValueLogLoadingMode = options.FileIO
+	opts.TableLoadingMode = options.MemoryMap
+	//opts.ValueLogFileSize = 1<<28 - 1
+	opts.MaxTableSize = 16 << 20
 	db, err := badger.Open(opts)
 	if err != nil {
 		panic(err)

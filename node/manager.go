@@ -520,17 +520,17 @@ func (m *manager) nodeGC() {
 
 }
 
-func (m *manager) connectMultiAddr(info core.NodeInfo) {
+func (m *manager) connectMultiAddr(info core.NodeInfo) error {
 	if info.ID == m.cfg.Identity {
-		return
+		return nil
 	}
 	_, ok := m.connectNodes.Load(info.ID)
 	if ok {
-		return
+		return nil
 	}
 	addrs := info.GetAddrs()
 	if addrs == nil {
-		return
+		return nil
 	}
 	for _, addr := range addrs {
 		dialer := mnet.Dialer{
@@ -541,15 +541,16 @@ func (m *manager) connectMultiAddr(info core.NodeInfo) {
 		dial, err := dialer.Dial(addr)
 		if err != nil {
 			fmt.Printf("link failed(%v)\n", err)
-			continue
+			return err
 		}
 		fmt.Printf("link success(%v)\n", addr)
 		_, err = m.newConn(dial)
 		if err != nil {
-			return
+			return err
 		}
-		return
+		return nil
 	}
+	return errors.New("no link connect")
 }
 
 // RegisterAddrCallback ...

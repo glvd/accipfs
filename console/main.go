@@ -3,14 +3,17 @@ package main
 
 import (
 	"fmt"
+	"net/http"
+	_ "net/http/pprof"
+	"os"
+	"os/signal"
+	"path/filepath"
+
 	"github.com/glvd/accipfs"
 	"github.com/glvd/accipfs/basis"
 	"github.com/glvd/accipfs/config"
 	"github.com/glvd/accipfs/log"
 	"github.com/spf13/cobra"
-	"os"
-	"os/signal"
-	"path/filepath"
 )
 
 // APP ...
@@ -26,8 +29,15 @@ var rootCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 	},
 }
+var _pprofIP = "0.0.0.0:6060"
 
 func main() {
+	go func() {
+		if err := http.ListenAndServe(_pprofIP, nil); err != nil {
+			fmt.Printf("start pprof failed on %s\n", _pprofIP)
+		}
+	}()
+
 	path, err := filepath.Abs(accipfs.DefaultPath)
 	if err != nil {
 		path = basis.CurrentDir()

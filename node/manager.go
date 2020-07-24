@@ -23,7 +23,7 @@ import (
 
 type manager struct {
 	scdt.Listener
-	initLoad        *atomic.Bool
+	//initLoad        *atomic.Bool
 	loopOnce        *sync.Once
 	cfg             *config.Config
 	t               *time.Ticker
@@ -54,9 +54,9 @@ func InitManager(cfg *config.Config) (core.NodeManager, error) {
 	}
 	data := core.DefaultLocalData()
 	m := &manager{
-		cfg:       cfg,
-		loopOnce:  &sync.Once{},
-		initLoad:  atomic.NewBool(false),
+		cfg:      cfg,
+		loopOnce: &sync.Once{},
+		//initLoad:  atomic.NewBool(false),
 		path:      filepath.Join(cfg.Path, _nodes),
 		expPath:   filepath.Join(cfg.Path, _expNodes),
 		nodes:     nodeCacher(cfg),
@@ -202,7 +202,8 @@ func (m *manager) Load() error {
 	m.nodes.Range(func(hash string, value string) bool {
 		log.Infow("range node", "hash", hash, "value", value)
 		var ninfo core.NodeInfo
-		err := json.Unmarshal([]byte(value), &ninfo)
+		err := ninfo.Unmarshal([]byte(value))
+		//err := json.Unmarshal([]byte(value), &ninfo)
 		if err != nil {
 			log.Errorw("load addr info failed", "err", err)
 			return true
@@ -271,12 +272,12 @@ func (m *manager) Push(node core.Node) {
 
 // save nodes
 func (m *manager) loop() {
-	if m.initLoad.CAS(false, true) {
-		err := m.Load()
-		if err != nil {
-			log.Errorw("load node failed", "err", err)
-		}
-	}
+	//if m.initLoad.CAS(false, true) {
+	//	err := m.Load()
+	//	if err != nil {
+	//		log.Errorw("load node failed", "err", err)
+	//	}
+	//}
 	for {
 		<-m.t.C
 		fmt.Println("store new node")
@@ -389,8 +390,12 @@ func (m *manager) mainProc(v interface{}) {
 }
 
 func (m *manager) connectRemoteDataStore(info core.DataStoreInfo) {
+	if m.local.Data().Node.ID == info.ID {
+		return
+	}
 	timeout, cancelFunc := context.WithTimeout(context.TODO(), time.Second*30)
 	defer cancelFunc()
+
 	if m.addrCB != nil {
 		addresses, err := basis.ParseAddresses(timeout, info.Addresses)
 		if err != nil {

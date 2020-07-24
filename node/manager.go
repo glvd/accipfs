@@ -49,7 +49,7 @@ var _ core.NodeManager = &manager{}
 // InitManager ...
 func InitManager(cfg *config.Config) (core.NodeManager, error) {
 	if cfg.Node.BackupSeconds == 0 {
-		cfg.Node.BackupSeconds = 30 * time.Second
+		cfg.Node.BackupSeconds = 30
 	}
 	data := core.DefaultLocalData()
 	m := &manager{
@@ -60,11 +60,9 @@ func InitManager(cfg *config.Config) (core.NodeManager, error) {
 		nodes:     nodeCacher(cfg),
 		hashNodes: hashCacher(cfg),
 		local:     data.Safe(),
-		t:         time.NewTicker(cfg.Node.BackupSeconds),
+		t:         time.NewTicker(cfg.Node.BackupSeconds * time.Second),
 	}
 	m.nodePool = mustPool(cfg.Node.PoolMax, m.mainProc)
-	go m.loop()
-
 	return m, nil
 }
 
@@ -89,6 +87,7 @@ func (m *manager) Store() (err error) {
 	m.connectNodes.Range(func(key, value interface{}) bool {
 		keyk, keyb := key.(string)
 		valv, valb := value.(core.Marshaler)
+		log.Infow("store", "key", keyk, "keyOK", keyb, "value", valv, "valOK", valb)
 		if !valb || !keyb {
 			return true
 		}
@@ -96,6 +95,7 @@ func (m *manager) Store() (err error) {
 		if err != nil {
 			return false
 		}
+		fmt.Println("node", keyk, "was stored")
 		return true
 	})
 	//return the last err
@@ -309,7 +309,7 @@ func (m *manager) mainProc(v interface{}) {
 	id := n.ID()
 	fmt.Println("user connect:", id)
 	if id == "" {
-		//wait client get base info
+		//wait remote client get base info
 		time.Sleep(3 * time.Second)
 		_ = n.SendConnected()
 		return
@@ -322,7 +322,7 @@ func (m *manager) mainProc(v interface{}) {
 			if n.Addrs() != nil {
 				nbase.AppendAddr(n.Addrs()...)
 			}
-			//wait client get base info
+			//wait remote client get base info
 			time.Sleep(3 * time.Second)
 			_ = n.SendConnected()
 			return
@@ -380,7 +380,6 @@ func (m *manager) mainProc(v interface{}) {
 }
 
 func (m *manager) connectRemoteDataStore(info core.DataStoreInfo) {
-
 	timeout, cancelFunc := context.WithTimeout(context.TODO(), time.Second*30)
 	defer cancelFunc()
 	if m.addrCB != nil {

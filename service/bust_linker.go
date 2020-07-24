@@ -53,7 +53,8 @@ func (l *BustLinker) Start() {
 	l.controller.WaitAllReady()
 	err := l.afterStart()
 	log.Infow("after start info", "err", err)
-
+	err = l.manager.Load()
+	log.Infow("load node", "err", err)
 	//start handle
 	go l.listener.Listen()
 
@@ -78,7 +79,6 @@ func (l *BustLinker) Stop() {
 }
 
 func (l *BustLinker) afterStart() error {
-
 	l.manager.Local().Update(func(data *core.LocalData) {
 		addr, err := getLocalAddr(l.cfg.Node.Port)
 		if err != nil {

@@ -307,23 +307,27 @@ func (m *manager) mainProc(v interface{}) {
 		return
 	}
 	pushed := false
-	defer func() {
-		fmt.Println("id", n.ID(), "was exit")
-		//wait client close itself
-		time.Sleep(500 * time.Millisecond)
-		n.Close()
-		if pushed {
-			m.connectNodes.Delete(n.ID())
-		}
-	}()
 	id := n.ID()
 	fmt.Println("user connect:", id)
+
 	if id == "" {
 		//wait remote client get base info
 		time.Sleep(3 * time.Second)
 		_ = n.SendConnected()
 		return
 	}
+	defer func() {
+		fmt.Println("id", id, "was exit")
+		//wait client close itself
+		time.Sleep(500 * time.Millisecond)
+		n.Close()
+		if pushed {
+			m.connectNodes.Delete(id)
+			m.local.Update(func(data *core.LocalData) {
+				delete(data.Nodes, id)
+			})
+		}
+	}()
 	old, loaded := m.connectNodes.Load(id)
 	log.Infow("new connection", "new", n.ID(), "isload", loaded)
 	if loaded {

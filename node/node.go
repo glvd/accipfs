@@ -308,7 +308,7 @@ func (n *node) SendInfoRequest() (core.NodeInfo, error) {
 		if err != nil {
 			return nodeInfo, err
 		}
-		//fmt.Printf("msg data id:%v\n", nodeInfo.ID)
+		log.Debugw("msg data", "id", n.ID(), "info", msg.Data)
 		return nodeInfo, nil
 	}
 	n.remoteNodeInfo = &nodeInfo
@@ -342,7 +342,7 @@ func (n *node) RecvInfoRequest(message *scdt.Message) ([]byte, bool, error) {
 		ProtocolVersion: "", //todo
 	}
 	json := nodeInfo.JSON()
-	log.Infow("node info", "json", json)
+	log.Debugw("node info", "json", json)
 	return []byte(json), true, nil
 }
 

@@ -88,7 +88,7 @@ func (c *client) host() string {
 	if c.cfg.UseTLS {
 		prefix = "https://"
 	}
-	return strings.Join([]string{prefix, "127.0.0.1:", strconv.Itoa(c.cfg.Port), "/api/", c.cfg.Version}, "")
+	return strings.Join([]string{prefix, "127.0.0.1:", strconv.Itoa(c.cfg.API.Port), "/api/", c.cfg.API.Version}, "")
 }
 
 // RequestURL ...

@@ -7,14 +7,7 @@ import (
 )
 
 func init() {
-	DefaultClient = New(&config.APIConfig{
-		Port:        10808,
-		Version:     "",
-		UseTLS:      false,
-		TLS:         config.TLSCertificate{},
-		Certificate: nil,
-		Timeout:     30,
-	})
+	DefaultClient = New(config.Default())
 }
 
 func TestDataStorePinLs(t *testing.T) {

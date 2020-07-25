@@ -241,6 +241,11 @@ func (c Config) rpcAddr() string {
 	return fmt.Sprintf("http://127.0.0.1:%d/rpc", c.Node.Port)
 }
 
+// IPFSAPIAddr ...
+func (c Config) IPFSAPIAddr() string {
+	return fmt.Sprintf(_ipfsAddr, Global().IPFS.API)
+}
+
 func currentPath() string {
 	dir, e := os.Getwd()
 	if e != nil {
@@ -281,7 +286,8 @@ func ETHAddr() string {
 
 // IPFSAPIAddr ...
 func IPFSAPIAddr() string {
-	return fmt.Sprintf(_ipfsAddr, Global().IPFS.API)
+	return Global().IPFSAPIAddr()
+
 }
 
 // IPFSAPIURL ...

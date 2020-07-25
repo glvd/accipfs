@@ -21,7 +21,7 @@ import (
 var DefaultClient core.API
 
 type client struct {
-	cfg *config.APIConfig
+	cfg *config.Config
 	ds  *httpapi.HttpApi
 	cli *http.Client
 }
@@ -61,14 +61,14 @@ func responseDecoder(rc io.ReadCloser, resp interface{}) error {
 
 // InitGlobalClient ...
 func InitGlobalClient(cfg *config.Config) {
-	DefaultClient = New(&cfg.API)
+	DefaultClient = New(cfg)
 }
 
 // New ...
-func New(cfg *config.APIConfig) core.API {
+func New(cfg *config.Config) core.API {
 	c := &http.Client{}
-	c.Timeout = cfg.Timeout * time.Minute
-	ma, err := multiaddr.NewMultiaddr(config.IPFSAPIAddr())
+	c.Timeout = cfg.API.Timeout * time.Second
+	ma, err := multiaddr.NewMultiaddr(cfg.IPFSAPIAddr())
 	if err != nil {
 		panic(err)
 	}

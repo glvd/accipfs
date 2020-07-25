@@ -18,14 +18,15 @@ require (
 	github.com/google/uuid v1.1.1
 	github.com/gorilla/rpc v1.2.0
 	github.com/ipfs/go-blockservice v0.1.3 // indirect
-	github.com/ipfs/go-cid v0.0.6 // indirect
+	github.com/ipfs/go-cid v0.0.6
 	github.com/ipfs/go-ipfs-blockstore v1.0.0 // indirect
 	github.com/ipfs/go-ipfs-cmds v0.2.9 // indirect
 	github.com/ipfs/go-ipfs-config v0.8.0
 	github.com/ipfs/go-ipfs-files v0.0.8
 	github.com/ipfs/go-ipfs-http-client v0.0.5
 	github.com/ipfs/go-ipfs-util v0.0.2 // indirect
-	github.com/ipfs/go-ipld-cbor v0.0.4 // indirect
+	github.com/ipfs/go-ipld-cbor v0.0.4
+	github.com/ipfs/go-ipld-format v0.2.0
 	github.com/ipfs/go-log/v2 v2.1.1 // indirect
 	github.com/ipfs/go-merkledag v0.3.2 // indirect
 	github.com/ipfs/interface-go-ipfs-core v0.3.0

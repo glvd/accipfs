@@ -82,7 +82,6 @@ func hashCacher(cfg *config.Config) Cacher {
 	opts.Truncate = true
 	opts.ValueLogLoadingMode = options.FileIO
 	opts.TableLoadingMode = options.MemoryMap
-	//opts.ValueLogFileSize = 1<<28 - 1
 	opts.MaxTableSize = 16 << 20
 	db, err := badger.Open(opts)
 	if err != nil {
@@ -101,7 +100,6 @@ func hashCacher(cfg *config.Config) Cacher {
 
 // Update ...
 func (c *baseCache) Update(hash string, fn func(bytes []byte) (core.Marshaler, error)) error {
-	defer c.db.RunValueLogGC(0.7)
 	return c.db.Update(
 		func(txn *badger.Txn) error {
 			item, err := txn.Get([]byte(hash))

@@ -392,7 +392,7 @@ func (m *manager) mainProc(v interface{}) {
 		}
 		//wait something done
 		<-peerDone
-		time.Sleep(5 * time.Second)
+		time.Sleep(30 * time.Second)
 	}
 }
 
@@ -427,9 +427,9 @@ func (m *manager) syncPeers(n core.Node) <-chan bool {
 		if err != nil {
 			done <- false
 		}
-		for _, peer := range peers {
-			if len(peer.Addrs) != 0 {
-				m.connectMultiAddr(peer)
+		for _, p := range peers {
+			if len(p.Addrs) != 0 {
+				_ = m.connectMultiAddr(p)
 			}
 		}
 		done <- true

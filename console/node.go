@@ -44,7 +44,7 @@ func nodeConnectCmd() *cobra.Command {
 			return
 		},
 	}
-	connect.Flags().BoolVarP(&byid, "byid", "i", false, "connect to node")
+	connect.Flags().BoolVarP(&byid, "byid", "i", false, "connect to node by id")
 	return connect
 }
 

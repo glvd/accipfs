@@ -142,7 +142,7 @@ func (m *manager) Link(req *core.NodeLinkReq) (*core.NodeLinkResp, error) {
 				}
 				conn, err := m.newConn(dial)
 				if err != nil {
-					return &core.NodeLinkResp{}, err
+					continue
 				}
 				id := conn.ID()
 				getNode, b := m.GetNode(id)
@@ -152,6 +152,7 @@ func (m *manager) Link(req *core.NodeLinkReq) (*core.NodeLinkResp, error) {
 					//use conn
 				}
 				infos = append(infos, info)
+				break
 			}
 		}
 	} else {

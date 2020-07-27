@@ -88,15 +88,20 @@ func mustPool(size int, pf func(v interface{})) *ants.PoolWithFunc {
 func (m *manager) Store() (err error) {
 	m.connectNodes.Range(func(key, value interface{}) bool {
 		keyk, keyb := key.(string)
-		valv, valb := value.(core.Marshaler)
+		valv, valb := value.(core.Node)
 		log.Infow("store", "key", keyk, "keyOK", keyb, "value", valv, "valOK", valb)
 		if !valb || !keyb || keyk == "" {
 			return true
 		}
-		err := m.nodes.Store(keyk, valv)
+		info, err := valv.GetInfo()
+		if err != nil {
+			return true
+		}
+
+		err = m.nodes.Store(keyk, info)
 		if err != nil {
 			log.Errorw("failed store", "err", err)
-			return false
+			return true
 		}
 		fmt.Println("node", keyk, "was stored")
 		return true
@@ -392,13 +397,11 @@ func (m *manager) mainProc(v interface{}) {
 		}
 	}
 
-	if !n.IsClosed() {
+	for !n.IsClosed() {
 		fmt.Println("node added:", n.ID())
 		pushed = true
 		m.Push(n)
-	}
 
-	for !n.IsClosed() {
 		peerDone := m.syncPeers(n)
 		lds, err := n.LDs()
 		if err != nil {

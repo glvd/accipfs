@@ -128,6 +128,7 @@ func (m *manager) Link(req *core.NodeLinkReq) (*core.NodeLinkResp, error) {
 				continue
 			}
 			for _, multiaddr := range info.GetAddrs() {
+				fmt.Println("connect to", multiaddr.String())
 				dial, err := d.Dial(multiaddr)
 				if err != nil {
 					fmt.Printf("link failed(%v)\n", err)
@@ -154,6 +155,7 @@ func (m *manager) Link(req *core.NodeLinkReq) (*core.NodeLinkResp, error) {
 				fmt.Printf("parse addr(%v) failed(%v)\n", addr, err)
 				continue
 			}
+			fmt.Println("connect to", multiaddr.String())
 			dial, err := d.Dial(multiaddr)
 			if err != nil {
 				fmt.Printf("link failed(%v)\n", err)

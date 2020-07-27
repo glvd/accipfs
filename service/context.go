@@ -148,10 +148,17 @@ func getLocalAddr(port int) (maddrs []string, err error) {
 	}
 	for i := range addrs {
 		if ipnet, ok := addrs[i].(*net.IPNet); ok && !ipnet.IP.IsLoopback() {
+
 			var addr string
 			if ipv4 := ipnet.IP.To4(); ipv4 != nil {
+				if ipv4.Equal(net.ParseIP("127.0.0.1")) {
+					continue
+				}
 				addr = fmt.Sprintf("/ip4/%s/tcp/%d", ipv4.String(), port)
 			} else if ipv6 := ipnet.IP.To16(); ipv6 != nil {
+				if ipv6.Equal(net.ParseIP("::1")) {
+					continue
+				}
 				addr = fmt.Sprintf("/ip6/%s/tcp/%d", ipv6.String(), port)
 			}
 			maddrs = append(maddrs, addr)

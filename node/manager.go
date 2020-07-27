@@ -148,7 +148,6 @@ func (m *manager) Link(req *core.NodeLinkReq) (*core.NodeLinkResp, error) {
 			}
 		}
 	} else {
-
 		for _, addr := range req.Addrs {
 			multiaddr, err := ma.NewMultiaddr(addr)
 			if err != nil {

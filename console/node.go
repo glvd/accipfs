@@ -31,7 +31,7 @@ func nodeConnectCmd() *cobra.Command {
 			client.InitGlobalClient(&cfg)
 
 			fmt.Printf("connect to [%v]\n", args)
-			req := &core.NodeLinkReq{Addrs: args}
+			req := &core.NodeLinkReq{Addrs: args, ByID: byid, Names: args}
 			resp, err := client.NodeLink(req)
 			if err != nil {
 				fmt.Printf("connect error: %v\n", err)

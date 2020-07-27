@@ -90,7 +90,7 @@ func (m *manager) Store() (err error) {
 		keyk, keyb := key.(string)
 		valv, valb := value.(core.Marshaler)
 		log.Infow("store", "key", keyk, "keyOK", keyb, "value", valv, "valOK", valb)
-		if !valb || !keyb {
+		if !valb || !keyb || keyk == "" {
 			return true
 		}
 		err := m.nodes.Store(keyk, valv)
@@ -127,7 +127,8 @@ func (m *manager) Link(req *core.NodeLinkReq) (*core.NodeLinkResp, error) {
 			if err != nil {
 				continue
 			}
-			for _, multiaddr := range info.GetAddrs() {
+			log.Infow("info", "info", info.JSON())
+			for _, multiaddr := range info.AddrInfo.GetAddrs() {
 				fmt.Println("connect to", multiaddr.String())
 				dial, err := d.Dial(multiaddr)
 				if err != nil {
@@ -377,6 +378,7 @@ func (m *manager) mainProc(v interface{}) {
 	}
 	//get remote node info
 	info, err := n.GetInfo()
+	log.Infow("sync node info", "info", info.JSON())
 	if err == nil {
 		if info.ID != m.cfg.Identity {
 			m.local.Update(func(data *core.LocalData) {

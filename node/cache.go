@@ -159,7 +159,7 @@ func (c *baseCache) Range(f func(key, value string) bool) {
 		iter := txn.NewIterator(c.iteratorOpts)
 		defer iter.Close()
 		var item *badger.Item
-		var continueFlag bool
+		continueFlag := true
 		for iter.Rewind(); iter.Valid(); iter.Next() {
 			if !continueFlag {
 				return nil

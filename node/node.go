@@ -203,6 +203,25 @@ func DialFromStringAddr(addr string, bind int) (net.Conn, error) {
 	return conn, nil
 }
 
+// MultiDial ...
+func MultiDial(addr ma.Multiaddr, bind int) (net.Conn, error) {
+	localAddr, err := ma.NewMultiaddr(fmt.Sprintf("/ip4/0.0.0.0/tcp/%d", bind))
+	if err != nil {
+		return nil, err
+	}
+	d := mnet.Dialer{
+		Dialer: net.Dialer{
+			Timeout: 5 * time.Second,
+		},
+		LocalAddr: localAddr,
+	}
+	conn, err := d.Dial(addr)
+	if err != nil {
+		return nil, err
+	}
+	return conn, nil
+}
+
 // ConnectNode ...
 func ConnectNode(addr ma.Multiaddr, bind int, local core.SafeLocalData) (core.Node, error) {
 	localAddr, err := ma.NewMultiaddr(fmt.Sprintf("/ip4/0.0.0.0/tcp/%d", bind))
@@ -210,7 +229,9 @@ func ConnectNode(addr ma.Multiaddr, bind int, local core.SafeLocalData) (core.No
 		return nil, err
 	}
 	d := mnet.Dialer{
-		Dialer:    net.Dialer{},
+		Dialer: net.Dialer{
+			Timeout: 5 * time.Second,
+		},
 		LocalAddr: localAddr,
 	}
 	conn, err := d.Dial(addr)

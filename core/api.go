@@ -133,14 +133,16 @@ type RequestTag int
 
 // NodeLinkReq ...
 type NodeLinkReq struct {
+	ByID    bool
+	Names   []string
 	Addrs   []string
 	Timeout time.Duration
 }
 
 // NodeLinkResp ...
 type NodeLinkResp struct {
-	Err error
-	NodeInfo
+	Err       error
+	NodeInfos []NodeInfo
 }
 
 // API ...

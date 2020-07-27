@@ -20,6 +20,7 @@ func nodeCmd() *cobra.Command {
 }
 
 func nodeConnectCmd() *cobra.Command {
+	var byid bool
 	connect := &cobra.Command{
 		Use:   "connect",
 		Short: "connect run",
@@ -28,6 +29,7 @@ func nodeConnectCmd() *cobra.Command {
 			config.Initialize()
 			cfg := config.Global()
 			client.InitGlobalClient(&cfg)
+
 			fmt.Printf("connect to [%v]\n", args)
 			req := &core.NodeLinkReq{Addrs: args}
 			resp, err := client.NodeLink(req)
@@ -36,11 +38,13 @@ func nodeConnectCmd() *cobra.Command {
 				return
 			}
 			fmt.Println("success:")
-			fmt.Printf("%+v\n", resp.JSON())
-
+			for _, info := range resp.NodeInfos {
+				fmt.Printf("connected to:%+v\n", info.ID)
+			}
 			return
 		},
 	}
+	connect.Flags().BoolVarP(&byid, "byid", "connect to exist target node", false, "connect to node")
 	return connect
 }
 

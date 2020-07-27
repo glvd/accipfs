@@ -111,45 +111,76 @@ func (m *manager) Link(req *core.NodeLinkReq) (*core.NodeLinkResp, error) {
 	if !m.local.Data().Initialized {
 		return &core.NodeLinkResp{}, errors.New("you are not ready for connection")
 	}
-	for _, addr := range req.Addrs {
-		multiaddr, err := ma.NewMultiaddr(addr)
-		if err != nil {
-			fmt.Printf("parse addr(%v) failed(%v)\n", addr, err)
-			continue
-		}
-		if req.Timeout == 0 {
-			req.Timeout = 5 * time.Second
-		}
-		d := mnet.Dialer{
-			Dialer: net.Dialer{
-				Timeout: req.Timeout,
-			},
-		}
-		dial, err := d.Dial(multiaddr)
-		if err != nil {
-			fmt.Printf("link failed(%v)\n", err)
-			continue
-		}
-		conn, err := m.newConn(dial)
-		if err != nil {
-			return &core.NodeLinkResp{}, err
-		}
-		id := conn.ID()
-		getNode, b := m.GetNode(id)
-		if b {
-			conn = getNode
-		} else {
-			//use conn
-		}
-		info, err := conn.GetInfo()
-		if err != nil {
-			return &core.NodeLinkResp{}, err
-		}
-		return &core.NodeLinkResp{
-			NodeInfo: info,
-		}, nil
+	if req.Timeout == 0 {
+		req.Timeout = 5 * time.Second
 	}
-	return &core.NodeLinkResp{}, errors.New("all request was failed")
+	d := mnet.Dialer{
+		Dialer: net.Dialer{
+			Timeout: req.Timeout,
+		},
+	}
+	var infos []core.NodeInfo
+	if req.ByID {
+		for _, name := range req.Names {
+			var info core.NodeInfo
+			err := m.nodes.Load(name, &info)
+			if err != nil {
+				continue
+			}
+			for _, multiaddr := range info.GetAddrs() {
+				dial, err := d.Dial(multiaddr)
+				if err != nil {
+					fmt.Printf("link failed(%v)\n", err)
+					continue
+				}
+				conn, err := m.newConn(dial)
+				if err != nil {
+					return &core.NodeLinkResp{}, err
+				}
+				id := conn.ID()
+				getNode, b := m.GetNode(id)
+				if b {
+					conn = getNode
+				} else {
+					//use conn
+				}
+				infos = append(infos, info)
+			}
+		}
+	} else {
+
+		for _, addr := range req.Addrs {
+			multiaddr, err := ma.NewMultiaddr(addr)
+			if err != nil {
+				fmt.Printf("parse addr(%v) failed(%v)\n", addr, err)
+				continue
+			}
+			dial, err := d.Dial(multiaddr)
+			if err != nil {
+				fmt.Printf("link failed(%v)\n", err)
+				continue
+			}
+			conn, err := m.newConn(dial)
+			if err != nil {
+				return &core.NodeLinkResp{}, err
+			}
+			id := conn.ID()
+			getNode, b := m.GetNode(id)
+			if b {
+				conn = getNode
+			} else {
+				//use conn
+			}
+			info, err := conn.GetInfo()
+			if err != nil {
+				return &core.NodeLinkResp{}, err
+			}
+			infos = append(infos, info)
+		}
+	}
+	return &core.NodeLinkResp{
+		NodeInfos: infos,
+	}, nil
 }
 
 // Unlink ...

@@ -69,17 +69,14 @@ func store(wg *sync.WaitGroup, nodeManager core.NodeManager) {
 
 func load(wg *sync.WaitGroup, nodeManager core.NodeManager) {
 	defer wg.Done()
-	for i := 0; i < 100; i++ {
-		err := nodeManager.Load()
-		if err != nil {
-			fmt.Println("error", err)
-			continue
-		}
-		nodeManager.Range(func(key string, n core.Node) bool {
-			fmt.Println("key:", key, "node", n.ID())
-			return true
-		})
+	err := nodeManager.Load()
+	if err != nil {
+		fmt.Println("error", err)
 	}
+	nodeManager.Range(func(key string, n core.Node) bool {
+		fmt.Println("key:", key, "node", n.ID())
+		return true
+	})
 }
 
 func TestManager_Load(t *testing.T) {

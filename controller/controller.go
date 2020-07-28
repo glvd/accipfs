@@ -37,41 +37,6 @@ type Controller struct {
 	cfg       *config.Config
 }
 
-// UploadFile ...
-func (c *Controller) UploadFile(req *core.UploadReq) (*core.UploadResp, error) {
-	stat, e := os.Stat(req.Path)
-	if e != nil {
-		return &core.UploadResp{}, e
-	}
-	var node files.Node
-	//var err error
-	if !stat.IsDir() {
-		file, e := os.Open(req.Path)
-		if e != nil {
-			return &core.UploadResp{}, e
-		}
-		node = files.NewReaderFile(file)
-	} else {
-		sf, e := files.NewSerialFile(req.Path, false, stat)
-		if e != nil {
-			return &core.UploadResp{}, e
-		}
-		node = sf
-	}
-	opts := func(settings *options.UnixfsAddSettings) error {
-		settings.Pin = true
-		return nil
-	}
-
-	resolved, e := c.dataNode().Unixfs().Add(context.TODO(), node, opts)
-	if e != nil {
-		return &core.UploadResp{}, e
-	}
-	return &core.UploadResp{
-		Hash: resolved.Cid().String(),
-	}, nil
-}
-
 // New ...
 func New(cfg *config.Config) *Controller {
 	c := &Controller{
@@ -90,10 +55,8 @@ func New(cfg *config.Config) *Controller {
 	}
 	if cfg.IPFS.Enable {
 		ipfs := newNodeLibIPFS(cfg)
-
 		ipfs.MessageHandle(func(s string) {
 			output("[datastore]", s)
-			//log.Infow(s, "tag", "ipfs")
 		})
 		c.services[IndexIPFS] = ipfs
 		c.ipfsNode = ipfs
@@ -186,8 +149,10 @@ func (c *Controller) DataStoreAPI() core.DataStoreAPI {
 
 // PinLs ...
 func (c *Controller) PinLs(req *core.DataStoreReq) (*core.DataStoreResp, error) {
-	log.Infow("pin list request")
-	ls, err := c.dataNode().Pin().Ls(context.TODO())
+	ls, err := c.dataNode().Pin().Ls(context.TODO(), func(settings *options.PinLsSettings) error {
+		settings.Type = "recursive"
+		return nil
+	})
 	if err != nil {
 		return nil, err
 	}
@@ -206,4 +171,39 @@ func (c *Controller) PinLs(req *core.DataStoreReq) (*core.DataStoreResp, error) 
 // HandleSwarm ...
 func (c *Controller) HandleSwarm(info peer.AddrInfo) error {
 	return c.ipfsNode.Swarm().Connect(context.TODO(), info)
+}
+
+// UploadFile ...
+func (c *Controller) UploadFile(req *core.UploadReq) (*core.UploadResp, error) {
+	stat, e := os.Stat(req.Path)
+	if e != nil {
+		return &core.UploadResp{}, e
+	}
+	var node files.Node
+	//var err error
+	if !stat.IsDir() {
+		file, e := os.Open(req.Path)
+		if e != nil {
+			return &core.UploadResp{}, e
+		}
+		node = files.NewReaderFile(file)
+	} else {
+		sf, e := files.NewSerialFile(req.Path, false, stat)
+		if e != nil {
+			return &core.UploadResp{}, e
+		}
+		node = sf
+	}
+	opts := func(settings *options.UnixfsAddSettings) error {
+		settings.Pin = true
+		return nil
+	}
+
+	resolved, e := c.dataNode().Unixfs().Add(context.TODO(), node, opts)
+	if e != nil {
+		return &core.UploadResp{}, e
+	}
+	return &core.UploadResp{
+		Hash: resolved.Cid().String(),
+	}, nil
 }

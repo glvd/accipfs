@@ -74,7 +74,7 @@ func (n *nodeLibIPFS) Stop() error {
 }
 
 // Initialize ...
-func (n nodeLibIPFS) Initialize() error {
+func (n *nodeLibIPFS) Initialize() error {
 	_ = os.Mkdir(n.configRoot, 0755)
 	//if err := basis.SetupPlugins(""); err != nil {
 	//	return err
@@ -98,12 +98,6 @@ func (n *nodeLibIPFS) IsReady() bool {
 // MessageHandle ...
 func (n *nodeLibIPFS) MessageHandle(f func(s string)) {
 
-}
-
-// Spawns a node to be used just for this run (i.e. creates a tmp repo)
-func (n *nodeLibIPFS) spawnEphemeral(ctx context.Context) error {
-
-	return nil
 }
 
 func (n *nodeLibIPFS) createRepo(ctx context.Context) error {

@@ -98,6 +98,7 @@ func (l *BustLinker) afterStart() error {
 		log.Infow("update node info", "info", info.AddrInfo)
 		data.Node.AddrInfo = info.AddrInfo
 	})
+
 	pins, err := l.api.DataStoreAPI().PinLs(&core.DataStoreReq{})
 	if err != nil {
 		return err

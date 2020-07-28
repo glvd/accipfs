@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/glvd/accipfs/basis"
+	"github.com/ipfs/go-ipfs/repo"
 	"go.uber.org/atomic"
 
 	"os"
@@ -24,6 +25,7 @@ type nodeLibIPFS struct {
 	isRunning  *atomic.Bool
 	configRoot string
 	intercore.CoreAPI
+	repo repo.Repo
 }
 
 var _ core.ControllerService = &nodeLibIPFS{}
@@ -52,11 +54,17 @@ func (n *nodeLibIPFS) Start() error {
 		}
 	}
 
-	// Spawning an ephemeral IPFS node
-	node, err := basis.CreateNode(n.ctx, n.configRoot)
+	repo, err := basis.OpenRepo(n.configRoot)
 	if err != nil {
 		return err
 	}
+	n.repo = repo
+	// Spawning an ephemeral IPFS node
+	node, err := basis.CreateNode(n.ctx, repo)
+	if err != nil {
+		return err
+	}
+
 	n.CoreAPI = node
 	n.isRunning.Store(true)
 	log.Infow("datastore is ready")
@@ -69,6 +77,10 @@ func (n *nodeLibIPFS) Stop() error {
 		n.cancel()
 		n.cancel = nil
 	}
+	if n.repo != nil {
+		n.repo.Close()
+	}
+
 	n.isRunning.Store(false)
 	return nil
 }

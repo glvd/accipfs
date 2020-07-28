@@ -19,7 +19,6 @@ require (
 	github.com/gorilla/rpc v1.2.0
 	github.com/ipfs/go-cid v0.0.7
 	github.com/ipfs/go-ipfs v0.6.1-0.20200724164245-5b28704e505e
-	github.com/ipfs/go-ipfs-blockstore v1.0.1 // indirect
 	github.com/ipfs/go-ipfs-config v0.9.0
 	github.com/ipfs/go-ipfs-files v0.0.8
 	github.com/ipfs/go-ipfs-http-client v0.0.5
@@ -27,7 +26,7 @@ require (
 	github.com/ipfs/go-ipld-format v0.2.0
 	github.com/ipfs/go-log/v2 v2.1.1 // indirect
 	github.com/ipfs/interface-go-ipfs-core v0.3.0
-	github.com/libp2p/go-libp2p-core v0.6.0
+	github.com/libp2p/go-libp2p-core v0.5.7
 	github.com/libp2p/go-openssl v0.0.6 // indirect
 	github.com/mattn/go-colorable v0.1.7 // indirect
 	github.com/miekg/dns v1.1.29
@@ -57,5 +56,5 @@ require (
 
 replace (
 	github.com/ipfs/go-ipfs-http-client v0.0.5 => github.com/godcong/go-ipfs-http-client v0.0.11
-	github.com/libp2p/go-libp2p-core v0.6.0 => git.5gnode.cn/chain/go-libp2p-core v0.6.101
+	//github.com/libp2p/go-libp2p-core v0.6.0 => git.5gnode.cn/chain/go-libp2p-core v0.6.101
 )

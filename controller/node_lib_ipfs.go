@@ -41,6 +41,7 @@ func newNodeLibIPFS(cfg *config.Config) *nodeLibIPFS {
 
 // Start ...
 func (n *nodeLibIPFS) Start() error {
+	// Spawning an ephemeral IPFS node
 	node, err := createNode(n.ctx, n.configRoot)
 	if err != nil {
 		return err
@@ -103,7 +104,7 @@ func (n *nodeLibIPFS) spawnEphemeral(ctx context.Context) error {
 	if err := n.createRepo(ctx); err != nil {
 		return fmt.Errorf("failed to create temp repo: %s", err)
 	}
-	// Spawning an ephemeral IPFS node
+
 	return nil
 }
 

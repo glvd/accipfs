@@ -414,7 +414,13 @@ func (c *APIContext) add() gin.HandlerFunc {
 
 func (c *APIContext) datastoreUploadFile() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-		list, err := c.DataStoreAPI().UploadFile(&core.UploadReq{})
+		var req core.UploadReq
+		err := ctx.BindJSON(&req)
+		if err != nil {
+			JSON(ctx, nil, err)
+			return
+		}
+		list, err := c.DataStoreAPI().UploadFile(&req)
 		JSON(ctx, list, err)
 	}
 }

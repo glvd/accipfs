@@ -1,7 +1,6 @@
 package core
 
 import (
-	"github.com/ipfs/interface-go-ipfs-core/options"
 	"time"
 )
 
@@ -111,8 +110,8 @@ type AddResp struct {
 
 // UploadReq ...
 type UploadReq struct {
-	Path   string
-	Option options.UnixfsAddOption
+	Path string
+	//Option options.UnixfsAddOption
 }
 
 // UploadResp ...
@@ -166,6 +165,5 @@ type NodeAPI interface {
 // DataStoreAPI ...
 type DataStoreAPI interface {
 	PinLs(req *DataStoreReq) (*DataStoreResp, error)
-
 	UploadFile(req *UploadReq) (*UploadResp, error)
 }

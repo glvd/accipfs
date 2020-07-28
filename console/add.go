@@ -23,7 +23,7 @@ func addCmd() *cobra.Command {
 			if len(args) <= 0 {
 				return
 			}
-
+			fmt.Println("add path", args[0])
 			file, err := client.UploadFile(&core.UploadReq{
 				Path: args[0],
 			})

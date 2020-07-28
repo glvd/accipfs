@@ -32,6 +32,10 @@ var _ core.ControllerService = &nodeLibIPFS{}
 func newNodeLibIPFS(cfg *config.Config) *nodeLibIPFS {
 	ctx, cancel := context.WithCancel(context.Background())
 	root := filepath.Join(cfg.Path, ".ipfs")
+	if err := basis.SetupPlugins(""); err != nil {
+		panic(err)
+	}
+
 	return &nodeLibIPFS{
 		ctx:        ctx,
 		cancel:     cancel,
@@ -43,16 +47,12 @@ func newNodeLibIPFS(cfg *config.Config) *nodeLibIPFS {
 
 // Start ...
 func (n *nodeLibIPFS) Start() error {
-	if err := basis.SetupPlugins(""); err != nil {
-		return err
-	}
-
 	if !fsrepo.IsInitialized(n.configRoot) {
 		if err := n.Initialize(); err != nil {
 			return err
 		}
 	}
-	_, err := fsrepo.Open(n.configRoot)
+	repo, err := fsrepo.Open(n.configRoot)
 	switch err {
 	default:
 		return err
@@ -66,6 +66,7 @@ func (n *nodeLibIPFS) Start() error {
 			return err
 		}
 	}
+	_ = repo.Close()
 	// Spawning an ephemeral IPFS node
 	node, err := basis.CreateNode(n.ctx, n.configRoot)
 	if err != nil {
@@ -73,7 +74,7 @@ func (n *nodeLibIPFS) Start() error {
 	}
 	n.api = node
 	n.isRunning.Store(true)
-	fmt.Println("datastore is ready")
+	log.Infow("datastore is ready")
 	return nil
 }
 
@@ -90,9 +91,9 @@ func (n *nodeLibIPFS) Stop() error {
 // Initialize ...
 func (n nodeLibIPFS) Initialize() error {
 	_ = os.Mkdir(n.configRoot, 0755)
-	if err := basis.SetupPlugins(""); err != nil {
-		return err
-	}
+	//if err := basis.SetupPlugins(""); err != nil {
+	//	return err
+	//}
 	// Create a Temporary Repo
 	if err := n.createRepo(n.ctx); err != nil {
 		return fmt.Errorf("failed to create temp repo: %s", err)

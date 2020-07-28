@@ -58,14 +58,12 @@ func (c *Controller) UploadFile(req *core.UploadReq) (*core.UploadResp, error) {
 		}
 		node = sf
 	}
-	if req.Option == nil {
-		req.Option = func(settings *options.UnixfsAddSettings) error {
-			settings.Pin = true
-			return nil
-		}
+	opts := func(settings *options.UnixfsAddSettings) error {
+		settings.Pin = true
+		return nil
 	}
 
-	resolved, e := c.dataNode().api.Unixfs().Add(context.TODO(), node, req.Option)
+	resolved, e := c.dataNode().api.Unixfs().Add(context.TODO(), node, opts)
 	if e != nil {
 		return &core.UploadResp{}, e
 	}

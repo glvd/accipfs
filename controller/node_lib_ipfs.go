@@ -6,7 +6,8 @@ import (
 	"github.com/ipfs/go-ipfs/core/coreapi"
 	"github.com/ipfs/go-ipfs/core/node/libp2p"
 	"github.com/ipfs/go-ipfs/repo/fsrepo"
-	"io/ioutil"
+	"github.com/ipfs/interface-go-ipfs-core/options"
+	"os"
 	"path/filepath"
 
 	"github.com/glvd/accipfs/config"
@@ -18,44 +19,59 @@ import (
 )
 
 type nodeLibIPFS struct {
-	ctx    context.Context
-	cancel context.CancelFunc
+	ctx        context.Context
+	cancel     context.CancelFunc
+	cfg        *config.Config
+	configRoot string
+	api        intercore.CoreAPI
 }
 
 var _ core.ControllerService = &nodeLibIPFS{}
 
 func newNodeLibIPFS(cfg *config.Config) *nodeLibIPFS {
 	ctx, cancel := context.WithCancel(context.Background())
-
+	root := filepath.Join(cfg.Path, ".ipfs")
 	return &nodeLibIPFS{
-		ctx:    ctx,
-		cancel: cancel,
+		ctx:        ctx,
+		cancel:     cancel,
+		cfg:        cfg,
+		configRoot: root,
 	}
 }
 
 // Start ...
-func (n nodeLibIPFS) Start() error {
-	panic("implement me")
+func (n *nodeLibIPFS) Start() error {
+	node, err := createNode(n.ctx, n.configRoot)
+	if err != nil {
+		return err
+	}
+	n.api = node
+	return nil
 }
 
 // Stop ...
-func (n nodeLibIPFS) Stop() error {
-	panic("implement me")
+func (n *nodeLibIPFS) Stop() error {
+	if n.cancel != nil {
+		n.cancel()
+		n.cancel = nil
+	}
+	return nil
 }
 
 // Initialize ...
 func (n nodeLibIPFS) Initialize() error {
-	panic("implement me")
+	_ = os.Mkdir(n.configRoot, 0755)
+	return n.spawnEphemeral(n.ctx)
 }
 
 // IsReady ...
-func (n nodeLibIPFS) IsReady() bool {
-	panic("implement me")
+func (n *nodeLibIPFS) IsReady() bool {
+	return true
 }
 
 // MessageHandle ...
-func (n nodeLibIPFS) MessageHandle(f func(s string)) {
-	panic("implement me")
+func (n *nodeLibIPFS) MessageHandle(f func(s string)) {
+
 }
 
 func setupPlugins(externalPluginsPath string) error {
@@ -78,40 +94,38 @@ func setupPlugins(externalPluginsPath string) error {
 }
 
 // Spawns a node to be used just for this run (i.e. creates a tmp repo)
-func spawnEphemeral(ctx context.Context) (intercore.CoreAPI, error) {
+func (n *nodeLibIPFS) spawnEphemeral(ctx context.Context) error {
 	if err := setupPlugins(""); err != nil {
-		return nil, err
+		return err
 	}
 
 	// Create a Temporary Repo
-	repoPath, err := createTempRepo(ctx)
-	if err != nil {
-		return nil, fmt.Errorf("failed to create temp repo: %s", err)
+	if err := n.createRepo(ctx); err != nil {
+		return fmt.Errorf("failed to create temp repo: %s", err)
 	}
-
 	// Spawning an ephemeral IPFS node
-	return createNode(ctx, repoPath)
+	return nil
 }
 
-func createTempRepo(ctx context.Context) (string, error) {
-	repoPath, err := ioutil.TempDir("", "ipfs-shell")
+func (n *nodeLibIPFS) createRepo(ctx context.Context) error {
+	identity, err := ipfsconfig.CreateIdentity(os.Stdout, []options.KeyGenerateOption{options.Key.Type(options.Ed25519Key)})
 	if err != nil {
-		return "", fmt.Errorf("failed to get temp dir: %s", err)
+		return err
 	}
 
 	// Create a config with default options and a 2048 bit key
-	cfg, err := ipfsconfig.Init(ioutil.Discard, 2048)
+	cfg, err := ipfsconfig.InitWithIdentity(identity)
 	if err != nil {
-		return "", err
+		return err
 	}
 
 	// Create the repo with the config
-	err = fsrepo.Init(repoPath, cfg)
+	err = fsrepo.Init(n.configRoot, cfg)
 	if err != nil {
-		return "", fmt.Errorf("failed to init ephemeral node: %s", err)
+		return fmt.Errorf("failed to init ephemeral node: %s", err)
 	}
 
-	return repoPath, nil
+	return nil
 }
 
 // Creates an IPFS node and returns its coreAPI

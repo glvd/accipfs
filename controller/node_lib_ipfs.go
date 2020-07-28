@@ -79,6 +79,7 @@ func (n *nodeLibIPFS) Stop() error {
 	}
 	if n.repo != nil {
 		n.repo.Close()
+		n.repo = nil
 	}
 
 	n.isRunning.Store(false)

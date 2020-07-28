@@ -69,7 +69,7 @@ func store(wg *sync.WaitGroup, nodeManager core.NodeManager) {
 
 func load(wg *sync.WaitGroup, nodeManager core.NodeManager) {
 	defer wg.Done()
-	err := nodeManager.Load()
+	err := nodeManager.LoadNode()
 	if err != nil {
 		fmt.Println("error", err)
 	}

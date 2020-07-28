@@ -84,8 +84,8 @@ func mustPool(size int, pf func(v interface{})) *ants.PoolWithFunc {
 	return withFunc
 }
 
-// Save ...
-func (m *manager) Save() (err error) {
+// SaveNode ...
+func (m *manager) SaveNode() (err error) {
 	m.connectNodes.Range(func(key, value interface{}) bool {
 		keyk, keyb := key.(string)
 		valv, valb := value.(core.Node)
@@ -237,8 +237,8 @@ func (m *manager) Local() core.SafeLocalData {
 	return m.local
 }
 
-// Load ...
-func (m *manager) Load() error {
+// LoadNode ...
+func (m *manager) LoadNode() error {
 	m.nodes.Range(func(hash string, value string) bool {
 		log.Infow("range node", "hash", hash, "value", value)
 		var ninfo core.NodeInfo
@@ -258,7 +258,7 @@ func (m *manager) Load() error {
 			if err != nil {
 				continue
 			}
-			//m.connectNodes.Save(hash, connectNode)
+			//m.connectNodes.SaveNode(hash, connectNode)
 			return true
 		}
 		return true
@@ -317,7 +317,7 @@ func (m *manager) Push(node core.Node) {
 // save nodes
 func (m *manager) loop() {
 	//if m.initLoad.CAS(false, true) {
-	//	err := m.Load()
+	//	err := m.LoadNode()
 	//	if err != nil {
 	//		log.Errorw("load node failed", "err", err)
 	//	}
@@ -326,7 +326,7 @@ func (m *manager) loop() {
 		<-m.t.C
 		fmt.Println("store new node")
 		if m.ts != m.currentTS {
-			if err := m.Save(); err != nil {
+			if err := m.SaveNode(); err != nil {
 				continue
 			}
 			m.currentTS = m.ts
@@ -394,7 +394,7 @@ func (m *manager) mainProc(v interface{}) {
 			m.local.Update(func(data *core.LocalData) {
 				data.Nodes[info.ID] = info
 			})
-			//err := m.nodes.Save(info.ID, info)
+			//err := m.nodes.SaveNode(info.ID, info)
 			//if err != nil {
 			//	log.Errorw("sotre nodes failed", "err", err)
 			//}

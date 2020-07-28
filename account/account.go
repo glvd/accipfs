@@ -98,7 +98,7 @@ func (acc *Account) Check() error {
 	return nil
 }
 
-// Save ...
+// SaveNode ...
 func (acc *Account) Save(cfg *config.Config) error {
 	if err := acc.Check(); err != nil {
 		return err

@@ -55,7 +55,7 @@ func (l *BustLinker) Start() {
 	log.Infow("after start info", "err", err)
 
 	go func() {
-		err := l.manager.Load()
+		err := l.manager.LoadNode()
 		log.Infow("load node on goroutine", "err", err)
 	}()
 

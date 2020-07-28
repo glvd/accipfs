@@ -53,8 +53,12 @@ func (l *BustLinker) Start() {
 	l.controller.WaitAllReady()
 	err := l.afterStart()
 	log.Infow("after start info", "err", err)
-	err = l.manager.Load()
-	log.Infow("manager load node", "err", err)
+
+	go func() {
+		err := l.manager.Load()
+		log.Infow("load node on goroutine", "err", err)
+	}()
+
 	//start handle
 	go l.listener.Listen()
 

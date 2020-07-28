@@ -48,9 +48,8 @@ func NewBustLinker(cfg *config.Config) (linker *BustLinker, err error) {
 // Start ...
 func (l *BustLinker) Start() {
 	l.controller.Run()
-	l.api.Start()
-
 	l.controller.WaitAllReady()
+	l.api.Start()
 	err := l.afterStart()
 	log.Infow("after start info", "err", err)
 

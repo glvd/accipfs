@@ -3,6 +3,7 @@ package controller
 import (
 	"context"
 	"fmt"
+	"go.uber.org/atomic"
 
 	"os"
 	"path/filepath"
@@ -23,6 +24,7 @@ type nodeLibIPFS struct {
 	ctx        context.Context
 	cancel     context.CancelFunc
 	cfg        *config.Config
+	isRunning  *atomic.Bool
 	configRoot string
 	api        intercore.CoreAPI
 }
@@ -37,17 +39,24 @@ func newNodeLibIPFS(cfg *config.Config) *nodeLibIPFS {
 		cancel:     cancel,
 		cfg:        cfg,
 		configRoot: root,
+		isRunning:  atomic.NewBool(false),
 	}
 }
 
 // Start ...
 func (n *nodeLibIPFS) Start() error {
+	if !fsrepo.IsInitialized(n.configRoot) {
+		if err := n.Initialize(); err != nil {
+			return err
+		}
+	}
 	// Spawning an ephemeral IPFS node
 	node, err := createNode(n.ctx, n.configRoot)
 	if err != nil {
 		return err
 	}
 	n.api = node
+	n.isRunning.Store(true)
 	return nil
 }
 
@@ -57,6 +66,7 @@ func (n *nodeLibIPFS) Stop() error {
 		n.cancel()
 		n.cancel = nil
 	}
+	n.isRunning.Store(false)
 	return nil
 }
 
@@ -68,7 +78,10 @@ func (n nodeLibIPFS) Initialize() error {
 
 // IsReady ...
 func (n *nodeLibIPFS) IsReady() bool {
-	return true
+	if n.isRunning.Load() {
+		return true
+	}
+	return false
 }
 
 // MessageHandle ...

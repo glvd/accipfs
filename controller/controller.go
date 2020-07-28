@@ -2,8 +2,11 @@ package controller
 
 import (
 	"context"
-	"fmt"
 	"github.com/glvd/accipfs/config"
+	files "github.com/ipfs/go-ipfs-files"
+	"github.com/ipfs/interface-go-ipfs-core/options"
+	"os"
+
 	//"github.com/glvd/accipfs/contract/dtag"
 	"github.com/glvd/accipfs/core"
 	"github.com/libp2p/go-libp2p-core/peer"
@@ -36,8 +39,39 @@ type Controller struct {
 
 // UploadFile ...
 func (c *Controller) UploadFile(req *core.UploadReq) (*core.UploadResp, error) {
-	fmt.Println("dummy:called on client")
-	return &core.UploadResp{}, nil
+	stat, e := os.Stat(req.Path)
+	if e != nil {
+		return &core.UploadResp{}, e
+	}
+	var node files.Node
+	//var err error
+	if !stat.IsDir() {
+		file, e := os.Open(req.Path)
+		if e != nil {
+			return &core.UploadResp{}, e
+		}
+		node = files.NewReaderFile(file)
+	} else {
+		sf, e := files.NewSerialFile(req.Path, false, stat)
+		if e != nil {
+			return &core.UploadResp{}, e
+		}
+		node = sf
+	}
+	if req.Option == nil {
+		req.Option = func(settings *options.UnixfsAddSettings) error {
+			settings.Pin = true
+			return nil
+		}
+	}
+
+	resolved, e := c.dataNode().api.Unixfs().Add(context.TODO(), node, req.Option)
+	if e != nil {
+		return &core.UploadResp{}, e
+	}
+	return &core.UploadResp{
+		Hash: resolved.Cid().String(),
+	}, nil
 }
 
 // New ...
@@ -58,6 +92,7 @@ func New(cfg *config.Config) *Controller {
 	}
 	if cfg.IPFS.Enable {
 		ipfs := newNodeLibIPFS(cfg)
+
 		ipfs.MessageHandle(func(s string) {
 			output("[datastore]", s)
 			//log.Infow(s, "tag", "ipfs")
@@ -112,7 +147,7 @@ func (c *Controller) Run() {
 			go func(service core.ControllerService) {
 				defer wg.Done()
 				if err := service.Start(); err != nil {
-					return
+					log.Errorw("controller start failed", "err", err)
 				}
 			}(c.services[idx])
 		}

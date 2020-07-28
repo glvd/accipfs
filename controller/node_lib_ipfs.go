@@ -43,6 +43,10 @@ func newNodeLibIPFS(cfg *config.Config) *nodeLibIPFS {
 
 // Start ...
 func (n *nodeLibIPFS) Start() error {
+	if err := basis.SetupPlugins(""); err != nil {
+		return err
+	}
+
 	if !fsrepo.IsInitialized(n.configRoot) {
 		if err := n.Initialize(); err != nil {
 			return err
@@ -53,19 +57,6 @@ func (n *nodeLibIPFS) Start() error {
 	default:
 		return err
 	case fsrepo.ErrNeedMigration:
-		//domigrate, found := req.Options[migrateKwd].(bool)
-		//fmt.Println("Found outdated fs-repo, migrations need to be run.")
-		//
-		//if !found {
-		//	domigrate = YesNoPrompt("Run migrations now? [y/N]")
-		//}
-		//
-		//if !domigrate {
-		//	fmt.Println("Not running migrations of fs-repo now.")
-		//	fmt.Println("Please get fs-repo-migrations from https://dist.ipfs.io")
-		//	return fmt.Errorf("fs-repo requires migration")
-		//}
-
 		err = migrate.RunMigration(fsrepo.RepoVersion)
 		if err != nil {
 			fmt.Println("The migrations of fs-repo failed:")
@@ -82,6 +73,7 @@ func (n *nodeLibIPFS) Start() error {
 	}
 	n.api = node
 	n.isRunning.Store(true)
+	fmt.Println("datastore is ready")
 	return nil
 }
 
@@ -98,11 +90,13 @@ func (n *nodeLibIPFS) Stop() error {
 // Initialize ...
 func (n nodeLibIPFS) Initialize() error {
 	_ = os.Mkdir(n.configRoot, 0755)
-	if err := n.spawnEphemeral(n.ctx); err != nil {
+	if err := basis.SetupPlugins(""); err != nil {
 		return err
 	}
-
-	//fsrepo.Init()
+	// Create a Temporary Repo
+	if err := n.createRepo(n.ctx); err != nil {
+		return fmt.Errorf("failed to create temp repo: %s", err)
+	}
 
 	return nil
 }
@@ -122,14 +116,6 @@ func (n *nodeLibIPFS) MessageHandle(f func(s string)) {
 
 // Spawns a node to be used just for this run (i.e. creates a tmp repo)
 func (n *nodeLibIPFS) spawnEphemeral(ctx context.Context) error {
-	if err := basis.SetupPlugins(""); err != nil {
-		return err
-	}
-
-	// Create a Temporary Repo
-	if err := n.createRepo(ctx); err != nil {
-		return fmt.Errorf("failed to create temp repo: %s", err)
-	}
 
 	return nil
 }

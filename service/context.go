@@ -234,7 +234,8 @@ func (c *APIContext) registerRoutes() {
 	v0.POST("/node/link", c.nodeLink())
 	v0.POST("/node/unlink", c.nodeUnlink())
 	v0.POST("/node/list", c.nodeList())
-	v0.POST("/datastore/pin/ls", c.datastorePinLs())
+	v0.POST("/ds/pin/ls", c.datastorePinLs())
+	v0.POST("/ds/upload", c.datastoreUploadFile())
 	v0.GET("/get/:hash", c.get)
 	v0.GET("/get/:hash/*endpoint", c.get)
 	v0.GET("/query", c.query)
@@ -408,6 +409,13 @@ func (c *APIContext) add() gin.HandlerFunc {
 			return
 		}
 		JSON(ctx, add, nil)
+	}
+}
+
+func (c *APIContext) datastoreUploadFile() gin.HandlerFunc {
+	return func(ctx *gin.Context) {
+		list, err := c.DataStoreAPI().UploadFile(&core.UploadReq{})
+		JSON(ctx, list, err)
 	}
 }
 

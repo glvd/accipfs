@@ -15,6 +15,7 @@ require (
 	github.com/goextension/tool v0.0.2
 	github.com/google/uuid v1.1.1
 	github.com/gorilla/rpc v1.2.0
+	github.com/ipfs/fs-repo-migrations v1.6.3
 	github.com/ipfs/go-cid v0.0.7
 	github.com/ipfs/go-ds-flatfs v0.4.4
 	github.com/ipfs/go-ds-leveldb v0.4.2

@@ -3,6 +3,8 @@ package controller
 import (
 	"context"
 	"fmt"
+	"github.com/glvd/accipfs/basis"
+	migrate "github.com/ipfs/go-ipfs/repo/fsrepo/migrations"
 	"go.uber.org/atomic"
 
 	"os"
@@ -10,11 +12,7 @@ import (
 
 	"github.com/glvd/accipfs/config"
 	"github.com/glvd/accipfs/core"
-	"github.com/glvd/accipfs/plugin/loader"
 	ipfsconfig "github.com/ipfs/go-ipfs-config"
-	ipfscore "github.com/ipfs/go-ipfs/core"
-	"github.com/ipfs/go-ipfs/core/coreapi"
-	"github.com/ipfs/go-ipfs/core/node/libp2p"
 	"github.com/ipfs/go-ipfs/repo/fsrepo"
 	intercore "github.com/ipfs/interface-go-ipfs-core"
 	"github.com/ipfs/interface-go-ipfs-core/options"
@@ -50,8 +48,35 @@ func (n *nodeLibIPFS) Start() error {
 			return err
 		}
 	}
+	_, err := fsrepo.Open(n.configRoot)
+	switch err {
+	default:
+		return err
+	case fsrepo.ErrNeedMigration:
+		//domigrate, found := req.Options[migrateKwd].(bool)
+		//fmt.Println("Found outdated fs-repo, migrations need to be run.")
+		//
+		//if !found {
+		//	domigrate = YesNoPrompt("Run migrations now? [y/N]")
+		//}
+		//
+		//if !domigrate {
+		//	fmt.Println("Not running migrations of fs-repo now.")
+		//	fmt.Println("Please get fs-repo-migrations from https://dist.ipfs.io")
+		//	return fmt.Errorf("fs-repo requires migration")
+		//}
+
+		err = migrate.RunMigration(fsrepo.RepoVersion)
+		if err != nil {
+			fmt.Println("The migrations of fs-repo failed:")
+			fmt.Printf("  %s\n", err)
+			fmt.Println("If you think this is a bug, please file an issue and include this whole log output.")
+			fmt.Println("  https://github.com/ipfs/fs-repo-migrations")
+			return err
+		}
+	}
 	// Spawning an ephemeral IPFS node
-	node, err := createNode(n.ctx, n.configRoot)
+	node, err := basis.CreateNode(n.ctx, n.configRoot)
 	if err != nil {
 		return err
 	}
@@ -73,7 +98,13 @@ func (n *nodeLibIPFS) Stop() error {
 // Initialize ...
 func (n nodeLibIPFS) Initialize() error {
 	_ = os.Mkdir(n.configRoot, 0755)
-	return n.spawnEphemeral(n.ctx)
+	if err := n.spawnEphemeral(n.ctx); err != nil {
+		return err
+	}
+
+	//fsrepo.Init()
+
+	return nil
 }
 
 // IsReady ...
@@ -89,28 +120,9 @@ func (n *nodeLibIPFS) MessageHandle(f func(s string)) {
 
 }
 
-func setupPlugins(externalPluginsPath string) error {
-	// Load any external plugins if available on externalPluginsPath
-	plugins, err := loader.NewPluginLoader(filepath.Join(externalPluginsPath, "plugins"))
-	if err != nil {
-		return fmt.Errorf("error loading plugins: %s", err)
-	}
-
-	// Load preloaded and external plugins
-	if err := plugins.Initialize(); err != nil {
-		return fmt.Errorf("error initializing plugins: %s", err)
-	}
-
-	if err := plugins.Inject(); err != nil {
-		return fmt.Errorf("error initializing plugins: %s", err)
-	}
-
-	return nil
-}
-
 // Spawns a node to be used just for this run (i.e. creates a tmp repo)
 func (n *nodeLibIPFS) spawnEphemeral(ctx context.Context) error {
-	if err := setupPlugins(""); err != nil {
+	if err := basis.SetupPlugins(""); err != nil {
 		return err
 	}
 
@@ -141,31 +153,4 @@ func (n *nodeLibIPFS) createRepo(ctx context.Context) error {
 	}
 
 	return nil
-}
-
-// Creates an IPFS node and returns its coreAPI
-func createNode(ctx context.Context, repoPath string) (intercore.CoreAPI, error) {
-	// Open the repo
-	repo, err := fsrepo.Open(repoPath)
-	if err != nil {
-		return nil, err
-	}
-
-	// Construct the node
-
-	nodeOptions := &ipfscore.BuildCfg{
-		Online:  true,
-		Routing: libp2p.NilRouterOption,
-		//Routing: libp2p.DHTOption, // This option sets the node to be a full DHT node (both fetching and storing DHT Records)
-		// Routing: libp2p.DHTClientOption, // This option sets the node to be a client DHT node (only fetching records)
-		Repo: repo,
-	}
-
-	node, err := ipfscore.NewNode(ctx, nodeOptions)
-	if err != nil {
-		return nil, err
-	}
-
-	// Attach the Core API to the constructed node
-	return coreapi.NewCoreAPI(node)
 }

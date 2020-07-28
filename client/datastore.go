@@ -53,7 +53,7 @@ func (c *client) UploadFile(req *core.UploadReq) (resp *core.UploadResp, err err
 		}
 	}
 
-	resolved, e := c.ds.Unixfs().Add(context.TODO(), node, req.Option)
+	resolved, e := c.node.Unixfs().Add(context.TODO(), node, req.Option)
 	if e != nil {
 		return &core.UploadResp{}, e
 	}

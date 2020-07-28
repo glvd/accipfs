@@ -2,14 +2,18 @@ package client
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"errors"
+	"github.com/glvd/accipfs/basis"
 	"github.com/glvd/accipfs/config"
 	httpapi "github.com/ipfs/go-ipfs-http-client"
+	intercore "github.com/ipfs/interface-go-ipfs-core"
 	"github.com/multiformats/go-multiaddr"
 	"io"
 	"net/http"
 	"net/url"
+	"path/filepath"
 	"strconv"
 	"strings"
 	"time"
@@ -21,9 +25,10 @@ import (
 var DefaultClient core.API
 
 type client struct {
-	cfg *config.Config
-	ds  *httpapi.HttpApi
-	cli *http.Client
+	cfg  *config.Config
+	ds   *httpapi.HttpApi
+	node intercore.CoreAPI
+	cli  *http.Client
 }
 
 type jsonResp struct {
@@ -76,10 +81,19 @@ func New(cfg *config.Config) core.API {
 	if e != nil {
 		panic(e)
 	}
+	err = basis.SetupPlugins("")
+	if err != nil {
+		panic(err)
+	}
+	node, err := basis.CreateNode(context.TODO(), filepath.Join(cfg.Path, ".ipfs"))
+	if err != nil {
+		panic(err)
+	}
 	return &client{
-		ds:  api,
-		cli: c,
-		cfg: cfg,
+		ds:   api,
+		node: node,
+		cli:  c,
+		cfg:  cfg,
 	}
 }
 

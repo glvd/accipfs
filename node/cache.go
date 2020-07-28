@@ -127,7 +127,7 @@ func (c *baseCache) Update(hash string, fn func(bytes []byte) (core.Marshaler, e
 		})
 }
 
-// Store ...
+// Save ...
 func (c *baseCache) Store(hash string, data core.Marshaler) error {
 	return c.db.Update(
 		func(txn *badger.Txn) error {

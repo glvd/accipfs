@@ -13,7 +13,7 @@ type NodeManager interface {
 	Push(n Node)
 	Range(f func(key string, node Node) bool)
 	Conn(c net.Conn) (Node, error)
-	Store() error
+	Save() error
 	Load() error
 
 	//RegisterLDRequest(func() ([]string, error))

@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"github.com/glvd/accipfs/basis"
-	migrate "github.com/ipfs/go-ipfs/repo/fsrepo/migrations"
 	"go.uber.org/atomic"
 
 	"os"
@@ -24,7 +23,7 @@ type nodeLibIPFS struct {
 	cfg        *config.Config
 	isRunning  *atomic.Bool
 	configRoot string
-	api        intercore.CoreAPI
+	intercore.CoreAPI
 }
 
 var _ core.ControllerService = &nodeLibIPFS{}
@@ -52,27 +51,13 @@ func (n *nodeLibIPFS) Start() error {
 			return err
 		}
 	}
-	repo, err := fsrepo.Open(n.configRoot)
-	switch err {
-	default:
-		return err
-	case fsrepo.ErrNeedMigration:
-		err = migrate.RunMigration(fsrepo.RepoVersion)
-		if err != nil {
-			fmt.Println("The migrations of fs-repo failed:")
-			fmt.Printf("  %s\n", err)
-			fmt.Println("If you think this is a bug, please file an issue and include this whole log output.")
-			fmt.Println("  https://github.com/ipfs/fs-repo-migrations")
-			return err
-		}
-	}
-	_ = repo.Close()
+
 	// Spawning an ephemeral IPFS node
 	node, err := basis.CreateNode(n.ctx, n.configRoot)
 	if err != nil {
 		return err
 	}
-	n.api = node
+	n.CoreAPI = node
 	n.isRunning.Store(true)
 	log.Infow("datastore is ready")
 	return nil

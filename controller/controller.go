@@ -63,7 +63,7 @@ func (c *Controller) UploadFile(req *core.UploadReq) (*core.UploadResp, error) {
 		return nil
 	}
 
-	resolved, e := c.dataNode().api.Unixfs().Add(context.TODO(), node, opts)
+	resolved, e := c.dataNode().Unixfs().Add(context.TODO(), node, opts)
 	if e != nil {
 		return &core.UploadResp{}, e
 	}
@@ -187,7 +187,7 @@ func (c *Controller) DataStoreAPI() core.DataStoreAPI {
 // PinLs ...
 func (c *Controller) PinLs(req *core.DataStoreReq) (*core.DataStoreResp, error) {
 	log.Infow("pin list request")
-	ls, err := c.dataNode().api.Pin().Ls(context.TODO())
+	ls, err := c.dataNode().Pin().Ls(context.TODO())
 	if err != nil {
 		return nil, err
 	}
@@ -205,5 +205,5 @@ func (c *Controller) PinLs(req *core.DataStoreReq) (*core.DataStoreResp, error) 
 
 // HandleSwarm ...
 func (c *Controller) HandleSwarm(info peer.AddrInfo) error {
-	return c.ipfsNode.api.Swarm().Connect(context.TODO(), info)
+	return c.ipfsNode.Swarm().Connect(context.TODO(), info)
 }

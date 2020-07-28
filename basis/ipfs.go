@@ -8,6 +8,7 @@ import (
 	"github.com/ipfs/go-ipfs/core/coreapi"
 	"github.com/ipfs/go-ipfs/core/node/libp2p"
 	"github.com/ipfs/go-ipfs/repo/fsrepo"
+	migrate "github.com/ipfs/go-ipfs/repo/fsrepo/migrations"
 	intercore "github.com/ipfs/interface-go-ipfs-core"
 	"path/filepath"
 )
@@ -16,10 +17,24 @@ import (
 func CreateNode(ctx context.Context, repoPath string) (intercore.CoreAPI, error) {
 	// Open the repo
 	repo, err := fsrepo.Open(repoPath)
+	switch err {
+	default:
+		return nil, err
+	case fsrepo.ErrNeedMigration:
+		err = migrate.RunMigration(fsrepo.RepoVersion)
+		if err != nil {
+			fmt.Println("The migrations of fs-repo failed:")
+			fmt.Printf("  %s\n", err)
+			fmt.Println("If you think this is a bug, please file an issue and include this whole log output.")
+			fmt.Println("  https://github.com/ipfs/fs-repo-migrations")
+			return nil, err
+		}
+	}
+	_ = repo.Close()
+	repo, err = fsrepo.Open(repoPath)
 	if err != nil {
 		return nil, err
 	}
-
 	// Construct the node
 
 	nodeOptions := &ipfscore.BuildCfg{

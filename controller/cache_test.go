@@ -1,4 +1,4 @@
-package node
+package controller
 
 import (
 	"fmt"
@@ -26,7 +26,7 @@ s":null,"IPFSAddrInfo":{"Addresses":null,"ID":""}}}`
 
 func TestHashCache_Store(t *testing.T) {
 	root := "QmVq9Du6jAgHBJfyXuhHkP9KHARxJ1RYoYPXTKdVkoN6F4"
-	cache := hashCacher(config.Default())
+	cache := HashCacher(config.Default())
 	for i := 0; i < 100000; i++ {
 		ds1 := &core.DataInfoV1{
 			RootHash: root,
@@ -86,7 +86,7 @@ func TestHashCache_Store(t *testing.T) {
 
 func BenchmarkHashCache_Load(b *testing.B) {
 	//root := "QmVq9Du6jAgHBJfyXuhHkP9KHARxJ1RYoYPXTKdVkoN6F4"
-	cache := hashCacher(config.Default())
+	cache := HashCacher(config.Default())
 	for i := 0; i < 100; i++ {
 		ds2 := &core.DataInfoV1{}
 		d1 := newDataHashInfo(ds2)
@@ -157,7 +157,7 @@ func BenchmarkDatabase2(b *testing.B) {
 
 	db, err := badger.Open(opt)
 	if err != nil {
-		log.Fatal(err)
+		b.Fatal(err)
 	}
 	defer db.Close()
 	var key string
@@ -178,7 +178,7 @@ func BenchmarkDatabase2Read(b *testing.B) {
 	opt := badger.DefaultOptions("badger")
 	db, err := badger.Open(opt)
 	if err != nil {
-		log.Fatal(err)
+		b.Fatal(err)
 	}
 	defer db.Close()
 	key := "81d351bf-c0e9-11ea-becf-00155d639067"

@@ -1,7 +1,8 @@
-package node
+package controller
 
 import (
 	"encoding/json"
+	"fmt"
 	"github.com/dgraph-io/badger/v2"
 	"github.com/dgraph-io/badger/v2/options"
 	"github.com/glvd/accipfs/config"
@@ -68,7 +69,8 @@ func (v *DataHashInfo) Unmarshal(b []byte) error {
 	return json.Unmarshal(b, v)
 }
 
-func hashCacher(cfg *config.Config) Cacher {
+// HashCacher ...
+func HashCacher(cfg *config.Config) Cacher {
 	path := filepath.Join(cfg.Path, cacheDir, hashNodeName)
 	_, err := os.Stat(path)
 	if err != nil && os.IsNotExist(err) {
@@ -180,7 +182,7 @@ func (c *baseCache) Range(f func(key, value string) bool) {
 		}
 		return nil
 	})
-	log.Infow("range data", "err", err)
+	fmt.Println("range data failed:", err)
 }
 
 // Close ...
@@ -194,7 +196,8 @@ func (c *baseCache) Close() error {
 	return nil
 }
 
-func nodeCacher(cfg *config.Config) Cacher {
+// NodeCacher ...
+func NodeCacher(cfg *config.Config) Cacher {
 	path := filepath.Join(cfg.Path, cacheDir, nodeName)
 	_, err := os.Stat(path)
 	if err != nil && os.IsNotExist(err) {

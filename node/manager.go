@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/glvd/accipfs/controller"
 	"net"
 	"path/filepath"
 	"sync"
@@ -36,8 +37,8 @@ type manager struct {
 	currentNodes    *atomic.Int32
 	connectNodes    sync.Map
 	disconnectNodes sync.Map
-	nodes           Cacher //all node caches
-	hashNodes       Cacher //hash cache nodes
+	nodes           controller.Cacher //all node caches
+	hashNodes       controller.Cacher //hash cache nodes
 	RequestLD       func() ([]string, error)
 	gc              *atomic.Bool
 	addrCB          func(info peer.AddrInfo) error
@@ -59,8 +60,8 @@ func InitManager(cfg *config.Config) (core.NodeManager, error) {
 		//initLoad:  atomic.NewBool(false),
 		path:      filepath.Join(cfg.Path, _nodes),
 		expPath:   filepath.Join(cfg.Path, _expNodes),
-		nodes:     nodeCacher(cfg),
-		hashNodes: hashCacher(cfg),
+		nodes:     controller.NodeCacher(cfg),
+		hashNodes: controller.HashCacher(cfg),
 		local:     data.Safe(),
 		t:         time.NewTicker(cfg.Node.BackupSeconds * time.Second),
 	}

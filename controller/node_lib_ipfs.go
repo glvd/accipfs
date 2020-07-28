@@ -3,16 +3,17 @@ package controller
 import (
 	"context"
 	"fmt"
+
 	"os"
 	"path/filepath"
 
 	"github.com/glvd/accipfs/config"
+	"github.com/glvd/accipfs/controller/plugin/loader"
 	"github.com/glvd/accipfs/core"
 	ipfsconfig "github.com/ipfs/go-ipfs-config"
 	ipfscore "github.com/ipfs/go-ipfs/core"
 	"github.com/ipfs/go-ipfs/core/coreapi"
 	"github.com/ipfs/go-ipfs/core/node/libp2p"
-	"github.com/ipfs/go-ipfs/plugin/loader"
 	"github.com/ipfs/go-ipfs/repo/fsrepo"
 	intercore "github.com/ipfs/interface-go-ipfs-core"
 	"github.com/ipfs/interface-go-ipfs-core/options"

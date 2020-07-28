@@ -17,10 +17,10 @@ require (
 	github.com/golang/protobuf v1.4.2 // indirect
 	github.com/google/uuid v1.1.1
 	github.com/gorilla/rpc v1.2.0
-	github.com/ipfs/go-cid v0.0.6
-	github.com/ipfs/go-ipfs v0.6.0
-	github.com/ipfs/go-ipfs-blockstore v1.0.0 // indirect
-	github.com/ipfs/go-ipfs-config v0.8.0
+	github.com/ipfs/go-cid v0.0.7
+	github.com/ipfs/go-ipfs v0.6.1-0.20200724164245-5b28704e505e
+	github.com/ipfs/go-ipfs-blockstore v1.0.1 // indirect
+	github.com/ipfs/go-ipfs-config v0.9.0
 	github.com/ipfs/go-ipfs-files v0.0.8
 	github.com/ipfs/go-ipfs-http-client v0.0.5
 	github.com/ipfs/go-ipld-cbor v0.0.4
@@ -44,11 +44,12 @@ require (
 	github.com/spf13/cobra v0.0.5
 	github.com/spf13/viper v1.3.2
 	github.com/whyrusleeping/cbor-gen v0.0.0-20200706173030-3bb387cdd4d1 // indirect
+	go.opencensus.io v0.22.4 // indirect
 	go.uber.org/atomic v1.6.0
 	go.uber.org/zap v1.15.0
 	golang.org/x/crypto v0.0.0-20200709230013-948cd5f35899 // indirect
 	golang.org/x/net v0.0.0-20200707034311-ab3426394381
-	golang.org/x/sys v0.0.0-20200722175500-76b94024e4b6 // indirect
+	golang.org/x/sys v0.0.0-20200727154430-2d971f7391a4 // indirect
 	golang.org/x/tools v0.0.0-20200702044944-0cc1aa72b347 // indirect
 	google.golang.org/protobuf v1.25.0 // indirect
 	honnef.co/go/tools v0.0.1-2020.1.4 // indirect

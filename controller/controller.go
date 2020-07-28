@@ -30,7 +30,7 @@ type Controller struct {
 	isRunning *atomic.Bool
 	services  []core.ControllerService
 	ethNode   *nodeBinETH
-	ipfsNode  *nodeBinIPFS
+	ipfsNode  *nodeLibIPFS
 	cfg       *config.Config
 }
 
@@ -57,7 +57,7 @@ func New(cfg *config.Config) *Controller {
 		c.ethNode = eth
 	}
 	if cfg.IPFS.Enable {
-		ipfs := newNodeBinIPFS(cfg)
+		ipfs := newNodeLibIPFS(cfg)
 		ipfs.MessageHandle(func(s string) {
 			output("[datastore]", s)
 			//log.Infow(s, "tag", "ipfs")
@@ -133,7 +133,7 @@ func (c *Controller) Stop() (e error) {
 	return
 }
 
-func (c *Controller) dataNode() *nodeBinIPFS {
+func (c *Controller) dataNode() *nodeLibIPFS {
 	return c.ipfsNode
 }
 
@@ -143,7 +143,7 @@ func (c *Controller) infoNode() *nodeBinETH {
 
 // ID ...
 func (c *Controller) ID(ctx context.Context) (*core.DataStoreInfo, error) {
-	return c.dataNode().ID(ctx)
+	return &core.DataStoreInfo{}, nil
 }
 
 // DataStoreAPI ...
@@ -154,7 +154,7 @@ func (c *Controller) DataStoreAPI() core.DataStoreAPI {
 // PinLs ...
 func (c *Controller) PinLs(req *core.DataStoreReq) (*core.DataStoreResp, error) {
 	log.Infow("pin list request")
-	ls, err := c.dataNode().PinLS(context.TODO())
+	ls, err := c.dataNode().api.Pin().Ls(context.TODO())
 	if err != nil {
 		return nil, err
 	}
@@ -172,5 +172,5 @@ func (c *Controller) PinLs(req *core.DataStoreReq) (*core.DataStoreResp, error) 
 
 // HandleSwarm ...
 func (c *Controller) HandleSwarm(info peer.AddrInfo) error {
-	return c.ipfsNode.SwarmConnect(context.TODO(), info)
+	return c.ipfsNode.api.Swarm().Connect(context.TODO(), info)
 }

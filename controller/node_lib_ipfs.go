@@ -8,8 +8,8 @@ import (
 	"path/filepath"
 
 	"github.com/glvd/accipfs/config"
-	"github.com/glvd/accipfs/controller/plugin/loader"
 	"github.com/glvd/accipfs/core"
+	"github.com/glvd/accipfs/plugin/loader"
 	ipfsconfig "github.com/ipfs/go-ipfs-config"
 	ipfscore "github.com/ipfs/go-ipfs/core"
 	"github.com/ipfs/go-ipfs/core/coreapi"

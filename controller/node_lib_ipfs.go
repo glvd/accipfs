@@ -14,7 +14,7 @@ import (
 	ipfsconfig "github.com/ipfs/go-ipfs-config"
 	ipfscore "github.com/ipfs/go-ipfs/core"
 	"github.com/ipfs/go-ipfs/plugin/loader"
-	interfacecore "github.com/ipfs/interface-go-ipfs-core"
+	intercore "github.com/ipfs/interface-go-ipfs-core"
 )
 
 type nodeLibIPFS struct {
@@ -78,7 +78,7 @@ func setupPlugins(externalPluginsPath string) error {
 }
 
 // Spawns a node to be used just for this run (i.e. creates a tmp repo)
-func spawnEphemeral(ctx context.Context) (interfacecore.CoreAPI, error) {
+func spawnEphemeral(ctx context.Context) (intercore.CoreAPI, error) {
 	if err := setupPlugins(""); err != nil {
 		return nil, err
 	}
@@ -115,7 +115,7 @@ func createTempRepo(ctx context.Context) (string, error) {
 }
 
 // Creates an IPFS node and returns its coreAPI
-func createNode(ctx context.Context, repoPath string) (interfacecore.CoreAPI, error) {
+func createNode(ctx context.Context, repoPath string) (intercore.CoreAPI, error) {
 	// Open the repo
 	repo, err := fsrepo.Open(repoPath)
 	if err != nil {

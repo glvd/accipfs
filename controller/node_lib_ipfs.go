@@ -3,10 +3,6 @@ package controller
 import (
 	"context"
 	"fmt"
-	"github.com/ipfs/go-ipfs/core/coreapi"
-	"github.com/ipfs/go-ipfs/core/node/libp2p"
-	"github.com/ipfs/go-ipfs/repo/fsrepo"
-	"github.com/ipfs/interface-go-ipfs-core/options"
 	"os"
 	"path/filepath"
 
@@ -14,8 +10,12 @@ import (
 	"github.com/glvd/accipfs/core"
 	ipfsconfig "github.com/ipfs/go-ipfs-config"
 	ipfscore "github.com/ipfs/go-ipfs/core"
+	"github.com/ipfs/go-ipfs/core/coreapi"
+	"github.com/ipfs/go-ipfs/core/node/libp2p"
 	"github.com/ipfs/go-ipfs/plugin/loader"
+	"github.com/ipfs/go-ipfs/repo/fsrepo"
 	intercore "github.com/ipfs/interface-go-ipfs-core"
+	"github.com/ipfs/interface-go-ipfs-core/options"
 )
 
 type nodeLibIPFS struct {

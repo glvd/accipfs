@@ -5,9 +5,13 @@ import (
 	"fmt"
 	"github.com/glvd/accipfs/basis"
 	"github.com/glvd/accipfs/plugin/loader"
+	ipfscore "github.com/ipfs/go-ipfs/core"
+	"github.com/ipfs/go-ipfs/core/coreapi"
 	"github.com/ipfs/go-ipfs/repo"
+	"github.com/jbenet/goprocess"
 	"go.uber.org/atomic"
 	"runtime"
+	"sort"
 
 	"os"
 	"path/filepath"
@@ -83,6 +87,37 @@ func printVersion() {
 	fmt.Printf("Golang version: %s\n", runtime.Version())
 }
 
+// printSwarmAddrs prints the addresses of the host
+func printSwarmAddrs(node *ipfscore.IpfsNode) {
+	if !node.IsOnline {
+		fmt.Println("Swarm not listening, running in offline mode.")
+		return
+	}
+
+	var lisAddrs []string
+	ifaceAddrs, err := node.PeerHost.Network().InterfaceListenAddresses()
+	if err != nil {
+		fmt.Printf("failed to read listening addresses: %s", err)
+	}
+	for _, addr := range ifaceAddrs {
+		lisAddrs = append(lisAddrs, addr.String())
+	}
+	sort.Strings(lisAddrs)
+	for _, addr := range lisAddrs {
+		fmt.Printf("Swarm listening on %s\n", addr)
+	}
+
+	var addrs []string
+	for _, addr := range node.PeerHost.Addrs() {
+		addrs = append(addrs, addr.String())
+	}
+	sort.Strings(addrs)
+	for _, addr := range addrs {
+		fmt.Printf("Swarm announcing %s\n", addr)
+	}
+
+}
+
 // Start ...
 func (n *nodeLibIPFS) Start() (_err error) {
 	err := mprome.Inject()
@@ -125,8 +160,19 @@ func (n *nodeLibIPFS) Start() (_err error) {
 	if err != nil {
 		return err
 	}
+	printSwarmAddrs(node)
+	// Attach the Core API to the constructed node
 
-	n.CoreAPI = node
+	_err = n.plugins.Start(node)
+	if _err != nil {
+		return _err
+	}
+	node.Process.AddChild(goprocess.WithTeardown(n.plugins.Close))
+	api, _err := coreapi.NewCoreAPI(node)
+	if _err != nil {
+		return _err
+	}
+	n.CoreAPI = api
 	n.isRunning.Store(true)
 	log.Infow("datastore is ready")
 	return nil

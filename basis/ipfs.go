@@ -3,7 +3,6 @@ package basis
 import (
 	"context"
 	"fmt"
-	"github.com/glvd/accipfs/plugin/loader"
 	ipfscore "github.com/ipfs/go-ipfs/core"
 	"github.com/ipfs/go-ipfs/core/coreapi"
 	"github.com/ipfs/go-ipfs/core/node/libp2p"
@@ -11,7 +10,7 @@ import (
 	"github.com/ipfs/go-ipfs/repo/fsrepo"
 	migrate "github.com/ipfs/go-ipfs/repo/fsrepo/migrations"
 	intercore "github.com/ipfs/interface-go-ipfs-core"
-	"path/filepath"
+	"sort"
 )
 
 // OpenRepo ...
@@ -60,26 +59,38 @@ func CreateNode(ctx context.Context, r repo.Repo) (intercore.CoreAPI, error) {
 	if err != nil {
 		return nil, err
 	}
+	printSwarmAddrs(node)
 	// Attach the Core API to the constructed node
 	return coreapi.NewCoreAPI(node)
 }
 
-// SetupPlugins ...
-func SetupPlugins(externalPluginsPath string) error {
-	// Load any external plugins if available on externalPluginsPath
-	plugins, err := loader.NewPluginLoader(filepath.Join(externalPluginsPath, "plugins"))
+// printSwarmAddrs prints the addresses of the host
+func printSwarmAddrs(node *ipfscore.IpfsNode) {
+	if !node.IsOnline {
+		fmt.Println("Swarm not listening, running in offline mode.")
+		return
+	}
+
+	var lisAddrs []string
+	ifaceAddrs, err := node.PeerHost.Network().InterfaceListenAddresses()
 	if err != nil {
-		return fmt.Errorf("error loading plugins: %s", err)
+		fmt.Printf("failed to read listening addresses: %s", err)
+	}
+	for _, addr := range ifaceAddrs {
+		lisAddrs = append(lisAddrs, addr.String())
+	}
+	sort.Strings(lisAddrs)
+	for _, addr := range lisAddrs {
+		fmt.Printf("Swarm listening on %s\n", addr)
 	}
 
-	// Load preloaded and external plugins
-	if err := plugins.Initialize(); err != nil {
-		return fmt.Errorf("error initializing plugins: %s", err)
+	var addrs []string
+	for _, addr := range node.PeerHost.Addrs() {
+		addrs = append(addrs, addr.String())
+	}
+	sort.Strings(addrs)
+	for _, addr := range addrs {
+		fmt.Printf("Swarm announcing %s\n", addr)
 	}
 
-	if err := plugins.Inject(); err != nil {
-		return fmt.Errorf("error initializing plugins: %s", err)
-	}
-
-	return nil
 }

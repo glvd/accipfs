@@ -4,16 +4,21 @@ import (
 	"context"
 	"fmt"
 	"github.com/glvd/accipfs/basis"
+	"github.com/glvd/accipfs/plugin/loader"
 	"github.com/ipfs/go-ipfs/repo"
 	"go.uber.org/atomic"
+	"runtime"
 
 	"os"
 	"path/filepath"
 
 	"github.com/glvd/accipfs/config"
 	"github.com/glvd/accipfs/core"
+	ipfsversion "github.com/ipfs/go-ipfs"
 	ipfsconfig "github.com/ipfs/go-ipfs-config"
+	utilmain "github.com/ipfs/go-ipfs/cmd/ipfs/util"
 	"github.com/ipfs/go-ipfs/repo/fsrepo"
+	mprome "github.com/ipfs/go-metrics-prometheus"
 	intercore "github.com/ipfs/interface-go-ipfs-core"
 	"github.com/ipfs/interface-go-ipfs-core/options"
 )
@@ -25,15 +30,36 @@ type nodeLibIPFS struct {
 	isRunning  *atomic.Bool
 	configRoot string
 	intercore.CoreAPI
-	repo repo.Repo
+	repo    repo.Repo
+	plugins *loader.PluginLoader
 }
 
 var _ core.ControllerService = &nodeLibIPFS{}
 
+func setupPlugins(externalPluginsPath string) (*loader.PluginLoader, error) {
+	// Load any external plugins if available on externalPluginsPath
+	plugins, err := loader.NewPluginLoader(filepath.Join(externalPluginsPath, "plugins"))
+	if err != nil {
+		return nil, fmt.Errorf("error loading plugins: %s", err)
+	}
+
+	// Load preloaded and external plugins
+	if err := plugins.Initialize(); err != nil {
+		return nil, fmt.Errorf("error initializing plugins: %s", err)
+	}
+
+	if err := plugins.Inject(); err != nil {
+		return nil, fmt.Errorf("error initializing plugins: %s", err)
+	}
+
+	return plugins, nil
+}
+
 func newNodeLibIPFS(cfg *config.Config) *nodeLibIPFS {
 	ctx, cancel := context.WithCancel(context.Background())
 	root := filepath.Join(cfg.Path, ".ipfs")
-	if err := basis.SetupPlugins(""); err != nil {
+	plugins, err := setupPlugins("")
+	if err != nil {
 		panic(err)
 	}
 
@@ -43,11 +69,46 @@ func newNodeLibIPFS(cfg *config.Config) *nodeLibIPFS {
 		cfg:        cfg,
 		configRoot: root,
 		isRunning:  atomic.NewBool(false),
+		plugins:    plugins,
 	}
+}
+func printVersion() {
+	v := ipfsversion.CurrentVersionNumber
+	if ipfsversion.CurrentCommit != "" {
+		v += "-" + ipfsversion.CurrentCommit
+	}
+	fmt.Printf("Datastore version: %s\n", v)
+	fmt.Printf("Repo version: %d\n", fsrepo.RepoVersion)
+	fmt.Printf("System version: %s\n", runtime.GOARCH+"/"+runtime.GOOS)
+	fmt.Printf("Golang version: %s\n", runtime.Version())
 }
 
 // Start ...
-func (n *nodeLibIPFS) Start() error {
+func (n *nodeLibIPFS) Start() (_err error) {
+	err := mprome.Inject()
+	if err != nil {
+		log.Errorf("Injecting prometheus handler for metrics failed with message: %s\n", err.Error())
+	}
+	// let the user know we're going.
+	fmt.Printf("Initializing daemon...\n")
+
+	defer func() {
+		if _err != nil {
+			// Print an extra line before any errors. This could go
+			// in the commands lib but doesn't really make sense for
+			// all commands.
+			fmt.Println(_err)
+		}
+	}()
+
+	printVersion()
+
+	if true {
+		if _, _, err := utilmain.ManageFdLimit(); err != nil {
+			log.Errorf("setting file descriptor limit: %s", err)
+		}
+	}
+
 	if !fsrepo.IsInitialized(n.configRoot) {
 		if err := n.Initialize(); err != nil {
 			return err
@@ -59,7 +120,7 @@ func (n *nodeLibIPFS) Start() error {
 		return err
 	}
 	n.repo = repo
-	// Spawning an ephemeral IPFS node
+
 	node, err := basis.CreateNode(n.ctx, repo)
 	if err != nil {
 		return err

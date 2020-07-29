@@ -58,8 +58,8 @@ func (c *APIContext) API() core.API {
 }
 
 // NodeAddrInfo ...
-func (c *APIContext) NodeAddrInfo(req *core.AddrReq) (*core.AddrResp, error) {
-	id, err := c.ID(&core.IDReq{})
+func (c *APIContext) NodeAddrInfo(ctx context.Context, req *core.AddrReq) (*core.AddrResp, error) {
+	id, err := c.ID(ctx, &core.IDReq{})
 	if err != nil {
 		return nil, err
 	}
@@ -81,8 +81,8 @@ func (c *APIContext) NodeAddrInfo(req *core.AddrReq) (*core.AddrResp, error) {
 }
 
 // PinLs ...
-func (c *APIContext) PinLs(req *core.DataStoreReq) (*core.DataStoreResp, error) {
-	return c.DataStoreAPI().PinLs(req)
+func (c *APIContext) PinLs(ctx context.Context, req *core.DataStoreReq) (*core.DataStoreResp, error) {
+	return c.DataStoreAPI().PinLs(ctx, req)
 }
 
 // DataStoreAPI ...
@@ -91,13 +91,13 @@ func (c *APIContext) DataStoreAPI() core.DataStoreAPI {
 }
 
 // Link ...
-func (c *APIContext) Link(req *core.NodeLinkReq) (*core.NodeLinkResp, error) {
-	return c.NodeAPI().Link(req)
+func (c *APIContext) Link(ctx context.Context, req *core.NodeLinkReq) (*core.NodeLinkResp, error) {
+	return c.NodeAPI().Link(ctx, req)
 }
 
 // List ...
-func (c *APIContext) List(req *core.NodeListReq) (*core.NodeListResp, error) {
-	return c.NodeAPI().List(req)
+func (c *APIContext) List(ctx context.Context, req *core.NodeListReq) (*core.NodeListResp, error) {
+	return c.NodeAPI().List(ctx, req)
 }
 
 // NodeAPI ...
@@ -106,12 +106,12 @@ func (c *APIContext) NodeAPI() core.NodeAPI {
 }
 
 // Add ...
-func (c *APIContext) Add(req *core.AddReq) (*core.AddResp, error) {
-	return c.NodeAPI().Add(req)
+func (c *APIContext) Add(ctx context.Context, req *core.AddReq) (*core.AddResp, error) {
+	return c.NodeAPI().Add(ctx, req)
 }
 
 // Ping ...
-func (c *APIContext) Ping(req *core.PingReq) (*core.PingResp, error) {
+func (c *APIContext) Ping(ctx context.Context, req *core.PingReq) (*core.PingResp, error) {
 	return &core.PingResp{
 		Data: "pong",
 	}, nil
@@ -168,7 +168,7 @@ func getLocalAddr(port int) (maddrs []string, err error) {
 }
 
 // ID ...
-func (c *APIContext) ID(req *core.IDReq) (*core.IDResp, error) {
+func (c *APIContext) ID(ctx context.Context, req *core.IDReq) (*core.IDResp, error) {
 	fromStringID, err := peer.Decode(c.cfg.Identity)
 	if err != nil {
 		return nil, err
@@ -274,7 +274,7 @@ func (c *APIContext) setController(controller *controller.Controller) {
 }
 
 func (c *APIContext) id(ctx *gin.Context) {
-	id, err := c.ID(&core.IDReq{})
+	id, err := c.ID(ctx.Request.Context(), &core.IDReq{})
 	JSON(ctx, id, err)
 }
 
@@ -359,7 +359,7 @@ func ipfsGetURL(uri string) string {
 }
 
 func (c *APIContext) ping(ctx *gin.Context) {
-	ping, err := c.Ping(&core.PingReq{})
+	ping, err := c.Ping(ctx.Request.Context(), &core.PingReq{})
 	JSON(ctx, ping, err)
 }
 
@@ -404,7 +404,7 @@ func (c *APIContext) nodeLink() func(ctx *gin.Context) {
 			JSON(ctx, nil, err)
 			return
 		}
-		id, err := c.Link(&req)
+		id, err := c.Link(ctx.Request.Context(), &req)
 		JSON(ctx, id, err)
 	}
 
@@ -412,26 +412,26 @@ func (c *APIContext) nodeLink() func(ctx *gin.Context) {
 
 func (c *APIContext) nodeUnlink() func(ctx *gin.Context) {
 	return func(ctx *gin.Context) {
-		id, err := c.Unlink(&core.NodeUnlinkReq{})
+		id, err := c.Unlink(ctx.Request.Context(), &core.NodeUnlinkReq{})
 		JSON(ctx, id, err)
 	}
 }
 
 // Unlink ...
-func (c *APIContext) Unlink(req *core.NodeUnlinkReq) (*core.NodeUnlinkResp, error) {
-	return c.m.NodeAPI().Unlink(req)
+func (c *APIContext) Unlink(ctx context.Context, req *core.NodeUnlinkReq) (*core.NodeUnlinkResp, error) {
+	return c.m.NodeAPI().Unlink(ctx, req)
 }
 
 func (c *APIContext) nodeList() func(ctx *gin.Context) {
 	return func(ctx *gin.Context) {
-		list, err := c.List(&core.NodeListReq{})
+		list, err := c.List(ctx.Request.Context(), &core.NodeListReq{})
 		JSON(ctx, list, err)
 	}
 }
 
 func (c *APIContext) datastorePinLs() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-		list, err := c.PinLs(&core.DataStoreReq{})
+		list, err := c.PinLs(ctx.Request.Context(), &core.DataStoreReq{})
 		JSON(ctx, list, err)
 	}
 }
@@ -444,7 +444,7 @@ func (c *APIContext) add() gin.HandlerFunc {
 			JSON(ctx, nil, err)
 			return
 		}
-		add, err := c.Add(&req)
+		add, err := c.Add(ctx.Request.Context(), &req)
 		if err != nil {
 			JSON(ctx, nil, err)
 			return
@@ -461,7 +461,7 @@ func (c *APIContext) datastoreUploadFile() gin.HandlerFunc {
 			JSON(ctx, nil, err)
 			return
 		}
-		list, err := c.DataStoreAPI().UploadFile(&req)
+		list, err := c.DataStoreAPI().UploadFile(ctx.Request.Context(), &req)
 		JSON(ctx, list, err)
 	}
 }

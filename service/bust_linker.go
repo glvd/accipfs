@@ -1,6 +1,7 @@
 package service
 
 import (
+	"context"
 	"github.com/glvd/accipfs/account"
 	"github.com/glvd/accipfs/config"
 	"github.com/glvd/accipfs/controller"
@@ -8,6 +9,7 @@ import (
 	"github.com/glvd/accipfs/node"
 	"github.com/glvd/accipfs/task"
 	"go.uber.org/atomic"
+	"time"
 )
 
 // BustLinker ...
@@ -99,7 +101,9 @@ func (l *BustLinker) afterStart() error {
 		data.Node.AddrInfo = info.AddrInfo
 	})
 
-	pins, err := l.api.DataStoreAPI().PinLs(&core.DataStoreReq{})
+	timeout, cancelFunc := context.WithTimeout(context.TODO(), 30*time.Second)
+	defer cancelFunc()
+	pins, err := l.api.DataStoreAPI().PinLs(timeout, &core.DataStoreReq{})
 	if err != nil {
 		return err
 	}

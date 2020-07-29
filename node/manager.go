@@ -204,7 +204,7 @@ func (m *manager) Unlink(ctx context.Context, req *core.NodeUnlinkReq) (*core.No
 }
 
 // NodeAddrInfo ...
-func (m *manager) NodeAddrInfo(req *core.AddrReq) (*core.AddrResp, error) {
+func (m *manager) NodeAddrInfo(ctx context.Context, req *core.AddrReq) (*core.AddrResp, error) {
 	load, ok := m.connectNodes.Load(req.ID)
 	if !ok {
 		return &core.AddrResp{}, fmt.Errorf("node not found id(%s)", req.ID)

@@ -88,6 +88,7 @@ func (n *nodeLibIPFS) Stop() error {
 
 // Initialize ...
 func (n *nodeLibIPFS) Initialize() error {
+	log.Infow("datastore init")
 	_ = os.Mkdir(n.configRoot, 0755)
 	//if err := basis.SetupPlugins(""); err != nil {
 	//	return err

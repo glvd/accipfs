@@ -2,7 +2,6 @@ package controller
 
 import (
 	"encoding/json"
-	"fmt"
 	"github.com/dgraph-io/badger/v2"
 	"github.com/dgraph-io/badger/v2/options"
 	"github.com/glvd/accipfs/config"
@@ -182,7 +181,9 @@ func (c *baseCache) Range(f func(key, value string) bool) {
 		}
 		return nil
 	})
-	fmt.Println("range data failed:", err)
+	if err != nil {
+		log.Errorw("range data failed", "err", err)
+	}
 }
 
 // Close ...

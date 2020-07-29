@@ -84,6 +84,8 @@ func (l *BustLinker) Stop() {
 }
 
 func (l *BustLinker) afterStart() error {
+	timeout, cancelFunc := context.WithTimeout(context.TODO(), 300*time.Second)
+	defer cancelFunc()
 	l.manager.Local().Update(func(data *core.LocalData) {
 		addr, err := getLocalAddr(l.cfg.Node.Port)
 		if err != nil {
@@ -92,7 +94,7 @@ func (l *BustLinker) afterStart() error {
 		data.Addrs = addr
 	})
 
-	info, err := l.api.NodeAddrInfo(&core.AddrReq{})
+	info, err := l.api.NodeAddrInfo(timeout, &core.AddrReq{})
 	if err != nil {
 		return err
 	}
@@ -101,8 +103,6 @@ func (l *BustLinker) afterStart() error {
 		data.Node.AddrInfo = info.AddrInfo
 	})
 
-	timeout, cancelFunc := context.WithTimeout(context.TODO(), 30*time.Second)
-	defer cancelFunc()
 	pins, err := l.api.DataStoreAPI().PinLs(timeout, &core.DataStoreReq{})
 	if err != nil {
 		return err

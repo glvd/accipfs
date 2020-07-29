@@ -1,11 +1,14 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"github.com/glvd/accipfs/client"
 	"github.com/glvd/accipfs/config"
 	"github.com/glvd/accipfs/core"
 	"github.com/spf13/cobra"
+	"os"
+	"os/signal"
 )
 
 func addCmd() *cobra.Command {
@@ -23,22 +26,40 @@ func addCmd() *cobra.Command {
 			if len(args) <= 0 {
 				return
 			}
+			ctx, cancelFunc := context.WithCancel(context.TODO())
+			done := make(chan error)
 			fmt.Println("add path", args[0])
-			file, err := client.UploadFile(&core.UploadReq{
-				Path: args[0],
-			})
-			if err != nil {
-				panic(err)
-			}
-			add, err := client.Add(&core.AddReq{
-				Hash: file.Hash,
-			})
-			if err != nil {
-				panic(err)
-			}
-			fmt.Println("success", add.IsSuccess)
-			fmt.Println("result hash:", add.Hash)
+			go func(c context.Context) {
+				var err error
+				defer func() {
+					done <- err
+				}()
+				file, err := client.UploadFile(c, &core.UploadReq{
+					Path: args[0],
+				})
+				if err != nil {
+					return
+				}
+				add, err := client.Add(c, &core.AddReq{
+					Hash: file.Hash,
+				})
+				if err != nil {
+					return
+				}
+				fmt.Println("success", add.IsSuccess)
+				fmt.Println("result hash:", add.Hash)
+			}(ctx)
 
+			sigs := make(chan os.Signal)
+			signal.Notify(sigs, os.Interrupt)
+			select {
+			case <-sigs:
+				cancelFunc()
+			case v := <-done:
+				if v != nil {
+					panic(v)
+				}
+			}
 		},
 	}
 	cmd.Flags().StringVar(&path, "path", "", "set the file dirctory path to add")

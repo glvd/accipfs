@@ -1,6 +1,7 @@
 package client
 
 import (
+	"context"
 	"github.com/glvd/accipfs/core"
 )
 
@@ -10,19 +11,19 @@ func (c *client) DataStoreAPI() core.DataStoreAPI {
 }
 
 // DataStorePinLs ...
-func DataStorePinLs(req *core.DataStoreReq) (resp *core.DataStoreResp, err error) {
-	return DefaultClient.DataStoreAPI().PinLs(req)
+func DataStorePinLs(ctx context.Context, req *core.DataStoreReq) (resp *core.DataStoreResp, err error) {
+	return DefaultClient.DataStoreAPI().PinLs(ctx, req)
 }
 
 // PinLs ...
-func (c *client) PinLs(req *core.DataStoreReq) (resp *core.DataStoreResp, err error) {
+func (c *client) PinLs(ctx context.Context, req *core.DataStoreReq) (resp *core.DataStoreResp, err error) {
 	resp = new(core.DataStoreResp)
 	err = c.doPost("ds/pin/ls", req, resp)
 	return
 }
 
 // UploadFile ...
-func (c *client) UploadFile(req *core.UploadReq) (resp *core.UploadResp, err error) {
+func (c *client) UploadFile(ctx context.Context, req *core.UploadReq) (resp *core.UploadResp, err error) {
 	resp = new(core.UploadResp)
 	err = c.doPost("ds/upload", req, resp)
 	return

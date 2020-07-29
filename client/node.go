@@ -1,6 +1,9 @@
 package client
 
-import "github.com/glvd/accipfs/core"
+import (
+	"context"
+	"github.com/glvd/accipfs/core"
+)
 
 // NodeAPI ...
 func (c *client) NodeAPI() core.NodeAPI {
@@ -8,32 +11,32 @@ func (c *client) NodeAPI() core.NodeAPI {
 }
 
 // Unlink ...
-func (c *client) Unlink(req *core.NodeUnlinkReq) (resp *core.NodeUnlinkResp, err error) {
+func (c *client) Unlink(ctx context.Context, req *core.NodeUnlinkReq) (resp *core.NodeUnlinkResp, err error) {
 	resp = new(core.NodeUnlinkResp)
 	err = c.doPost("node/unlink", req, resp)
 	return
 }
 
 // NodeList ...
-func (c *client) List(req *core.NodeListReq) (resp *core.NodeListResp, err error) {
+func (c *client) List(ctx context.Context, req *core.NodeListReq) (resp *core.NodeListResp, err error) {
 	resp = new(core.NodeListResp)
 	err = c.doPost("node/list", req, resp)
 	return
 }
 
 // NodeList ...
-func NodeList(req *core.NodeListReq) (resp *core.NodeListResp, err error) {
-	return DefaultClient.NodeAPI().List(req)
+func NodeList(ctx context.Context, req *core.NodeListReq) (resp *core.NodeListResp, err error) {
+	return DefaultClient.NodeAPI().List(ctx, req)
 }
 
 // Link ...
-func (c *client) Link(req *core.NodeLinkReq) (resp *core.NodeLinkResp, err error) {
+func (c *client) Link(ctx context.Context, req *core.NodeLinkReq) (resp *core.NodeLinkResp, err error) {
 	resp = new(core.NodeLinkResp)
 	err = c.doPost("/node/link", req, resp)
 	return
 }
 
 // NodeLink ...
-func NodeLink(req *core.NodeLinkReq) (resp *core.NodeLinkResp, err error) {
-	return DefaultClient.NodeAPI().Link(req)
+func NodeLink(ctx context.Context, req *core.NodeLinkReq) (resp *core.NodeLinkResp, err error) {
+	return DefaultClient.NodeAPI().Link(ctx, req)
 }

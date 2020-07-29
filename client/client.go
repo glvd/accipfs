@@ -146,42 +146,42 @@ func (c *client) Ping(req *core.PingReq) (resp *core.PingResp, err error) {
 }
 
 // ID ...
-func ID(req *core.IDReq) (resp *core.IDResp, err error) {
-	return DefaultClient.ID(req)
+func ID(ctx context.Context, req *core.IDReq) (resp *core.IDResp, err error) {
+	return DefaultClient.ID(ctx, req)
 }
 
 // ID ...
-func (c *client) ID(req *core.IDReq) (resp *core.IDResp, err error) {
+func (c *client) ID(ctx context.Context, req *core.IDReq) (resp *core.IDResp, err error) {
 	resp = new(core.IDResp)
 	err = c.doPost("id", req, resp)
 	return
 }
 
 // Add ...
-func (c *client) Add(req *core.AddReq) (resp *core.AddResp, err error) {
+func (c *client) Add(ctx context.Context, req *core.AddReq) (resp *core.AddResp, err error) {
 	resp = new(core.AddResp)
 	err = c.doPost("add", req, resp)
 	return
 }
 
 // NodeAddrInfo ...
-func NodeAddrInfo(req *core.AddrReq) (*core.AddrResp, error) {
+func NodeAddrInfo(ctx context.Context, req *core.AddrReq) (*core.AddrResp, error) {
 	return DefaultClient.NodeAPI().NodeAddrInfo(req)
 }
 
 // NodeAddrInfo ...
-func (c *client) NodeAddrInfo(req *core.AddrReq) (resp *core.AddrResp, err error) {
+func (c *client) NodeAddrInfo(ctx context.Context, req *core.AddrReq) (resp *core.AddrResp, err error) {
 	resp = new(core.AddrResp)
 	err = c.doPost("info", req, resp)
 	return
 }
 
 // Add ...
-func Add(req *core.AddReq) (resp *core.AddResp, err error) {
+func Add(ctx context.Context, req *core.AddReq) (resp *core.AddResp, err error) {
 	return DefaultClient.Add(req)
 }
 
 // UploadFile ...
-func UploadFile(req *core.UploadReq) (resp *core.UploadResp, err error) {
+func UploadFile(ctx context.Context, req *core.UploadReq) (resp *core.UploadResp, err error) {
 	return DefaultClient.DataStoreAPI().UploadFile(req)
 }

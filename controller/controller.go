@@ -165,9 +165,11 @@ func (c *Controller) GetUnixfs(ctx context.Context, urlPath string, endpoint str
 	}
 	_, ok := node.(files.Directory)
 	if ok {
-		node, err = c.dataNode().Unixfs().Get(context.TODO(), path.Join(resolvedPath, endpoint))
-		if err != nil {
-			return nil, err
+		if endpoint != "" {
+			node, err = c.dataNode().Unixfs().Get(context.TODO(), path.Join(resolvedPath, endpoint))
+			if err != nil {
+				return nil, err
+			}
 		}
 	}
 	return node, err

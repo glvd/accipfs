@@ -309,18 +309,42 @@ func (c *APIContext) get(ctx *gin.Context) {
 	if err != nil {
 		return
 	}
-	file, ok := fs.(files.File)
-	if ok {
-		_, err = io.Copy(ctx.Writer, file)
+	switch fs := fs.(type) {
+	case files.File:
+		_, err = io.Copy(ctx.Writer, fs)
 		if err != nil {
 			ctx.Writer.WriteHeader(http.StatusBadRequest)
 			return
 		}
 		return
+	case files.Directory:
+		view, _ := directoryView(fs)
+		JSON(ctx, view, nil)
+		return
 	}
+
 	log.Infow("wrong file path", "path", hash, "endpoint", ep)
 	ctx.Writer.WriteHeader(http.StatusBadRequest)
 	return
+}
+
+func directoryView(root files.Node) (interface{}, bool) {
+	switch fs := root.(type) {
+	case files.File:
+		return nil, false
+	case files.Directory:
+		var files []interface{}
+		entries := fs.Entries()
+		for entries.Next() {
+			if v, b := directoryView(entries.Node()); b {
+				files = append(files, v)
+			} else {
+				files = append(files, entries.Name())
+			}
+		}
+		return files, true
+	}
+	return nil, false
 }
 
 func ipfsGetURL(uri string) string {

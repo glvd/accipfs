@@ -15,15 +15,13 @@ require (
 	github.com/goextension/tool v0.0.2
 	github.com/google/uuid v1.1.1
 	github.com/gorilla/rpc v1.2.0
-	github.com/ipfs/fs-repo-migrations v1.6.3
 	github.com/ipfs/go-cid v0.0.7
 	github.com/ipfs/go-ds-flatfs v0.4.4
 	github.com/ipfs/go-ds-leveldb v0.4.2
-	github.com/ipfs/go-ipfs v0.6.1-0.20200724164245-5b28704e505e
+	github.com/ipfs/go-ipfs v0.6.0
 	github.com/ipfs/go-ipfs-config v0.9.0
 	github.com/ipfs/go-ipfs-files v0.0.8
 	github.com/ipfs/go-ipfs-http-client v0.0.5
-	github.com/ipfs/go-ipld-cbor v0.0.4
 	github.com/ipfs/go-ipld-format v0.2.0
 	github.com/ipfs/go-ipld-git v0.0.3
 	github.com/ipfs/go-log v1.0.4

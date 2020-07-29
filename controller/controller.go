@@ -173,6 +173,11 @@ func (c *Controller) GetUnixfs(ctx context.Context, urlPath string, endpoint str
 	return node, err
 }
 
+// PinAdd ...
+func (c *Controller) PinAdd(req *core.DataStoreReq) (*core.DataStoreResp, error) {
+	return &core.DataStoreResp{}, nil
+}
+
 // PinLs ...
 func (c *Controller) PinLs(req *core.DataStoreReq) (*core.DataStoreResp, error) {
 	ls, err := c.dataNode().Pin().Ls(context.TODO(), func(settings *options.PinLsSettings) error {

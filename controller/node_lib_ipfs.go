@@ -7,11 +7,13 @@ import (
 	"github.com/glvd/accipfs/plugin/loader"
 	ipfscore "github.com/ipfs/go-ipfs/core"
 	"github.com/ipfs/go-ipfs/core/coreapi"
+	"github.com/ipfs/go-ipfs/core/corerepo"
 	"github.com/ipfs/go-ipfs/repo"
 	"github.com/jbenet/goprocess"
 	"go.uber.org/atomic"
 	"runtime"
 	"sort"
+	"sync"
 
 	"os"
 	"path/filepath"
@@ -173,6 +175,13 @@ func (n *nodeLibIPFS) Start() (_err error) {
 		return _err
 	}
 	n.CoreAPI = api
+
+	errc := make(chan error)
+	go func() {
+		errc <- corerepo.PeriodicGC(context.TODO(), node)
+		close(errc)
+	}()
+
 	n.isRunning.Store(true)
 	log.Infow("datastore is ready")
 	return nil
@@ -253,4 +262,31 @@ func badgerSpec() map[string]interface{} {
 			"truncate":   true,
 		},
 	}
+}
+func merge(cs ...<-chan error) <-chan error {
+	var wg sync.WaitGroup
+	out := make(chan error)
+
+	// Start an output goroutine for each input channel in cs.  output
+	// copies values from c to out until c is closed, then calls wg.Done.
+	output := func(c <-chan error) {
+		for n := range c {
+			out <- n
+		}
+		wg.Done()
+	}
+	for _, c := range cs {
+		if c != nil {
+			wg.Add(1)
+			go output(c)
+		}
+	}
+
+	// Start a goroutine to close out once all the output goroutines are
+	// done.  This must start after the wg.Add call.
+	go func() {
+		wg.Wait()
+		close(out)
+	}()
+	return out
 }

@@ -46,7 +46,7 @@ func CreateNode(ctx context.Context, r repo.Repo) (intercore.CoreAPI, error) {
 		Online:                      true,
 		Routing:                     libp2p.NilRouterOption,
 		Permanent:                   true, // It is temporary way to signify that node is permanent
-		DisableEncryptedConnections: true,
+		DisableEncryptedConnections: false,
 		ExtraOpts: map[string]bool{
 			"pubsub": true,
 			"ipnsps": true,

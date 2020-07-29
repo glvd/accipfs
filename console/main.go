@@ -2,6 +2,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 	_ "net/http/pprof"
@@ -74,4 +75,23 @@ func waitingInterruptSignal() {
 	sigs := make(chan os.Signal)
 	signal.Notify(sigs, os.Interrupt)
 	<-sigs
+}
+
+func sysRoutineRun(f func(ctx context.Context, ch chan<- error)) {
+	ctx, cancelFunc := context.WithCancel(context.TODO())
+	done := make(chan error)
+	sigs := make(chan os.Signal)
+	signal.Notify(sigs, os.Interrupt)
+	if f != nil {
+		f(ctx, done)
+	}
+	select {
+	case <-sigs:
+		cancelFunc()
+	case v := <-done:
+		if v != nil {
+			cancelFunc()
+			panic(v)
+		}
+	}
 }

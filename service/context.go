@@ -5,19 +5,18 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
+	"github.com/gin-gonic/gin"
+	"github.com/glvd/accipfs/config"
 	"github.com/glvd/accipfs/controller"
+	"github.com/glvd/accipfs/core"
+	files "github.com/ipfs/go-ipfs-files"
+	ic "github.com/libp2p/go-libp2p-core/crypto"
+	"github.com/libp2p/go-libp2p-core/peer"
 	ma "github.com/multiformats/go-multiaddr"
+	"go.uber.org/atomic"
 	"io"
 	"net"
 	"net/http"
-	"strings"
-
-	"github.com/gin-gonic/gin"
-	"github.com/glvd/accipfs/config"
-	"github.com/glvd/accipfs/core"
-	ic "github.com/libp2p/go-libp2p-core/crypto"
-	"github.com/libp2p/go-libp2p-core/peer"
-	"go.uber.org/atomic"
 )
 
 // APIContext ...
@@ -280,36 +279,47 @@ func (c *APIContext) id(ctx *gin.Context) {
 
 func (c *APIContext) get(ctx *gin.Context) {
 	hash := ctx.Param("hash")
-	uri := []string{"ipfs", hash}
+	ep := ctx.Param("endpoint")
 
-	if ep := ctx.Param("endpoint"); ep != "" {
-		uri = append(uri, ep)
-	}
-
-	url := ipfsGetURL(strings.Join(uri, "/"))
-	log.Infow("visit", "url", url)
-	get, err := http.Get(url)
-	if err != nil {
-		log.Errorw("get source failed", "err", err)
-		ctx.Writer.WriteHeader(http.StatusBadRequest)
-		return
-	}
-	if get.Body == nil {
-		log.Errorw("response body not found", "err", err)
-		ctx.Writer.WriteHeader(http.StatusBadRequest)
-		return
-	}
-	err = c.m.ConnRemoteFromHash(hash)
+	//url := ipfsGetURL(strings.Join(uri, "/"))
+	//log.Infow("visit", "url", url)
+	//parsePath := path.New(hash)
+	//unixfs, err := c.c.GetUnixfs(parsePath)
+	//if err != nil {
+	//	log.Errorw("get unixfs failed", "err", err)
+	//	ctx.Writer.WriteHeader(http.StatusBadRequest)
+	//	return
+	//}
+	//get, err := http.Get(url)
+	//if err != nil {
+	//	log.Errorw("get source failed", "err", err)
+	//	ctx.Writer.WriteHeader(http.StatusBadRequest)
+	//	return
+	//}
+	//if get.Body == nil {
+	//	log.Errorw("response body not found", "err", err)
+	//	ctx.Writer.WriteHeader(http.StatusBadRequest)
+	//	return
+	//}
+	err := c.m.ConnRemoteFromHash(hash)
 	if err != nil {
 		log.Warnw("no accelerator node to connect", "err", err)
 	}
-
-	_, err = io.Copy(ctx.Writer, get.Body)
+	fs, err := c.c.GetUnixfs(ctx.Request.Context(), hash, ep)
 	if err != nil {
-		log.Infow("copy failed", "err", err)
-		ctx.Writer.WriteHeader(http.StatusBadRequest)
 		return
 	}
+	file, ok := fs.(files.File)
+	if ok {
+		_, err = io.Copy(ctx.Writer, file)
+		if err != nil {
+			ctx.Writer.WriteHeader(http.StatusBadRequest)
+			return
+		}
+		return
+	}
+	log.Infow("wrong file path", "path", hash, "endpoint", ep)
+	ctx.Writer.WriteHeader(http.StatusBadRequest)
 	return
 }
 

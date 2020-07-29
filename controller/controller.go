@@ -5,6 +5,7 @@ import (
 	"github.com/glvd/accipfs/config"
 	files "github.com/ipfs/go-ipfs-files"
 	"github.com/ipfs/interface-go-ipfs-core/options"
+	"github.com/ipfs/interface-go-ipfs-core/path"
 	"os"
 
 	//"github.com/glvd/accipfs/contract/dtag"
@@ -145,6 +146,31 @@ func (c *Controller) ID(ctx context.Context) (*core.DataStoreInfo, error) {
 // DataStoreAPI ...
 func (c *Controller) DataStoreAPI() core.DataStoreAPI {
 	return c
+}
+
+// Get ...
+func (c *Controller) GetUnixfs(ctx context.Context, urlPath string, endpoint string) (node files.Node, err error) {
+	parsedPath := path.New(urlPath)
+	if err := parsedPath.IsValid(); err != nil {
+		return nil, err
+	}
+
+	resolvedPath, err := c.dataNode().ResolvePath(ctx, parsedPath)
+	if err != nil {
+		return nil, err
+	}
+	node, err = c.dataNode().Unixfs().Get(ctx, resolvedPath)
+	if err != nil {
+		return nil, err
+	}
+	_, ok := node.(files.Directory)
+	if ok {
+		node, err = c.dataNode().Unixfs().Get(context.TODO(), path.Join(resolvedPath, endpoint))
+		if err != nil {
+			return nil, err
+		}
+	}
+	return node, err
 }
 
 // PinLs ...

@@ -1,11 +1,14 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"github.com/glvd/accipfs/client"
 	"github.com/glvd/accipfs/config"
 	"github.com/glvd/accipfs/core"
 	"github.com/spf13/cobra"
+	"os"
+	"os/signal"
 )
 
 func nodeCmd() *cobra.Command {
@@ -29,17 +32,35 @@ func nodeConnectCmd() *cobra.Command {
 			config.Initialize()
 			cfg := config.Global()
 			client.InitGlobalClient(&cfg)
-
+			ctx, cancelFunc := context.WithCancel(context.TODO())
+			done := make(chan error)
 			fmt.Printf("connect to %v\n", args)
-			req := &core.NodeLinkReq{Addrs: args, ByID: byid, Names: args}
-			resp, err := client.NodeLink(req)
-			if err != nil {
-				fmt.Printf("connect error: %v\n", err)
-				return
-			}
-			fmt.Println("success:")
-			for _, info := range resp.NodeInfos {
-				fmt.Printf("connected to:%+v\n", info.ID)
+			go func(c context.Context) {
+				var err error
+				defer func() {
+					done <- err
+				}()
+
+				req := &core.NodeLinkReq{Addrs: args, ByID: byid, Names: args}
+				resp, err := client.NodeLink(c, req)
+				if err != nil {
+					fmt.Printf("connect error: %v\n", err)
+					return
+				}
+				fmt.Println("success:")
+				for _, info := range resp.NodeInfos {
+					fmt.Printf("connected to:%+v\n", info.ID)
+				}
+			}(ctx)
+			sigs := make(chan os.Signal)
+			signal.Notify(sigs, os.Interrupt)
+			select {
+			case <-sigs:
+				cancelFunc()
+			case v := <-done:
+				if v != nil {
+					panic(v)
+				}
 			}
 			return
 		},
@@ -57,14 +78,32 @@ func nodePeerCmd() *cobra.Command {
 			config.Initialize()
 			cfg := config.Global()
 			client.InitGlobalClient(&cfg)
+			ctx, cancelFunc := context.WithCancel(context.TODO())
+			done := make(chan error)
+			go func(c context.Context) {
+				var err error
+				defer func() {
+					done <- err
+				}()
 
-			list, err := client.NodeList(&core.NodeListReq{})
-			if err != nil {
-				panic(err)
-			}
-			for id := range list.Nodes {
-				fmt.Printf("id:%v\n", id)
-				//fmt.Printf("info:%v\n", info.JSON())
+				list, err := client.NodeList(c, &core.NodeListReq{})
+				if err != nil {
+					panic(err)
+				}
+				for id := range list.Nodes {
+					fmt.Printf("id:%v\n", id)
+					//fmt.Printf("info:%v\n", info.JSON())
+				}
+			}(ctx)
+			sigs := make(chan os.Signal)
+			signal.Notify(sigs, os.Interrupt)
+			select {
+			case <-sigs:
+				cancelFunc()
+			case v := <-done:
+				if v != nil {
+					panic(v)
+				}
 			}
 			return
 		},

@@ -112,7 +112,7 @@ func (m *manager) SaveNode() (err error) {
 }
 
 // Link ...
-func (m *manager) Link(req *core.NodeLinkReq) (*core.NodeLinkResp, error) {
+func (m *manager) Link(ctx context.Context, req *core.NodeLinkReq) (*core.NodeLinkResp, error) {
 	fmt.Printf("connect info:%+v\n", req.Addrs)
 	if !m.local.Data().Initialized {
 		return &core.NodeLinkResp{}, errors.New("you are not ready for connection")
@@ -193,7 +193,7 @@ func (m *manager) Link(req *core.NodeLinkReq) (*core.NodeLinkResp, error) {
 }
 
 // Unlink ...
-func (m *manager) Unlink(req *core.NodeUnlinkReq) (*core.NodeUnlinkResp, error) {
+func (m *manager) Unlink(ctx context.Context, req *core.NodeUnlinkReq) (*core.NodeUnlinkResp, error) {
 	if len(req.Peers) == 0 {
 		return &core.NodeUnlinkResp{}, nil
 	}
@@ -219,7 +219,7 @@ func (m *manager) NodeAddrInfo(req *core.AddrReq) (*core.AddrResp, error) {
 }
 
 // List ...
-func (m *manager) List(req *core.NodeListReq) (*core.NodeListResp, error) {
+func (m *manager) List(ctx context.Context, req *core.NodeListReq) (*core.NodeListResp, error) {
 	//todo:need optimization
 	//nodes := make(map[string]core.NodeInfo)
 	//m.Range(func(key string, node core.Node) bool {
@@ -532,7 +532,7 @@ func (m *manager) AllNodes() (map[string]core.Node, int, error) {
 }
 
 // Add ...
-func (m *manager) Add(req *core.AddReq) (*core.AddResp, error) {
+func (m *manager) Add(ctx context.Context, req *core.AddReq) (*core.AddResp, error) {
 	m.local.Update(func(data *core.LocalData) {
 		data.LDs[req.Hash] = 0
 	})

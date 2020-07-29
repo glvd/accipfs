@@ -174,12 +174,12 @@ func (c *Controller) GetUnixfs(ctx context.Context, urlPath string, endpoint str
 }
 
 // PinAdd ...
-func (c *Controller) PinAdd(req *core.DataStoreReq) (*core.DataStoreResp, error) {
+func (c *Controller) PinAdd(ctx context.Context, req *core.DataStoreReq) (*core.DataStoreResp, error) {
 	return &core.DataStoreResp{}, nil
 }
 
 // PinLs ...
-func (c *Controller) PinLs(req *core.DataStoreReq) (*core.DataStoreResp, error) {
+func (c *Controller) PinLs(ctx context.Context, req *core.DataStoreReq) (*core.DataStoreResp, error) {
 	ls, err := c.dataNode().Pin().Ls(context.TODO(), func(settings *options.PinLsSettings) error {
 		settings.Type = "recursive"
 		return nil
@@ -205,7 +205,7 @@ func (c *Controller) HandleSwarm(info peer.AddrInfo) error {
 }
 
 // UploadFile ...
-func (c *Controller) UploadFile(req *core.UploadReq) (*core.UploadResp, error) {
+func (c *Controller) UploadFile(ctx context.Context, req *core.UploadReq) (*core.UploadResp, error) {
 	stat, e := os.Stat(req.Path)
 	if e != nil {
 		return &core.UploadResp{}, e
@@ -231,7 +231,14 @@ func (c *Controller) UploadFile(req *core.UploadReq) (*core.UploadResp, error) {
 		return nil
 	})
 
-	resolved, e := c.dataNode().Unixfs().Add(context.TODO(), node, opts)
+	resolved, e := c.dataNode().Unixfs().Add(ctx, node, opts)
+	if e != nil {
+		return &core.UploadResp{}, e
+	}
+	e = c.dataNode().Pin().Add(ctx, resolved, func(settings *options.PinAddSettings) error {
+		settings.Recursive = true
+		return nil
+	})
 	if e != nil {
 		return &core.UploadResp{}, e
 	}

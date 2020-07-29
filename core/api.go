@@ -1,6 +1,7 @@
 package core
 
 import (
+	"context"
 	"time"
 )
 
@@ -146,24 +147,24 @@ type NodeLinkResp struct {
 
 // API ...
 type API interface {
-	Ping(req *PingReq) (*PingResp, error)
-	ID(req *IDReq) (*IDResp, error)
-	Add(req *AddReq) (*AddResp, error)
+	Ping(ctx context.Context, req *PingReq) (*PingResp, error)
+	ID(ctx context.Context, req *IDReq) (*IDResp, error)
+	Add(ctx context.Context, req *AddReq) (*AddResp, error)
 	NodeAPI() NodeAPI
 	DataStoreAPI() DataStoreAPI
 }
 
 // NodeAPI ...
 type NodeAPI interface {
-	Add(req *AddReq) (*AddResp, error)
-	Link(req *NodeLinkReq) (*NodeLinkResp, error)
-	Unlink(req *NodeUnlinkReq) (*NodeUnlinkResp, error)
-	List(req *NodeListReq) (*NodeListResp, error)
+	Add(ctx context.Context, req *AddReq) (*AddResp, error)
+	Link(ctx context.Context, req *NodeLinkReq) (*NodeLinkResp, error)
+	Unlink(ctx context.Context, req *NodeUnlinkReq) (*NodeUnlinkResp, error)
+	List(ctx context.Context, req *NodeListReq) (*NodeListResp, error)
 	NodeAddrInfo(req *AddrReq) (*AddrResp, error)
 }
 
 // DataStoreAPI ...
 type DataStoreAPI interface {
-	PinLs(req *DataStoreReq) (*DataStoreResp, error)
-	UploadFile(req *UploadReq) (*UploadResp, error)
+	PinLs(ctx context.Context, req *DataStoreReq) (*DataStoreResp, error)
+	UploadFile(ctx context.Context, req *UploadReq) (*UploadResp, error)
 }

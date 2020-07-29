@@ -13,14 +13,14 @@ func (c *client) NodeAPI() core.NodeAPI {
 // Unlink ...
 func (c *client) Unlink(ctx context.Context, req *core.NodeUnlinkReq) (resp *core.NodeUnlinkResp, err error) {
 	resp = new(core.NodeUnlinkResp)
-	err = c.doPost("node/unlink", req, resp)
+	err = c.doPost(ctx, "node/unlink", req, resp)
 	return
 }
 
 // NodeList ...
 func (c *client) List(ctx context.Context, req *core.NodeListReq) (resp *core.NodeListResp, err error) {
 	resp = new(core.NodeListResp)
-	err = c.doPost("node/list", req, resp)
+	err = c.doPost(ctx, "node/list", req, resp)
 	return
 }
 
@@ -32,7 +32,7 @@ func NodeList(ctx context.Context, req *core.NodeListReq) (resp *core.NodeListRe
 // Link ...
 func (c *client) Link(ctx context.Context, req *core.NodeLinkReq) (resp *core.NodeLinkResp, err error) {
 	resp = new(core.NodeLinkResp)
-	err = c.doPost("/node/link", req, resp)
+	err = c.doPost(ctx, "/node/link", req, resp)
 	return
 }
 

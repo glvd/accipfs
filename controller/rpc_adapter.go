@@ -20,7 +20,7 @@ type adapter struct {
 
 // ID ...
 func (a adapter) ID(r *http.Request, req *core.IDReq, resp *core.IDResp) error {
-	id, err := a.api.ID(req)
+	id, err := a.api.ID(r.Context(), req)
 	if err != nil {
 		return err
 	}

@@ -6,14 +6,12 @@ import (
 	"encoding/json"
 	"errors"
 	"github.com/glvd/accipfs/config"
+	"github.com/glvd/accipfs/core"
 	"io"
 	"net/http"
 	"net/url"
 	"strconv"
 	"strings"
-	"time"
-
-	"github.com/glvd/accipfs/core"
 )
 
 // DefaultClient ...
@@ -24,6 +22,7 @@ type client struct {
 	//ds   *httpapi.HttpApi
 	//node intercore.CoreAPI
 	cli *http.Client
+	ctx context.Context
 }
 
 type jsonResp struct {
@@ -67,7 +66,7 @@ func InitGlobalClient(cfg *config.Config) {
 // New ...
 func New(cfg *config.Config) core.API {
 	c := &http.Client{}
-	c.Timeout = cfg.API.Timeout * time.Second
+	//c.Timeout = cfg.API.Timeout * time.Second
 	//ma, err := multiaddr.NewMultiaddr(cfg.IPFSAPIAddr())
 	//if err != nil {
 	//	panic(err)
@@ -107,10 +106,14 @@ func (c *client) RequestURL(uri string) string {
 	}
 	return strings.Join([]string{c.host(), uri}, "/")
 }
-func (c *client) doGet(uri string, req url.Values, resp interface{}) error {
+
+func (c *client) doGet(ctx context.Context, uri string, req url.Values, resp interface{}) error {
 	request, err := http.NewRequest(http.MethodGet, requestQuery(c.RequestURL(uri), req), nil)
 	if err != nil {
 		return err
+	}
+	if ctx != nil {
+		request.WithContext(ctx)
 	}
 	response, err := c.cli.Do(request)
 	if err != nil {
@@ -118,7 +121,7 @@ func (c *client) doGet(uri string, req url.Values, resp interface{}) error {
 	}
 	return responseDecoder(response.Body, resp)
 }
-func (c *client) doPost(uri string, req, resp interface{}) error {
+func (c *client) doPost(ctx context.Context, uri string, req, resp interface{}) error {
 	reader, err := requestReader(req)
 	if err != nil {
 		return err
@@ -126,6 +129,9 @@ func (c *client) doPost(uri string, req, resp interface{}) error {
 	request, err := http.NewRequest(http.MethodPost, c.RequestURL(uri), reader)
 	if err != nil {
 		return err
+	}
+	if ctx != nil {
+		request.WithContext(ctx)
 	}
 	response, err := c.cli.Do(request)
 	if err != nil {
@@ -142,7 +148,7 @@ func Ping(ctx context.Context, req *core.PingReq) (resp *core.PingResp, err erro
 // Ping ...
 func (c *client) Ping(ctx context.Context, req *core.PingReq) (resp *core.PingResp, err error) {
 	resp = new(core.PingResp)
-	err = c.doGet("ping", nil, resp)
+	err = c.doGet(ctx, "ping", nil, resp)
 	return
 }
 
@@ -154,14 +160,14 @@ func ID(ctx context.Context, req *core.IDReq) (resp *core.IDResp, err error) {
 // ID ...
 func (c *client) ID(ctx context.Context, req *core.IDReq) (resp *core.IDResp, err error) {
 	resp = new(core.IDResp)
-	err = c.doPost("id", req, resp)
+	err = c.doPost(ctx, "id", req, resp)
 	return
 }
 
 // Add ...
 func (c *client) Add(ctx context.Context, req *core.AddReq) (resp *core.AddResp, err error) {
 	resp = new(core.AddResp)
-	err = c.doPost("add", req, resp)
+	err = c.doPost(ctx, "add", req, resp)
 	return
 }
 
@@ -173,7 +179,7 @@ func NodeAddrInfo(ctx context.Context, req *core.AddrReq) (*core.AddrResp, error
 // NodeAddrInfo ...
 func (c *client) NodeAddrInfo(ctx context.Context, req *core.AddrReq) (resp *core.AddrResp, err error) {
 	resp = new(core.AddrResp)
-	err = c.doPost("info", req, resp)
+	err = c.doPost(ctx, "info", req, resp)
 	return
 }
 

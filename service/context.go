@@ -319,6 +319,7 @@ func (c *APIContext) get(ctx *gin.Context) {
 		return
 	case files.Directory:
 		view, _ := directoryView(fs)
+		log.Infow("target is dir", "list", view)
 		JSON(ctx, view, nil)
 		return
 	}

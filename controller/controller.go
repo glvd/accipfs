@@ -148,7 +148,7 @@ func (c *Controller) DataStoreAPI() core.DataStoreAPI {
 	return c
 }
 
-// Get ...
+// GetUnixfs ...
 func (c *Controller) GetUnixfs(ctx context.Context, urlPath string, endpoint string) (node files.Node, err error) {
 	parsedPath := path.New(urlPath)
 	if err := parsedPath.IsValid(); err != nil {
@@ -164,12 +164,10 @@ func (c *Controller) GetUnixfs(ctx context.Context, urlPath string, endpoint str
 		return nil, err
 	}
 	_, ok := node.(files.Directory)
-	if ok {
-		if endpoint != "" {
-			node, err = c.dataNode().Unixfs().Get(context.TODO(), path.Join(resolvedPath, endpoint))
-			if err != nil {
-				return nil, err
-			}
+	if endpoint != "" && ok {
+		node, err = c.dataNode().Unixfs().Get(context.TODO(), path.Join(resolvedPath, endpoint))
+		if err != nil {
+			return nil, err
 		}
 	}
 	return node, err

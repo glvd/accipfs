@@ -160,7 +160,7 @@ type NodeAPI interface {
 	Link(ctx context.Context, req *NodeLinkReq) (*NodeLinkResp, error)
 	Unlink(ctx context.Context, req *NodeUnlinkReq) (*NodeUnlinkResp, error)
 	List(ctx context.Context, req *NodeListReq) (*NodeListResp, error)
-	NodeAddrInfo(req *AddrReq) (*AddrResp, error)
+	NodeAddrInfo(ctx context.Context, req *AddrReq) (*AddrResp, error)
 }
 
 // DataStoreAPI ...

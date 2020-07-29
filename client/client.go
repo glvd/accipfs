@@ -2,6 +2,7 @@ package client
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"errors"
 	"github.com/glvd/accipfs/config"
@@ -134,12 +135,12 @@ func (c *client) doPost(uri string, req, resp interface{}) error {
 }
 
 // Ping ...
-func Ping(req *core.PingReq) (resp *core.PingResp, err error) {
-	return DefaultClient.Ping(req)
+func Ping(ctx context.Context, req *core.PingReq) (resp *core.PingResp, err error) {
+	return DefaultClient.Ping(ctx, req)
 }
 
 // Ping ...
-func (c *client) Ping(req *core.PingReq) (resp *core.PingResp, err error) {
+func (c *client) Ping(ctx context.Context, req *core.PingReq) (resp *core.PingResp, err error) {
 	resp = new(core.PingResp)
 	err = c.doGet("ping", nil, resp)
 	return
@@ -166,7 +167,7 @@ func (c *client) Add(ctx context.Context, req *core.AddReq) (resp *core.AddResp,
 
 // NodeAddrInfo ...
 func NodeAddrInfo(ctx context.Context, req *core.AddrReq) (*core.AddrResp, error) {
-	return DefaultClient.NodeAPI().NodeAddrInfo(req)
+	return DefaultClient.NodeAPI().NodeAddrInfo(ctx, req)
 }
 
 // NodeAddrInfo ...
@@ -178,10 +179,10 @@ func (c *client) NodeAddrInfo(ctx context.Context, req *core.AddrReq) (resp *cor
 
 // Add ...
 func Add(ctx context.Context, req *core.AddReq) (resp *core.AddResp, err error) {
-	return DefaultClient.Add(req)
+	return DefaultClient.Add(ctx, req)
 }
 
 // UploadFile ...
 func UploadFile(ctx context.Context, req *core.UploadReq) (resp *core.UploadResp, err error) {
-	return DefaultClient.DataStoreAPI().UploadFile(req)
+	return DefaultClient.DataStoreAPI().UploadFile(ctx, req)
 }

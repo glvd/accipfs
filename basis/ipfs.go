@@ -43,8 +43,14 @@ func CreateNode(ctx context.Context, r repo.Repo) (intercore.CoreAPI, error) {
 
 	// Construct the node
 	nodeOptions := &ipfscore.BuildCfg{
-		Online:  true,
-		Routing: libp2p.NilRouterOption,
+		Online:                      true,
+		Routing:                     libp2p.NilRouterOption,
+		Permanent:                   true, // It is temporary way to signify that node is permanent
+		DisableEncryptedConnections: true,
+		ExtraOpts: map[string]bool{
+			"pubsub": true,
+			"ipnsps": true,
+		},
 		//Routing: libp2p.DHTOption, // This option sets the node to be a full DHT node (both fetching and storing DHT Records)
 		// Routing: libp2p.DHTClientOption, // This option sets the node to be a client DHT node (only fetching records)
 		Repo: r,

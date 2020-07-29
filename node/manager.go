@@ -317,15 +317,10 @@ func (m *manager) Push(node core.Node) {
 
 // save nodes
 func (m *manager) loop() {
-	//if m.initLoad.CAS(false, true) {
-	//	err := m.LoadNode()
-	//	if err != nil {
-	//		log.Errorw("load node failed", "err", err)
-	//	}
-	//}
+
 	for {
 		<-m.t.C
-		fmt.Println("store new node")
+		log.Infow("store new node")
 		if m.ts != m.currentTS {
 			if err := m.SaveNode(); err != nil {
 				continue

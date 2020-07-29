@@ -17,6 +17,7 @@ import (
 	"io"
 	"net"
 	"net/http"
+	"reflect"
 )
 
 // APIContext ...
@@ -307,6 +308,8 @@ func (c *APIContext) get(ctx *gin.Context) {
 	}
 	fs, err := c.c.GetUnixfs(ctx.Request.Context(), hash, ep)
 	if err != nil {
+		log.Errorw("get unixfs failed", "err", err)
+		ctx.Writer.WriteHeader(http.StatusBadRequest)
 		return
 	}
 	switch fs := fs.(type) {
@@ -323,6 +326,8 @@ func (c *APIContext) get(ctx *gin.Context) {
 
 		JSON(ctx, view, nil)
 		return
+	default:
+		log.Infow("wrong file type", "type", reflect.TypeOf(fs).String())
 	}
 
 	log.Infow("wrong file path", "path", hash, "endpoint", ep)

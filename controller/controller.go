@@ -220,10 +220,11 @@ func (c *Controller) UploadFile(req *core.UploadReq) (*core.UploadResp, error) {
 		}
 		node = sf
 	}
-	opts := func(settings *options.UnixfsAddSettings) error {
+	opts := options.UnixfsAddOption(func(settings *options.UnixfsAddSettings) error {
 		settings.Pin = true
+		settings.OnlyHash = false
 		return nil
-	}
+	})
 
 	resolved, e := c.dataNode().Unixfs().Add(context.TODO(), node, opts)
 	if e != nil {

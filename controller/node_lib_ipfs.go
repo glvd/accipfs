@@ -124,7 +124,7 @@ func (n *nodeLibIPFS) createRepo(ctx context.Context) error {
 	if err != nil {
 		return err
 	}
-
+	cfg.Datastore.Spec = badgerSpec()
 	// Create the repo with the config
 	err = fsrepo.Init(n.configRoot, cfg)
 	if err != nil {
@@ -132,4 +132,17 @@ func (n *nodeLibIPFS) createRepo(ctx context.Context) error {
 	}
 
 	return nil
+}
+
+func badgerSpec() map[string]interface{} {
+	return map[string]interface{}{
+		"type":   "measure",
+		"prefix": "badger.datastore",
+		"child": map[string]interface{}{
+			"type":       "badgerds",
+			"path":       "badgerds",
+			"syncWrites": false,
+			"truncate":   true,
+		},
+	}
 }

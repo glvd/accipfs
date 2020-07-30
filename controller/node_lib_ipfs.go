@@ -28,9 +28,10 @@ type nodeLibIPFS struct {
 	isRunning  *atomic.Bool
 	configRoot string
 	intercore.CoreAPI
-	repo    repo.Repo
-	node    *ipfscore.IpfsNode
-	plugins *loader.PluginLoader
+	repo       repo.Repo
+	node       *ipfscore.IpfsNode
+	plugins    *loader.PluginLoader
+	nodeConfig *ipfscore.BuildCfg
 }
 
 var _ core.ControllerService = &nodeLibIPFS{}
@@ -80,7 +81,7 @@ func printVersion() {
 
 // Start ...
 func (n *nodeLibIPFS) Start() (err error) {
-	ipfsNode, err := startIPFSNode(n.ctx, n.configRoot)
+	ipfsNode, err := n.startIPFSNode(n.ctx, n.configRoot)
 	if err != nil {
 		return err
 	}
@@ -171,7 +172,7 @@ func badgerSpec() map[string]interface{} {
 	}
 }
 
-func startIPFSNode(ctx context.Context, path string) (intercore.CoreAPI, error) {
+func (n *nodeLibIPFS) startIPFSNode(ctx context.Context, path string) (intercore.CoreAPI, error) {
 	/// --- Part I: Getting a IPFS node running
 	fmt.Println("-- Getting an IPFS node running -- ")
 
@@ -179,11 +180,11 @@ func startIPFSNode(ctx context.Context, path string) (intercore.CoreAPI, error) 
 		return nil, err
 	}
 	// Spawning an ephemeral IPFS node
-	return createNode(ctx, path)
+	return n.createNode(ctx, path)
 }
 
 // Creates an IPFS node and returns its coreAPI
-func createNode(ctx context.Context, repoPath string) (intercore.CoreAPI, error) {
+func (n *nodeLibIPFS) createNode(ctx context.Context, repoPath string) (intercore.CoreAPI, error) {
 	// Open the repo
 	repo, err := fsrepo.Open(repoPath)
 	if err != nil {
@@ -198,12 +199,13 @@ func createNode(ctx context.Context, repoPath string) (intercore.CoreAPI, error)
 		// Routing: libp2p.DHTClientOption, // This option sets the node to be a client DHT node (only fetching records)
 		Repo: repo,
 	}
+	n.nodeConfig = nodeOptions
 
 	node, err := ipfscore.NewNode(ctx, nodeOptions)
 	if err != nil {
 		return nil, err
 	}
-
+	n.node = node
 	// Attach the Core API to the constructed node
 	return coreapi.NewCoreAPI(node)
 }

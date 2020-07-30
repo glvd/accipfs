@@ -2,10 +2,12 @@ package controller
 
 import (
 	"context"
+	"encoding/base64"
 	"github.com/glvd/accipfs/config"
 	files "github.com/ipfs/go-ipfs-files"
 	"github.com/ipfs/interface-go-ipfs-core/options"
 	"github.com/ipfs/interface-go-ipfs-core/path"
+	ic "github.com/libp2p/go-libp2p-core/crypto"
 	"os"
 
 	//"github.com/glvd/accipfs/contract/dtag"
@@ -140,7 +142,34 @@ func (c *Controller) infoNode() *nodeBinETH {
 
 // ID ...
 func (c *Controller) ID(ctx context.Context) (*core.DataStoreInfo, error) {
-	return &core.DataStoreInfo{}, nil
+	addrs, err := c.ipfsNode.CoreAPI.Swarm().LocalAddrs(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	dsi := &core.DataStoreInfo{
+		ID:              "",
+		PublicKey:       "",
+		Addresses:       nil,
+		AgentVersion:    "",
+		ProtocolVersion: "",
+	}
+	var addrStr []string
+	for _, addr := range addrs {
+		addrStr = append(addrStr, addr.String())
+	}
+	dsi.Addresses = addrStr
+	dsi.ID = c.ipfsNode.node.Identity.Pretty()
+	key, err := c.ipfsNode.node.Identity.ExtractPublicKey()
+	if err != nil {
+		return nil, err
+	}
+	pkb, err := ic.MarshalPublicKey(key)
+	if err != nil {
+		return nil, err
+	}
+	dsi.PublicKey = base64.StdEncoding.EncodeToString(pkb)
+	return dsi, nil
 }
 
 // DataStoreAPI ...

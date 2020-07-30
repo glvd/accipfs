@@ -281,7 +281,6 @@ func (c *APIContext) id(ctx *gin.Context) {
 func (c *APIContext) get(ctx *gin.Context) {
 	hash := ctx.Param("hash")
 	ep := ctx.Param("endpoint")
-	log.Info("---------------------------call api get request---------------------------")
 
 	err := c.m.ConnRemoteFromHash(hash)
 	if err != nil {
@@ -295,7 +294,6 @@ func (c *APIContext) get(ctx *gin.Context) {
 	}
 	switch fs := fs.(type) {
 	case files.File:
-		log.Info("---------------------------data copy---------------------------")
 		_, err = io.Copy(ctx.Writer, fs)
 		if err != nil {
 			ctx.Writer.WriteHeader(http.StatusBadRequest)

@@ -281,27 +281,8 @@ func (c *APIContext) id(ctx *gin.Context) {
 func (c *APIContext) get(ctx *gin.Context) {
 	hash := ctx.Param("hash")
 	ep := ctx.Param("endpoint")
+	log.Info("---------------------------call api get request---------------------------")
 
-	//url := ipfsGetURL(strings.Join(uri, "/"))
-	//log.Infow("visit", "url", url)
-	//parsePath := path.New(hash)
-	//unixfs, err := c.c.GetUnixfs(parsePath)
-	//if err != nil {
-	//	log.Errorw("get unixfs failed", "err", err)
-	//	ctx.Writer.WriteHeader(http.StatusBadRequest)
-	//	return
-	//}
-	//get, err := http.Get(url)
-	//if err != nil {
-	//	log.Errorw("get source failed", "err", err)
-	//	ctx.Writer.WriteHeader(http.StatusBadRequest)
-	//	return
-	//}
-	//if get.Body == nil {
-	//	log.Errorw("response body not found", "err", err)
-	//	ctx.Writer.WriteHeader(http.StatusBadRequest)
-	//	return
-	//}
 	err := c.m.ConnRemoteFromHash(hash)
 	if err != nil {
 		log.Warnw("no accelerator node to connect", "err", err)
@@ -314,6 +295,7 @@ func (c *APIContext) get(ctx *gin.Context) {
 	}
 	switch fs := fs.(type) {
 	case files.File:
+		log.Info("---------------------------data copy---------------------------")
 		_, err = io.Copy(ctx.Writer, fs)
 		if err != nil {
 			ctx.Writer.WriteHeader(http.StatusBadRequest)

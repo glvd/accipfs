@@ -153,7 +153,7 @@ func (n *nodeLibIPFS) Start() (_err error) {
 	}
 	fmt.Println("repo path:", repoPath)
 	if !fsrepo.IsInitialized(repoPath) {
-		if err := n.Initialize(); err != nil {
+		if err := createRepo(n.ctx, repoPath); err != nil {
 			return err
 		}
 	}
@@ -231,7 +231,7 @@ func (n *nodeLibIPFS) Initialize() error {
 	//	return err
 	//}
 	// Create a Temporary Repo
-	if err := n.createRepo(n.ctx); err != nil {
+	if err := createRepo(n.ctx, n.configRoot); err != nil {
 		return fmt.Errorf("failed to create temp repo: %s", err)
 	}
 
@@ -251,7 +251,7 @@ func (n *nodeLibIPFS) MessageHandle(f func(s string)) {
 
 }
 
-func (n *nodeLibIPFS) createRepo(ctx context.Context) error {
+func createRepo(ctx context.Context, repoPath string) error {
 
 	identity, err := ipfsconfig.CreateIdentity(os.Stdout, []options.KeyGenerateOption{options.Key.Type(options.Ed25519Key)})
 	if err != nil {
@@ -265,7 +265,7 @@ func (n *nodeLibIPFS) createRepo(ctx context.Context) error {
 	}
 	cfg.Datastore.Spec = badgerSpec()
 	// Create the repo with the config
-	err = fsrepo.Init(n.configRoot, cfg)
+	err = fsrepo.Init(repoPath, cfg)
 	if err != nil {
 		return fmt.Errorf("failed to init ephemeral node: %s", err)
 	}

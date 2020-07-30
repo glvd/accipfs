@@ -11,6 +11,7 @@ import (
 	"github.com/ipfs/go-ipfs/repo"
 	"github.com/jbenet/goprocess"
 	"go.uber.org/atomic"
+	"io/ioutil"
 	"runtime"
 	"sort"
 	"sync"
@@ -146,14 +147,18 @@ func (n *nodeLibIPFS) Start() (_err error) {
 			log.Errorf("setting file descriptor limit: %s", err)
 		}
 	}
-
-	if !fsrepo.IsInitialized(n.configRoot) {
+	repoPath, err := ioutil.TempDir("", "ipfs-shell")
+	if err != nil {
+		return fmt.Errorf("failed to get temp dir: %s", err)
+	}
+	fmt.Println("repo path:", repoPath)
+	if !fsrepo.IsInitialized(repoPath) {
 		if err := n.Initialize(); err != nil {
 			return err
 		}
 	}
 
-	repo, err := basis.OpenRepo(n.configRoot)
+	repo, err := basis.OpenRepo(repoPath)
 	if err != nil {
 		return err
 	}
@@ -247,6 +252,7 @@ func (n *nodeLibIPFS) MessageHandle(f func(s string)) {
 }
 
 func (n *nodeLibIPFS) createRepo(ctx context.Context) error {
+
 	identity, err := ipfsconfig.CreateIdentity(os.Stdout, []options.KeyGenerateOption{options.Key.Type(options.Ed25519Key)})
 	if err != nil {
 		return err

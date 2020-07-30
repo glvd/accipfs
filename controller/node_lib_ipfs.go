@@ -3,15 +3,10 @@ package controller
 import (
 	"context"
 	"fmt"
-	"github.com/glvd/accipfs/basis"
 	"github.com/glvd/accipfs/plugin/loader"
 	ipfscore "github.com/ipfs/go-ipfs/core"
-	"github.com/ipfs/go-ipfs/core/coreapi"
-	"github.com/ipfs/go-ipfs/core/corerepo"
 	"github.com/ipfs/go-ipfs/repo"
-	"github.com/jbenet/goprocess"
 	"go.uber.org/atomic"
-	"io/ioutil"
 	"runtime"
 	"sort"
 	"sync"
@@ -23,9 +18,7 @@ import (
 	"github.com/glvd/accipfs/core"
 	ipfsversion "github.com/ipfs/go-ipfs"
 	ipfsconfig "github.com/ipfs/go-ipfs-config"
-	utilmain "github.com/ipfs/go-ipfs/cmd/ipfs/util"
 	"github.com/ipfs/go-ipfs/repo/fsrepo"
-	mprome "github.com/ipfs/go-metrics-prometheus"
 	intercore "github.com/ipfs/interface-go-ipfs-core"
 	"github.com/ipfs/interface-go-ipfs-core/options"
 )
@@ -66,10 +59,10 @@ func setupPlugins(externalPluginsPath string) (*loader.PluginLoader, error) {
 func newNodeLibIPFS(cfg *config.Config) *nodeLibIPFS {
 	ctx, cancel := context.WithCancel(context.Background())
 	root := filepath.Join(cfg.Path, ".ipfs")
-	plugins, err := setupPlugins("")
-	if err != nil {
-		panic(err)
-	}
+	//plugins, err := setupPlugins("")
+	//if err != nil {
+	//	panic(err)
+	//}
 
 	return &nodeLibIPFS{
 		ctx:        ctx,
@@ -77,7 +70,7 @@ func newNodeLibIPFS(cfg *config.Config) *nodeLibIPFS {
 		cfg:        cfg,
 		configRoot: root,
 		isRunning:  atomic.NewBool(false),
-		plugins:    plugins,
+		//plugins:    plugins,
 	}
 }
 func printVersion() {
@@ -124,81 +117,85 @@ func printSwarmAddrs(node *ipfscore.IpfsNode) {
 
 // Start ...
 func (n *nodeLibIPFS) Start() (_err error) {
-	err := mprome.Inject()
-	if err != nil {
-		log.Errorf("Injecting prometheus handler for metrics failed with message: %s\n", err.Error())
-	}
-	// let the user know we're going.
-	fmt.Printf("Initializing daemon...\n")
+	ipfsNode := startIPFSNode()
+	n.CoreAPI = ipfsNode
+	//return nil
 
-	defer func() {
-		if _err != nil {
-			// Print an extra line before any errors. This could go
-			// in the commands lib but doesn't really make sense for
-			// all commands.
-			fmt.Println(_err)
-		}
-	}()
-
-	printVersion()
-
-	if true {
-		if _, _, err := utilmain.ManageFdLimit(); err != nil {
-			log.Errorf("setting file descriptor limit: %s", err)
-		}
-	}
-	repoPath, err := ioutil.TempDir("", "ipfs-shell")
-	if err != nil {
-		return fmt.Errorf("failed to get temp dir: %s", err)
-	}
-	fmt.Println("repo path:", repoPath)
-	if !fsrepo.IsInitialized(repoPath) {
-		if err := createRepo(n.ctx, repoPath); err != nil {
-			return err
-		}
-	}
-
-	repo, err := basis.OpenRepo(repoPath)
-	if err != nil {
-		return err
-	}
-	n.repo = repo
-
-	node, err := basis.CreateNode(n.ctx, repo)
-	if err != nil {
-		return err
-	}
-	n.node = node
-	node.IsDaemon = true
-	if node.PNetFingerprint != nil {
-		fmt.Println("Swarm is limited to private network of peers with the swarm key")
-		fmt.Printf("Swarm key fingerprint: %x\n", node.PNetFingerprint)
-	}
-
-	printSwarmAddrs(node)
-	// Attach the Core API to the constructed node
-
-	_err = n.plugins.Start(node)
-	if _err != nil {
-		return _err
-	}
-	node.Process.AddChild(goprocess.WithTeardown(n.plugins.Close))
-	api, _err := coreapi.NewCoreAPI(node)
-	if _err != nil {
-		return _err
-	}
-	n.CoreAPI = api
-
-	errc := make(chan error)
-	go func() {
-		errc <- corerepo.PeriodicGC(context.TODO(), node)
-		close(errc)
-	}()
+	//err := mprome.Inject()
+	//if err != nil {
+	//	log.Errorf("Injecting prometheus handler for metrics failed with message: %s\n", err.Error())
+	//}
+	//// let the user know we're going.
+	//fmt.Printf("Initializing daemon...\n")
+	//
+	//defer func() {
+	//	if _err != nil {
+	//		// Print an extra line before any errors. This could go
+	//		// in the commands lib but doesn't really make sense for
+	//		// all commands.
+	//		fmt.Println(_err)
+	//	}
+	//}()
+	//
+	//printVersion()
+	//
+	//if true {
+	//	if _, _, err := utilmain.ManageFdLimit(); err != nil {
+	//		log.Errorf("setting file descriptor limit: %s", err)
+	//	}
+	//}
+	//repoPath, err := ioutil.TempDir("", "ipfs-shell")
+	//if err != nil {
+	//	return fmt.Errorf("failed to get temp dir: %s", err)
+	//}
+	//fmt.Println("repo path:", repoPath)
+	//if !fsrepo.IsInitialized(repoPath) {
+	//	if err := createRepo(n.ctx, repoPath); err != nil {
+	//		return err
+	//	}
+	//}
+	//
+	//repo, err := basis.OpenRepo(repoPath)
+	//if err != nil {
+	//	return err
+	//}
+	//n.repo = repo
+	//
+	//node, err := basis.CreateNode(n.ctx, repo)
+	//if err != nil {
+	//	return err
+	//}
+	//n.node = node
+	//node.IsDaemon = true
+	//if node.PNetFingerprint != nil {
+	//	fmt.Println("Swarm is limited to private network of peers with the swarm key")
+	//	fmt.Printf("Swarm key fingerprint: %x\n", node.PNetFingerprint)
+	//}
+	//
+	//printSwarmAddrs(node)
+	//// Attach the Core API to the constructed node
+	//
+	//_err = n.plugins.Start(node)
+	//if _err != nil {
+	//	return _err
+	//}
+	//node.Process.AddChild(goprocess.WithTeardown(n.plugins.Close))
+	//api, _err := coreapi.NewCoreAPI(node)
+	//if _err != nil {
+	//	return _err
+	//}
+	//n.CoreAPI = api
+	//
+	//errc := make(chan error)
+	//go func() {
+	//	errc <- corerepo.PeriodicGC(context.TODO(), node)
+	//	close(errc)
+	//}()
 
 	n.isRunning.Store(true)
 	log.Infow("datastore is ready")
 
-	merge(errc)
+	//merge(errc)
 
 	return nil
 }

@@ -37,6 +37,7 @@ type nodeLibIPFS struct {
 	configRoot string
 	intercore.CoreAPI
 	repo    repo.Repo
+	node    *ipfscore.IpfsNode
 	plugins *loader.PluginLoader
 }
 
@@ -162,6 +163,13 @@ func (n *nodeLibIPFS) Start() (_err error) {
 	if err != nil {
 		return err
 	}
+	n.node = node
+	node.IsDaemon = true
+	if node.PNetFingerprint != nil {
+		fmt.Println("Swarm is limited to private network of peers with the swarm key")
+		fmt.Printf("Swarm key fingerprint: %x\n", node.PNetFingerprint)
+	}
+
 	printSwarmAddrs(node)
 	// Attach the Core API to the constructed node
 
@@ -184,6 +192,9 @@ func (n *nodeLibIPFS) Start() (_err error) {
 
 	n.isRunning.Store(true)
 	log.Infow("datastore is ready")
+
+	merge(errc)
+
 	return nil
 }
 
@@ -193,6 +204,11 @@ func (n *nodeLibIPFS) Stop() error {
 		n.cancel()
 		n.cancel = nil
 	}
+	if n.node != nil {
+		n.node.Close()
+		n.node = nil
+	}
+
 	if n.repo != nil {
 		n.repo.Close()
 		n.repo = nil

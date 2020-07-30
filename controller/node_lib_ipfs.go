@@ -9,6 +9,8 @@ import (
 	ipfsversion "github.com/ipfs/go-ipfs"
 	ipfsconfig "github.com/ipfs/go-ipfs-config"
 	ipfscore "github.com/ipfs/go-ipfs/core"
+	"github.com/ipfs/go-ipfs/core/coreapi"
+	"github.com/ipfs/go-ipfs/core/node/libp2p"
 	"github.com/ipfs/go-ipfs/repo"
 	"github.com/ipfs/go-ipfs/repo/fsrepo"
 	intercore "github.com/ipfs/interface-go-ipfs-core"
@@ -178,4 +180,30 @@ func startIPFSNode(ctx context.Context, path string) (intercore.CoreAPI, error) 
 	}
 	// Spawning an ephemeral IPFS node
 	return createNode(ctx, path)
+}
+
+// Creates an IPFS node and returns its coreAPI
+func createNode(ctx context.Context, repoPath string) (intercore.CoreAPI, error) {
+	// Open the repo
+	repo, err := fsrepo.Open(repoPath)
+	if err != nil {
+		return nil, err
+	}
+
+	// Construct the node
+
+	nodeOptions := &ipfscore.BuildCfg{
+		Online:  true,
+		Routing: libp2p.DHTOption, // This option sets the node to be a full DHT node (both fetching and storing DHT Records)
+		// Routing: libp2p.DHTClientOption, // This option sets the node to be a client DHT node (only fetching records)
+		Repo: repo,
+	}
+
+	node, err := ipfscore.NewNode(ctx, nodeOptions)
+	if err != nil {
+		return nil, err
+	}
+
+	// Attach the Core API to the constructed node
+	return coreapi.NewCoreAPI(node)
 }

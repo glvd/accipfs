@@ -397,11 +397,13 @@ func (m *manager) mainProc(v interface{}) {
 			m.connectRemoteDataStore(info.DataStore)
 		}
 	}
-
-	for !n.IsClosed() {
+	if !n.IsClosed() {
 		fmt.Println("node added:", n.ID())
 		pushed = true
 		m.Push(n)
+	}
+
+	for !n.IsClosed() {
 
 		peerDone := m.syncPeers(n)
 		lds, err := n.LDs()

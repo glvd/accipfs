@@ -3,19 +3,21 @@ package controller
 import (
 	"context"
 	"encoding/base64"
+	"os"
+	"sync"
+	"time"
+
 	"github.com/glvd/accipfs/config"
+	"github.com/glvd/accipfs/core"
+	version "github.com/ipfs/go-ipfs"
 	files "github.com/ipfs/go-ipfs-files"
 	"github.com/ipfs/interface-go-ipfs-core/options"
 	"github.com/ipfs/interface-go-ipfs-core/path"
 	ic "github.com/libp2p/go-libp2p-core/crypto"
-	"os"
-
-	//"github.com/glvd/accipfs/contract/dtag"
-	"github.com/glvd/accipfs/core"
+	"github.com/libp2p/go-libp2p-core/host"
 	"github.com/libp2p/go-libp2p-core/peer"
+	"github.com/libp2p/go-libp2p/p2p/protocol/identify"
 	"go.uber.org/atomic"
-	"sync"
-	"time"
 )
 
 // ServiceIndex ...
@@ -142,34 +144,29 @@ func (c *Controller) infoNode() *nodeBinETH {
 
 // ID ...
 func (c *Controller) ID(ctx context.Context) (*core.DataStoreInfo, error) {
-	addrs, err := c.ipfsNode.CoreAPI.Swarm().LocalAddrs(ctx)
-	if err != nil {
-		return nil, err
-	}
+	ipfsNode := c.ipfsNode.node
+	info := new(core.DataStoreInfo)
+	info.ID = ipfsNode.Identity.Pretty()
 
-	dsi := &core.DataStoreInfo{
-		ID:              "",
-		PublicKey:       "",
-		Addresses:       nil,
-		AgentVersion:    "",
-		ProtocolVersion: "",
-	}
-	var addrStr []string
-	for _, addr := range addrs {
-		addrStr = append(addrStr, addr.String())
-	}
-	dsi.Addresses = addrStr
-	dsi.ID = c.ipfsNode.node.Identity.Pretty()
-	key, err := c.ipfsNode.node.Identity.ExtractPublicKey()
+	pk := ipfsNode.PrivateKey.GetPublic()
+	pkb, err := ic.MarshalPublicKey(pk)
 	if err != nil {
 		return nil, err
 	}
-	pkb, err := ic.MarshalPublicKey(key)
-	if err != nil {
-		return nil, err
+	info.PublicKey = base64.StdEncoding.EncodeToString(pkb)
+
+	if ipfsNode.PeerHost != nil {
+		addrs, err := peer.AddrInfoToP2pAddrs(host.InfoFromHost(ipfsNode.PeerHost))
+		if err != nil {
+			return nil, err
+		}
+		for _, a := range addrs {
+			info.Addresses = append(info.Addresses, a.String())
+		}
 	}
-	dsi.PublicKey = base64.StdEncoding.EncodeToString(pkb)
-	return dsi, nil
+	info.ProtocolVersion = identify.LibP2PVersion
+	info.AgentVersion = version.UserAgent
+	return info, nil
 }
 
 // DataStoreAPI ...

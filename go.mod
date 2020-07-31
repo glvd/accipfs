@@ -33,6 +33,7 @@ require (
 	github.com/ipfs/go-metrics-prometheus v0.0.2
 	github.com/ipfs/interface-go-ipfs-core v0.3.0
 	github.com/jbenet/goprocess v0.1.4
+	github.com/libp2p/go-libp2p v0.9.6
 	github.com/libp2p/go-libp2p-core v0.5.7
 	github.com/libp2p/go-libp2p-peerstore v0.2.6
 	github.com/libp2p/go-openssl v0.0.6 // indirect

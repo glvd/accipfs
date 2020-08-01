@@ -18,7 +18,6 @@ import (
 	"github.com/libp2p/go-libp2p-core/peer"
 	ma "github.com/multiformats/go-multiaddr"
 	mnet "github.com/multiformats/go-multiaddr-net"
-	"github.com/panjf2000/ants/v2"
 	"go.uber.org/atomic"
 )
 
@@ -434,6 +433,15 @@ func (m *manager) mainProc(v interface{}) {
 		<-peerDone
 		time.Sleep(30 * time.Second)
 	}
+}
+
+func (m *manager) getLinkData() <-chan bool {
+	ldDone := make(chan bool)
+	go func() {
+		ldDone <- true
+		return
+	}()
+	return ldDone
 }
 
 func (m *manager) connectRemoteDataStore(info core.DataStoreInfo) {

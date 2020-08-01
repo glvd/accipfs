@@ -409,6 +409,8 @@ func (m *manager) mainProc(v interface{}) {
 		m.syncPeers(wg, n)
 		wg.Add(1)
 		m.getLinkData(wg, n)
+		wg.Add(1)
+		m.syncInfo(wg, n)
 		//wait something done
 		wg.Wait()
 		time.Sleep(30 * time.Second)
@@ -655,4 +657,8 @@ func (m *manager) ConnRemoteFromHash(hash string) error {
 		}
 	}
 	return nil
+}
+
+func (m *manager) syncInfo(wg *sync.WaitGroup, n core.Node) {
+	defer wg.Done()
 }

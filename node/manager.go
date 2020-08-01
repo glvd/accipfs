@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/glvd/accipfs/controller"
+	"github.com/panjf2000/ants/v2"
 	"net"
 	"path/filepath"
 	"sync"
@@ -403,45 +404,43 @@ func (m *manager) mainProc(v interface{}) {
 	}
 
 	for !n.IsClosed() {
-
-		peerDone := m.syncPeers(n)
-		lds, err := n.LDs()
-		if err != nil {
-			fmt.Println("failed to get link data", err)
-			if err == ErrNoData {
-				continue
-			}
-			//close connect when found err?
-			return
-		}
-		for _, ld := range lds {
-			err := m.hashNodes.Update(ld, func(bytes []byte) (core.Marshaler, error) {
-				nodes := NewNodes()
-				err := nodes.Unmarshal(bytes)
-				if err != nil {
-					return nil, err
-				}
-				nodes.n[n.ID()] = true
-				return nodes, nil
-			})
-			if err != nil {
-				continue
-			}
-			fmt.Println("from:", n.ID(), "list:", ld)
-		}
+		wg := &sync.WaitGroup{}
+		wg.Add(1)
+		m.syncPeers(wg, n)
+		wg.Add(1)
+		m.getLinkData(wg, n)
 		//wait something done
-		<-peerDone
+		wg.Wait()
 		time.Sleep(30 * time.Second)
 	}
 }
 
-func (m *manager) getLinkData() <-chan bool {
-	ldDone := make(chan bool)
-	go func() {
-		ldDone <- true
+func (m *manager) getLinkData(wg *sync.WaitGroup, node core.Node) {
+	defer wg.Done()
+	ds, err := node.LDs()
+	if err != nil {
+		fmt.Println("failed to get link data", err)
+		if err == ErrNoData {
+			return
+		}
+		//close connect when found err?
 		return
-	}()
-	return ldDone
+	}
+	for _, ld := range ds {
+		err := m.hashNodes.Update(ld, func(bytes []byte) (core.Marshaler, error) {
+			nodes := NewNodes()
+			err := nodes.Unmarshal(bytes)
+			if err != nil {
+				return nil, err
+			}
+			nodes.n[node.ID()] = true
+			return nodes, nil
+		})
+		if err != nil {
+			continue
+		}
+		fmt.Println("from:", node.ID(), "list:", ld)
+	}
 }
 
 func (m *manager) connectRemoteDataStore(info core.DataStoreInfo) {
@@ -468,21 +467,17 @@ func (m *manager) connectRemoteDataStore(info core.DataStoreInfo) {
 
 }
 
-func (m *manager) syncPeers(n core.Node) <-chan bool {
-	done := make(chan bool)
-	go func() {
-		peers, err := n.Peers()
-		if err != nil {
-			done <- false
+func (m *manager) syncPeers(wg *sync.WaitGroup, n core.Node) {
+	defer wg.Done()
+	peers, err := n.Peers()
+	if err != nil {
+		return
+	}
+	for _, p := range peers {
+		if len(p.Addrs) != 0 {
+			_ = m.connectMultiAddr(p)
 		}
-		for _, p := range peers {
-			if len(p.Addrs) != 0 {
-				_ = m.connectMultiAddr(p)
-			}
-		}
-		done <- true
-	}()
-	return done
+	}
 }
 
 func decodeNode(m core.NodeManager, b []byte, api core.API) error {

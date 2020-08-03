@@ -403,41 +403,31 @@ func (m *manager) mainProc(v interface{}) {
 		wg.Add(1)
 		m.syncPeers(wg, n)
 		wg.Add(1)
-		m.getLinkData(wg, n)
-		wg.Add(1)
-		m.syncInfo(wg, n)
+		data, err := m.getLinkData(n)
+		if err == nil {
+			wg.Add(1)
+			m.syncLDs(wg, n, data)
+			wg.Add(1)
+			m.syncInfo(wg, n, data)
+		}
+
 		//wait something done
 		wg.Wait()
 		time.Sleep(30 * time.Second)
 	}
 }
 
-func (m *manager) getLinkData(wg *sync.WaitGroup, node core.Node) {
-	defer wg.Done()
+func (m *manager) getLinkData(node core.Node) ([]string, error) {
 	ds, err := node.LDs()
 	if err != nil {
 		fmt.Println("failed to get link data", err)
 		if err == ErrNoData {
-			return
+			return []string{}, nil
 		}
 		//close connect when found err?
-		return
+		return nil, err
 	}
-	for _, ld := range ds {
-		err := m.hashNodes.Update(ld, func(bytes []byte) (core.Marshaler, error) {
-			nodes := NewNodes()
-			err := nodes.Unmarshal(bytes)
-			if err != nil {
-				return nil, err
-			}
-			nodes.n[node.ID()] = true
-			return nodes, nil
-		})
-		if err != nil {
-			continue
-		}
-		fmt.Println("from:", node.ID(), "list:", ld)
-	}
+	return ds, nil
 }
 
 func (m *manager) connectRemoteDataStore(info core.DataStoreInfo) {
@@ -652,7 +642,26 @@ func (m *manager) ConnRemoteFromHash(hash string) error {
 	return nil
 }
 
-func (m *manager) syncInfo(wg *sync.WaitGroup, n core.Node) {
+func (m *manager) syncInfo(wg *sync.WaitGroup, node core.Node, lds []string) {
+	defer wg.Done()
+	for _, ld := range lds {
+		err := m.hashNodes.Update(ld, func(bytes []byte) (core.Marshaler, error) {
+			nodes := NewNodes()
+			err := nodes.Unmarshal(bytes)
+			if err != nil {
+				return nil, err
+			}
+			nodes.n[node.ID()] = true
+			return nodes, nil
+		})
+		if err != nil {
+			continue
+		}
+		fmt.Println("from:", node.ID(), "list:", ld)
+	}
 
+}
+
+func (m *manager) syncLDs(wg *sync.WaitGroup, node core.Node, data []string) {
 	defer wg.Done()
 }

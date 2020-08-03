@@ -390,10 +390,6 @@ func (m *manager) mainProc(v interface{}) {
 			m.local.Update(func(data *core.LocalData) {
 				data.Nodes[info.ID] = info
 			})
-			//err := m.nodes.SaveNode(info.ID, info)
-			//if err != nil {
-			//	log.Errorw("sotre nodes failed", "err", err)
-			//}
 			m.connectRemoteDataStore(info.DataStore)
 		}
 	}
@@ -402,9 +398,8 @@ func (m *manager) mainProc(v interface{}) {
 		pushed = true
 		m.Push(n)
 	}
-
+	wg := &sync.WaitGroup{}
 	for !n.IsClosed() {
-		wg := &sync.WaitGroup{}
 		wg.Add(1)
 		m.syncPeers(wg, n)
 		wg.Add(1)
@@ -574,6 +569,7 @@ func (m *manager) nodeGC() {
 				return
 			}
 			if deleted {
+				m.connectNodes.Delete(key)
 				m.local.Update(func(data *core.LocalData) {
 					delete(data.Nodes, keyStr)
 				})
@@ -586,12 +582,9 @@ func (m *manager) nodeGC() {
 		}
 		ping, err := v.Ping()
 		if err != nil {
-			m.connectNodes.Delete(key)
 			return true
 		}
 		if ping != "pong" {
-			m.connectNodes.Delete(key)
-
 			return true
 		}
 
@@ -660,5 +653,6 @@ func (m *manager) ConnRemoteFromHash(hash string) error {
 }
 
 func (m *manager) syncInfo(wg *sync.WaitGroup, n core.Node) {
+
 	defer wg.Done()
 }

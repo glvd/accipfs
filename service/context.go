@@ -106,7 +106,7 @@ func (c *APIContext) NodeAPI() core.NodeAPI {
 }
 
 // Add ...
-func (c *APIContext) Add(ctx context.Context, req *core.AddReq) (*core.AddResp, error) {
+func (c *APIContext) Add(ctx context.Context, req *core.NodeAddReq) (*core.NodeAddResp, error) {
 	return c.NodeAPI().Add(ctx, req)
 }
 
@@ -417,7 +417,7 @@ func (c *APIContext) datastorePinLs() gin.HandlerFunc {
 
 func (c *APIContext) add() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-		var req core.AddReq
+		var req core.NodeAddReq
 		err := ctx.BindJSON(&req)
 		if err != nil {
 			JSON(ctx, nil, err)

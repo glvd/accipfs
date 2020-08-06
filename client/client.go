@@ -165,8 +165,8 @@ func (c *client) ID(ctx context.Context, req *core.IDReq) (resp *core.IDResp, er
 }
 
 // Add ...
-func (c *client) Add(ctx context.Context, req *core.AddReq) (resp *core.AddResp, err error) {
-	resp = new(core.AddResp)
+func (c *client) Add(ctx context.Context, req *core.NodeAddReq) (resp *core.NodeAddResp, err error) {
+	resp = new(core.NodeAddResp)
 	err = c.doPost(ctx, "add", req, resp)
 	return
 }
@@ -184,7 +184,7 @@ func (c *client) NodeAddrInfo(ctx context.Context, req *core.AddrReq) (resp *cor
 }
 
 // Add ...
-func Add(ctx context.Context, req *core.AddReq) (resp *core.AddResp, err error) {
+func Add(ctx context.Context, req *core.NodeAddReq) (resp *core.NodeAddResp, err error) {
 	return DefaultClient.Add(ctx, req)
 }
 

@@ -103,8 +103,8 @@ const (
 	AddBoth
 )
 
-// AddReq ...
-type AddReq struct {
+// NodeAddReq ...
+type NodeAddReq struct {
 	//Setting options.UnixfsAddSettings
 	Type  AddType
 	JSNFO string
@@ -112,8 +112,8 @@ type AddReq struct {
 	Hash  string
 }
 
-// AddResp ...
-type AddResp struct {
+// NodeAddResp ...
+type NodeAddResp struct {
 	IsSuccess bool
 	Hash      string
 }
@@ -158,14 +158,14 @@ type NodeLinkResp struct {
 type API interface {
 	Ping(ctx context.Context, req *PingReq) (*PingResp, error)
 	ID(ctx context.Context, req *IDReq) (*IDResp, error)
-	Add(ctx context.Context, req *AddReq) (*AddResp, error)
+	Add(ctx context.Context, req *NodeAddReq) (*NodeAddResp, error)
 	NodeAPI() NodeAPI
 	DataStoreAPI() DataStoreAPI
 }
 
 // NodeAPI ...
 type NodeAPI interface {
-	Add(ctx context.Context, req *AddReq) (*AddResp, error)
+	Add(ctx context.Context, req *NodeAddReq) (*NodeAddResp, error)
 	Link(ctx context.Context, req *NodeLinkReq) (*NodeLinkResp, error)
 	Unlink(ctx context.Context, req *NodeUnlinkReq) (*NodeUnlinkResp, error)
 	List(ctx context.Context, req *NodeListReq) (*NodeListResp, error)

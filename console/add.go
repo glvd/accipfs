@@ -40,7 +40,7 @@ func addCmd() *cobra.Command {
 				if err != nil {
 					return
 				}
-				add, err := client.Add(c, &core.AddReq{
+				add, err := client.Add(c, &core.NodeAddReq{
 					Hash: file.Hash,
 				})
 				if err != nil {

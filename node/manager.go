@@ -524,11 +524,11 @@ func (m *manager) AllNodes() (map[string]core.Node, int, error) {
 }
 
 // Add ...
-func (m *manager) Add(ctx context.Context, req *core.AddReq) (*core.AddResp, error) {
+func (m *manager) Add(ctx context.Context, req *core.NodeAddReq) (*core.NodeAddResp, error) {
 	m.local.Update(func(data *core.LocalData) {
 		data.LDs[req.Hash] = 0
 	})
-	return &core.AddResp{
+	return &core.NodeAddResp{
 		IsSuccess: true,
 		Hash:      req.Hash,
 	}, nil

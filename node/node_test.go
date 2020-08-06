@@ -17,7 +17,7 @@ type dummyAPI struct {
 	id string
 }
 
-func (d *dummyAPI) Add(req *core.AddReq) (*core.AddResp, error) {
+func (d *dummyAPI) Add(req *core.NodeAddReq) (*core.NodeAddResp, error) {
 	panic("implement me")
 }
 

@@ -14,6 +14,14 @@ type DataStoreResp struct {
 	Pins []string
 }
 
+// DataStorePinReq ...
+type DataStorePinReq struct {
+}
+
+// DataStorePinResp ...
+type DataStorePinResp struct {
+}
+
 // PingReq ...
 type PingReq struct {
 }

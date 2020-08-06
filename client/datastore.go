@@ -22,6 +22,18 @@ func (c *client) PinLs(ctx context.Context, req *core.DataStoreReq) (resp *core.
 	return
 }
 
+// DataStorePinLs ...
+func DataStorePinAdd(ctx context.Context, req *core.DataStoreReq) (resp *core.DataStoreResp, err error) {
+	return DefaultClient.DataStoreAPI().PinLs(ctx, req)
+}
+
+// PinLs ...
+func (c *client) PinAdd(ctx context.Context, req *core.DataStorePinReq) (resp *core.DataStoreResp, err error) {
+	resp = new(core.DataStorePinResp)
+	err = c.doPost(ctx, "ds/pin/ls", req, resp)
+	return
+}
+
 // UploadFile ...
 func (c *client) UploadFile(ctx context.Context, req *core.UploadReq) (resp *core.UploadResp, err error) {
 	resp = new(core.UploadResp)

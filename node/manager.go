@@ -5,10 +5,8 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/glvd/accipfs/controller"
 	"github.com/panjf2000/ants/v2"
 	"net"
-	"path/filepath"
 	"sync"
 	"time"
 
@@ -24,21 +22,18 @@ import (
 
 type manager struct {
 	scdt.Listener
-	//initLoad        *atomic.Bool
 	loopOnce        *sync.Once
 	cfg             *config.Config
 	t               *time.Ticker
 	currentTS       int64
 	ts              int64
-	path            string
-	expPath         string
 	local           core.SafeLocalData
 	nodePool        *ants.PoolWithFunc
 	currentNodes    *atomic.Int32
 	connectNodes    sync.Map
 	disconnectNodes sync.Map
-	nodes           controller.Cacher //all node caches
-	hashNodes       controller.Cacher //hash cache nodes
+	nodes           Cacher //all node caches
+	hashNodes       Cacher //hash cache nodes
 	RequestLD       func() ([]string, error)
 	gc              *atomic.Bool
 	addrCB          func(info peer.AddrInfo) error
@@ -58,10 +53,10 @@ func InitManager(cfg *config.Config) (core.NodeManager, error) {
 		cfg:      cfg,
 		loopOnce: &sync.Once{},
 		//initLoad:  atomic.NewBool(false),
-		path:      filepath.Join(cfg.Path, _nodes),
-		expPath:   filepath.Join(cfg.Path, _expNodes),
-		nodes:     controller.NodeCacher(cfg),
-		hashNodes: controller.HashCacher(cfg),
+		//path:      filepath.Join(cfg.Path, _nodes),
+		//expPath:   filepath.Join(cfg.Path, _expNodes),
+		nodes:     NodeCacher(cfg),
+		hashNodes: HashCacher(cfg),
 		local:     data.Safe(),
 		t:         time.NewTicker(cfg.Node.BackupSeconds * time.Second),
 	}

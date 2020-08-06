@@ -37,7 +37,7 @@ func pinLsCmd() *cobra.Command {
 				defer func() {
 					done <- err
 				}()
-				pins, err := client.DataStorePinLs(c, &core.DataStoreReq{})
+				pins, err := client.DataStorePinLs(c, &core.DataStorePinLsReq{})
 				if err != nil {
 					panic(err)
 				}

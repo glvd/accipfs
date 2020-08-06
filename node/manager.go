@@ -312,10 +312,9 @@ func (m *manager) Push(node core.Node) {
 
 // save nodes
 func (m *manager) loop() {
-
 	for {
 		<-m.t.C
-		log.Infow("store new node")
+		log.Infow("backup connect nodes")
 		if m.ts != m.currentTS {
 			if err := m.SaveNode(); err != nil {
 				continue

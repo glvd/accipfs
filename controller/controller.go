@@ -200,12 +200,12 @@ func (c *Controller) GetUnixfs(ctx context.Context, urlPath string, endpoint str
 }
 
 // PinAdd ...
-func (c *Controller) PinAdd(ctx context.Context, req *core.DataStoreReq) (*core.DataStoreResp, error) {
-	return &core.DataStoreResp{}, nil
+func (c *Controller) PinAdd(ctx context.Context, req *core.DataStorePinAddReq) (*core.DataStorePinAddResp, error) {
+	return &core.DataStorePinAddResp{}, nil
 }
 
 // PinLs ...
-func (c *Controller) PinLs(ctx context.Context, req *core.DataStoreReq) (*core.DataStoreResp, error) {
+func (c *Controller) PinLs(ctx context.Context, req *core.DataStorePinLsReq) (*core.DataStorePinLsResp, error) {
 	ls, err := c.dataNode().Pin().Ls(context.TODO(), func(settings *options.PinLsSettings) error {
 		settings.Type = "recursive"
 		return nil
@@ -222,7 +222,7 @@ func (c *Controller) PinLs(ctx context.Context, req *core.DataStoreReq) (*core.D
 		log.Infow("show pins", "data", v.Path().Cid())
 		pins = append(pins, v.Path().Cid().String())
 	}
-	return &core.DataStoreResp{Pins: pins}, nil
+	return &core.DataStorePinLsResp{Pins: pins}, nil
 }
 
 // HandleSwarm ...

@@ -5,22 +5,22 @@ import (
 	"time"
 )
 
-// DataStoreReq ...
-type DataStoreReq struct {
+// DataStorePinLsReq ...
+type DataStorePinLsReq struct {
 }
 
-// DataStoreResp ...
-type DataStoreResp struct {
+// DataStorePinLsResp ...
+type DataStorePinLsResp struct {
 	Pins []string
 }
 
-// DataStorePinReq ...
-type DataStorePinReq struct {
+// DataStorePinAddReq ...
+type DataStorePinAddReq struct {
 	Pins []string
 }
 
-// DataStorePinResp ...
-type DataStorePinResp struct {
+// DataStorePinAddResp ...
+type DataStorePinAddResp struct {
 }
 
 // PingReq ...
@@ -174,7 +174,7 @@ type NodeAPI interface {
 
 // DataStoreAPI ...
 type DataStoreAPI interface {
-	PinLs(ctx context.Context, req *DataStoreReq) (*DataStoreResp, error)
-	PinAdd(ctx context.Context, req *DataStorePinReq) (*DataStorePinResp, error)
+	PinLs(ctx context.Context, req *DataStorePinLsReq) (*DataStorePinLsResp, error)
+	PinAdd(ctx context.Context, req *DataStorePinAddReq) (*DataStorePinAddResp, error)
 	UploadFile(ctx context.Context, req *UploadReq) (*UploadResp, error)
 }

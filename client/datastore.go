@@ -11,25 +11,25 @@ func (c *client) DataStoreAPI() core.DataStoreAPI {
 }
 
 // DataStorePinLs ...
-func DataStorePinLs(ctx context.Context, req *core.DataStoreReq) (resp *core.DataStoreResp, err error) {
+func DataStorePinLs(ctx context.Context, req *core.DataStorePinLsReq) (resp *core.DataStorePinLsResp, err error) {
 	return DefaultClient.DataStoreAPI().PinLs(ctx, req)
 }
 
 // PinLs ...
-func (c *client) PinLs(ctx context.Context, req *core.DataStoreReq) (resp *core.DataStoreResp, err error) {
-	resp = new(core.DataStoreResp)
+func (c *client) PinLs(ctx context.Context, req *core.DataStorePinLsReq) (resp *core.DataStorePinLsResp, err error) {
+	resp = new(core.DataStorePinLsResp)
 	err = c.doPost(ctx, "ds/pin/ls", req, resp)
 	return
 }
 
-// DataStorePinLs ...
-func DataStorePinAdd(ctx context.Context, req *core.DataStoreReq) (resp *core.DataStoreResp, err error) {
-	return DefaultClient.DataStoreAPI().PinLs(ctx, req)
+// DataStorePinAdd ...
+func DataStorePinAdd(ctx context.Context, req *core.DataStorePinAddReq) (resp *core.DataStorePinAddResp, err error) {
+	return DefaultClient.DataStoreAPI().PinAdd(ctx, req)
 }
 
 // PinLs ...
-func (c *client) PinAdd(ctx context.Context, req *core.DataStorePinReq) (resp *core.DataStoreResp, err error) {
-	resp = new(core.DataStorePinResp)
+func (c *client) PinAdd(ctx context.Context, req *core.DataStorePinAddReq) (resp *core.DataStorePinAddResp, err error) {
+	resp = new(core.DataStorePinAddResp)
 	err = c.doPost(ctx, "ds/pin/ls", req, resp)
 	return
 }

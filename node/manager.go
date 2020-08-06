@@ -654,7 +654,6 @@ func (m *manager) syncInfo(wg *sync.WaitGroup, node core.Node, lds []string) {
 		}
 		fmt.Println("from:", node.ID(), "list:", ld)
 	}
-
 }
 
 func (m *manager) syncLDs(wg *sync.WaitGroup, node core.Node, data []string) {

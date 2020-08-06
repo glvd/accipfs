@@ -81,7 +81,7 @@ func (c *APIContext) NodeAddrInfo(ctx context.Context, req *core.AddrReq) (*core
 }
 
 // PinLs ...
-func (c *APIContext) PinLs(ctx context.Context, req *core.DataStoreReq) (*core.DataStoreResp, error) {
+func (c *APIContext) PinLs(ctx context.Context, req *core.DataStorePinLsReq) (*core.DataStorePinLsResp, error) {
 	return c.DataStoreAPI().PinLs(ctx, req)
 }
 
@@ -410,7 +410,7 @@ func (c *APIContext) nodeList() func(ctx *gin.Context) {
 
 func (c *APIContext) datastorePinLs() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-		list, err := c.PinLs(ctx.Request.Context(), &core.DataStoreReq{})
+		list, err := c.PinLs(ctx.Request.Context(), &core.DataStorePinLsReq{})
 		JSON(ctx, list, err)
 	}
 }

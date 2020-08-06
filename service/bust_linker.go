@@ -103,7 +103,7 @@ func (l *BustLinker) afterStart() error {
 		data.Node.AddrInfo = info.AddrInfo
 	})
 
-	pins, err := l.api.DataStoreAPI().PinLs(timeout, &core.DataStoreReq{})
+	pins, err := l.api.DataStoreAPI().PinLs(timeout, &core.DataStorePinLsReq{})
 	if err != nil {
 		return err
 	}

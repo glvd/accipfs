@@ -71,8 +71,8 @@ func nodeConnectCmd() *cobra.Command {
 
 func nodePeerCmd() *cobra.Command {
 	peers := &cobra.Command{
-		Use:   "list",
-		Short: "list run",
+		Use:   "ls",
+		Short: "node list",
 		Long:  "show the local node list",
 		Run: func(cmd *cobra.Command, args []string) {
 			config.Initialize()

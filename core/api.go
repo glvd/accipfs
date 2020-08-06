@@ -16,6 +16,7 @@ type DataStoreResp struct {
 
 // DataStorePinReq ...
 type DataStorePinReq struct {
+	Pins []string
 }
 
 // DataStorePinResp ...
@@ -174,5 +175,6 @@ type NodeAPI interface {
 // DataStoreAPI ...
 type DataStoreAPI interface {
 	PinLs(ctx context.Context, req *DataStoreReq) (*DataStoreResp, error)
+	PinAdd(ctx context.Context, req *DataStorePinReq) (*DataStorePinResp, error)
 	UploadFile(ctx context.Context, req *UploadReq) (*UploadResp, error)
 }

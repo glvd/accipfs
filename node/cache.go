@@ -5,7 +5,6 @@ import (
 	"github.com/dgraph-io/badger/v2"
 	"github.com/dgraph-io/badger/v2/options"
 	"github.com/glvd/accipfs/config"
-	"github.com/glvd/accipfs/controller"
 	"github.com/glvd/accipfs/core"
 	"os"
 	"path/filepath"
@@ -183,7 +182,7 @@ func (c *baseCache) Range(f func(key, value string) bool) {
 		return nil
 	})
 	if err != nil {
-		controller.log.Errorw("range data failed", "err", err)
+		log.Errorw("range data failed", "err", err)
 	}
 }
 
